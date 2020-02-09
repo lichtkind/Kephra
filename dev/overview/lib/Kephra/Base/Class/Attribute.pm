@@ -1,7 +1,7 @@
 use v5.16;
 use warnings;
 
-package Kephra::Base::Class::Instance::Attribute;
+package Kephra::Base::Class::Attribute;
 our $VERSION = 0.03;
 
 

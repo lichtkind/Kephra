@@ -11,7 +11,7 @@ use Kephra::Base::Class::Method::Argument;
 use Kephra::Base::Class::Method::Signature;
 use Kephra::Base::Class::Method::Hook;
 
-my $universal_getter = sub{Kephra::Base::Class::Instance::Attribute::get($_[0])};
+my $universal_getter = sub{Kephra::Base::Class::Attribute::get($_[0])};
 my (%setter, %resetter);
 
 ################################################################################
@@ -86,7 +86,7 @@ sub create_constructor { # aka new
             for (@{$params->{input}}){
                 if ($_->[0] eq 'PARAMETER'){
                          Kephra::Base::Package::call_sub( $class_name.'::'.$_->[1], $access_scope_self, @{$err_or_params->{$_->[1]}} ) if $err_or_params->{$_->[1]};
-                } else { Kephra::Base::Class::Instance::Attribute::set(Kephra::Base::Class::Instance::get_attribute($self, $_->[1]), $err_or_params->{$_->[1]})}
+                } else { Kephra::Base::Class::Attribute::set(Kephra::Base::Class::Instance::get_attribute($self, $_->[1]), $err_or_params->{$_->[1]})}
             }
             $anchor->{'AFTER'}->($self, $parameter);
             $anchor->{'AND_AFTER'}->($self, $parameter, $hook_result);

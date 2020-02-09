@@ -1,14 +1,15 @@
 use v5.16;
 use warnings;
 
-# central storage for all self styled objects (Base::Object namespace is for tools wich are objest themself)
+# central storage for all object refs (class instances, created by KBOS)
+# Base::Object is namespace for self made aux classes 
 
 package Kephra::Base::Class::Instance;
 our $VERSION = 0.02;
 use Kephra::Base::Class::Definition;
 use Kephra::Base::Class::Scope;
-use Kephra::Base::Class::Instance::Attribute;
-use Kephra::Base::Class::Instance::Type;
+use Kephra::Base::Class::Attribute;
+use Kephra::Base::Class::Attribute::Type;
 
 my %object = (); # register of all objects by class name
 my %by_ref = (); # cross ref
@@ -28,7 +29,7 @@ sub create {
     $by_ref{int $_} = $obj_refs for values %$obj_refs;
 
     my $attribs = Kephra::Base::Class::Definition::get_attributes($class);
-    $obj_refs->{attribute}{$_} = Kephra::Base::Class::Instance::Attribute::create
+    $obj_refs->{attribute}{$_} = Kephra::Base::Class::Attribute::create
         ($class, $_, Kephra::Base::Class::get_types($class)->default_value( $attribs->{$_} )) for keys %$attribs;
     $by_ref{int $_} = $obj_refs for values %{$obj_refs->{attribute}};
 
@@ -49,7 +50,7 @@ sub delete {
     my $obj_refs = $by_ref{int $obj};
 
     delete $by_ref{int $_} for values %{$obj_refs->{attribute}};
-    Kephra::Base::Class::Instance::Attribute::delete($_) for values %{$obj_refs->{attribute}};
+    Kephra::Base::Class::Attribute::delete($_) for values %{$obj_refs->{attribute}};
 
     delete $by_ref{int $_} for values %{$obj_refs->{object_attribute}};
     my $attribs = Kephra::Base::Class::get_object_attributes( $obj_refs->{class} );

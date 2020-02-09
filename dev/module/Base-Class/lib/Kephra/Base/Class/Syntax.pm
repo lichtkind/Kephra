@@ -34,40 +34,40 @@ my (%callback, %prefix, $previous_keyword, $current_class);
 sub import   { Keyword::Simple::define($_, $callback{$_}) for keys %rules }
 sub unimport { Keyword::Simple::undefine($_)              for keys %rules }
 ################################################################################
-for my $name (keys %rules){
-    my $rule = $rules{$name};
+for my $rule_name (keys %rules){
+    my $rule = $rules{$rule_name};
     $callback{$name} = sub {
         my ($ref) = @_; #say "=before, $name, $previous_keyword: ", substr($$ref, 0 ,100);
         die "syntax error: no keyword $name after $previous_keyword allowed!"
-            if (($previous_keyword and not exists $rule->{prefix})
-            or(exists $rule->{prefix} and not exists $rule->{prefix}{$previous_keyword}));
-        if ($rule->{store}) { $prefix{$previous_keyword = $name}++ }
+            if (($previous_keyword and not exists $rule->{'prefix'})
+            or  (exists $rule->{'prefix'} and not exists $rule->{'prefix'}{$previous_keyword}));
+        if ($rule->{'store'}) { $prefix{$previous_keyword = $rule_name}++ }
         else {
             my @build_parameter;
             if ($rule->{'delete'})              {$$ref =~ s/$rule->{delete}//}
             if (ref $rule->{'parse'} eq 'ARRAY'){
-                for (@{$rule->{'parse'}}){#say  "== ",$_;
+                for (@{$rule->{'parse'}}){# say  "== ",$_;
                    if ($_ eq 'name') {
                        $$ref =~ s/^$parse{name}//;
-                       push @build_parameter, $1; #say "=== name = ", $1;
+                       push @build_parameter, $1; # say "=== name = ", $1;
                    } elsif ($_ eq 'HASH') {
                        my $endpos = closing_brace_pos($ref)+1;
                        my $data = eval substr($$ref,0,$endpos);
-                       die "malformed syntax of data hash in class $current_class on $name ".$build_parameter[0].' - '.substr($$ref,0,$endpos)." : $@"
+                       die "malformed syntax of data hash in class $current_class on $rule_name ".$build_parameter[0].' - '.substr($$ref,0,$endpos)." : $@"
                            if $@ or ref $data ne 'HASH';
-                       push @build_parameter, $data; #say  "=== HASH = ",$data,' ',substr($$ref,0,$endpos);
+                       push @build_parameter, $data; # say  "=== HASH = ",$data,' ',substr($$ref,0,$endpos);
                        substr($$ref,0,$endpos) = '';
                    } elsif ($_ eq 'CODE') {
                        my $endpos = closing_brace_pos($ref)+1;
                        my $code = eval 'sub'.substr($$ref,0,$endpos);
-                       die "malformed syntax of code block in class $current_class on $name ".$build_parameter[0].' - '.substr($$ref,0,$endpos)." : $@"
+                       die "malformed syntax of code block in class $current_class on $rule_name ".$build_parameter[0].' - '.substr($$ref,0,$endpos)." : $@"
                            if $@ or ref $code ne 'CODE';
-                       push @build_parameter, $code; #say  "=== CODE = ",$code,' ',substr($$ref,0,$endpos);
+                       push @build_parameter, $code; # say  "=== CODE = ",$code,' ',substr($$ref,0,$endpos);
                        substr($$ref,0,$endpos) = '';
                    } elsif ($_ eq 'signature') {
                        $$ref =~ s/^$parse{signature}//;
                        my $params = Kephra::Base::Class::Method::Signature::parse($1);
-                       die "malformed syntax of signature in class $current_class on $name ".$build_parameter[0]." : $1" unless ref $params eq 'HASH';
+                       die "malformed syntax of signature in class $current_class on $rule_name ".$build_parameter[0]." : $1" unless ref $params eq 'HASH';
                        push @build_parameter, $params; #say  "=== sig = ",$params,' ', $1;
                    } else { die "unknown Kephra syntax parsing rule $_" }
                    $$ref =~ s/^$parse{separator}//;

@@ -2,10 +2,12 @@ use v5.16;
 use warnings;
 
 package Kephra::Base::Class::Instance;
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
-use Kephra::Base::Class::Instance::Attribute;
-use Kephra::Base::Class::Instance::Type;
+use Kephra::Base::Class::Definition;
+use Kephra::Base::Class::Scope;
+use Kephra::Base::Class::Attribute;
+use Kephra::Base::Class::Attribute::Type;
 
 sub create {}            # str class --> bool 
 sub delete {}            # $$ obj    --> bool

@@ -3,7 +3,7 @@ use warnings;
 
 # central kv storage for all data stored in normal (called data)- and wrapping attributes
 
-package Kephra::Base::Class::Instance::Attribute;
+package Kephra::Base::Class::Attribute;
 our $VERSION = 0.04;
 use Kephra::Base::Package;
 

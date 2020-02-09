@@ -7,7 +7,8 @@ package Kephra::Base::Class::Builder;
 our $VERSION = 0.02;
 my (%raw_def); # class kind name [parameter]
 use Kephra::Base::Package;
-use Kephra::Base::Class::Definition
+use Kephra::Base::Class::Attribute;
+use Kephra::Base::Class::Definition;
 use Kephra::Base::Class::Scope;
 use Kephra::Base::Class::Method;
 use Kephra::Base::Class::Instance;

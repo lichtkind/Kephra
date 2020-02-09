@@ -3,12 +3,12 @@ use warnings;
 
 #
 
-package Kephra::Base::Class::Instance::Type;  # types with acess to attributes
+package Kephra::Base::Class::Attribute::Type;  # types with acess to attributes
 our $VERSION = 0.04;
 use Kephra::Base::Data::Type;
-use Kephra::Base::Class::Instance::Attribute;
+use Kephra::Base::Class::Attribute;
 
-my %set = (index  => {check => ['index of list',          sub{$_[0] < @{$_[1]->get()} }], parent => 'int+'},);
+my %set = (list_index  => {check => ['index of list',          sub{$_[0] < @{$_[1]->get()} }], parent => 'int+'},);
 
 ################################################################################
 sub new {  my ($pkg) = @_;   bless { } }

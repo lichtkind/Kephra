@@ -1,7 +1,7 @@
 use v5.16;
 use warnings;
 
-package Kephra::Base::Class::Argument::Type;
+package Kephra::Base::Class::Attribute::Type;
 use Kephra::Base::Data::Type;
 
                          # type means type name
