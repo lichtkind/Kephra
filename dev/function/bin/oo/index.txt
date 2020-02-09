@@ -1,0 +1,4 @@
+
+- mo.pl = test mo OO framework
+- new_syntax.pl = how to introduce new oo keywords
+- parent.pl = checker of workings of parent pragma
