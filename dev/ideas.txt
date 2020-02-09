@@ -1,0 +1,43 @@
+use case prototypes are the place do develop and polish a single feature.
+(a single from the end users perspective can include several calls that share
+a common infrastructure). use case proto may also just serve as an investigation
+into another view on an existing or planned feature.
+When it is ready, it can mixed into mainline according road map.
+
+More details about our development model are at doc/CompleteProgramming.pod
+and about the relation of the different protos under dev/roadmap.txt
+
+--------------------------------------------------------------------------------
+               C = complete
+                B = buggy
+                 U = usable
+                  I = in progress
+                   M = major feature missing
+                    N = not yet (planned)
+--------------------------------------------------------------------------------
+
+[Widgets]
+
+docpanel            N    multiple docbar with realtime same docs, in multiple changing layouts
+filebrowser       IM     list and change dir via click, ops on files
+textbrowser         N    sneak into text files via file browser
+iounit              N    panel for all kinds of communication in channels
+ 
+searchbar           N    
+sidebar             N    
+statusbar           N    homebrew statusbar from widgets and panels
+
+snippets            N    DND snippet lib
+#treelib            N    komodo like snippet and tool lib with DND
+
+mousegestures       N
+
+vim                 N    vim like command line
+orgpad              N    minimal effective emacs orgmode clone
+emacs               N    emacs like keyboard usage
+acme                N    advanced mouse controls with click combos and context panels
+html                N
+latex               N
+red                 N    text factory panel
+
+XPMconverter        N    read icon bitmap from inlined data

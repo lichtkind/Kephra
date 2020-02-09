@@ -1,0 +1,8 @@
+#!usr/bin/perl
+use v5.14;
+use warnings;
+BEGIN { unshift @INC, '.', '../lib', 'lib' }
+
+use Kephra::App;
+$Kephra::NAME = 'Kephra CP 0.3.2.1 : ';
+Kephra::App->new->MainLoop;

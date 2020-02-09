@@ -1,0 +1,10 @@
+
+--------------------------------------------------------------------------------
+               C = complete
+                I = mInor Feature mIssing
+                 U = usable
+                  B = Buggy
+                   M = Major feature missing
+                    P = In Progress (currently worked on)
+                     N = not yet (planned)
+--------------------------------------------------------------------------------

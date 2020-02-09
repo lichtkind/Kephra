@@ -1,0 +1,61 @@
+Module prototypes are the place to develope libraries (internal API's).
+Several connected libraries can be joined in one proto.
+Latest copies of all necessary libraries are copied into a proto before dev takes place.
+
+design of the API's is done in: dev/overview
+relation between different types of protos: dev/roadmap.txt
+our development model in more details: doc/CompleteProgramming.pod
+
+--------------------------------------------------------------------------------
+                             C = Complete
+                              S = Small feature missing
+                               B = Buggy
+                                M = Major feature missing
+                                 U = Usable
+                                  P = Partially there, nothing missing now
+                                   I = In Progress (currently worked on)
+                                    N = Not yet (planned)
+--------------------------------------------------------------------------------
+ - Kephra::Base                             C
+   Kephra::Base::Data                       C
+   Kephra::Base::Data::Type                 C
+   Kephra::Base::Package                    C
+--------------------------------------------------------------------------------
+ - Kephra::Base::Class                                    P
+   Kephra::Base::Class::Definition                        P
+   Kephra::Base::Class::Scope                         C
+   Kephra::Base::Class::Instance::Type                    P
+   Kephra::Base::Class::Instance::Attribute           C
+   Kephra::Base::Class::Instance                      C
+   Kephra::Base::Class::Builder                        SM U
+   Kephra::Base::Class::Method::Argument                  P
+   Kephra::Base::Class::Method::Signature             C
+   Kephra::Base::Class::Method::Hook                  C
+   Kephra::Base::Class::Method                         S  U
+   Kephra::Base::Class::Syntax                        C
+--------------------------------------------------------------------------------
+================================================================================
+ - Kephra::Base::Object
+   Kephra::Base::Object::CodeSnippet
+   Kephra::Base::Object::Queue
+   Kephra::Base::Object::Store
+
+   #B::Call
+   #B::Call::Template
+   #B::Call::Dynamic
+   #B::Call::Dynamic::Template
+--------------------------------------------------------------------------------
+    I::Message
+    I::Message::Channel
+ -  I::Message::Net
+--------------------------------------------------------------------------------
+    I::Event
+ -  I::Event::Table
+--------------------------------------------------------------------------------
+    I::Command
+ -  I::Command::Center
+--------------------------------------------------------------------------------
+    App::Sizer
+ -  App::Panel
+--------------------------------------------------------------------------------    
+ -  App::Bar::Tab

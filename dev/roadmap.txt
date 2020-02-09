@@ -1,0 +1,113 @@
+===========================================
+ Overview to the development of Kephra CP
+===========================================
+
+purpose of the prototypes by directory:
+---------------------------------------
+deeper explanation on all 5 proto types and overall development process: doc/CompleteProgramming.pod
+
+
+dev/function   very small, prototypes that test one or very few low level calls (OS or third party lib)
+
+dev/module     develope and test a selfmade API with least overhead, mostly mocking dependencies
+
+dev/feature    one function from user perspective, also checks real world usage of own API
+
+dev/stage      shippable levels of devopement with a rounded feature set (several use cases).
+               this roadmap basically shows the progression of stages and on which protos each stage depends on.
+
+dev/overview   dummy code (modules with almost empty subs and comments) representing target designed as understood now
+
+
+--------------
+stage roadmap:
+--------------------------------------------------------------------------------
+
+    sed                    C       single file editor: read, writes files, utf safe, perl highlighting
+              A::Editor    C       STC derivative as we need it for now
+                wx/ed      C       simplest utf safe editor based on STC
+
+    ded                    C       doc ed: stashed doc obj with file_path &more attr., docbar, central API.pm
+              API          C       central relay for important cross module calls
+              Document     C       doc object that holds all properties
+              A::Sizer     C       manages widget lists with more comfort than wx standard
+              AB::Tab      C       API over AUI tabbar with DND and more
+                wx/tabbar  C       Wx::AuiNotebook demo
+
+--------------------------------------------------------------------------------
+            K:: = Kephra, B:: = Base, O:: Object, A:: = App, P:: = Panel, B:: = Bar, E:: = Editor
+            p = core perl, sys = op. system, stc = editor, gui = self made, wx = API ontop Wx
+--------------------------------------------------------------------------------
+                           C = Complete
+    stage                   S = Small feature missing
+        feature              B = Buggy
+            module            M = major feature Missing
+                function       U = Usable
+                                P = In Progress (currently worked on)
+                                 N = Not yet (planned)
+--------------------------------------------------------------------------------
+    bed                         PN base: object - messages, event, commands
+            Base::Object
+                oo/scalar_object C       
+                p/caller         C
+                p/export_cycle   C
+            Base::Class           S MUP
+                oo/new_syntax    C    
+                oo/parent        C
+                p/phaser         C
+            Base                 C
+                p/symbol_table
+
+
+    ved                          N view: multi tab bars, filebrowser, notes, direct io
+        centerpanel              N multiple docbar with realtime same docs, in multiple changing layouts
+            AP::Center           N panel for multiple doc/tab bars
+            A::Splitter          N movable separator
+                wxsplitter C       Wx::SplitterWindow demo
+                doubleview C       2 stc instances show same doc in realtime
+        filebrowser            M   list and change dir via click, ops on files
+            A::List              N Wx::ListCtrl demo
+        msgmonitor               N panel for all kinds of communication in channels
+                wx/shellio       N talk async to the shell via Wx::Perl::ProcessStream
+                p/eval      SU     create optimized coderefs with runtime eval
+                p/ref        U M   testing enge cases in reference handling
+
+       todo: 
+                                       - new: doc attr: notes
+                                       - save also global notes
+                                       - timer events, autosave, save all
+
+
+    ged                          N gui edit: toolbar, menus, statusbar defined by registered in Command.pm, Keymap.pm
+        sidebar                  N custom toolbar with upright text labels or icons
+                sidetextbar      N tabbar with sideway textual tabs
+        searchbar                N simple search based on stc functions
+                stcsearch        N simple search functions based on stc std functions    
+            Toolbar              N general toolbar generator from commands
+                wxtoolbar    U     Wx::Toolbar demo
+            Menu                 N general menu generator from commands
+                wxmenu           N Wx::Menu demo
+                XPMinline  C       get XPM icons inlined in perl code
+            Command              N global UI command (call, label, help, icon, ) handling
+            KeyMap               N global keycombo handling (translation, maping storage)
+        statusbar                N custom status bar with self made text and bitmap labels
+                wxstatusbar      N Wx::Frame default statusbar demo
+
+
+    ked                          N keylog: evr.key=command, edit history, clipboard, treelib, Focus.pm
+        KA::Focus                N
+        KAE::History             N
+        KAE::Clipboard           N
+        KA::Popup                N
+    clipboard
+    snippets                     N DND snippet lib
+            wxtree               N Wx::Treebook demo
+
+    ned                          N nav: own find&replace, [book]marker, outline, brace&block nav
+
+    ced                          N comfort ed:smart sel., mode comments, 
+        paintbar                 N self drawn toolbar with DC/toolbar with full artistic freedom
+
+    led                          N local editor, store and retrieve all configs and user data from local files
+    fed                          N file: sessions, recents, projects
+    sced                         N source code ed: folding, syntax modes

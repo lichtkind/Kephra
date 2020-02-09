@@ -1,0 +1,29 @@
+stage prototypes are evolutionary steps of app development.
+
+Each is a complete usable, polished (as good as it gets) program.
+Between stages we add features set which belongs together from the technical and
+usage point of view. When a proto is completed it becomes the new stable branch.
+Next proto gets started by copy previous, completed one.
+
+complete development model: doc/CompleteProgramming.pod 
+sate of the project with relation between protos types: dev/roadmap.txt
+--------------------------------------------------------------------------------
+       C = complete
+        I = mInor Feature mIssing
+         U = usable
+          B = Buggy
+           M = Major feature missing
+            P = In Progress (currently worked on)
+             N = not yet (planned)
+--------------------------------------------------------------------------------
+sed    C         single file editor: read, writes files, utf safe, perl highlighting (simplest)
+ded    C         doc ed: stashed doc obj with file_path &more attr., docbar, central API.pm
+bed         P    base ed: own object, event and msg system
+
+aed        MP    abstract layer: events, message queue, UI command list, keymaps
+ved      UBMP    view: several tab bars, filebrowser, notes, direct io, EventTable.pm, LogBook.pm
+
+ged          N   gui edit: toolbar, menus, statusbar defined by regist. commands, 
+ked          N   keylog: every key calls a call, own edit history
+ned          N   nav edit: own find&replace, searchbar, marker, bookmarks, last edit
+ced          N   comfort editing: brace&block navigation, selection, goto last edit ....

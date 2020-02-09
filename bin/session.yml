@@ -1,0 +1,57 @@
+---
+current: '8'
+docs:
+  -
+    change_pos: 0
+    cursor_pos: 737
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/kephra/dev/stage/index.txt
+    syntaxmode: no
+  -
+    change_pos: 0
+    cursor_pos: 0
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/kephra/dev/module/index.txt
+    syntaxmode: no
+  -
+    change_pos: 0
+    cursor_pos: 307
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/kephra/dev/module/Base/lib/Kephra/Base.pm
+    syntaxmode: perl
+  -
+    change_pos: 519
+    cursor_pos: 523
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/kephra/dev/module/Base/lib/Kephra/Base/Package.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 0
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/kephra/dev/module/Base/lib/Kephra/Base/Data.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 5558
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/kephra/dev/module/Base/lib/Kephra/Base/Data/Type.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 1023
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/kephra/dev/module/Base/lib/Kephra/Base/Data/Type/Relative.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 74
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/kephra/dev/module/Base-Class/lib/Kephra/Base.pm
+    syntaxmode: perl
+  -
+    change_pos: 90
+    cursor_pos: 90
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/kephra/dev/module/Base-Class/lib/Kephra/Base/Class/Instance/Attribute.pm
+    syntaxmode: perl

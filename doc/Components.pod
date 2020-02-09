@@ -1,0 +1,109 @@
+=head1 Kephra Graphical Components
+
+the visible parts of the editor app:
+
+component     position            key                    purpose
+
+--------------------------------------------------------------------------------
+
+MenuBar       top 1
+
+MainToolBar   top 2                             icons, dropdown menu, tool panel 
+
+TabBar        top 3                     
+Editor        center                            main editing area, dividable by 4
+
+SearchBar     below 1                           find and goto functions
+
+TextLab       below 2                           find|lines -> replace append, prepend
+
+IOUnit
+ Output        below Search     ctrl+shift+<    just watching various output channels
+ InputRow      below Output     ctrl+<          typing commands to kephra/perl/shell/other
+
+StatusLine    below Input
+
+
+
+FileBrowser   left                F2
+
+Project       left                 
+Manager
+
+
+TreeLib       right               F7           nested list of snippets (runnable with *)
+
+DocBrowser    right               F8           simple html browser (converst POD)
+
+OrgPad        right               F9           simple org mode clone
+
+ScratchSheet  right              F12           plain temp text buffer, 1 global, 1 per doc
+
+
+# Document      external
+# Viewer        window
+
+Dialogs: File, Color, Config, Info
+
+
+=head2 Visual Overview
+
+Full view where you see any option:
+
+_______________________________________________________________________________
+|___________________________________menu_bar__________________________________|
+|________________________________global_toolbar_______________________________|
+|                  |___|___|___|___|____|___|___|___|___|___|                 |
+|                  |                    |                   |                 |
+|    filebrowser   |    editor leftup   |  editor rightup   |                 |
+|                  |                    |                   |     treelib     |
+|      [s]ftp      |                    |                   |                 |
+|                  |                    |                   |     orgpad      |
+|      hg / git    |              editor panel              |                 |
+|                  |____________________|___________________|    scratchsheet |
+|   projectmanager |___|___|___|___|____|___|___|___|___|___|                 |
+|                  |                    |                   |    clipboard    |
+|      outline     |      left down     |    right down     |                 |
+|                  |                    |                   |    docbrowser   |
+|                  |____________________|___________________|                 |
+|                  |__________________find__________________|                 |
+|                  |_________________replace________________|                 |
+|      left        |_________________textlab________________|      right      |
+|                  | tab     |                              |                 |
+|    sidepanel     | tab     |                              |    sidepanel    |
+|                  | tab     |                              |                 |
+|                  | channel |       output                 |                 |
+|                  |                                        |                 |
+|                  |________________________________________|                 |
+|__________________| channel :_______input__________________|_________________|
+|___________________________status____________________________________________|
+
+
+
+
+simple view - what you will use mostly:
+
+_______________________________________________________________________________
+|___________________________________menu_bar__________________________________|
+|________________________________global_toolbar_______________________________|
+|                  |                                        |                 |
+|                  |                                        |                 |
+|   filebrowser    |                                        |     treelib     |
+|                  |                                        |                 |
+|        or        |                 editor                 |        or       |
+|                  |                                        |                 |
+|  projectmanager  |                                        |      orgpad     |
+|                  |                                        |                 |
+|                  |                                        |                 |
+|                  |                                        |                 |
+|                  |                                        |                 |
+|                  |                                        |                 |
+|                  |____________________ ___________________|                 |
+|                  |_____input__(works also for finding)____|                 |
+|                  |                                        |                 |
+|                  |                                        |                 |
+|                  |     output (pop out when needed)       |                 |
+|                  |                                        |                 |
+|                  |________________________________________|                 |
+|__________________|_tab__|_tab_|__another_output channel___|_________________|
+|___________________________status____________________________________________|

@@ -1,0 +1,28 @@
+=head1 Kephra Overview
+
+Welcome to the root document of the Kephra dev documentation.
+If you are new, it is the best point to start from.
+
+=head2 Index
+
+CompleteProgramming	set of rules that organizes our development
+Components		visual components and their layout
+EndGoal			technical details of the vision we lean toward
+Internals		structure of the sources, meaning of terms and names
+LongFeatureList		
+Philosophy		theoretical goal and rationale for our technical decisions
+Sanddrum		a vi like command language
+StyleGuide		formating and other rules for writing Kephra sources
+Versioning		about our version numbers and releases
+
+=head3 Inspirations
+
+  Nedit, Kommodo, Vim, Emacs, Geany, Gedit, LightTable, Tincta, Proton, Phase 5
+
+=head3 Design Decisions
+
+=head2 Techology
+
+=head2 Main Features
+
+

@@ -1,0 +1,43 @@
+=head1 Sandrum
+
+=head2 SYNOPSIS
+
+language of the Kephra command line
+
+=head2 Main Idea
+
+The best thing about vi is the way to control the editor with short comands,
+that get typed into a seperate line.
+For complex operations is this the fastest way to get thigs done.
+Thats because each latter can open a new context.
+This way you can stuff much more commands onto the keayboard.
+Also the the options of each command multiply the into the unimaginable,
+if you just think in terms of point and click or simple key combinations
+
+Why not Perl? All commands would be much longer/complicated.
+But its also possible. In a different command line just one tab away.
+
+=head2 Name
+
+Kephra, depicted as a scarab is a desert beatle. 
+For communication the beat the sand, making low frequency sound signals.
+
+
+=head2 Command Overview
+
+  .       -     repeat last action
+  /../    -     match / find
+  /../../ -     substitute
+  g/d     -     goto line number /d stands for number (regex syntax)
+  gb      -     goto [docs] beginning
+  ge      -     goto        end
+  gs/w    -     goto sub name = /w
+  gd.     -     goto doc nr (/d) or name(/w)
+  dw      -     delete word
+  dl      -     delete line
+  cw      -     copy word
+  cl      -     copy line
+  cs      -     copy selection
+  sa      -     select all
+  u       -     undo
+  r       -     redo

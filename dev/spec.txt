@@ -1,0 +1,127 @@
+
+--------------------------------------------------------------------------------
+|                                                                              |
+|    content:                                                                  |
+|                api, call, object, message, event, command,                   |
+|                       edhist, keymap, focus, config, doc                     |
+|                                                                              |
+--------------------------------------------------------------------------------
+
+api:           (minimize direct cross module calls - overview to see where is what)
+  - central source of core functionality (and utilities and pointer to key parts)
+  - exporting only sub symbols (no vars), also grouped by tags
+
+call:
+  -
+  - template
+
+object:
+
+
+message:
+
+
+command:       (all functions that can be called by program user)
+  - global ID: have-such-names
+  - other property: coderef, key combo (keymap), icon, label, help
+  - add/rename/delete
+  - triggered by the user via GUI (Kephra CLI is also part of gui)
+  - are logged
+
+
+event:         (loose  async coupling of any subs - sorted by topic)
+  - global ID: have.such.names
+  - under each ID are 3+2 lists (states and slots) of coderef:
+    - active: gets triggered when called
+    - frozen: remember call and trigger when thaw
+    - halted: ignores all calls
+    - slots are before, main, after
+  - add/rename/delete (event)              : (eventID)
+  - add/del (a call to an event)           : (coderef, eventID, callname, state=active, slot=main)/(eventID, callname)
+    - call-name is module::sub by default
+  - freeze/thaw                            : (eventID, ['all']/callname, slot = main)
+  - halt/restart                           : (eventID, ['all']/callname, slot = main)
+
+
+log: temporal ordered, nested lists o by slot-ID
+  - global nested  channel ID: have#such#names
+  - add_entry: channel, data, prio, comment 
+  - list(from, to)
+  - create/has/modify/delete channel
+  - create: ID, filter, target
+  - create/has/delete target
+  - create/has/delete filter
+
+
+callbank: (local (in obj) coderef storage)
+  - calls have: $code, $ref, @dependencies
+  - add, remove, has, run - call
+  - run_all
+  - add, remove, has      - dependency
+
+keymap:
+ - multiple hashes: key combo =>  command
+ - normal and emacs style (multi combos)
+ - also dependend on messages (states)
+ - register events to
+ 
+ 
+edit history:
+ - nonelinear (every node can have 0 .. many predecessor and successor)
+ - to every node belongs a list of changes: pos, original text, replacement 
+
+
+focus: 
+ - linear history of widgetref thar were in focus
+
+
+
+config:        (global) 
+ - persistant global data storage 
+
+
+document:
+
+
+stash:
+
+
+editor:
+
+
+history:
+
+
+plugin:
+
+<
+format:
+
+
+:-+:
+:23+ldfkl
+:34-<23
+
+<
+>
++
+.
+
+goto
+select
+selectto
+replace
+find
+findnext
+findprev
+
+cmd-
+ev.
+key+
+
+Sereal
+
+
+       64 32  16  8  4  2  1
+
+101 =   1  1
