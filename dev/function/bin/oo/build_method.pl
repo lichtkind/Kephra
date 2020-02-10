@@ -23,7 +23,7 @@ say 'insert method';
 say '-'x70;
 say "here should be a 1: ",$obj->one();
 say "methods :";
-say "    - $_" for keys *{"Class::"}{HASH};
+say "    - $_" for keys %{*{"Class::"}{HASH}};
 
 __END__
 

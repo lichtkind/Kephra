@@ -1,5 +1,6 @@
 use v5.16;
 use warnings;
+use lib '.';
 
 use User;
 
