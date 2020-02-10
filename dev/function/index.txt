@@ -64,6 +64,16 @@ codeinject           N              how implement roles (extend classes safely o
 
 
 
+[Objects] (/oo)
+
+mo               bed      test mo OO framework
+new_syntax       bed      how to introduce new oo keywords
+parent           bed      checker of workings of parent pragma
+scalar_object    bed      test scalar ref as object refs
+build_method     bed      manually insert codref in name table
+
+
+
 [SYSTEM] (/sys)
 
 findlib          U         list all local Kephra repos

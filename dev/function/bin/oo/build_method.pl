@@ -16,7 +16,7 @@ my $obj = Class->new();
 say "string context: $obj";
 say "ref           : ",ref $obj;
 say "methods       :";
-say "    - $_" for keys *{"Class::"}{HASH};
+say "    - $_" for keys %{*{"Class::"}{HASH}};
 say '-'x70;
 say 'insert method';
 *{"Class::one"} = sub {1};
