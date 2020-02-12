@@ -1,4 +1,4 @@
-use v5.16;
+use v5.18;
 use warnings;
 
 # central store for method namespace constants and their priority logic
@@ -11,10 +11,10 @@ my %constant = (hook => 'HOOK', argument => 'ARGUMENT',attribute => 'ATTRIBUTE',
 my %level    = (public => 1,    private => 2,          access => 3,        build => 4);
 my @importance = sort {$level{$b} <=> $level{$a}} (keys %level);
 ################################################################################
-sub list       { @importance }
-sub list_all   { keys %constant }
-sub is         { exists $level{$_[0]} }
-sub is_first_tighter {
+sub list_method_names { @importance }
+sub list_all_names    { keys %constant }
+sub is_name           { $_[0] and exists $level{$_[0]} }
+sub is_first_tighter  {
     return undef unless @_ == 2 and $level{$_[0]} and $level{$_[1]};
     $level{$_[0]} >= $level{$_[1]};
 }
@@ -29,7 +29,7 @@ sub included_names {
     }
 }
 
-sub name { # create package name for scope of that class
+sub construct_path { # create package name for scope of that class
     return unless @_ > 1 and defined $constant{$_[0]};
     my $scope = shift;
     my $c = shift;
