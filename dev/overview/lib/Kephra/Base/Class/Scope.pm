@@ -1,17 +1,27 @@
 use v5.18;
 use warnings;
 
-# central store for namespace constants
+# method namespace name constants and their priority logic
+# Classname::methodname
+# Classname::PRIVATE::methodname
+# Classname::ACCESS::methodname
+# Classname::BUILD::methodname
+# Classname::HOOK::methodname::BEFORE/AFTER
+# Classname::ARGUMENT::methodname::argname
+# Classname::ATTRIBUTE::attrname::get/set/reset
 
 package Kephra::Base::Class::Scope;
 
-sub is_name            {}  # ~scope          --> bool
-sub method_scope_names {}  #                 --> @~scope
-sub all_scope_names    {}  #                 --> @~scope
+sub method_scopes      {}  #                 --> @~scope
+sub all_scopes         {}  #                 --> @~scope
 
-sub is_first_tighter{}  # ~scopeA ~scopeB    --> bool
+sub is_method_scope    {}  # ~scope          --> bool
+sub is_scope           {}  # ~scope          --> bool
+sub is_name            {}  # ~SCOPE          --> bool
 
-sub included_names  {}  # ~scope ~class - ~name ~method  --> @~full_name
-sub construct_path  {}  # ~scope ~class - ~name ~method  --> ~full_name
+sub is_first_tighter   {}  # ~scopeA ~scopeB --> bool
+
+sub included_names     {}  # ~scope ~class - ~name ~method  --> @~full_name
+sub construct_path     {}  # ~scope ~class - ~name ~method  --> ~full_name
 
 1;
