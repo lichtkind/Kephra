@@ -14,7 +14,7 @@ my %set = (bool  => {check => ['boolean',          sub{$_[0] eq 0 or $_[0] eq 1}
           'num+' => {check => ['positive number',  sub{$_[0]>=0}],                parent => 'num', },
            int   => {check => ['integer',          sub{int $_[0] == $_[0]}],      parent => 'num', },
           'int+' => {check => ['positive integer', sub{$_[0]>=0}],                parent => 'int', },
-          'int++'=> {check => ['strictly positive integer',sub{$_[0]> 0}],        parent => 'int',   default=>1},
+          'int++'=> {check => ['strictly positive integer',sub{$_[0] > 0}],       parent => 'int',   default=>1},
           'str'  => {check => [],                                                 parent => 'value'},
           'str+' => {check => ['none empty string',sub{$_[0] or ~$_[0]}],         parent => 'str',   default=> ' '},
           'str+lc'=>{check => ['lower case string',sub{lc $_[0] eq $_[0]}],       parent => 'str+'},
