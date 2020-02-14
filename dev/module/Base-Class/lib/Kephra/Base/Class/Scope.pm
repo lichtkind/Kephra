@@ -5,7 +5,7 @@ use warnings;
 # Classname::method
 # Classname::PRIVATE::methodname          # & ACCESS/BUILD
 # Classname::HOOK::method::BEFORE/AFTER
-# Classname::ARGUMENT::method::arghashref
+# Classname::ARGUMENT::method::argname
 # Classname::ATTRIBUTE::attrname::get/set/reset
 
 package Kephra::Base::Class::Scope;

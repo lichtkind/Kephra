@@ -15,6 +15,6 @@ sub is_owned          {} # ~type ~package ~file -->  bool
 sub get_default_value {} # ~type                -->  .val|undef
 sub get_callback      {} # ~type                -->  &callback
 
-sub check             {} # ~type .val   -->  errormsg|''    # contains value and what test failed
+sub check             {} # ~type .val $attr    -->  ''|errormsg    # contains value and what test failed
 
 1;

@@ -8,11 +8,11 @@ our development model in more details: doc/CompleteProgramming.pod
 
 --------------------------------------------------------------------------------
                              C = Complete
-                              S = Small feature missing
-                               B = Buggy
-                                M = Major feature missing
-                                 U = Usable
-                                  P = Partially there, nothing missing now
+                              P = Partially there, nothing missing now
+                               S = Small feature missing
+                                U = Usable
+                                 M = Major feature missing
+                                  B = Buggy
                                    I = In Progress (currently worked on)
                                     N = Not yet (planned)
 --------------------------------------------------------------------------------
@@ -21,18 +21,18 @@ our development model in more details: doc/CompleteProgramming.pod
    Kephra::Base::Data::Type                 C
    Kephra::Base::Package                    C
 --------------------------------------------------------------------------------
- - Kephra::Base::Class                                    P
-   Kephra::Base::Class::Definition                        P
-   Kephra::Base::Class::Scope                         C
-   Kephra::Base::Class::Instance::Type                    P
-   Kephra::Base::Class::Instance::Attribute           C
-   Kephra::Base::Class::Instance                      C
-   Kephra::Base::Class::Builder                        SM U
-   Kephra::Base::Class::Method::Argument                  P
-   Kephra::Base::Class::Method::Signature             C
-   Kephra::Base::Class::Method::Hook                  C
-   Kephra::Base::Class::Method                         S  U
-   Kephra::Base::Class::Syntax                        C
+ - Kephra::Base::Class                       P
+   Kephra::Base::Class::Definition             UM
+   Kephra::Base::Class::Scope               C
+   Kephra::Base::Class::Attribute::Type      P
+   Kephra::Base::Class::Attribute              UM
+   Kephra::Base::Class::Instance               UM
+   Kephra::Base::Class::Builder                UM
+   Kephra::Base::Class::Method::Argument     P
+   Kephra::Base::Class::Method::Signature         I
+   Kephra::Base::Class::Method::Hook              I
+   Kephra::Base::Class::Method                    I
+   Kephra::Base::Class::Syntax                    I
 --------------------------------------------------------------------------------
 ================================================================================
  - Kephra::Base::Object
@@ -57,5 +57,5 @@ our development model in more details: doc/CompleteProgramming.pod
 --------------------------------------------------------------------------------
     App::Sizer
  -  App::Panel
---------------------------------------------------------------------------------    
+--------------------------------------------------------------------------------
  -  App::Bar::Tab

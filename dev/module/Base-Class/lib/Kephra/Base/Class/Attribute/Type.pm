@@ -50,16 +50,16 @@ sub get_default_value  { # name                       --> val|undef
 }
 
 sub get_callback { # type                       --> &callback
-    my ($self, $type, $attribute) = @_;
+    my ($self, $type) = @_;
     if (Kephra::Base::Data::Type::is_known($type)) {return Kephra::Base::Data::Type::get_callback($type)}
     elsif (exists $self->{'type'}{$type})          {return $self->{'type'}{$type}{'callback'} if exists $self->{'type'}{$type}{'callback'}}
-    else                                           {return "type $type unknown  to class ".$self->{class} }
+    else                                           {return "type $type unknown  to class ".$self->{'class'} }
     my $c = $self->{'type'}{$type}{'check'};
     my $l = @$c;
     no warnings "all";
     $self->{'type'}{$type}{'callback'} = sub {
-        my ($val, $self) = @_;
-        for (my $i = 0; $i < $l; $i+=2){return "value: $val needed to be of type $type, but failed test: $c->[$i]" unless $c->[$i+1]->($val, $self)};'';
+        my ($val, $access_self) = @_;
+        for (my $i = 0; $i < $l; $i+=2){return "value: $val needed to be of type $type, but failed test: $c->[$i]" unless $c->[$i+1]->($val, $access_self)};'';
     }
 }
 
