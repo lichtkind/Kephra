@@ -38,8 +38,8 @@ wrapping attribute name => {help => '',required =>0|1,  # help = long name ; req
                             construct => [], destruct=>{}}} # parameter for constructor (hash or array)
 
 
-constructor new (sig) {@_ = $self, $parameter};         # build method is called by new             # $self has only here access to getter and setter in build(new) scope
-destructor destroy (sig) {@_ = $self, $parameter};      # canonical name for destructor method      # called autmatically or by hand # build scope
+constructor new (sig) {@_ = $self, $parameter};         # build method is called by new             # $self has only here access to getter and setter in build scope
+destructor demolish (sig) {@_ = $self, $parameter};      # canonical name for destructor method      # called autmatically or by hand                  # build scope
 
 
 (g|s)etter [method] name (sig) {($self, $args, $attr->get/set/reset) = @};                          # scope determined by attr def
@@ -63,8 +63,8 @@ or g/setter set        *              *              *             *
 to public scope
 
 private method or                     *              *             *
-private (g/s)
+private g/s
 
-access scope (g/s)                                   *             *
+access scope g/s                                     *             *
 
-build scope  (g/s)                                                 *
+build scope  g/s                                                   *

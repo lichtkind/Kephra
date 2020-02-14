@@ -14,7 +14,7 @@ sub create {
     my ($class, $method, $values) = @_;
     return 0 unless ref $values eq 'HASH' and substr($class, 0, 6) eq 'Kephra';
     my $v = 0;
-    my $self = bless \$v , Kephra::Base::Class::Scope::name('arguments', $class, $method);
+    my $self = bless \$v , Kephra::Base::Class::Scope::name('argument', $class, $method);
     $value{int $self} = $values;
     $self;
 }
