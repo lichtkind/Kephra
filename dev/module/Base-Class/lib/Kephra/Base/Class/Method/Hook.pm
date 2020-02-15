@@ -35,14 +35,14 @@ sub create_anchor {
         Kephra::Base::Package::set_sub($name, $code);
         $ret->{$slot} = $code;
     }
-    Kephra::Base::Package::set_hash(Kephra::Base::Class::Scope::name('hook', $class, 'ALL', $method), {});
+    Kephra::Base::Package::set_hash( Kephra::Base::Class::Scope::construct_path('hook', $class, 'ALL', $method), {});
     $ret;
 }
 
 sub has_anchor {
     my ($class, $method, $type) = @_;
     $type = 'BEFORE' unless defined $type;
-    Kephra::Base::Package::has_sub( Kephra::Base::Class::Scope::name('hook', $class, $type, $method));
+    Kephra::Base::Package::has_sub( Kephra::Base::Class::Scope::construct_path('hook', $class, $type, $method));
 }
 ################################################################################
 sub add {
@@ -51,15 +51,15 @@ sub add {
         unless ref $code eq 'CODE' and $name{$slot};
     return 'need two CODE blocks for BEFORE_AND_AFTER method hook'
         if $slot eq 'BEFORE_AND_AFTER' and ref $code2 ne 'CODE';
-    my $all = Kephra::Base::Package::get_hash(Kephra::Base::Class::Scope::name('hook', $class, 'ALL', $method));
+    my $all = Kephra::Base::Package::get_hash(Kephra::Base::Class::Scope::construct_path('hook', $class, 'ALL', $method));
     return "method $class::$method has no anchor, to which a hook can be added" if ref $all ne 'HASH';
     return "can not override a hook" if $all->{$hook};
     $all->{$hook} = $slot;
     if ($slot eq 'BEFORE_AND_AFTER'){
-        Kephra::Base::Package::get_hash(Kephra::Base::Class::Scope::name('hook', $class, 'BEFORE_AND', $method))->{$hook} = $code;
-        Kephra::Base::Package::get_hash(Kephra::Base::Class::Scope::name('hook', $class, 'AND_AFTER', $method))->{$hook} = $code2;
+        Kephra::Base::Package::get_hash( Kephra::Base::Class::Scope::name('hook', $class, 'BEFORE_AND', $method))->{$hook} = $code;
+        Kephra::Base::Package::get_hash( Kephra::Base::Class::Scope::name('hook', $class, 'AND_AFTER', $method))->{$hook} = $code2;
     } else {
-        Kephra::Base::Package::get_hash(Kephra::Base::Class::Scope::name('hook', $class, $slot, $method))->{$hook} = $code;
+        Kephra::Base::Package::get_hash( Kephra::Base::Class::Scope::name('hook', $class, $slot, $method))->{$hook} = $code;
     }
     0;
 }
@@ -74,8 +74,8 @@ sub remove {
     my $slot = delete $all->{$hook};
     if ($slot eq 'BEFORE_AND_AFTER'){
         return (
-          delete Kephra::Base::Package::get_hash(Kephra::Base::Class::Scope::name('hook', $class, 'BEFORE_AND', $method))->{$hook},
-          delete Kephra::Base::Package::get_hash(Kephra::Base::Class::Scope::name('hook', $class, 'AND_AFTER', $method))->{$hook}
+          delete Kephra::Base::Package::get_hash( Kephra::Base::Class::Scope::name('hook', $class, 'BEFORE_AND', $method))->{$hook},
+          delete Kephra::Base::Package::get_hash( Kephra::Base::Class::Scope::name('hook', $class, 'AND_AFTER', $method))->{$hook}
         );
     } else {
         return delete Kephra::Base::Package::get_hash(Kephra::Base::Class::Scope::name('hook', $class, $slot, $method))->{$hook};

@@ -6,7 +6,7 @@ use warnings;
 
 package Kephra::Base::Class::Method;
 our $VERSION = 0.03;
-use Kephra::Base::Package;
+use Kephra::Base::Package qw/set_sub call_sub/;
 use Kephra::Base::Class::Method::Argument;
 use Kephra::Base::Class::Method::Signature;
 use Kephra::Base::Class::Method::Hook;

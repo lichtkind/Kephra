@@ -6,7 +6,7 @@ use warnings;
 package Kephra::Base::Class::Attribute;
 our $VERSION = 0.04;
 use Kephra::Base::Package;
-use Kephra::Base::Data::Type;
+use Kephra::Base::Attribute::Type;
 
 my %value = ();
 

@@ -9,7 +9,6 @@ our $VERSION = 0.02;
 use Kephra::Base::Class::Definition;
 use Kephra::Base::Class::Scope;
 use Kephra::Base::Class::Attribute;
-use Kephra::Base::Class::Attribute::Type;
 
 my %object = (); # register of all objects by class name
 my %by_ref = (); # cross ref

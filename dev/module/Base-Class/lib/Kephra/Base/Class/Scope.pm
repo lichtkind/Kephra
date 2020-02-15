@@ -2,11 +2,16 @@ use v5.18;
 use warnings;
 use experimental qw/switch/;
 
-# method namespace name constants and their priority logic
+# method namespace constants and their priority logic
 
 package Kephra::Base::Class::Scope;
 our $VERSION = 0.04;
+use Exporter 'import';
+our @EXPORT_OK = qw/cat_scope_path/;
+our %EXPORT_TAGS = (all  => [@EXPORT_OK]);
+
 ################################################################################
+my $prefix   = '-';
 my %name     = (hook => 'HOOK', argument => 'ARGUMENT',attribute => 'ATTRIBUTE',
                 public => '',   private => 'PRIVATE',  access => 'ACCESS', build => 'BUILD');
 my %priority = (public => 1,    private => 2,          access => 3,        build => 4); # 
@@ -30,17 +35,17 @@ sub included_names {
     my $scope = shift;
     my @names;
     for my $s (@importance){
-        push @names, construct_path($s, @_);
+        push @names, cat_scope_path($s, @_);
         return @names if $s eq $scope;
     }
 }
-sub construct_path { # create package name for scope of that class
+sub cat_scope_path { # create package name for scope of that class
     return unless @_ > 1 and defined $name{$_[0]} and not ($_[0] ~~ \@names);
     my $scope = shift;
     my $c = shift;
-    return if defined $_[0] and $_[0] ~~ \@names;
-    return if defined $_[1] and $_[1] ~~ \@names;
-    $c .= '::'.$name{$scope} if $name{$scope};
+    # return if defined $_[0] and $_[0] ~~ \@names; # with prefix there are no method name collisions
+    # return if defined $_[1] and $_[1] ~~ \@names;
+    $c .= '::'.$prefix.'::'.$name{$scope} if $name{$scope};
     $c .= '::'.$_[0] if $_[0];
     $c .= '::'.$_[1] if $_[1] and not $priority{ $scope };
     $c;
