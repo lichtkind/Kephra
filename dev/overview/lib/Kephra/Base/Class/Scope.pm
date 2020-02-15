@@ -22,6 +22,6 @@ sub is_name            {}  # ~SCOPE          --> bool
 sub is_first_tighter   {}  # ~scopeA ~scopeB --> bool
 
 sub included_names     {}  # ~scope ~class - ~name ~method  --> @~full_name
-sub construct_path     {}  # ~scope ~class - ~name ~method  --> ~full_name
+sub cat_scope_path     {}  # ~scope ~class - ~name ~method  --> ~full_name
 
 1;
