@@ -1,52 +1,84 @@
 use v5.16;
 use warnings;
 
-# central kv storage for all data stored in normal (called data)- and wrapping attributes
+# central kv storage for all data stored in attributes
 
 package Kephra::Base::Class::Attribute;
-our $VERSION = 0.04;
-use Kephra::Base::Package;
-use Kephra::Base::Attribute::Type;
+our $VERSION = 0.1;
+use Kephra::Base::Package qw/set_sub has_sub/;
+use Kephra::Base::Class::Scope qw/cat_scope_path/;
+use Kephra::Base::Class::Attribute::Type;
 
-my %value = ();
+my (%store, %setter, %resetter, %tr_getter, %tr_setter);
+my $universal_getter = sub{$store{int $_[0]} if ref $_[0] and exists $store{int $_[0]} };
 
 ################################################################################
-sub create_accessors {
-    my ($class, $attribute, $class_types, $type) = @_;
-    my $callback = $class_types->check_callback($type);
-    my $default = $class_types->default_value($type);
-    return 0 unless ref $callback;
-
-}
 sub create {
-    my ($key, $value) = @_;
-    return 0 unless @_ < 3;
-    my $k = $key // 0;
-    my $self = bless \$k , __PACKAGE__;
-    $value{int $self} = $value if defined $value;
+    my ($class, $attribute, $class_types, $type) = @_;
+    return 0 unless ref $class_types eq 'Kephra::Base::Class::Attribute::Type';
+    my $callback = $class_types->get_callback($type);
+    my $default = $class_types->default_value($type);
+    return 0 unless ref $callback eq 'CODE';
+
+    my $scope = cat_scope_path( 'attribute', $class, $attribute);
+    my $k = '';
+    my $self = bless \$k, $scope;
+    $store{int $self} = $default if defined $default;
+
+    $setter{$class}{$type} = sub { 
+        return 0 unless ref $_[0] and exists $store{int $_[0]} and defined $_[1];
+        my $a = shift;
+        $k = $callback->(@_);
+        return 0 if $k;
+        $store{int $a} = $_[0];
+    } unless ref $setter{$class}{$type};
+
+    $resetter{$class}{$type} = sub { 
+        return 0 unless ref $_[0] and exists $store{int $_[0]};
+        $store{int $_[0]} = $default;
+        $default
+    } unless ref $resetter{$class}{$type};
+
+    set_sub( "$scope::get", $universal_getter);
+    set_sub( "$scope::set", $setter{$class}{$type});
+    set_sub( "$scope::reset", $resetter{$class}{$type});
     $self;
 }
-sub is_known { (ref $_[0] and exists $value{int $_[0]}) ? 1 : 0 }
-sub get      { $value{int $_[0]}         if is_known($_[0]) }
-sub set      { $value{int $_[0]} = $_[1] if is_known($_[0]) }
-sub delete   { delete $value{int $_[0]}  if is_known($_[0]) }
+
+sub add_getter {
+    my ($attribute, $attr_ref, $path, $self) = @_;
+    return 0 unless ref $attr_ref and exists $store{int $attr_ref} and ref $self;
+    $tr_getter{int $self}{$attribute} = $attr_ref;
+    set_sub( $path, sub {
+        return unless ref $_[0] and ref $tr_getter{int $_[0]};
+        $store{int $tr_getter{int $_[0]}{$attribute}};
+    });
+} 
+
+sub add_setter {
+    my ($attribute, $attr_ref, $path, $self) = @_;
+    return 0 unless ref $attr_ref and exists $store{int $attr_ref} and ref $self;
+    $tr_getter{int $self}{$attribute} = $attr_ref;
+    set_sub( $path, sub {
+        return unless ref $_[0] and ref $tr_setter{int $_[0]} and defined $_[1];
+        my $self = shift;
+        my $attr = $tr_getter{int $self}{$attribute};
+        my $ret = $attr->set($_[0], $self);
+        $$self = $$attr; # copy error msg
+        $ret;
+    });
+} 
+
+sub delete   { 
+    my $attr = shift;
+    delete $tr_getter{int $_} for @_;
+    delete $tr_setter{int $_} for @_;
+    delete $store{int $attr} if is_known($attr);
+}
+################################################################################
+sub is_known { (ref $_[0] and exists $store{int $_[0]}) ? 1 : 0 }
+sub get      { $store{int $_[0]}         if is_known($_[0]) }
+sub set      { $store{int $_[0]} = $_[1] if is_known($_[0]) }
 ################################################################################
 
 1;
-
-__END__
-my $universal_getter = sub{Kephra::Base::Class::Attribute::get($_[0])};
-my (%setter, %resetter);
-
-################################################################################
-sub create_attribute_accessors {
-
-    $resetter{$class}{$type} = sub{set($_[0], $default )} unless ref $resetter{$class}{$type};
-    $setter{$class}{$type} = sub{   $callback->($_[1], Kephra::Base::Class::Instance::get_access_self($_[0]))
-                         or Kephra::Base::Class::Instance::Attribute::set(@_[0,1])} unless ref $setter{$class}{$type};
-
-    Kephra::Base::Package::set_sub( Kephra::Base::Class::Scope::name('attribute',$class,$attribute,'get'), $universal_getter);
-    Kephra::Base::Package::set_sub( Kephra::Base::Class::Scope::name('attribute',$class,$attribute,'set'),  $setter{$type});
-    Kephra::Base::Package::set_sub( Kephra::Base::Class::Scope::name('attribute',$class,$attribute,'reset'), $resetter{$type});
-    1;
-}

@@ -21,7 +21,7 @@ sub make {
         my $class = shift;
         die "class $class already created" if exists $raw_def{ $class };
         Kephra::Base::Class::create($class ) or die 'class already created';
-        $raw_def{ $class } = {all_method =>{clone => 1, state => 1, restate => 1 }}; # default service routines
+        $raw_def{ $class } = {method =>{clone => 1, state => 1, restate => 1 }}; # default service routines
     }
     elsif ($what eq 'type') {
         my ($class, $type, $def) = @_;

@@ -6,7 +6,7 @@ use warnings;
 package Kephra::Base::Class::Method::Argument;
 our $VERSION = 0.01;
 use Kephra::Base::Package;
-use Kephra::Base::Class::Scope;
+use Kephra::Base::Class::Scope qw/cat_scope_path/;
 my %value;
 
 ################################################################################

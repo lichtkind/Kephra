@@ -27,7 +27,7 @@ my %rules = (
     public     => {store => 1},
     private    => {store => 1},
 
-);
+);@_
 my %parse = (name => qr/\s*([^\s;{]+)\s*/, signature => qr/\s*\(\s*([^)]*)\s*\)/, separator => qr/\s*(?:=>|,|;)\s*/);
 my (%callback, %prefix, $previous_keyword, $current_class);
 ################################################################################

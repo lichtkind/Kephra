@@ -9,7 +9,6 @@ our $VERSION = 0.04;
 use Exporter 'import';
 our @EXPORT_OK = qw/cat_scope_path/;
 our %EXPORT_TAGS = (all  => [@EXPORT_OK]);
-
 ################################################################################
 my $prefix   = '-';
 my %name     = (hook => 'HOOK', argument => 'ARGUMENT',attribute => 'ATTRIBUTE',
