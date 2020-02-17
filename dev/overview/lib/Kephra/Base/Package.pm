@@ -1,7 +1,7 @@
 use v5.16;
 use warnings;
 
-# low level package and sub manipulation in symbol table
+# low level package and sub manipulation in symbol table // export all
 
 package Kephra::Base::Package;
 

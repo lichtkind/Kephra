@@ -94,12 +94,11 @@ sub add_getsetter {
 sub delete   { # autodelete translations?
     my $attr_ref = shift;
     return 0 unless ref $attr_ref and exists $data{int $attr_ref};
-    my $attribute = $attr_name{int $attr_ref};
-    delete $attr_ref_getter{$_}{$attribute} for keys %{$self_ref{int $attr_ref}};
-    delete $attr_ref_setter{$_}{$attribute}  for keys %{$self_ref{int $attr_ref}};
-    delete $attr_ref_getsetter{$_}{$attribute} for keys %{$self_ref{int $attr_ref}};
-    delete $self_ref{int $attr_ref};
-    delete $attr_name{int $attr_ref};
+    my $attribute = delete $attr_name{int $attr_ref};
+    my $self = delete $self_ref{int $attr_ref};
+    delete $attr_ref_getter{$_}{$attribute} for keys %$self;
+    delete $attr_ref_setter{$_}{$attribute}  for keys %$self;
+    delete $attr_ref_getsetter{$_}{$attribute} for keys %$self;
     delete $data{int $attr_ref};
 }
 

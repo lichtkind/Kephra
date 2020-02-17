@@ -39,7 +39,7 @@ wrapping attribute name => {help => '',required =>0|1,  # help = long name ; req
 
 
 constructor new (sig) {@_ = $self, $parameter};         # build method is called by new             # $self has only here access to getter and setter in build scope
-destructor demolish (sig) {@_ = $self, $parameter};      # canonical name for destructor method      # called autmatically or by hand                  # build scope
+destructor demolish (sig) {@_ = $self, $parameter};      # canonical name for destructor method     # called autmatically or by hand                  # build scope
 
 
 (g|s)etter [method] name (sig) {($self, $args, $attr->get/set/reset) = @};                          # scope determined by attr def
