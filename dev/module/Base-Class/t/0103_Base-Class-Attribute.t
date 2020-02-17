@@ -2,7 +2,7 @@
 use v5.16;
 use warnings;
 use experimental qw/switch/;
-use Test::More tests => 34;
+use Test::More tests => 42;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 use Kephra::Base::Class::Scope qw/cat_scope_path/;
@@ -29,49 +29,47 @@ my $scope = cat_scope_path('attribute', 'class', 'attr');
 $real_attr = Kephra::Base::Class::Attribute::create('class', 'attr', $attr_types);
 ok (not($real_attr), 'class, name and types are enough arguments to create attribute');
 $real_attr = Kephra::Base::Class::Attribute::create('class', 'attr', $attr_types, 'int');
-is( ref $real_attr, cat_scope_path('attribute', 'class', 'attr'), 'finally enough arguments to create attribute');
+is( ref $real_attr, $scope, 'finally enough arguments to create attribute');
 
+is( $real_attr->get(),   0, 'attribute has correct default value (getter works)');
+is( $real_attr->set(2),  2, 'setter of created attribute works');
+is( $real_attr->get(),   2, 'value provided by set, has been stored');
+is( $real_attr->reset(), 0, 'resetter works');
+is( $real_attr->get(),   0, 'resetter has restored value of attribute correctly');
+$real_attr->set(2);
+is( $real_attr->set(1.1), undef, 'type checks of stter work');
+ok( $$real_attr, 'got error message becasue failed type checks');
 
+# add getter and setter getsetter
+$real_attr->set(2);
+my $subscope = 'Sub::Class';
+my $aself = bless \$var, $subscope;
+is( Kephra::Base::Class::Attribute::add_getter('attr', $real_attr, $subscope.'::geta', $aself ), 1, 'mounted a getter via add_getter');
+is( $aself->geta(), 2, 'mounted a getter works');
+is( Kephra::Base::Class::Attribute::add_setter('attr', $real_attr, $subscope.'::seta', $aself ), 1, 'mounted a setter via add_getter');
+is( $aself->seta(3), 3, 'mounted a setter via add_getter');
+is( $aself->geta(), 3, 'mounted setter works, stored value');
+is( $aself->seta(1.1), undef, 'type check of mounted setter works');
+ok( $$aself, 'got error message becasue failed type checks');
+is( Kephra::Base::Class::Attribute::add_getsetter('attr', $real_attr, $subscope.'::gseta', $aself ), 1, 'mounted a getter/setter via add_getter');
+is( $aself->gseta(), 3, 'mounted a getter /setter via add_getsetter');
+is( $aself->gseta(4), 4, 'mounted getter/setter works as setter');
+is( $aself->gseta(), 4, 'mounted getter/setter works as getter');
+is( $aself->gseta(1.1), undef, 'type check of mounted getter/setter works');
+ok( $$aself, 'got error message becasue failed type checks');
 
-#is( Kephra::Base::Class::Attribute::is_known(''), 0, 'random string does not refer to a known attribute');
-#is( Kephra::Base::Class::Attribute::get(''),      0, 'can not get attribute on string');
-#is( Kephra::Base::Class::Attribute::set(''),      0, 'can not set attribute on string');
-#is( Kephra::Base::Class::Attribute::delete(''),   0, 'can not delete attribute on string');
+$real_attr->set(2);
+is( Kephra::Base::Class::Attribute::is_known($real_attr), 1, 'real attribute is known');
+is( Kephra::Base::Class::Attribute::get($real_attr),      2, 'outward getter works');
+is( Kephra::Base::Class::Attribute::set($real_attr, 3),   3, 'outward setter works');
+is( Kephra::Base::Class::Attribute::get($real_attr),      3, 'outward setter stored value');
+is( Kephra::Base::Class::Attribute::delete($real_attr, $aself), 3, 'attribute deleted');
+is( Kephra::Base::Class::Attribute::is_known($real_attr), 0, 'real attribute has been deleted');
 
-#is( Kephra::Base::Class::Attribute::is_known({}), 0, 'random ref is not known attribute');
-#is( Kephra::Base::Class::Attribute::get({}),      0, 'can not get attribute on random ref');
-#is( Kephra::Base::Class::Attribute::set({}),      0, 'can not set attribute on random ref');
-#is( Kephra::Base::Class::Attribute::delete({}),   0, 'can not delete attribute on random ref');
+is( $aself->geta(), undef, 'mounted a getter no longer works on deleted attribute');
+is( $aself->seta(4), undef, 'mounted a setter no longer works on deleted attribute');
+is( $aself->gseta(), undef, 'mounted a getter/setter no longer works as getter on deleted attribute');
+is( $aself->gseta(4), undef, 'mounted a getter/setter no longer works as setter on deleted attribute');
 
-my $class  = 'class';
-my $value  = 'value';
-my $attr_ref = Kephra::Base::Class::Attribute::create($class, $value);
-
-
-#is( Kephra::Base::Class::Attribute::create(1,2,3),                     0, 'can not create attribute with too much args');
-#ok( ref $attr_ref,                                                        'can create attribute with enough args');
-#is( ref $attr_ref, 'Kephra::Base::Class::Attribute',                      'attribute has right class');
-#is( $$attr_ref,                                                           $class, 'attribute ref has right content');
-#is( Kephra::Base::Class::Attribute::is_known($attr_ref),             1, 'newly created attribute is known');
-#is( Kephra::Base::Class::Attribute::get($attr_ref),             $value, 'get attribute value');
-#is( Kephra::Base::Class::Attribute::set($attr_ref, 2),               2, 'set attribute value');
-#is( Kephra::Base::Class::Attribute::delete($attr_ref),               2, 'delete attribute');
-#is( Kephra::Base::Class::Attribute::is_known($attr_ref),             0, 'deleted attribute is not known');
-#is( Kephra::Base::Class::Attribute::get($attr_ref),                  0, 'can not get deleted attribute');
-#is( Kephra::Base::Class::Attribute::set($attr_ref, 2),               0, 'can not set deleted attribute');
-#is( Kephra::Base::Class::Attribute::delete($attr_ref),               0, 'can not delete a deleted attribute');
-
-
-my $attr_ref2 = Kephra::Base::Class::Attribute::create($class, $value);
-#isnt( $attr_ref, $attr_ref2,           'next attribute gets different reference');
-#is ( $attr_ref2->is_known(),        1, 'attr is known (OO interface)');
-#is ( $attr_ref2->get(),       'value', 'getter works (OO interface)');
-#is ( $attr_ref2->set('val'),    'val', 'setter works (OO interface)');
-#is ( $attr_ref2->get(),         'val', 'set value was stored (OO interface)');
-#is ( $attr_ref2->delete(),      'val', 'delete works (OO interface)');
-#is ( $attr_ref2->is_known(),        0, 'deleted attr is not known (OO interface)');
-#is ( $attr_ref2->get(),             0, 'do not get unknown attribute (OO interface)');
-#is ( $attr_ref2->set(2),            0, 'can not set unknown attribute (OO interface)');
-#is ( $attr_ref2->delete(),          0, 'can not delete unknown attribute (OO interface)');
 
 exit 0;

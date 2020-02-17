@@ -9,7 +9,7 @@ use Kephra::Base::Package qw/set_sub has_sub/;
 use Kephra::Base::Class::Scope qw/cat_scope_path/;
 use Kephra::Base::Class::Attribute::Type;
 
-my (%store, %setter, %resetter, %tr_getter, %tr_setter);
+my (%store, %setter, %resetter, %tr_getter, %tr_setter, %tr_getsetter);
 my $universal_getter = sub{$store{int $_[0]} if ref $_[0] and exists $store{int $_[0]} };
 
 ################################################################################
@@ -26,15 +26,15 @@ sub create {
     $store{int $self} = $default if defined $default;
 
     $setter{$class}{$type} = sub { 
-        return 0 unless ref $_[0] and exists $store{int $_[0]} and defined $_[1];
+        return unless ref $_[0] and exists $store{int $_[0]} and defined $_[1];
         my $a = shift;
         $k = $callback->(@_);
-        return 0 if $k;
+        return if $k;
         $store{int $a} = $_[0];
     } unless ref $setter{$class}{$type};
 
     $resetter{$class}{$type} = sub { 
-        return 0 unless ref $_[0] and exists $store{int $_[0]};
+        return unless ref $_[0] and exists $store{int $_[0]};
         $store{int $_[0]} = $default;
         $default;
     } unless ref $resetter{$class}{$type};
@@ -53,26 +53,43 @@ sub add_getter {
         return unless ref $_[0] and ref $tr_getter{int $_[0]};
         $store{int $tr_getter{int $_[0]}{$attribute}};
     });
+    1;
 } 
-
 sub add_setter {
     my ($attribute, $attr_ref, $path, $self) = @_;
     return 0 unless ref $attr_ref and exists $store{int $attr_ref} and ref $self;
-    $tr_getter{int $self}{$attribute} = $attr_ref;
+    $tr_setter{int $self}{$attribute} = $attr_ref;
     set_sub( $path, sub {
         return unless ref $_[0] and ref $tr_setter{int $_[0]} and defined $_[1];
         my $self = shift;
         my $attr = $tr_getter{int $self}{$attribute};
+        my $ret = $attr->set($_[0], $self); # get return value
+        $$self = $$attr;    # copy error msg
+        $ret;
+    });
+    1;
+}
+sub add_getsetter {
+    my ($attribute, $attr_ref, $path, $self) = @_;
+    return 0 unless ref $attr_ref and exists $store{int $attr_ref} and ref $self;
+    $tr_getsetter{int $self}{$attribute} = $attr_ref;
+    set_sub( $path, sub {
+        return unless ref $_[0] and ref $tr_getsetter{int $_[0]};
+        my $self = shift;
+        my $attr = $tr_getsetter{int $self}{$attribute};
+        return $attr->get() unless defined $_[0];
         my $ret = $attr->set($_[0], $self);
         $$self = $$attr; # copy error msg
         $ret;
     });
-} 
+    1;
+}
 
-sub delete   { 
+sub delete   { # autodelete translations?
     my $attr = shift;
     delete $tr_getter{int $_} for @_;
     delete $tr_setter{int $_} for @_;
+    delete $tr_getsetter{int $_} for @_;
     delete $store{int $attr} if is_known($attr);
 }
 ################################################################################
