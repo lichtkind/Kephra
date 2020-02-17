@@ -14,10 +14,10 @@ my $universal_getter = sub{$store{int $_[0]} if ref $_[0] and exists $store{int 
 
 ################################################################################
 sub create {
-    my ($class, $attribute, $class_types, $type) = @_;
-    return 0 unless ref $class_types eq 'Kephra::Base::Class::Attribute::Type';
-    my $callback = $class_types->get_callback($type);
-    my $default = $class_types->default_value($type);
+    my ($class, $attribute, $attr_types, $type) = @_;
+    return 0 unless ref $attr_types eq 'Kephra::Base::Class::Attribute::Type' and defined $type;
+    my $callback = $attr_types->get_callback($type);
+    my $default = $attr_types->get_default_value($type);
     return 0 unless ref $callback eq 'CODE';
 
     my $scope = cat_scope_path( 'attribute', $class, $attribute);
@@ -36,12 +36,12 @@ sub create {
     $resetter{$class}{$type} = sub { 
         return 0 unless ref $_[0] and exists $store{int $_[0]};
         $store{int $_[0]} = $default;
-        $default
+        $default;
     } unless ref $resetter{$class}{$type};
 
-    set_sub( "$scope::get", $universal_getter);
-    set_sub( "$scope::set", $setter{$class}{$type});
-    set_sub( "$scope::reset", $resetter{$class}{$type});
+    set_sub( $scope.'::get', $universal_getter);
+    set_sub( $scope.'::set', $setter{$class}{$type});
+    set_sub( $scope.'::reset', $resetter{$class}{$type});
     $self;
 }
 
