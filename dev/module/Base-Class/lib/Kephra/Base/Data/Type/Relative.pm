@@ -1,29 +1,30 @@
 use v5.16;
 use warnings;
 
-package Kephra::Base::Data::Type;
-our $VERSION = 0.07;
+package Kephra::Base::Data::Type::Relative;
+our $VERSION = 0.08;
 use Scalar::Util qw/blessed looks_like_number/;
+use Kephra::Base::Data::Type;
 use Kephra::Base::Package;
 use Exporter 'import';
 our @EXPORT_OK = (qw/check_type guess_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-my %set = (bool  => {check => ['boolean',          sub{$_[0] eq 0 or $_[0] eq 1}],parent => 'value', default => 0},
-           num   => {check => ['number',           sub{looks_like_number($_[0])}],parent => 'value', default => 0},
+my %set = (bool  => {check => ['boolean',          sub{$_[0] eq 0 or $_[0] eq 1}],parent => 'value', default=>0},
+           num   => {check => ['number',           sub{looks_like_number($_[0])}],parent => 'value', default=>0},
           'num+' => {check => ['positive number',  sub{$_[0]>=0}],                parent => 'num', },
            int   => {check => ['integer',          sub{int $_[0] == $_[0]}],      parent => 'num', },
           'int+' => {check => ['positive integer', sub{$_[0]>=0}],                parent => 'int', },
-          'int++'=> {check => ['strictly positive integer',sub{$_[0] > 0}],       parent => 'int',   default => 1},
+          'int++'=> {check => ['strictly positive integer',sub{$_[0]> 0}],        parent => 'int',   default=>1},
           'str'  => {check => [],                                                 parent => 'value'},
-          'str+' => {check => ['none empty string',sub{$_[0] or ~$_[0]}],         parent => 'str',   default => ' '},
+          'str+' => {check => ['none empty string',sub{$_[0] or ~$_[0]}],         parent => 'str',   default=> ' '},
           'str+lc'=>{check => ['lower case string',sub{lc $_[0] eq $_[0]}],       parent => 'str+'},
           'str+uc'=>{check => ['upper case string',sub{uc $_[0] eq $_[0]}],       parent => 'str+'},
           'str+wc'=>{check => ['word case string', sub{ucfirst $_[0] eq $_[0]}],  parent => 'str+'},
-          'value' =>{check => ['not a reference',  sub{not ref $_[0]}],                              default => ''},
+          'value' =>{check => ['not a reference',  sub{not ref $_[0]}],                              default=>''},
 
           'obj'  => {check => ['object',           sub{blessed($_[0])}]},
-          'any'  => {check => ['any data',         sub{1}]},
+          'any'  => {check => ['any value',        sub{1}]},
 
           'CODE' => {check => ['code reference',   sub{ref $_[0] eq 'CODE'}]},
           'ARRAY'=> {check => ['array reference',  sub{ref $_[0] eq 'ARRAY'}]},
@@ -34,15 +35,14 @@ my %set = (bool  => {check => ['boolean',          sub{$_[0] eq 0 or $_[0] eq 1}
 ################################################################################
 
 sub add    {                                # name help cref parent? --> bool
-    my ($type, $help, $check, $default, $parent, $shortcut) = @_;
+    my ($type, $help, $check, $default, $parent) = @_;
     return 0 if is_known($type);            # do not overwrite types
     if (ref $help eq 'HASH'){               # name => {help =>'...', check => sub {},  parent => 'type'}
-        return 0 unless exists $help->{'help'} and exists $help->{'check'};
-        $help = $help->{'help'};
-        $check = $help->{'check'};
-        $parent = $help->{'parent'};
+        return 0 unless exists $help->{'help'};
         $default = $help->{'default'};
-        $shortcut = $help->{'$shortcut'};
+        $parent = $help->{'parent'};
+        $check = $help->{'check'};
+        $help  = $help->{'help'};
     }
     return 0 unless ref $check eq 'CODE'; # need a checker
     my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();

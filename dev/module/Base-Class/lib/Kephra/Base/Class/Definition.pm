@@ -11,10 +11,11 @@ my %store;
 
 sub new_class {
     my ($class) = @_;
+    return "need a class name stringas argument" unless defined $class;
     return "class $class is already defined" if exists $store{$class};
-    $store{$class} = {attribute => { data => {}, delegating => {}, wrapping => {}, },
-                         method => { simple => {}, multi => {}, accessor => {}, constructor => {}, destructor =>{} },
-                       complete => 0, unresolved => 0};
+    $store{$class} = { types => Kephra::Base::Class::Attribute::Type->new(),
+                       attribute => { }, method => { state => {}, restate => {},
+                       state => 'new'}};
     '';
 }
 
@@ -45,6 +46,10 @@ sub add_wrapping_attribute {
 }
 
 sub add_simple_method {
+    my ($class, $name, $signature, $scope) = @_;
+}
+
+sub add_multi_method {
     my ($class, $name, $signature, $scope) = @_;
 }
 ################################################################################

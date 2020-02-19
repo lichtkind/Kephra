@@ -1,7 +1,7 @@
 use v5.16;
 use warnings;
 
-# central kv storage for all data stored in attributes
+# central kv storage for all data stored in attributes and creation of direct data accessors
 
 package Kephra::Base::Class::Attribute;
 our $VERSION = 0.1;

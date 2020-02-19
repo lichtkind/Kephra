@@ -12,27 +12,28 @@ our development model in more details: doc/CompleteProgramming.pod
                                S = Small feature missing
                                 U = Usable
                                  M = Major feature missing
-                                  B = Buggy
+                                  B = Buggy/old Deprecated code
                                    I = In Progress (currently worked on)
                                     N = Not yet (planned)
 --------------------------------------------------------------------------------
- - Kephra::Base                             C
-   Kephra::Base::Data                       C
+   Kephra::Base::Data::Type::Relative              N
    Kephra::Base::Data::Type                 C
+   Kephra::Base::Data                       C
    Kephra::Base::Package                    C
+ - Kephra::Base                             C
 --------------------------------------------------------------------------------
- - Kephra::Base::Class                       P
-   Kephra::Base::Class::Definition             UM
    Kephra::Base::Class::Scope               C
    Kephra::Base::Class::Attribute::Type      P
-   Kephra::Base::Class::Attribute              UM
-   Kephra::Base::Class::Instance               UM
-   Kephra::Base::Class::Method::Argument          I
-   Kephra::Base::Class::Method::Signature         I
-   Kephra::Base::Class::Method::Hook              I
-   Kephra::Base::Class::Method                    I
-   Kephra::Base::Class::Builder                UM
-   Kephra::Base::Class::Syntax                    I
+   Kephra::Base::Class::Attribute           C
+   Kephra::Base::Class::Definition              MDI
+   Kephra::Base::Class::Instance               UMD
+   Kephra::Base::Class::Method::Argument         DI
+   Kephra::Base::Class::Method::Signature        DI
+   Kephra::Base::Class::Method::Hook             DI
+   Kephra::Base::Class::Method                   DI
+   Kephra::Base::Class::Builder                UMD
+   Kephra::Base::Class::Syntax                   DI
+ - Kephra::Base::Class                       P
 --------------------------------------------------------------------------------
 ================================================================================
  - Kephra::Base::Object

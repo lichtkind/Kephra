@@ -1,8 +1,8 @@
-use v5.16;
+use v5.20;
 use warnings;
 
 package Kephra::Base::Data::Type::Relative;
-our $VERSION = 0.07;
+our $VERSION = 0.01;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type;
 use Kephra::Base::Package;
