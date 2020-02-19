@@ -4,7 +4,10 @@ use warnings;
 package Kephra::Base::Class::Definition;
 
 
-sub new_class {}               # ~class                              --> ~error
+sub new_class {}               # ~class                               --> ~error
+
+
+
 
 sub add_simple_attribute {}    # str class, str name, HASH properties --> ~error
 sub add_delegating_attribute {}# str class, str name, HASH properties --> ~error

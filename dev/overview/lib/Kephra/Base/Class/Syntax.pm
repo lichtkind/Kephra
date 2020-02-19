@@ -15,10 +15,9 @@ __END__
 class C;                                                # final ; are optional except on class def
 
 
-type        name => {check => sub {$val = @_}, help => 'description what is checked', [parent => type_name], default => val };
+type name => {check => sub {$val = @_}, help => 'description what is checked' - parent => type_name, default => val };
 
-object type name => {check => ['help' => sub {$val, $self = @_},],                     parent => type_name, default => val }; 
-                                                        # $self of access scope
+relative type name => {check => sub {$val, $obj = @_}, help => '....' -      parent => type_name, default => val };
 
 
 attribute name => {help => '',                          # help = long name
