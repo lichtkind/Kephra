@@ -30,7 +30,7 @@ sub add            { # ~name %def -->  bool         %def : parent @check default
 }
 sub delete         { # name                       -->  bool
     my ($self, $type) = @_;
-    return 0 unless $self->is_known( $type );
+    return 0 unless exists $self->{'type'}{$type};
     delete $self->{'type'}{$type};
 }
 
