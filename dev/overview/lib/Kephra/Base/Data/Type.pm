@@ -17,7 +17,7 @@ sub get_default_value  {} # ~type                -->  .default|undef
 sub get_checks         {} # ~type                -->  @checks  = [[~help, &check]]
 sub get_callback       {} # ~type                -->  &callback
 
-sub check          {} # ~type .val               -->  ~errormsg|''    = "reason .val"
+sub check          {} # ~type .val               -->  ~error    = "reason .val"
 sub guess          {} # .val                     -->  @~type
 
 1;
