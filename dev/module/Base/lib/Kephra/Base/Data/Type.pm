@@ -23,7 +23,7 @@ my %set = (bool  => {check => ['boolean',          sub{$_[0] eq 0 or $_[0] eq 1}
           'value' =>{check => ['not a reference',  sub{not ref $_[0]}],                              default =>''},
 
           'obj'  => {check => ['object',           sub{blessed($_[0])}]},
-          'any'  => {check => ['any data',        sub{1}]},
+          'any'  => {check => ['any data',         sub{1}]},
 
           'CODE' => {check => ['code reference',   sub{ref $_[0] eq 'CODE'}]},
           'ARRAY'=> {check => ['array reference',  sub{ref $_[0] eq 'ARRAY'}]},
@@ -34,14 +34,15 @@ my %set = (bool  => {check => ['boolean',          sub{$_[0] eq 0 or $_[0] eq 1}
 ################################################################################
 
 sub add    {                                # name help cref parent? --> bool
-    my ($type, $help, $check, $default, $parent) = @_;
+    my ($type, $help, $check, $default, $parent, $shortcut) = @_;
     return 0 if is_known($type);            # do not overwrite types
     if (ref $help eq 'HASH'){               # name => {help =>'...', check => sub {},  parent => 'type'}
-        return 0 unless exists $help->{'help'};
-        $default = $help->{'default'};
-        $parent = $help->{'parent'};
+        return 0 unless exists $help->{'help'} and exists $help->{'check'};
+        $help = $help->{'help'};
         $check = $help->{'check'};
-        $help  = $help->{'help'};
+        $parent = $help->{'parent'};
+        $default = $help->{'default'};
+        $shortcut = $help->{'$shortcut'};
     }
     return 0 unless ref $check eq 'CODE'; # need a checker
     my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
