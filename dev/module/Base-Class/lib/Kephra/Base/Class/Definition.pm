@@ -19,6 +19,10 @@ sub new_class {
     '';
 }
 
+sub get_types                { $store{$_[0]}{'types'}                    if exists $store{$_[0]} }
+sub get_attributes           { keys %{$store{$_[0]}{'attribute'}}        if exists $store{$_[0]} }
+sub get_attribute_type       { $store{$_[0]}{'attribute'}{$_[1]}{'type'} if exists $store{$_[0]} and exists $store{$_[0]}{'attribute'}{$_[1]}}
+
 sub add_data_attribute {
     my ($class, $name, $properties) = @_;
     return 0 unless $store{$class} and not $store{$class}{'c'} and $store{$class}{'types'}->is_known($type);
@@ -65,11 +69,6 @@ sub resolve_dependencies {
     $store{$class}{r} = 1;
 }
 
-sub get_attribute_type       { $store{$_[0]}{attribute}{$_[1]} if exists $store{$_[0]} }
-sub get_attributes           { $store{$_[0]}{attribute}        if exists $store{$_[0]} }
-sub get_delegating_attributes{ $store{$_[0]}{delegating}       if exists $store{$_[0]} }
-sub get_wrapping_attributes  { $store{$_[0]}{wrapping}         if exists $store{$_[0]} }
-sub get_types                { $store{$_[0]}{types}            if exists $store{$_[0]} }
 
 sub complete    {
     return 0 unless exists $store{$_[0]} and not exists $store{$_[0]}{c}; $store{$_[0]}{c} = 1;
