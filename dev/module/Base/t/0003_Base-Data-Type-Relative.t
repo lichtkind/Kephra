@@ -4,7 +4,7 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Kephra::Base::Data::Type qw/:all/;
+use Kephra::Base::Data::Type::Relative qw/:all/;
 use Test::More tests => 115;
 
 is( check_type('value',1),             '', 'recognize 1 as value');

@@ -5,7 +5,7 @@ use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 use Kephra::Base::Data::Type qw/:all/;
-use Test::More tests => 115;
+use Test::More tests => 126;
 
 is( check_type('value',1),             '', 'recognize 1 as value');
 is( check_type('value',0),             '', 'recognize 0 as value');
@@ -69,6 +69,12 @@ is( check_type('num+', 1.5),           '', 'recognize positive number');
 is( check_type('int',    5),           '', 'recognize integer');
 is( check_type('int+',   5),           '', 'recognize positive integer');
 
+is( Kephra::Base::Data::Type::resolve_shortcut('~'), 'str+', 'resolved string shortcut');
+is( Kephra::Base::Data::Type::resolve_shortcut('?'), 'bool', 'resolved boolean shortcut');
+ok( ('~' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'string shortcut gets listed');
+ok( ('?' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'boolean shortcut gets listed');
+
+
 my @type = guess_type(5);
 ok( !('bool' ~~ \@type),'5 is not an boolean');
 ok( 'int' ~~ \@type,    '5 is an integer');
@@ -108,9 +114,11 @@ use Test::More;
 my $type_name = 'test_type';
 is( Kephra::Base::Data::Type::is_known($type_name),   0, 'test type not present yet');
 is( Kephra::Base::Data::Type::is_owned('bool'),       0, 'default type bool is not recognized as own my current package');
-is( add($type_name, 'infive',sub{-5 < $_[0] and $_[0] < 5},2,'int'),   1, 'added my custom type');
-@type = Kephra::Base::Data::Type::list_names();
-ok( ($type_name ~~ \@type),                              'new created types gets listed');
+is( add($type_name, 'infive',sub{-5 < $_[0] and $_[0] < 5},2,'int', '-'),   1, 'added my custom type');
+
+ok( ($type_name ~~ [Kephra::Base::Data::Type::list_names()]), 'new created type gets listed');
+ok( ('-' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'new created type shortcut gets listed');
+is( Kephra::Base::Data::Type::resolve_shortcut('-'), $type_name, 'shortcut of new type can be resolved');
 is( Kephra::Base::Data::Type::is_known($type_name),   1, 'test type is present now');
 is( Kephra::Base::Data::Type::is_owned($type_name),   1, 'test type is recognized as owned by my current package');
 is( Kephra::Base::Data::Type::is_standard($type_name), 0,'test type is not recognized as standard');
@@ -119,22 +127,26 @@ is( Kephra::Base::Data::Type::get_default_value($type_name),2,'got default value
 is( Kephra::Base::Data::Type::check($type_name,   1), '','test type accepts correctly');
 ok( Kephra::Base::Data::Type::check($type_name, -10),    'test type rejects correctly');
 is( Kephra::Base::Data::Type::delete($type_name),     1, 'deleted my custom type');
-@type = Kephra::Base::Data::Type::list_names();
-ok( !($type_name ~~ \@type),                             'new deleted types gets not listed anymore');
+ok( !($type_name ~~ [Kephra::Base::Data::Type::list_names()]), 'new deleted types gets not listed anymore');
+ok( !('-' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'deleted types shortcut gets not listed anymore');
+is( Kephra::Base::Data::Type::resolve_shortcut('-'), '', 'deleted shotcut can not be resolved');
 is( Kephra::Base::Data::Type::is_known($type_name),   0, 'test type not present again');
 is( Kephra::Base::Data::Type::is_known($type_name),   0, 'test type not present again');
 is( add($type_name, 'just for this test',sub{-5 < $_[0] and $_[0] < 5}, 12, 'int'), 0, 'default value of type has to be of type');
 
+
 is( add($type_name => {default => 2, help => 'just for this test',
-                       check => sub{-5 < $_[0] and $_[0] < 5}, parent => 'int'}), 1, 'HASHref syntax for add type');
+                       check => sub{-5 < $_[0] and $_[0] < 5}, parent => 'int',
+                       shortcut => '-'}),             1, 'HASHref syntax for add type');
+ok( ($type_name ~~ [Kephra::Base::Data::Type::list_names()]), 'again created type gets listed');
+ok( ('-' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'again created type shortcut gets listed');
+is( Kephra::Base::Data::Type::resolve_shortcut('-'), $type_name, 'shortcut of type can be resolved');
 is( Kephra::Base::Data::Type::is_known($type_name),   1, 'HASHref test type is present now');
 is( Kephra::Base::Data::Type::is_owned($type_name),   1, 'HASHref test type is recognized as own my current package');
 is( Kephra::Base::Data::Type::get_default_value($type_name), 2, 'HASHref type got default value of self made type');
 is( Kephra::Base::Data::Type::check($type_name,   1),'', 'HASHref test type accepts correctly');
 ok( Kephra::Base::Data::Type::check($type_name, -10),    'HASHref test type rejects correctly');
 is( Kephra::Base::Data::Type::delete($type_name),     1, 'deleted HASHref custom type');
-
-
 
 
 my $child = 'three';

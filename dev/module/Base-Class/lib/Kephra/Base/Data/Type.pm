@@ -9,20 +9,21 @@ use Exporter 'import';
 our @EXPORT_OK = (qw/check_type guess_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-my %set = (bool  => {check => ['boolean',          sub{$_[0] eq 0 or $_[0] eq 1}],parent => 'value', default => 0},
-           num   => {check => ['number',           sub{looks_like_number($_[0])}],parent => 'value', default => 0},
+my %set = (bool  => {check => ['boolean',          sub{$_[0] eq 0 or $_[0] eq 1}],parent => 'value', default => 0, shortcut => '?'},
+           num   => {check => ['number',           sub{looks_like_number($_[0])}],parent => 'value', default => 0, shortcut => '+'},
           'num+' => {check => ['positive number',  sub{$_[0]>=0}],                parent => 'num', },
            int   => {check => ['integer',          sub{int $_[0] == $_[0]}],      parent => 'num', },
           'int+' => {check => ['positive integer', sub{$_[0]>=0}],                parent => 'int', },
           'int++'=> {check => ['strictly positive integer',sub{$_[0] > 0}],       parent => 'int',   default => 1},
           'str'  => {check => [],                                                 parent => 'value'},
-          'str+' => {check => ['none empty string',sub{$_[0] or ~$_[0]}],         parent => 'str',   default => ' '},
+          'str+' => {check => ['none empty string',sub{$_[0] or ~$_[0]}],         parent => 'str',   default =>' ',shortcut => '~'},
           'str+lc'=>{check => ['lower case string',sub{lc $_[0] eq $_[0]}],       parent => 'str+'},
           'str+uc'=>{check => ['upper case string',sub{uc $_[0] eq $_[0]}],       parent => 'str+'},
           'str+wc'=>{check => ['word case string', sub{ucfirst $_[0] eq $_[0]}],  parent => 'str+'},
           'value' =>{check => ['not a reference',  sub{not ref $_[0]}],                              default => ''},
 
           'obj'  => {check => ['object',           sub{blessed($_[0])}]},
+          'ref'  => {check => ['reference',        sub{ref $_[0]}]},
           'any'  => {check => ['any data',         sub{1}]},
 
           'CODE' => {check => ['code reference',   sub{ref $_[0] eq 'CODE'}]},
@@ -30,30 +31,33 @@ my %set = (bool  => {check => ['boolean',          sub{$_[0] eq 0 or $_[0] eq 1}
           'HASH' => {check => ['hash reference',   sub{ref $_[0] eq 'HASH'}]},
           'ARGS' => {check => ['array or hash ref',sub{ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'}]},
 );
-
+my %shortcut;
 ################################################################################
 
 sub add    {                                # name help cref parent? --> bool
     my ($type, $help, $check, $default, $parent, $shortcut) = @_;
     return 0 if is_known($type);            # do not overwrite types
     if (ref $help eq 'HASH'){               # name => {help =>'...', check => sub {},  parent => 'type'}
-        return 0 unless exists $help->{'help'} and exists $help->{'check'};
-        $help = $help->{'help'};
+        return 0 unless exists $help->{'help'};
+        $shortcut = $help->{'shortcut'} if exists $help->{'shortcut'};
+        $default = $help->{'default'}  if exists $help->{'default'};
+        $parent = $help->{'parent'}  if exists $help->{'parent'};
         $check = $help->{'check'};
-        $parent = $help->{'parent'};
-        $default = $help->{'default'};
-        $shortcut = $help->{'$shortcut'};
+        $help = $help->{'help'};
     }
     return 0 unless ref $check eq 'CODE'; # need a checker
     my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
     return 0 if not $package;               # only package (classes) can have types
     return 0 if defined $parent and $parent and not is_known($parent);
+    return 0 if defined $shortcut and exists $shortcut{ $shortcut };
     $set{$type} = {package => $package, file => $file, check => [$help, $check],  parent => $parent};
+    $set{$type}{'shortcut'} = $shortcut if defined $shortcut;
     _resolve_dependencies($type);
     if (defined $default){
         if (check($type, $default)) {delete $set{$type}; return 0}
         else                        {$set{$type}{default} = $default}
     }
+    $shortcut{ $shortcut } = $type if defined $shortcut;
     1;
 }
 sub delete {                              # name       -->  bool
@@ -62,11 +66,16 @@ sub delete {                              # name       -->  bool
     return 0 if is_standard($name);       # cant delete std types
     my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
     return 0 unless _owned($name, $package, $file); # only creator can delete type
+    delete $shortcut{ $set{$name}{'shortcut'} } if exists $set{$name}{'shortcut'};
     delete $set{$name};
     return 1;
 }
-
-sub list_names  { keys %set }                  #            --> [name]
+################################################################################
+sub list_names     { keys %set }                    #            --> @~type
+sub list_shortcuts { keys %shortcut }               #            --> @~shortcut
+sub resolve_shortcut {                              # ~shortcut  -->  ~type
+    $shortcut{$_[0]} if defined $shortcut{$_[0]}
+}
 ################################################################################
 sub is_known    { exists $set{$_[0]} ? 1 : 0 } # name       -->  bool
 sub is_standard {(exists $set{$_[0]} and not exists $set{$_[0]}{'file'}) ? 1 : 0 }
@@ -118,20 +127,21 @@ sub guess        { # val          --> [name]
 sub _resolve_dependencies {
     my ($type) = @_;
     die "can not resolve type $type" unless defined $type and exists $set{$type};
-    return unless exists $set{$type}{parent};
-    my $parent = $set{$type}{parent};
+    return unless exists $set{$type}{'parent'};
+    my $parent = $set{$type}{'parent'};
     _resolve_dependencies($parent);
-    $set{$type}{default} = $set{$parent}{default} if not defined $set{$type}{default};
-    unshift @{$set{$type}{check}}, @{$set{$parent}{check}};
-    delete $set{$type}{parent};
+    $set{$type}{default} = $set{$parent}{'default'} if not defined $set{$type}{'default'};
+    unshift @{$set{$type}{'check'}}, @{$set{$parent}{'check'}};
+    delete $set{$type}{'parent'};
 }
 
 for my $type (keys %set){
     _resolve_dependencies($type);
-    if (exists $set{$type}{default}){
-        my $msg = check($type, $set{$type}{default});
+    if (exists $set{$type}{'default'}){
+        my $msg = check($type, $set{$type}{'default'});
         die "default value of type $type : $set{$type}{default} misses requirement: $msg" if $msg;
     }
+    $shortcut{ $set{$type}{'shortcut'} } = $type if exists $set{$type}{'shortcut'};
 }
 
 ################################################################################
