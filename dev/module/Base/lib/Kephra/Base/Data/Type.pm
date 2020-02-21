@@ -9,27 +9,27 @@ use Exporter 'import';
 our @EXPORT_OK = (qw/check_type guess_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-my %set = (bool  => {check => ['boolean',          sub{$_[0] eq 0 or $_[0] eq 1}],parent => 'value', default => 0, shortcut => '?'},
-           num   => {check => ['number',           sub{looks_like_number($_[0])}],parent => 'value', default => 0, shortcut => '+'},
-          'num+' => {check => ['positive number',  sub{$_[0]>=0}],                parent => 'num', },
-           int   => {check => ['integer',          sub{int $_[0] == $_[0]}],      parent => 'num', },
-          'int+' => {check => ['positive integer', sub{$_[0]>=0}],                parent => 'int', },
-          'int++'=> {check => ['strictly positive integer',sub{$_[0] > 0}],       parent => 'int',   default => 1},
+my %set = (bool  => {check => ['is 0 or 1',          '$_[0] eq 0 or $_[0] eq 1'], parent => 'value', default => 0,  shortcut => '?'},
+           num   => {check => ['is number',          'looks_like_number($_[0])'], parent => 'value', default => 0,  shortcut => '+'},
+          'num+' => {check => ['is positive',        '$_[0]>=0'],                 parent => 'num', },
+           int   => {check => ['is integer',         'int $_[0] == $_[0]'],       parent => 'num', },
+          'int+' => {check => ['is positive',        '$_[0]>=0'],                 parent => 'int', },
+          'int++'=> {check => ['is strictly positive','$_[0] > 0'],               parent => 'int',   default => 1},
           'str'  => {check => [],                                                 parent => 'value'},
-          'str+' => {check => ['none empty string',sub{$_[0] or ~$_[0]}],         parent => 'str',   default =>' ',shortcut => '~'},
-          'str+lc'=>{check => ['lower case string',sub{lc $_[0] eq $_[0]}],       parent => 'str+'},
-          'str+uc'=>{check => ['upper case string',sub{uc $_[0] eq $_[0]}],       parent => 'str+'},
-          'str+wc'=>{check => ['word case string', sub{ucfirst $_[0] eq $_[0]}],  parent => 'str+'},
-          'value' =>{check => ['not a reference',  sub{not ref $_[0]}],                              default => ''},
+          'str+' => {check => ['none empty value',   '$_[0] or ~$_[0]'],          parent => 'str',   default =>' ', shortcut => '~'},
+          'str+lc'=>{check => ['only lower case character', 'lc $_[0] eq $_[0]'],  parent => 'str+'},
+          'str+uc'=>{check => ['only upper case character', 'uc $_[0] eq $_[0]'],   parent => 'str+'},
+          'str+wc'=>{check => ['only word case character',  'ucfirst $_[0] eq $_[0]'],parent => 'str+'},
+          'value' =>{check => ['not a reference',    'not ref $_[0]'],                                default => ''},
 
-          'obj'  => {check => ['object',           sub{blessed($_[0])}]},
-          'ref'  => {check => ['reference',        sub{ref $_[0]}]},
-          'any'  => {check => ['any data',         sub{1}]},
+          'any'  => {check => ['any data',            1]},
+          'obj'  => {check => ['is blessed object',  'blessed($_[0])']},
+          'ref'  => {check => ['reference',          'ref $_[0]']},
 
-          'CODE' => {check => ['code reference',   sub{ref $_[0] eq 'CODE'}]},
-          'ARRAY'=> {check => ['array reference',  sub{ref $_[0] eq 'ARRAY'}]},
-          'HASH' => {check => ['hash reference',   sub{ref $_[0] eq 'HASH'}]},
-          'ARGS' => {check => ['array or hash ref',sub{ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'}]},
+          'CODE' => {check => ['code reference',     q/ref $_[0] eq 'CODE'/]},
+          'ARRAY'=> {check => ['array reference',    q/ref $_[0] eq 'ARRAY'/]},
+          'HASH' => {check => ['hash reference',     q/ref $_[0] eq 'HASH'/]},
+          'ARGS' => {check => ['array or hash ref',  q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/]},
 );
 my %shortcut;
 ################################################################################
@@ -45,7 +45,7 @@ sub add    {                                # name help cref parent? --> bool
         $check = $help->{'check'};
         $help = $help->{'help'};
     }
-    return 0 unless ref $check eq 'CODE'; # need a checker
+    return 0 unless defined $check; # need a checker
     my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
     return 0 if not $package;               # only package (classes) can have types
     return 0 if defined $parent and $parent and not is_known($parent);
@@ -98,10 +98,12 @@ sub get_callback {  # type                                 --> &callback
     my $c = get_checks($type);
     no warnings "all";
     my $l = @$c;
-    $set{$type}{'callback'} = sub {
-        my $val = shift;
-        for (my $i = 0; $i < $l; $i+=2){return "$val needed to be of type $type, but failed test: $c->[$i]" unless $c->[$i+1]->($val)}'';
+    my $callback = 'sub { ';
+    for (my $i = 0; $i < $l; $i+=2){
+        $callback .= 'return "value $_[0]'." needed to be of type $type, but failed test: $c->[$i]\" unless $c->[$i+1];";
     }
+    $callback = eval $callback.'return \'\'}';
+    $set{$type}{'callback'} = $@ ? $@ : $callback
 }
 ################################################################################
 sub check_type    {&check}
@@ -139,7 +141,7 @@ for my $type (keys %set){
     _resolve_dependencies($type);
     if (exists $set{$type}{'default'}){
         my $msg = check($type, $set{$type}{'default'});
-        die "default value of type $type : $set{$type}{default} misses requirement: $msg" if $msg;
+        die "default value of type $type : $set{$type}{default} misses requirement, $msg" if $msg;
     }
     $shortcut{ $set{$type}{'shortcut'} } = $type if exists $set{$type}{'shortcut'};
 }
