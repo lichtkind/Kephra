@@ -1,4 +1,4 @@
-use v5.16;
+use v5.20;
 use warnings;
 
 package Kephra::Base::Data::Type;

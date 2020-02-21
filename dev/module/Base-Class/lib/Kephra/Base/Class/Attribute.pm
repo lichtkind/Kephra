@@ -1,4 +1,4 @@
-use v5.16;
+use v5.20;
 use warnings;
 
 # central kv storage for all data stored in attributes and creation of direct data accessors

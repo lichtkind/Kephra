@@ -1,4 +1,4 @@
-use v5.16;
+use v5.20;
 use warnings;
 
 # object that holds all types of a class

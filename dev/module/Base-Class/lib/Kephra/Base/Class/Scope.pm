@@ -1,4 +1,4 @@
-use v5.18;
+use v5.20;
 use warnings;
 use experimental qw/switch/;
 

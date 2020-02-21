@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-use v5.16;
+use v5.20;
 use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
@@ -26,7 +26,7 @@ is( check_type('num',1.5),             '', 'recognize small float as number');
 is( check_type('num',0.1e-5),          '', 'recognize scientific number');
 ok( check_type('num','das'),               'string is not a number');
 ok( check_type('num', sub{}),              'coderef is not a number');
-is( Kephra::Base::Data::Type::get_default_value('num'), 0, 'got default number');
+is( Kephra::Base::Data::Type::Relative::get_default_value('num'), 0, 'got default number');
 
 is( check_type('num+',1.5),            '', 'recognize positive number');
 is( check_type('num+',0),              '', 'zero is positive number');
@@ -58,7 +58,7 @@ ok( check_type('str+', ''),                'this is not a none empty string');
 
 is( check_type('str+uc', 'DAS'),       '', 'recognize upper case string');
 ok( check_type('str+uc', 'DaS'),           'this is not an upper case string');
-is( Kephra::Base::Data::Type::get_default_value('str+uc'), ' ', 'this type has no default');
+is( Kephra::Base::Data::Type::Relative::get_default_value('str+uc'), ' ', 'this type has no default');
 
 is( check_type('str+lc', 'das'),       '', 'recognize lower case string');
 ok( check_type('str+lc', 'DaS'),           'this is not an lower case string');
@@ -106,13 +106,13 @@ package Typer;
 use Test::More;
 
 my $type_name = 'test_type';
-is( Kephra::Base::Data::Type::is_known($type_name),   0, 'test type not present yet');
-is( Kephra::Base::Data::Type::is_owned('bool'),       0, 'default type bool is not recognized as own my current package');
+is( Kephra::Base::Data::Type::Relative::is_known($type_name),   0, 'test type not present yet');
+is( Kephra::Base::Data::Type::Relative::is_owned('bool'),       0, 'default type bool is not recognized as own my current package');
 is( add($type_name, 'infive',sub{-5 < $_[0] and $_[0] < 5},2,'int'),   1, 'added my custom type');
-@type = Kephra::Base::Data::Type::list_names();
+@type = Kephra::Base::Data::Type::Relative::list_names();
 ok( ($type_name ~~ \@type),                              'new created types gets listed');
-is( Kephra::Base::Data::Type::is_known($type_name),   1, 'test type is present now');
-is( Kephra::Base::Data::Type::is_owned($type_name),   1, 'test type is recognized as owned by my current package');
+is( Kephra::Base::Data::Type::Relative::is_known($type_name),   1, 'test type is present now');
+is( Kephra::Base::Data::Type::Relative::is_owned($type_name),   1, 'test type is recognized as owned by my current package');
 is( Kephra::Base::Data::Type::is_standard($type_name), 0,'test type is not recognized as standard');
 is( Kephra::Base::Data::Type::is_standard('int'),      1,'int is recognized as standard');
 is( Kephra::Base::Data::Type::get_default_value($type_name),2,'got default value of self made type');
@@ -153,8 +153,8 @@ ok( Kephra::Base::Data::Type::check($child,   2),     'child test type still rej
 add($type_name, 'fiverr',sub{-5 < $_[0] and $_[0] < 5}, 0,'int');
 
 
-my $cb = Kephra::Base::Data::Type::get_callback('int');
-my $cb2 = Kephra::Base::Data::Type::get_callback('int');
+my $cb = Kephra::Base::Data::Type::Relative::get_callback('int');
+my $cb2 = Kephra::Base::Data::Type::Relative::get_callback('int');
 ok( ref $cb eq 'CODE',                    'got a real callback');
 ok( $cb eq $cb2,                          'got a same callback twice');
 is( $cb->(5),                         '', 'recognize integer by callback');
@@ -165,12 +165,12 @@ ok( $cb->('das'),                         'string is not an integer, found by ca
 ok( $cb->({}),                            'hash ref is not an integer, found by callback');
 
 
-sub add { Kephra::Base::Data::Type::add(@_) }
+sub add { Kephra::Base::Data::Type::Relative::add(@_) }
 
 package Typest;
 use Test::More;
 
-is( Kephra::Base::Data::Type::delete($type_name), 0, 'can not deleted what I did not create');
-is( Kephra::Base::Data::Type::is_known($type_name), 1, 'test type is still nown');
+is( Kephra::Base::Data::Type::Relative::delete($type_name), 0, 'can not deleted what I did not create');
+is( Kephra::Base::Data::Type::Relative::is_known($type_name), 1, 'test type is still nown');
 
 exit 0;

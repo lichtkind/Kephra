@@ -1,4 +1,4 @@
-use v5.16;
+use v5.20;
 use warnings;
 
 # central store for all KBOS class definitions (specs, which attr methods and so on)
@@ -14,14 +14,15 @@ sub new_class {
     return "need a class name stringas argument" unless defined $class;
     return "class $class is already defined" if exists $store{$class};
     $store{$class} = { types => Kephra::Base::Class::Attribute::Type->new(),
-                       attribute => { }, method => { state => {}, restate => {},
-                       state => 'new'}};
+                       attribute => { }, method => { state => {}, restate => {}, state => 'n'}};
     '';
 }
 
-sub get_types                { $store{$_[0]}{'types'}                    if exists $store{$_[0]} }
-sub get_attributes           { keys %{$store{$_[0]}{'attribute'}}        if exists $store{$_[0]} }
-sub get_attribute_type       { $store{$_[0]}{'attribute'}{$_[1]}{'type'} if exists $store{$_[0]} and exists $store{$_[0]}{'attribute'}{$_[1]}}
+sub is_known          { exists $store{$_[0]} }
+sub is_complete       { exists $store{$_[0]} and $store{$_[0]}{'state'} eq 'c' }
+sub get_types         { exists $store{$_[0]} and $store{$_[0]}{'types'} }
+sub get_attributes    { keys %{$store{$_[0]}{'attribute'}}        if exists $store{$_[0]} }
+sub get_attribute_type{ $store{$_[0]}{'attribute'}{$_[1]}{'type'} if exists $store{$_[0]} and exists $store{$_[0]}{'attribute'}{$_[1]}}
 
 sub add_data_attribute {
     my ($class, $name, $properties) = @_;
@@ -57,6 +58,7 @@ sub add_multi_method {
     my ($class, $name, $signature, $scope) = @_;
 }
 ################################################################################
+sub complete {                 exists $store{$_[0]} and            $store{$_[0]}{c} }
 sub resolve_dependencies {
     my ($class) = @_;
     return 0 unless $store{$class};
@@ -68,13 +70,6 @@ sub resolve_dependencies {
     }
     $store{$class}{r} = 1;
 }
-
-
-sub complete    {
-    return 0 unless exists $store{$_[0]} and not exists $store{$_[0]}{c}; $store{$_[0]}{c} = 1;
-}
-sub is_complete {                 exists $store{$_[0]} and            $store{$_[0]}{c} }
-sub is_known    {                 exists $store{$_[0]} }
 ################################################################################
 
 
