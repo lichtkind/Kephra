@@ -1,4 +1,4 @@
-use v5.16;
+use v5.20;
 use warnings;
 
 # self made data types, standards + defined by any class
@@ -16,12 +16,12 @@ sub is_known           {} # ~type                -->  ?
 sub is_standard        {} # ~type                -->  ?
 sub is_owned           {} # ~type ~package ~file -->  ?
 
-sub get_default_value  {} # ~type                -->  .default|undef
+sub get_default_value  {} # ~type                -->  $default|undef
 sub get_checks         {} # ~type                -->  @checks  = [[~help, &check]]
 sub get_callback       {} # ~type                -->  &callback|~evalerror
 
-sub check          {} # ~type .val               -->  ~error    = "reason .val"
-sub guess          {} # .val                     -->  @~type
+sub check          {} # ~type $val               -->  ~error    = "reason $val"
+sub guess          {} # $val                     -->  @~type
 
 1;
 
