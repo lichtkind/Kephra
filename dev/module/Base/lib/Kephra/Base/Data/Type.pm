@@ -20,7 +20,7 @@ my %set = (bool  => {check => ['is 0 or 1',          '$_[0] eq 0 or $_[0] eq 1']
           'str+lc'=>{check => ['only lower case character', 'lc $_[0] eq $_[0]'],  parent => 'str+'},
           'str+uc'=>{check => ['only upper case character', 'uc $_[0] eq $_[0]'],   parent => 'str+'},
           'str+wc'=>{check => ['only word case character',  'ucfirst $_[0] eq $_[0]'],parent => 'str+'},
-          'value' =>{check => ['not a reference',    'not ref $_[0]'],                                default => ''},
+          'value' =>{check => ['not a reference',    'not ref $_[0]'],                               default => ''},
 
           'any'  => {check => ['any data',            1]},
           'obj'  => {check => ['is blessed object',  'blessed($_[0])']},
@@ -31,9 +31,27 @@ my %set = (bool  => {check => ['is 0 or 1',          '$_[0] eq 0 or $_[0] eq 1']
           'HASH' => {check => ['hash reference',     q/ref $_[0] eq 'HASH'/]},
           'ARGS' => {check => ['array or hash ref',  q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/]},
 );
-my %shortcut = (':' => 0);
+my %shortcut = ('-' => 0);
 ################################################################################
-
+for my $type (keys %set){
+    _resolve_dependencies($type);
+    if (exists $set{$type}{'default'}){
+        my $msg = check($type, $set{$type}{'default'});
+        die "default value of type $type : $set{$type}{default} misses requirement, $msg" if $msg;
+    }
+    $shortcut{ $set{$type}{'shortcut'} } = $type if exists $set{$type}{'shortcut'};
+}
+sub _resolve_dependencies {
+    my ($type) = @_;
+    die "can not resolve type $type" unless defined $type and exists $set{$type};
+    return unless exists $set{$type}{'parent'};
+    my $parent = $set{$type}{'parent'};
+    _resolve_dependencies($parent);
+    $set{$type}{default} = $set{$parent}{'default'} if not defined $set{$type}{'default'};
+    unshift @{$set{$type}{'check'}}, @{$set{$parent}{'check'}};
+    delete $set{$type}{'parent'};
+}
+################################################################################
 sub add    {                                # name help cref parent? --> bool
     my ($type, $help, $check, $default, $parent, $shortcut) = @_;
     return 0 if is_known($type);            # do not overwrite types
@@ -123,27 +141,6 @@ sub guess        { # val          --> [name]
         push @found, $name unless check($name, $value);
     }
     @found;
-}
-################################################################################
-
-sub _resolve_dependencies {
-    my ($type) = @_;
-    die "can not resolve type $type" unless defined $type and exists $set{$type};
-    return unless exists $set{$type}{'parent'};
-    my $parent = $set{$type}{'parent'};
-    _resolve_dependencies($parent);
-    $set{$type}{default} = $set{$parent}{'default'} if not defined $set{$type}{'default'};
-    unshift @{$set{$type}{'check'}}, @{$set{$parent}{'check'}};
-    delete $set{$type}{'parent'};
-}
-
-for my $type (keys %set){
-    _resolve_dependencies($type);
-    if (exists $set{$type}{'default'}){
-        my $msg = check($type, $set{$type}{'default'});
-        die "default value of type $type : $set{$type}{default} misses requirement, $msg" if $msg;
-    }
-    $shortcut{ $set{$type}{'shortcut'} } = $type if exists $set{$type}{'shortcut'};
 }
 
 ################################################################################
