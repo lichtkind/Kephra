@@ -1,6 +1,6 @@
 use v5.20;
 use warnings;
-use Kephra::Base::Call;
+use Kephra::Base::Call qw/new_call/;
 use Kephra::Base::Data;
 use Kephra::Base::Package;
 
@@ -11,7 +11,7 @@ our @EXPORT_OK = qw/create_counter date_time/;
 our %EXPORT_TAGS = (all  => [@EXPORT_OK]);
 
 
-sub create_counter { Kephra::Base::Call->new('state $cc = 0; $cc++;') }
+sub create_counter { new_call('++$data;', 0) }
 
 sub date_time {
     my @time = (localtime);

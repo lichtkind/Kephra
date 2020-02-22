@@ -31,7 +31,7 @@ my %set = (bool  => {check => ['is 0 or 1',          '$_[0] eq 0 or $_[0] eq 1']
           'HASH' => {check => ['hash reference',     q/ref $_[0] eq 'HASH'/]},
           'ARGS' => {check => ['array or hash ref',  q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/]},
 );
-my %shortcut;
+my %shortcut = (':' => 0);
 ################################################################################
 
 sub add    {                                # name help cref parent? --> bool
