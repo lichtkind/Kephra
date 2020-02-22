@@ -7,14 +7,14 @@ use Kephra::Base::Package;
 use Kephra::Base::Class::Scope;
 use Kephra::Base::Class::Attribute::Type;
 
-sub create         {} # ~class ~attribute $class_types ~type --> $attr
-sub add_getter     {} # $attr ~path $self                    --> bool
-sub add_setter     {} # $attr ~path $self                    --> bool
-sub add_getsetter  {} # $attr ~path $self                    --> bool
-sub delete         {} # $attr                                --> value
+sub create         {} # ~class ~attribute .class_types ~type --> .attr
+sub add_getter     {} # .attr  ~path  .self                  --> ?
+sub add_setter     {} # .attr  ~path  .self                  --> ?
+sub add_getsetter  {} # .attr  ~path  .self                  --> ?
+sub delete         {} # .attr                                --> $value
 
-sub is_known       {} # $attr                  --> bool
-sub get            {} # $attr                  --> value
-sub set            {} # $attr value            --> value|0
+sub is_known       {} # .attr                  --> ?
+sub get            {} # .attr                  --> $value
+sub set            {} # .attr $value           --> $value|0
 
 1;

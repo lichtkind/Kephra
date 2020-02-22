@@ -3,8 +3,8 @@ use warnings;
 
 package  Kephra::Base::Call;
 
-sub new        {} # ~source : $data   --> .call|~evalerror
-                  # .call   : $data   --> .call
+sub new        {} # ~source - $data   --> .call|~evalerror
+                  # .call   - $data   --> .call
 sub clone      {} # .call             --> .call
 
 sub get_source {} #                   --> ~source

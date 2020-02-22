@@ -15,11 +15,11 @@ package Kephra::Base::Class::Scope;
 sub method_scopes      {}  #                       --> @~scope
 sub all_scopes         {}  #                       --> @~scope
 
-sub is_method_scope    {}  # ~scope                --> bool
-sub is_scope           {}  # ~scope                --> bool
-sub is_name            {}  # ~SCOPE                --> bool
+sub is_method_scope    {}  # ~scope                --> ?
+sub is_scope           {}  # ~scope                --> ?
+sub is_name            {}  # ~SCOPE                --> ?
 
-sub is_first_tighter   {}  # ~scopeA ~scopeB       --> bool
+sub is_first_tighter   {}  # ~scopeA ~scopeB       --> ?
 
 sub included_names     {}  # ~scope ~class - ~name ~method  --> @~full_name
 sub cat_scope_path     {}  # ~scope ~class - ~name ~method  --> ~full_name
