@@ -1,6 +1,7 @@
-use v5.16;
+use v5.20;
 use warnings;
 
+use Kephra::Base::Call;
 use Kephra::Base::Class;
 use Kephra::Base::Object;
 use Kephra::Base::Message::Net;

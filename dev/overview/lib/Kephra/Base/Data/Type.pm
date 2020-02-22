@@ -5,17 +5,20 @@ use warnings;
 
 package Kephra::Base::Data::Type;
 
-sub add            {} # ~type ~help &check - .default ~parent ~shortcut -->  bool
-sub delete         {} # ~type                                           -->  bool
-sub list_names     {} #                                                 -->  @~type
+sub add          {} # ~type ~help &check - .default ~parent ~shortcut --> ?
+sub delete       {} # ~type                                           --> ?
 
-sub is_known           {} # ~type                -->  bool
-sub is_standard        {} # ~type                -->  bool
-sub is_owned           {} # ~type ~package ~file -->  bool
+sub list_names       {} #                        --> @~type
+sub list_shortcuts   {} #                        --> @~shortcut
+sub resolve_shortcut {} #  ~shortcut             -->  ~type
+
+sub is_known           {} # ~type                -->  ?
+sub is_standard        {} # ~type                -->  ?
+sub is_owned           {} # ~type ~package ~file -->  ?
 
 sub get_default_value  {} # ~type                -->  .default|undef
 sub get_checks         {} # ~type                -->  @checks  = [[~help, &check]]
-sub get_callback       {} # ~type                -->  &callback
+sub get_callback       {} # ~type                -->  &callback|~evalerror
 
 sub check          {} # ~type .val               -->  ~error    = "reason .val"
 sub guess          {} # .val                     -->  @~type
