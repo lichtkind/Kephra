@@ -11,7 +11,7 @@ our @EXPORT_OK = qw/create_counter date_time/;
 our %EXPORT_TAGS = (all  => [@EXPORT_OK]);
 
 
-sub create_counter { new_call('++$data;', 0) }
+sub create_counter { new_call('++$state', 0) }
 
 sub date_time {
     my @time = (localtime);

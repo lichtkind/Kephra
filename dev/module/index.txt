@@ -20,7 +20,7 @@ our development model in more details: doc/CompleteProgramming.pod
    Kephra::Base::Data::Type                 C
    Kephra::Base::Data::Type::Relative           I
    Kephra::Base::Data                       C
-   Kephra::Base::Call                           I
+   Kephra::Base::Call                       C
  - Kephra::Base                             C
 --------------------------------------------------------------------------------
    Kephra::Base::Class::Scope               C

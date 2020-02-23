@@ -29,24 +29,24 @@ my $counter = Kephra::Base::Call->new('state $cc = 0; $cc++;');
 is ($counter->run(), 0,              'counter works');
 is ($counter->run(), 1,              'every time');
 
-$counter = Kephra::Base::Call->new('++$data;', 2);
-is ($counter->get_data(), 2,         'got init data back');
+$counter = Kephra::Base::Call->new('++$state;', 2);
+is ($counter->get_state(), 2,        'got init data back');
 is ($counter->run(), 3,              'data counter works');
 is ($counter->run(), 4,              'every time');
-is ($counter->get_data(), 4,         'got current data back');
-$counter->set_data(8);
-is ($counter->get_data(), 8,         'set data works');
+is ($counter->get_state(), 4,        'got current data back');
+$counter->set_state(8);
+is ($counter->get_state(), 8,        'set data works');
 is ($counter->run(), 9,              'call works now with set data');
 
 my $siblingcc = $counter->new(5); # create couter from 5 on
 is (ref $siblingcc, 'Kephra::Base::Call', 'recreated counter');
-is ($siblingcc->get_data(), 5,       'counter sibling got his init data');
+is ($siblingcc->get_state(), 5,      'counter sibling got his init data');
 is ($siblingcc->run(), 6,            'counter sibling works');
 $clone = $siblingcc->clone();
-is ($clone->get_data(), 6,           'counter clone took data from origin');
+is ($clone->get_state(), 6,          'counter clone took data from origin');
 is ($clone->run(), 7,                'counter clone works');
 
-$counter = new_call('++$data;', 3);
+$counter = new_call('++$state;', 3);
 is ($counter->run(), 4,              'also counter created by shortcut works');
 
 exit 0;
