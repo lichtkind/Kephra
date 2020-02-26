@@ -10,7 +10,7 @@ use Exporter 'import';
 our @EXPORT_OK = (qw/check_type guess_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-my %set = (index => {check => ['boolean',          sub{$_[0] eq 0 or $_[0] eq 1}],parent => 'value', default=>0},
+my %set = (index => {msg => 'in range', code =>'$_[0] < @{$_[1]}', arguments =>['array', 'ARRAY'], parent => 'int+' },
 );
 
 ################################################################################

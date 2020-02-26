@@ -9,27 +9,28 @@ use Exporter 'import';
 our @EXPORT_OK = (qw/check_type guess_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-my %set = (bool  => {check => ['is 0 or 1',          '$_[0] eq 0 or $_[0] eq 1'], parent => 'value', default => 0,  shortcut => '?'},
-           num   => {check => ['is number',          'looks_like_number($_[0])'], parent => 'value', default => 0,  shortcut => '+'},
-          'num+' => {check => ['is positive',        '$_[0]>=0'],                 parent => 'num', },
-           int   => {check => ['is integer',         'int $_[0] == $_[0]'],       parent => 'num', },
-          'int+' => {check => ['is positive',        '$_[0]>=0'],                 parent => 'int', },
-          'int++'=> {check => ['is strictly positive','$_[0] > 0'],               parent => 'int',   default => 1},
-          'str'  => {check => [],                                                 parent => 'value'},
-          'str+' => {check => ['none empty value',   '$_[0] or ~$_[0]'],          parent => 'str',   default =>' ', shortcut => '~'},
+my %set = (bool  => {check => ['0 or 1',              '$_[0] eq 0 or $_[0] eq 1'], parent => 'value', default => 0,  shortcut => '?'},
+           num   => {check => ['number',              'looks_like_number($_[0])'], parent => 'value', default => 0,  shortcut => '+'},
+          'num+' => {check => ['greater equal zero',  '$_[0]>=0'],                 parent => 'num', },
+           int   => {check => ['integer',             'int $_[0] == $_[0]'],       parent => 'num', },
+          'int+' => {check => ['positive',            '$_[0]>=0'],                 parent => 'int', },
+          'int++'=> {check => ['greater zero',        '$_[0] > 0'],                parent => 'int',   default => 1},
+          'str'  => {check => [],                                                  parent => 'value'},
+          'str+' => {check => ['none empty value',    '$_[0] or ~$_[0]'],          parent => 'str',   default =>' ', shortcut => '~'},
           'str+lc'=>{check => ['only lower case character', 'lc $_[0] eq $_[0]'],  parent => 'str+'},
           'str+uc'=>{check => ['only upper case character', 'uc $_[0] eq $_[0]'],   parent => 'str+'},
-          'str+wc'=>{check => ['only word case character',  'ucfirst $_[0] eq $_[0]'],parent => 'str+'},
-          'value' =>{check => ['not a reference',    'not ref $_[0]'],                               default => ''},
+          'str+wc'=>{check => ['only word case character', 'ucfirst $_[0] eq $_[0]'],parent => 'str+'},
+          'value' =>{check => ['not a reference',     'not ref $_[0]'],                               default => ''},
 
-          'any'  => {check => ['any data',            1]},
-          'obj'  => {check => ['is blessed object',  'blessed($_[0])']},
-          'ref'  => {check => ['reference',          'ref $_[0]']},
+          'any'  => {check => ['any data',             1]},
+          'def'  => {check => ['defined value',       'defined $_[0]']},
+          'obj'  => {check => ['is blessed object',   'blessed($_[0])']},
+          'ref'  => {check => ['reference',           'ref $_[0]']},
 
-          'CODE' => {check => ['code reference',     q/ref $_[0] eq 'CODE'/]},
-          'ARRAY'=> {check => ['array reference',    q/ref $_[0] eq 'ARRAY'/]},
-          'HASH' => {check => ['hash reference',     q/ref $_[0] eq 'HASH'/]},
-          'ARGS' => {check => ['array or hash ref',  q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/]},
+          'CODE' => {check => ['code reference',      q/ref $_[0] eq 'CODE'/],                                      shortcut => '&'},
+          'ARRAY'=> {check => ['array reference',     q/ref $_[0] eq 'ARRAY'/],                                     shortcut => '@'},
+          'HASH' => {check => ['hash reference',      q/ref $_[0] eq 'HASH'/],                                      shortcut => '%'},
+          'ARGS' => {check => ['array or hash ref',   q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/]},
 );
 my %shortcut = ('-' => 0);
 ################################################################################
@@ -142,6 +143,5 @@ sub guess        { # val          --> [name]
     }
     @found;
 }
-
 ################################################################################
 1;
