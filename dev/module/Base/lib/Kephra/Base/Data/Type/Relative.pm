@@ -7,16 +7,35 @@ use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type;
 use Kephra::Base::Package;
 use Exporter 'import';
-our @EXPORT_OK = (qw/check_type guess_type known_type/);
+our @EXPORT_OK = (qw/check_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 my %set = (index => {msg => 'in range', code =>'$_[0] < @{$_[1]}', arguments =>['array', 'ARRAY'], parent => 'int+' },
 );
+my %shortcut = ('-' => 0);
+################################################################################
+for my $type (keys %set){
+    _resolve_dependencies($type);
+    if (exists $set{$type}{default}){
+        my $msg = check($type, $set{$type}{default});
+        die "default value of type $type : $set{$type}{default} misses requirement: $msg" if $msg;
+    }
+}
 
+sub _resolve_dependencies {
+    my ($type) = @_;
+    die "can not resolve type $type" unless defined $type and exists $set{$type};
+    return unless exists $set{$type}{parent};
+    my $parent = $set{$type}{parent};
+    _resolve_dependencies($parent);
+    $set{$type}{default} = $set{$parent}{default} if not defined $set{$type}{default};
+    unshift @{$set{$type}{check}}, @{$set{$parent}{check}};
+    delete $set{$type}{parent};
+}
 ################################################################################
 
 sub add    {                                # name help cref parent? --> bool
-    my ($type, $help, $check, $default, $parent) = @_;
+    my ($type, $msg, $code, $arguments, $default, $parent, $shortcut) = @_;
     return 0 if is_known($type);            # do not overwrite types
     if (ref $help eq 'HASH'){               # name => {help =>'...', check => sub {},  parent => 'type'}
         return 0 unless exists $help->{'help'} and exists $help->{'check'};
@@ -84,37 +103,5 @@ sub check         { # name val  --> errormsg|''
     return "no type named $type known" unless ref $callback;
     $callback->($value);
 }
-
-sub guess_type   {&guess}
-sub guess        { # val          --> [name]
-    my ($value) = @_;
-    return '' unless defined $value;
-    my @found = ();
-    for my $name(list_names()){
-        push @found, $name unless check($name, $value);
-    }
-    @found;
-}
-################################################################################
-
-sub _resolve_dependencies {
-    my ($type) = @_;
-    die "can not resolve type $type" unless defined $type and exists $set{$type};
-    return unless exists $set{$type}{parent};
-    my $parent = $set{$type}{parent};
-    _resolve_dependencies($parent);
-    $set{$type}{default} = $set{$parent}{default} if not defined $set{$type}{default};
-    unshift @{$set{$type}{check}}, @{$set{$parent}{check}};
-    delete $set{$type}{parent};
-}
-
-for my $type (keys %set){
-    _resolve_dependencies($type);
-    if (exists $set{$type}{default}){
-        my $msg = check($type, $set{$type}{default});
-        die "default value of type $type : $set{$type}{default} misses requirement: $msg" if $msg;
-    }
-}
-
 ################################################################################
 1;

@@ -5,7 +5,10 @@ use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 use Kephra::Base::Data::Type::Relative qw/:all/;
-use Test::More tests => 115;
+use Test::More tests => 119;
+
+is( Kephra::Base::Data::Type::is_known('value'), 1, 'some default type is know');
+is( known_type('value'),                1, 'sub known_type got imported');
 
 is( check_type('value',1),             '', 'recognize 1 as value');
 is( check_type('value',0),             '', 'recognize 0 as value');

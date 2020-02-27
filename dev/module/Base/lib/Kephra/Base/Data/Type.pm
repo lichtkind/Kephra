@@ -96,6 +96,7 @@ sub resolve_shortcut {                              # ~shortcut  -->  ~type
     $shortcut{$_[0]} if defined $shortcut{$_[0]}
 }
 ################################################################################
+sub known_type  { &is_known }
 sub is_known    { exists $set{$_[0]} ? 1 : 0 } # name       -->  bool
 sub is_standard {(exists $set{$_[0]} and not exists $set{$_[0]}{'file'}) ? 1 : 0 }
 sub is_owned {

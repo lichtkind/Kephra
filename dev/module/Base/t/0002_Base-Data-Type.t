@@ -5,9 +5,15 @@ use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 use Kephra::Base::Data::Type qw/:all/;
-use Test::More tests => 127;
+use Test::More tests => 132;
 
-is( check_type('value',1),             '', 'recognize 1 as value');
+is( Kephra::Base::Data::Type::is_known('value'), 1, 'some default type is know');
+is( known_type('value'),                         1, 'sub known_type got imported');
+is( 'num' ~~ [Kephra::Base::Data::Type::guess(2.3)], 1, 'guessed type num right');
+is( 'num' ~~ [guess_type(2.3)],                 1, 'sub guess_type got imported');
+
+is( Kephra::Base::Data::Type::check('value',1),'', 'recognize 1 as value');
+is( check_type('value',1),             '', 'sub check_type got imported');
 is( check_type('value',0),             '', 'recognize 0 as value');
 is( check_type('value',''),            '', 'recognize empty string as value');
 is( check_type('value','d'),           '', 'recognize letter value');
