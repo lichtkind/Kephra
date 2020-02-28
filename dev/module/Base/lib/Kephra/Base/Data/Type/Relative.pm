@@ -11,6 +11,7 @@ our @EXPORT_OK = (qw/check_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 my %set = (index => {msg => 'in range', code =>'$_[0] < @{$_[1]}', arguments =>['array', 'ARRAY'], parent => 'int+' },
+     typed_array => { code => '', arguments =>['type', 'TYPE'] },
 );
 my %shortcut = ('-' => 0);
 ################################################################################

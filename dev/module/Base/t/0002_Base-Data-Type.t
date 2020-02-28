@@ -89,7 +89,7 @@ ok( 'int++' ~~ \@type,  '5 is a strictly positive integer');
 ok( 'num' ~~ \@type,    '5 is a number');
 ok( 'num+' ~~ \@type,   '5 is a positive number');
 ok( 'str+' ~~ \@type,   '5 is none empty string');
-ok( 'any' ~~ \@type,    '5 is a value');
+ok( 'ANY' ~~ \@type,    '5 is a value');
 
 @type = guess_type(0);
 ok( 'bool' ~~ \@type,   '0 is a boolean');
@@ -98,20 +98,20 @@ ok( 'int+' ~~ \@type,   '0 is a positive integer');
 ok( 'num' ~~ \@type,    '0 is a number');
 ok( 'num+' ~~ \@type,   '0 is a positive number');
 ok( 'str+' ~~ \@type,   '0 is none empty string');
-ok( 'any' ~~ \@type,    '0 is a value');
+ok( 'ANY' ~~ \@type,    '0 is a value');
 
 @type = guess_type('');
 ok( !('bool' ~~ \@type), 'empty string is not a boolean');
 ok( !('int' ~~ \@type),  'empty string is not an integer');
 ok( !('num' ~~ \@type),  'empty string is not a number');
 ok( !('str+' ~~ \@type), 'not empty string');
-ok( 'any' ~~ \@type,     'empty string is a value');
+ok( 'ANY' ~~ \@type,     'empty string is a value');
 
 @type = Kephra::Base::Data::Type::list_names();
 ok( ('bool' ~~ \@type),  'bool type is known, list works');
 ok( ('num' ~~ \@type),   'num type is known, list works');
 ok( ('int' ~~ \@type),   'int type is known, list works');
-ok( ('any' ~~ \@type),   'any type is known, list works');
+ok( ('ANY' ~~ \@type),   'any type is known, list works');
 
 
 package Typer;
