@@ -9,7 +9,7 @@ our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 ################################################################################
 sub new_call   {new(__PACKAGE__, @_)}
 sub new {
-    my ($pkg, $source, $state) = @_;
+    my ($pkg, $source, $state, $type) = @_;
     if (ref $pkg eq __PACKAGE__){
         $state = $source;
         $source = $pkg->get_source();

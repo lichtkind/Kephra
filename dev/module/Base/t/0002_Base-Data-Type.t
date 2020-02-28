@@ -34,10 +34,10 @@ ok( check_type('num','das'),               'string is not a number');
 ok( check_type('num', sub{}),              'coderef is not a number');
 is( Kephra::Base::Data::Type::get_default_value('num'), 0, 'got default number');
 
-is( check_type('num+',1.5),            '', 'recognize positive number');
-is( check_type('num+',0),              '', 'zero is positive number');
-ok( check_type('num+',-1.5),               'a negative is not a positive number');
-ok( check_type('num+','das'),              'string is not a positive number');
+is( check_type('num_pos',1.5),         '', 'recognize positive number');
+is( check_type('num_pos',0),           '', 'zero is positive number');
+ok( check_type('num_pos',-1.5),            'a negative is not a positive number');
+ok( check_type('num_pos','das'),           'string is not a positive number');
 
 is( check_type('int',  5),             '', 'recognize integer');
 is( check_type('int',-12),             '', 'recognize negative integer');
@@ -46,72 +46,72 @@ ok( check_type('int',1.5),                 'real is not an integer');
 ok( check_type('int','das'),               'string is not an integer');
 ok( check_type('int',{}),                  'hash ref is not an integer');
 
-is( check_type('int+',1),              '', 'recognize positive int');
-is( check_type('int+',0),              '', 'zero is positive int');
-ok( check_type('int+',-1),                 'a negative is not a positive int');
-ok( check_type('int+','das'),              'string is not a positive int');
+is( check_type('int_pos',1),           '', 'recognize positive int');
+is( check_type('int_pos',0),           '', 'zero is positive int');
+ok( check_type('int_pos',-1),              'a negative is not a positive int');
+ok( check_type('int_pos','das'),           'string is not a positive int');
 
-is( check_type('int++',1),             '', 'one is a stricly positive number');
-ok( check_type('int++',0),                 'zero is not a stricly positive number');
+is( check_type('int_spos',1),          '', 'one is a stricly positive number');
+ok( check_type('int_spos',0),              'zero is not a stricly positive number');
 
 is( check_type('str', 'das'),          '', 'recognize string');
 is( check_type('str', 5),              '', 'numbers can be strings');
 ok( check_type('str', {}),                 'ref ist not a string');
 
 
-is( check_type('str+','das'),          '', 'recognize none empty string');
-ok( check_type('str+', ''),                'this is not a none empty string');
+is( check_type('str_ne','das'),        '', 'recognize none empty string');
+ok( check_type('str_ne', ''),                'this is not a none empty string');
 
-is( check_type('str+uc', 'DAS'),       '', 'recognize upper case string');
-ok( check_type('str+uc', 'DaS'),           'this is not an upper case string');
-is( Kephra::Base::Data::Type::get_default_value('str+uc'), ' ', 'this type has no default');
+is( check_type('str_uc', 'DAS'),       '', 'recognize upper case string');
+ok( check_type('str_uc', 'DaS'),           'this is not an upper case string');
+is( Kephra::Base::Data::Type::get_default_value('str_uc'), ' ', 'this type has no default');
 
-is( check_type('str+lc', 'das'),       '', 'recognize lower case string');
-ok( check_type('str+lc', 'DaS'),           'this is not an lower case string');
+is( check_type('str_lc', 'das'),       '', 'recognize lower case string');
+ok( check_type('str_lc', 'DaS'),           'this is not an lower case string');
 
 
 is( check_type('num',  1.5),           '', 'recognize number');
-is( check_type('num+', 1.5),           '', 'recognize positive number');
-is( check_type('int',    5),           '', 'recognize integer');
-is( check_type('int+',   5),           '', 'recognize positive integer');
+is( check_type('num_pos', 1.5),        '', 'recognize positive number');
+is( check_type('int',     5),          '', 'recognize integer');
+is( check_type('int_pos', 5),          '', 'recognize positive integer');
 
-is( Kephra::Base::Data::Type::resolve_shortcut('~'), 'str+', 'resolved string shortcut');
+is( Kephra::Base::Data::Type::resolve_shortcut('~'), 'str_ne', 'resolved string shortcut');
 is( Kephra::Base::Data::Type::resolve_shortcut('?'), 'bool', 'resolved boolean shortcut');
 ok( ('~' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'string shortcut gets listed');
 ok( ('?' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'boolean shortcut gets listed');
 
 
 my @type = guess_type(5);
-ok( !('bool' ~~ \@type),'5 is not an boolean');
-ok( 'int' ~~ \@type,    '5 is an integer');
-ok( 'int+' ~~ \@type,   '5 is a positive integer');
-ok( 'int++' ~~ \@type,  '5 is a strictly positive integer');
-ok( 'num' ~~ \@type,    '5 is a number');
-ok( 'num+' ~~ \@type,   '5 is a positive number');
-ok( 'str+' ~~ \@type,   '5 is none empty string');
-ok( 'ANY' ~~ \@type,    '5 is a value');
+ok( !('bool' ~~ \@type), '5 is not an boolean');
+ok( 'int' ~~ \@type,     '5 is an integer');
+ok( 'int_pos' ~~ \@type, '5 is a positive integer');
+ok( 'int_spos' ~~ \@type,'5 is a strictly positive integer');
+ok( 'num' ~~ \@type,     '5 is a number');
+ok( 'num_pos' ~~ \@type, '5 is a positive number');
+ok( 'str_ne' ~~ \@type,  '5 is none empty string');
+ok( 'ANY' ~~ \@type,     '5 is a value');
 
 @type = guess_type(0);
-ok( 'bool' ~~ \@type,   '0 is a boolean');
-ok( 'int' ~~ \@type,    '0 is an integer');
-ok( 'int+' ~~ \@type,   '0 is a positive integer');
-ok( 'num' ~~ \@type,    '0 is a number');
-ok( 'num+' ~~ \@type,   '0 is a positive number');
-ok( 'str+' ~~ \@type,   '0 is none empty string');
-ok( 'ANY' ~~ \@type,    '0 is a value');
+ok( 'bool' ~~ \@type,    '0 is a boolean');
+ok( 'int' ~~ \@type,     '0 is an integer');
+ok( 'int_pos' ~~ \@type, '0 is a positive integer');
+ok( 'num' ~~ \@type,     '0 is a number');
+ok( 'num_pos' ~~ \@type, '0 is a positive number');
+ok( 'str_ne' ~~ \@type,  '0 is none empty string');
+ok( 'ANY' ~~ \@type,     '0 is a value');
 
 @type = guess_type('');
-ok( !('bool' ~~ \@type), 'empty string is not a boolean');
-ok( !('int' ~~ \@type),  'empty string is not an integer');
-ok( !('num' ~~ \@type),  'empty string is not a number');
-ok( !('str+' ~~ \@type), 'not empty string');
-ok( 'ANY' ~~ \@type,     'empty string is a value');
+ok( !('bool' ~~ \@type),  'empty string is not a boolean');
+ok( !('int' ~~ \@type),   'empty string is not an integer');
+ok( !('num' ~~ \@type),   'empty string is not a number');
+ok( !('str_ne' ~~ \@type),'not empty string');
+ok( 'ANY' ~~ \@type,      'empty string is a value');
 
 @type = Kephra::Base::Data::Type::list_names();
-ok( ('bool' ~~ \@type),  'bool type is known, list works');
-ok( ('num' ~~ \@type),   'num type is known, list works');
-ok( ('int' ~~ \@type),   'int type is known, list works');
-ok( ('ANY' ~~ \@type),   'any type is known, list works');
+ok( ('bool' ~~ \@type),   'bool type is known, list works');
+ok( ('num' ~~ \@type),    'num type is known, list works');
+ok( ('int' ~~ \@type),    'int type is known, list works');
+ok( ('ANY' ~~ \@type),    'any type is known, list works');
 
 
 package Typer;

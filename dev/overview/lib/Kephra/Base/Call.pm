@@ -3,13 +3,13 @@ use warnings;
 
 package  Kephra::Base::Call;
 
-sub new        {} # ~source - $data   --> .call|~evalerror
-                  # .call   - $data   --> .call
-sub clone      {} # .call             --> .call
+sub new        {} # ~source - $state  --> .call|~evalerror   # call with own source and state
+                  # .call   - $state  --> .call              # another call with same source
+sub clone      {} # .call             --> .call              # another call in same source and same state
 
-sub get_source {} #                   --> ~source
-sub get_data   {} #                   --> $data
-sub set_data   {} # $data             --> $data 
+sub get_source {} # .call             --> ~source
+sub get_state  {} # .call             --> $state
+sub set_state  {} # .call $data       --> $state
 
 sub run        {} #         : @arg    --> $retval
 

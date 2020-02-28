@@ -76,13 +76,3 @@ sub check          { # name val                   --> help|''
 }
 
 1;
-__END__
-my %set = (list_index  => {check => ['index of list',          sub{$_[0] < @{$_[1]->get()} }], parent => 'int+'},);
-sub check_defaults {
-    my ($self, $access_scope_self) = @_;
-    for my $type (keys %{$self->{'type'}}){
-         my $msg = $self->check($type, $self->{'type'}{$type}{default}, $access_scope_self);
-         return $msg if $msg;
-    }
-    '';
-}

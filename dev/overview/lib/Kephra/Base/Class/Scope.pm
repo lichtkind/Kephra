@@ -1,4 +1,4 @@
-use v5.18;
+use v5.20;
 use warnings;
 
 # method namespace name constants and their priority logic

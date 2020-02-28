@@ -1,6 +1,9 @@
 use v5.20;
 use warnings;
 
+# self made data types, standards + added by any package (owner)
+# example = bool  => {check => ['boolean', '$_[0] eq 0 or $_[0] eq 1'],  parent => 'value', default=>0},
+
 package Kephra::Base::Data::Type;
 our $VERSION = 0.07;
 use Scalar::Util qw/blessed looks_like_number/;
@@ -9,37 +12,41 @@ use Exporter 'import';
 our @EXPORT_OK = (qw/check_type guess_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-my %set = (bool  => {check => ['0 or 1',              '$_[0] eq 0 or $_[0] eq 1'],  parent => 'value', default => 0,  shortcut => '?'},
-           num   => {check => ['number',              'looks_like_number($_[0])'],  parent => 'value', default => 0,  shortcut => '+'},
-          'num+' => {check => ['greater equal zero',  '$_[0]>=0'],                  parent => 'num', },
-           int   => {check => ['integer',             'int $_[0] == $_[0]'],        parent => 'num', },
-          'int+' => {check => ['positive',            '$_[0]>=0'],                  parent => 'int', },
-          'int++'=> {check => ['greater zero',        '$_[0] > 0'],                 parent => 'int',   default => 1},
-          'str'  => {check => [],                                                   parent => 'value'},
-          'str+' => {check => ['none empty value',    '$_[0] or ~$_[0]'],           parent => 'str',   default =>' ', shortcut => '~'},
-          'str+lc'=>{check => ['only lower case character', 'lc $_[0] eq $_[0]'],   parent => 'str+'},
-          'str+uc'=>{check => ['only upper case character', 'uc $_[0] eq $_[0]'],   parent => 'str+'},
-          'str+wc'=>{check => ['only word case character','ucfirst $_[0] eq $_[0]'],parent => 'str+'},
-          'value' =>{check => ['not a reference',     'not ref $_[0]'],                                default => ''},
+my %set = ('value' =>{check => ['not a reference',     'not ref $_[0]'],                                default => ''},
+            bool   =>{check => ['0 or 1',              '$_[0] eq 0 or $_[0] eq 1'],  parent => 'value', default => 0,  shortcut => '?'},
+            num    =>{check => ['number',              'looks_like_number($_[0])'],  parent => 'value', default => 0,  shortcut => '+'},
+           'num_pos'=>{check => ['greater equal zero', '$_[0]>=0'],                  parent => 'num', },
+            int    =>{check => ['integer',             'int $_[0] == $_[0]'],        parent => 'num', },
+           'int_pos'=>{check => ['positive',           '$_[0]>=0'],                  parent => 'int', },
+           'int_spos'=>{check => ['greater zero',      '$_[0] > 0'],                 parent => 'int',   default => 1},
+           'str'   =>{check => [],                                                   parent => 'value'},
+           'str_ne'=>{check => ['none empty value',   '$_[0] or ~$_[0]'],            parent => 'str',   default =>' ', shortcut => '~'},
+           'str_lc'=>{check => ['only lower case character', 'lc $_[0] eq $_[0]'],   parent => 'str_ne'},
+           'str_uc'=>{check => ['only upper case character', 'uc $_[0] eq $_[0]'],   parent => 'str_ne'},
+           'str_wc'=>{check => ['only word case character','ucfirst $_[0] eq $_[0]'],parent => 'str_ne'},
+           'name'  =>{check => ['only word character', '$_[0] =~ /^\w+$/'],          parent => 'value', default => 'name'},
 
-          'TYPE'  =>{check => ['type name',           'is_known $_[0]'],            parent => 'value', default => 'str'              },
-          'CODE' => {check => ['code reference',      q/ref $_[0] eq 'CODE'/],                                        shortcut => '&'},
-          'ARRAY'=> {check => ['array reference',     q/ref $_[0] eq 'ARRAY'/],                                       shortcut => '@'},
-          'HASH' => {check => ['hash reference',      q/ref $_[0] eq 'HASH'/],                                        shortcut => '%'},
-          'ARGS' => {check => ['array or hash ref',   q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/]},
-          'REF'  => {check => ['reference',           'ref $_[0]']},
-          'OBJ'  => {check => ['is blessed object',   'blessed($_[0])']},
-          'DEF'  => {check => ['defined value',       'defined $_[0]']},
-          'ANY'  => {check => ['any data',             1]},
+          'TYPE'  => {check => ['type name',           'is_known $_[0]'],            parent => 'name',  default => 'str_ne'           },
+          'CODE'  => {check => ['code reference',      q/ref $_[0] eq 'CODE'/],                                        shortcut => '&'},
+          'ARRAY' => {check => ['array reference',     q/ref $_[0] eq 'ARRAY'/],                                       shortcut => '@'},
+          'HASH'  => {check => ['hash reference',      q/ref $_[0] eq 'HASH'/],                                        shortcut => '%'},
+          'ARGS'  => {check => ['array or hash ref',   q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/]},
+          'REF'   => {check => ['reference',           'ref $_[0]']},
+          'OBJ'   => {check => ['is blessed object',   'blessed($_[0])']},
+          'DEF'   => {check => ['defined value',       'defined $_[0]']},
+          'ANY'   => {check => ['any data',             1]},
 );
 my %shortcut = ('-' => 0);
 ################################################################################
 for my $type (keys %set){
+    die "type name $type contains none word character" unless $type =~ /^\w+$/;
     _resolve_dependencies($type);
     if (exists $set{$type}{'default'}){
         my $msg = check($type, $set{$type}{'default'});
         die "default value of type $type : $set{$type}{default} misses requirement, $msg" if $msg;
     }
+    die 'type shortcut '.$shortcut{ $set{$type}{'shortcut'} }.' is used twice'
+        if exists $set{$type}{'shortcut'} and exists $shortcut{ $set{$type}{'shortcut'} };
     $shortcut{ $set{$type}{'shortcut'} } = $type if exists $set{$type}{'shortcut'};
 }
 sub _resolve_dependencies {
@@ -56,6 +63,7 @@ sub _resolve_dependencies {
 sub add    {                                # name help cref parent? --> bool
     my ($type, $help, $check, $default, $parent, $shortcut) = @_;
     return 0 if is_known($type);            # do not overwrite types
+    return 0 unless $type =~ /^\w+$/;       # type has to from type name
     if (ref $help eq 'HASH'){               # name => {help =>'...', check => sub {},  parent => 'type'}
         return 0 unless exists $help->{'help'};
         $shortcut = $help->{'shortcut'} if exists $help->{'shortcut'};

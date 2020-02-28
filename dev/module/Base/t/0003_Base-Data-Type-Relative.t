@@ -4,8 +4,8 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Kephra::Base::Data::Type qw/:all/;
-use Test::More tests => 132;
+use Kephra::Base::Data::Type::Relative qw/:all/;
+use Test::More tests => 1;
 
 is( Kephra::Base::Data::Type::is_known('value'), 1, 'some default type is know');
 is( known_type('value'),                         1, 'sub known_type got imported');

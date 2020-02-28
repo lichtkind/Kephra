@@ -10,11 +10,24 @@ use Exporter 'import';
 our @EXPORT_OK = (qw/check_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-my %set = (index => {msg => 'in range', code =>'$_[0] < @{$_[1]}', arguments =>['array', 'ARRAY'], parent => 'int+' },
-     typed_array => { code => '', arguments =>['type', 'TYPE'] },
+my %set = (index => {msg => 'in range', code =>'$_[0] < @{$_[1]}', arguments =>[{msg => 'array', type => 'ARRAY', default=>[]},], parent => 'int+' },
+     typed_array => {code => 'for my $vi (0..$#{$_[0]}){my $ret = $check->($_[0]); return "array element $vi $ret" if $ret}', parent => 'ARRAY',
+                     arguments =>[{msg => 'type name', type =>'TYPE', var => 'check', eval => 'Kephra::Base::Data::Type::get_callback($_[1])', default => 'str'} ,],}
 );
 my %shortcut = ('-' => 0);
 ################################################################################
+for my $type (keys %set){
+    if (exists $set{$type}{'default'}){
+        my $msg = check($type, $set{$type}{'default'});
+        die "default value of type $type : $set{$type}{default} misses requirement, $msg" if $msg;
+    }
+    $shortcut{ $set{$type}{'shortcut'} } = $type if exists $set{$type}{'shortcut'};
+}
+
+1;
+
+__END__
+
 for my $type (keys %set){
     _resolve_dependencies($type);
     if (exists $set{$type}{default}){
@@ -104,5 +117,3 @@ sub check         { # name val  --> errormsg|''
     return "no type named $type known" unless ref $callback;
     $callback->($value);
 }
-################################################################################
-1;
