@@ -15,8 +15,9 @@ sub list_names       {} #                        --> @~type
 sub list_shortcuts   {} #                        --> @~shortcut
 sub resolve_shortcut {} #  ~shortcut             -->  ~type
 
-sub is_known           {} # ~type                -->  ?
-sub is_standard        {} # ~type                -->  ?
+sub is_known           {} # ~type                -->  ?      # is a data type
+sub is_relative        {} # ~type                -->  ?      # is a relativ type
+sub is_standard        {} # ~type                -->  ?      # is predefined ?
 sub is_owned           {} # ~type ~package ~file -->  ?
 
 sub get_message        {} # ~type                -->  ~msg|undef

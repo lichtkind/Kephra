@@ -36,7 +36,7 @@ my %set = ('value' =>{check => ['not a reference',     'not ref $_[0]'],        
           'DEF'   => {check => ['defined value',       'defined $_[0]']},
           'ANY'   => {check => ['any data',             1]},
 );
-my %shortcut = ('-' => 0);
+my %shortcut = ( '-' => 0, '>' => 0, '<' => 0, ',' => 0,);
 ################################################################################
 for my $type (keys %set){
     die "type name $type contains none word character" unless $type =~ /^\w+$/;

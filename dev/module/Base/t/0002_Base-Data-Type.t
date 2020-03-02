@@ -5,7 +5,7 @@ use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 use Kephra::Base::Data::Type qw/:all/;
-use Test::More tests => 132;
+use Test::More tests => 133;
 
 is( Kephra::Base::Data::Type::is_known('value'), 1, 'some default type is know');
 is( known_type('value'),                         1, 'sub known_type got imported');
@@ -82,23 +82,23 @@ ok( ('?' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'boolean shortcut get
 
 
 my @type = guess_type(5);
-ok( !('bool' ~~ \@type), '5 is not an boolean');
-ok( 'int' ~~ \@type,     '5 is an integer');
-ok( 'int_pos' ~~ \@type, '5 is a positive integer');
-ok( 'int_spos' ~~ \@type,'5 is a strictly positive integer');
-ok( 'num' ~~ \@type,     '5 is a number');
-ok( 'num_pos' ~~ \@type, '5 is a positive number');
-ok( 'str_ne' ~~ \@type,  '5 is none empty string');
-ok( 'ANY' ~~ \@type,     '5 is a value');
+ok( !('bool' ~~ \@type),  '5 is not an boolean');
+ok( 'int' ~~ \@type,      '5 is an integer');
+ok( 'int_pos' ~~ \@type,  '5 is a positive integer');
+ok( 'int_spos' ~~ \@type, '5 is a strictly positive integer');
+ok( 'num' ~~ \@type,      '5 is a number');
+ok( 'num_pos' ~~ \@type,  '5 is a positive number');
+ok( 'str_ne' ~~ \@type,   '5 is none empty string');
+ok( 'ANY' ~~ \@type,      '5 is a value');
 
 @type = guess_type(0);
-ok( 'bool' ~~ \@type,    '0 is a boolean');
-ok( 'int' ~~ \@type,     '0 is an integer');
-ok( 'int_pos' ~~ \@type, '0 is a positive integer');
-ok( 'num' ~~ \@type,     '0 is a number');
-ok( 'num_pos' ~~ \@type, '0 is a positive number');
-ok( 'str_ne' ~~ \@type,  '0 is none empty string');
-ok( 'ANY' ~~ \@type,     '0 is a value');
+ok( 'bool' ~~ \@type,     '0 is a boolean');
+ok( 'int' ~~ \@type,      '0 is an integer');
+ok( 'int_pos' ~~ \@type,  '0 is a positive integer');
+ok( 'num' ~~ \@type,      '0 is a number');
+ok( 'num_pos' ~~ \@type,  '0 is a positive number');
+ok( 'str_ne' ~~ \@type,   '0 is none empty string');
+ok( 'ANY' ~~ \@type,      '0 is a value');
 
 @type = guess_type('');
 ok( !('bool' ~~ \@type),  'empty string is not a boolean');
@@ -108,10 +108,10 @@ ok( !('str_ne' ~~ \@type),'not empty string');
 ok( 'ANY' ~~ \@type,      'empty string is a value');
 
 @type = Kephra::Base::Data::Type::list_names();
-ok( ('bool' ~~ \@type),   'bool type is known, list works');
-ok( ('num' ~~ \@type),    'num type is known, list works');
-ok( ('int' ~~ \@type),    'int type is known, list works');
-ok( ('ANY' ~~ \@type),    'any type is known, list works');
+ok( ('bool' ~~ \@type),  'bool type is known, list works');
+ok( ('num' ~~ \@type),   'num type is known, list works');
+ok( ('int' ~~ \@type),   'int type is known, list works');
+ok( ('ANY' ~~ \@type),   'any type is known, list works');
 
 
 package Typer;
@@ -145,16 +145,17 @@ is( add($type_name, 'just for this test','-5 < $_[0] and $_[0] < 5', 12, 'int'),
 
 is( add($type_name => {default => 2, help => 'just for this test',
                        check => '-5 < $_[0] and $_[0] < 5', parent => 'int',
-                       shortcut => ':'}),             1, 'HASHref syntax for add type');
-ok( ($type_name ~~ [Kephra::Base::Data::Type::list_names()]), 'again created type gets listed');
-ok( ('-' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'again created type shortcut gets listed');
-is( Kephra::Base::Data::Type::resolve_shortcut(':'), $type_name, 'shortcut of type can be resolved');
-is( Kephra::Base::Data::Type::is_known($type_name),   1, 'HASHref test type is present now');
-is( Kephra::Base::Data::Type::is_owned($type_name),   1, 'HASHref test type is recognized as own my current package');
+                       shortcut => ':'}),                      1, 'HASHref syntax for add type');
+is( add($type_name, 'infive','-5 < $_[0] and $_[0] < 5',2,'int'), 0, 'can not have two types with same name');
+ok( ($type_name ~~ [Kephra::Base::Data::Type::list_names()]),   'again created type gets listed');
+ok( ('-' ~~ [Kephra::Base::Data::Type::list_shortcuts()]),      'again created type shortcut gets listed');
+is( Kephra::Base::Data::Type::resolve_shortcut(':'), $type_name,'shortcut of type can be resolved');
+is( Kephra::Base::Data::Type::is_known($type_name),          1, 'HASHref test type is present now');
+is( Kephra::Base::Data::Type::is_owned($type_name),          1, 'HASHref test type is recognized as own my current package');
 is( Kephra::Base::Data::Type::get_default_value($type_name), 2, 'HASHref type got default value of self made type');
-is( Kephra::Base::Data::Type::check($type_name,   1),'', 'HASHref test type accepts correctly');
-ok( Kephra::Base::Data::Type::check($type_name, -10),    'HASHref test type rejects correctly');
-is( Kephra::Base::Data::Type::delete($type_name),     1, 'deleted HASHref custom type');
+is( Kephra::Base::Data::Type::check($type_name,   1),       '', 'HASHref test type accepts correctly');
+ok( Kephra::Base::Data::Type::check($type_name, -10),           'HASHref test type rejects correctly');
+is( Kephra::Base::Data::Type::delete($type_name),           1, 'deleted HASHref custom type');
 
 
 my $child = 'three';
