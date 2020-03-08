@@ -1,8 +1,8 @@
 use v5.20;
 use warnings;
-use Kephra::Base::Call qw/new_call/;
-use Kephra::Base::Data;
 use Kephra::Base::Package;
+use Kephra::Base::Data;
+use Kephra::Base::Call qw/new_call/;
 
 package Kephra::Base;
 our $VERSION = 0.01;
