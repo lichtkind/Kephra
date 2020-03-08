@@ -30,7 +30,7 @@ sub get_source { $_[0]->{'source'} }
 sub get_gettype{ $_[0]->{'get_type'} }
 sub get_settype{ $_[0]->{'set_type'} }
 sub get_state  { ${$_[0]->{'state'}} unless $_[0]->{'get_type'} and Kephra::Base::Data::Type::check( $_[0]->{'get_type'}, ${$_[0]->{'state'}}) }
-sub set_state  { ${$_[0]->{'state'}} = $_[1] unless $_[0]->{'get_type'} and Kephra::Base::Data::Type::check( $_[0]->{'get_type'}, ${$_[0]->{'state'}}) }
+sub set_state  { ${$_[0]->{'state'}} = $_[1] unless $_[0]->{'set_type'} and Kephra::Base::Data::Type::check( $_[0]->{'set_type'}, $_[1]); ${$_[0]->{'state'}} }
 ################################################################################
 sub run {
     my ($self) = shift;

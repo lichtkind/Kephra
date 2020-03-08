@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use v5.20;
 use warnings;
-use Test::More tests => 42;
+use Test::More tests => 48;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 use Kephra::Base::Call qw/new_call/;
@@ -63,14 +63,19 @@ is ($counter->get_state(), 6,           'typed call stored its init value');
 is ($counter->run(), 7,                 'typed call runs its code');
 is ($counter->set_state(9), 9,          'set state of typed call');
 is ($counter->get_state(), 9,           'state of typed call was stored');
+is ($counter->set_state(9.1), 9,        'reject malformed data while set state of typed call');
+is ($counter->get_state(), 9,           'old state of typed call still there');
 
-$counter = new_call('++$state;',  -1, 'int', 'int_pos');
+$counter = new_call('++$state;',  -4, 'int', 'int_pos');
 is (ref $counter, 'Kephra::Base::Call', 'created call with get and set type');
-ok ($counter->get_state() ne '-1',      'can not get init value due get type');
+ok ($counter->get_state() ne '-4',      'can not get init value due get type');
+is ($counter->set_state(-1), -1,        'set state of double typed call to calue I can set but not get');
+ok ($counter->get_state() ne '-1',      'could not get the value');
 is ($counter->run(), 0,                 'double typed call runs its code');
 is ($counter->get_state(), 0,           'state of double typed call was stored');
 is ($counter->set_state(9), 9,          'set state of double typed call');
-
+is ($counter->set_state(9.1), 9,        'reject malformed data while set state of typed call');
+is ($counter->get_state(), 9,           'old state of typed call still there');
 
 exit 0;
 
