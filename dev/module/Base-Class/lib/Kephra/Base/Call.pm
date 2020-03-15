@@ -2,7 +2,7 @@ use v5.20;
 use warnings;
 
 package Kephra::Base::Call;
-our $VERSION = 0.01;
+our $VERSION = 0.2;
 use Exporter 'import';
 our @EXPORT_OK = (qw/new_call/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);

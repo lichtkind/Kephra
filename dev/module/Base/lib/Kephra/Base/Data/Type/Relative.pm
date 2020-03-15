@@ -10,11 +10,11 @@ use Exporter 'import';
 our @EXPORT_OK = (qw/check_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-my %set = (index => {message => 'in range', code =>'$_[0] < @{$_[1]}', arguments =>[{msg => 'array', type => 'ARRAY', default=>[]},], parent => 'int_pos' },
+my %set = (index => {code =>'return out of range if $_[0] >= @{$_[1]}', arg =>[{label => 'array', type => 'ARRAY', default=>[]},], parent => 'int_pos' },
      typed_array => {code => 'for my $vi (0..$#{$_[0]}){my $ret = $check->($_[0][$vi]); return "array element $vi : $ret" if $ret}', parent => 'ARRAY', shortcut => '@',
-                     arguments =>[{msg => 'type name', type =>'TYPE', var => 'check', eval => 'Kephra::Base::Data::Type::get_callback($_[1])', default => 'str'} ,],},
+                     arg  =>[{label => 'type name', type =>'TYPE', var => 'check', eval => 'Kephra::Base::Data::Type::get_callback($_[1])', default => 'str'} ,],},
      typed_hash  => {code => 'for my $vk (keys %{$_[0]}){my $ret = $check->($_[0]{$vk}); return "hash value of key $vk : $ret" if $ret}', parent => 'HASH', shortcut => '%',
-                     arguments =>[{msg => 'type name', type =>'TYPE', var => 'check', eval => 'Kephra::Base::Data::Type::get_callback($_[1])', default => 'str'} ,],},
+                     arg  =>[{label => 'type name', type =>'TYPE', var => 'check', eval => 'Kephra::Base::Data::Type::get_callback($_[1])', default => 'str'} ,],},
 );
 my %shortcut = ( '-' => 0, '>' => 0, '<' => 0, ',' => 0,);
 ################################################################################
@@ -32,37 +32,52 @@ for my $type (keys %set){
 ################################################################################
 
 sub add    {                                # name help cref parent? --> bool
-    my ($type, $msg, $code, $args, $default, $parent, $shortcut) = @_;
+    my ($type, $code, $args, $default, $parent, $shortcut) = @_;
     return 0 if is_known($type);            # do not overwrite types
-    return 0 unless $type =~ /^\w+$/;       # type has to from type name
-    if (ref $msg eq 'HASH'){               # name => {help =>'...', check => sub {},  parent => 'type'}
-        $shortcut = $msg->{'shortcut'} if exists $msg->{'shortcut'};
-        $default = $msg->{'default'}  if exists $msg->{'default'};
-        $parent = $msg->{'parent'}   if exists $msg->{'parent'};
-        $args = $msg->{'arguments'} if exists $msg->{'arguments'};
-        $code = $msg->{'code'}     if exists $msg->{'code'};
-        $msg = $msg->{'message'}  if exists $msg->{'message'};
+    return 0 unless $type =~ /^\w+$/;       # type name can only sontain word char
+    if (ref $code eq 'HASH'){               # name => {help =>'...', check => sub {},  parent => 'type'}
+        $shortcut = $code->{'shortcut'} if exists $code->{'shortcut'};
+        $default = $code->{'default'}  if exists $code->{'default'};
+        $parent = $code->{'parent'}   if exists $code->{'parent'};
+        $args = $code->{'arg'}       if exists $code->{'arg'};
+        $code = $code->{'code'}     if exists $code->{'code'};
     }
-    return 0 unless defined $code;
     return 0 unless ref $args eq 'ARRAY' and @$args > 0; # need arg def
-    for my $arg (@$args){  }
-    return 0 if defined $parent and not is_known($parent); 
+    for my $arg (@$args){
+        return 0 unless exists $arg->{'label'} and exists $arg->{'type'} and Kephra::Base::Data::Type::is_known($arg->{'type'});
+        return 0 if exists $arg->{'var'} xor exists $arg->{'eval'};
+    }
+    return 0 if defined $parent and not Kephra::Base::Data::Type::is_known( $parent );
     return 0 if defined $shortcut and exists $shortcut{ $shortcut };
 
     my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
     return 0 if not $package;               # only package (classes) can have types
     return 0 if defined $parent and $parent and not is_known($parent);
-    $set{$type} = {package => $package, file => $file, code => $code, arguments => $args};
-
-
+    $set{$type} = {package => $package, file => $file, code => $code, arg => $args};
+    $set{$type}{'parent'}   = $parent if defined $parent;
+    $set{$type}{'shortcut'} = $shortcut if defined $shortcut;
     $shortcut{ $shortcut } = $type if defined $shortcut;
 
     1;
 }
-
+sub delete {                              # name       -->  bool
+    my ($type) = @_;
+    return 0 unless is_known($type);   # can only delete existing types
+    return 0 if is_standard($type);       # can't delete std types
+    my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
+    return 0 unless _owned($type, $package, $file); # only creator can delete type
+    delete $shortcut{ $set{$type}{'shortcut'} } if exists $set{$type}{'shortcut'};
+    delete $set{$type};
+    return 1;
+}
 ################################################################################
-sub is_known    { is_relative($_[0]) or Kephra::Base::Data::Type::is_known($_[0]) } 
-sub is_relative { exists $set{$_[0]} ? 1 : 0 } 
+sub list_names     { keys %set }                    #            --> @~type
+sub list_shortcuts { keys %shortcut }               #            --> @~shortcut
+sub resolve_shortcut {                              # ~shortcut  -->  ~type
+    $shortcut{$_[0]} if defined $shortcut{$_[0]}
+}
+################################################################################
+sub is_known    { exists $set{$_[0]} ? 1 : 0 } 
 sub is_standard {(exists $set{$_[0]} and not exists $set{$_[0]}{'file'}) ? 1 : 0 }
 sub is_owned {
     my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
@@ -72,6 +87,19 @@ sub _owned {
     my ($type, $package, $file) = @_;
     (exists $set{$type} and exists $set{$type}{'package'} and $set{$type}{'package'} eq $package
                         and exists $set{$type}{'file'} and $set{$type}{'file'} eq $file) ? 1 : 0
+}
+################################################################################
+sub get_default_value { $set{$_[0]}{'default'} if exists $set{$_[0]} and exists $set{$_[0]}{'default'}}
+sub get_argument_count { int @{$set{$_[0]}{'arg'}} if exists $set{$_[0]} }
+sub get_argument_type  {
+    my ($type, $index) = @_;
+    return 0 unless is_known($type) and defined $index and $index < int @{$set{$type}{'arg'}} and $index >= 0;
+    $set{$type}{'arg'}[$index]{'type'};
+}
+sub get_argument_label {
+    my ($type, $index) = @_;
+    return 0 unless is_known($type) and defined $index and $index < int @{$set{$type}{'arg'}} and $index >= 0;
+    $set{$type}{'arg'}[$index]{'label'};
 }
 
 
@@ -108,18 +136,6 @@ sub _resolve_dependencies {
     unshift @{$set{$type}{check}}, @{$set{$parent}{check}};
     delete $set{$type}{parent};
 }
-
-sub delete {                              # name       -->  bool
-    my ($name) = @_;
-    return 0 unless is_known($name);      # can only delete existing types
-    return 0 if is_standard($name);       # cant delete std types
-    my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
-    return 0 unless _owned($name, $package, $file); # only creator can delete type
-    delete $set{$name};
-    return 1;
-}
-
-sub list_names  { keys %set }                  #            --> [name]
 ################################################################################
 
 sub get_default_value { $set{$_[0]}{'default'} if exists $set{$_[0]} and exists $set{$_[0]}{'default'}}

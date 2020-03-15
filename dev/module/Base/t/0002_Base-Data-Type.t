@@ -5,9 +5,10 @@ use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 use Kephra::Base::Data::Type qw/:all/;
-use Test::More tests => 133;
+use Test::More tests => 134;
 
-is( Kephra::Base::Data::Type::is_known('value'), 1, 'some default type is know');
+is( Kephra::Base::Data::Type::is_known('superkalifrailistisch'), 0, 'check for unknown type');
+is( Kephra::Base::Data::Type::is_known('value'), 1, 'some default type is known');
 is( known_type('value'),                         1, 'sub known_type got imported');
 is( 'num' ~~ [Kephra::Base::Data::Type::guess(2.3)], 1, 'guessed type num right');
 is( 'num' ~~ [guess_type(2.3)],                 1, 'sub guess_type got imported');

@@ -77,7 +77,8 @@ sub add    {                                # name help cref parent? --> bool
     return 0 if not $package;               # only package (classes) can have types
     return 0 if defined $parent and $parent and not is_known($parent);
     return 0 if defined $shortcut and exists $shortcut{ $shortcut };
-    $set{$type} = {package => $package, file => $file, check => [$help, $check],  parent => $parent};
+    $set{$type} = {package => $package, file => $file, check => [$help, $check]};
+    $set{$type}{'parent'}   = $parent if defined $parent;
     $set{$type}{'shortcut'} = $shortcut if defined $shortcut;
     _resolve_dependencies($type);
     if (defined $default){
@@ -90,7 +91,7 @@ sub add    {                                # name help cref parent? --> bool
 sub delete {                              # name       -->  bool
     my ($name) = @_;
     return 0 unless is_known($name);      # can only delete existing types
-    return 0 if is_standard($name);       # cant delete std types
+    return 0 if is_standard($name);       # can't delete std types
     my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
     return 0 unless _owned($name, $package, $file); # only creator can delete type
     delete $shortcut{ $set{$name}{'shortcut'} } if exists $set{$name}{'shortcut'};
