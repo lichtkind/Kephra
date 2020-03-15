@@ -6,7 +6,7 @@ use warnings;
 
 package Kephra::Base::Data::Type;
 
-sub add          {} # ~type ~help &check - $default ~parent ~shortcut --> ?
+sub add          {} # ~type ~help ~check - $default ~parent ~shortcut --> ?
 sub delete       {} # ~type                                           --> ?
 
 sub list_names       {} #                        --> @~type

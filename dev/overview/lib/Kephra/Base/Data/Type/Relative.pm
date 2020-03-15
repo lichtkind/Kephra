@@ -7,24 +7,23 @@ use warnings;
 
 package Kephra::Base::Data::Type;
 
-#                                     {~msg, ~type - ~var, ~eval}
-sub add          {} # ~type ~msg ~code @arguments $default ~parent ~shortcut --> ? 
-sub delete       {} # ~type                                                  --> ?
+ #                                @arguments[] ~~ {~label, ~type - ~var, ~eval}
+sub add          {} # ~type ~code @arguments - $default ~parent ~shortcut --> ? 
+sub delete       {} # ~type                                               --> ?
 
 sub list_names       {} #                        --> @~type
 sub list_shortcuts   {} #                        --> @~shortcut
 sub resolve_shortcut {} #  ~shortcut             -->  ~type
 
 sub is_known           {} # ~type                -->  ?      # is a data type
-sub is_relative        {} # ~type                -->  ?      # is a relativ type
 sub is_standard        {} # ~type                -->  ?      # is predefined ?
 sub is_owned           {} # ~type ~package ~file -->  ?
 
-sub get_message        {} # ~type                -->  ~msg|undef
-sub get_code           {} # ~type                -->  ~code|undef
 sub get_default_value  {} # ~type                -->  $default|undef
 sub get_argument_count {} # ~type                -->  +
-sub get_argument       {} # ~type                -->  %argument
+sub get_argument_type  {} # ~type +index         -->  ~type
+sub get_argument_label {} # ~type +index         -->  ~label
+
 sub get_callback       {} # ~type                -->  &callback|~evalerror
 sub curry              {} # ~type                -->  &callback|~evalerror
 
