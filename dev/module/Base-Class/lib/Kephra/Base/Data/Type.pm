@@ -1,41 +1,40 @@
 use v5.20;
 use warnings;
 
-# self made data types, standards + added by any package (owner)
-# example = bool  => {check => ['boolean', '$_[0] eq 0 or $_[0] eq 1'],  parent => 'value', default=>0},
+# mechanism to check data types, standards (here) + added by any package (owner)
 
 package Kephra::Base::Data::Type;
 our $VERSION = 0.07;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Package;
-use Kephra::Base::Data::Type::Relative;
 use Exporter 'import';
 our @EXPORT_OK = (qw/check_type guess_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-my %set = ('value' =>{check => ['not a reference',     'not ref $_[0]'],                                default => ''},
-            bool   =>{check => ['0 or 1',              '$_[0] eq 0 or $_[0] eq 1'],  parent => 'value', default => 0,  shortcut => '?'},
-            num    =>{check => ['number',              'looks_like_number($_[0])'],  parent => 'value', default => 0,  shortcut => '+'},
-           'num_pos'=>{check => ['greater equal zero', '$_[0]>=0'],                  parent => 'num', },
-            int    =>{check => ['integer',             'int $_[0] == $_[0]'],        parent => 'num', },
-           'int_pos'=>{check => ['positive',           '$_[0]>=0'],                  parent => 'int', },
-           'int_spos'=>{check => ['greater zero',      '$_[0] > 0'],                 parent => 'int',   default => 1},
-           'str'   =>{check => [],                                                   parent => 'value'},
-           'str_ne'=>{check => ['none empty value',   '$_[0] or ~$_[0]'],            parent => 'str',   default =>' ', shortcut => '~'},
-           'str_lc'=>{check => ['only lower case character', 'lc $_[0] eq $_[0]'],   parent => 'str_ne'},
-           'str_uc'=>{check => ['only upper case character', 'uc $_[0] eq $_[0]'],   parent => 'str_ne'},
-           'str_wc'=>{check => ['only word case character','ucfirst $_[0] eq $_[0]'],parent => 'str_ne'},
-           'name'  =>{check => ['only word character', '$_[0] =~ /^\w+$/'],          parent => 'value', default => 'name'},
+my %set = ( # standard types - no package can delete them
+  'value' =>{check => ['not a reference',     'not ref $_[0]'],                                default => ''},
+   bool   =>{check => ['0 or 1',              '$_[0] eq 0 or $_[0] eq 1'],  parent => 'value', default => 0,  shortcut => '?'},
+   num    =>{check => ['number',              'looks_like_number($_[0])'],  parent => 'value', default => 0,  shortcut => '+'},
+  'num_pos'=>{check => ['greater equal zero', '$_[0]>=0'],                  parent => 'num', },
+   int    =>{check => ['integer',             'int $_[0] == $_[0]'],        parent => 'num', },
+  'int_pos'=>{check => ['positive',           '$_[0]>=0'],                  parent => 'int', },
+  'int_spos'=>{check => ['greater zero',      '$_[0] > 0'],                 parent => 'int',   default => 1},
+  'str'   =>{check => [],                                                   parent => 'value'},
+  'str_ne'=>{check => ['none empty value',   '$_[0] or ~$_[0]'],            parent => 'str',   default =>' ', shortcut => '~'},
+  'str_lc'=>{check => ['only lower case character', 'lc $_[0] eq $_[0]'],   parent => 'str_ne'},
+  'str_uc'=>{check => ['only upper case character', 'uc $_[0] eq $_[0]'],   parent => 'str_ne'},
+  'str_wc'=>{check => ['only word case character','ucfirst $_[0] eq $_[0]'],parent => 'str_ne'},
+  'name'  =>{check => ['only word character', '$_[0] =~ /^\w+$/'],          parent => 'value', default => 'name'},
 
-          'TYPE'  => {check => ['type name',           'is_known $_[0]'],            parent => 'name',  default => 'str_ne'           },
-          'CODE'  => {check => ['code reference',      q/ref $_[0] eq 'CODE'/],                                        shortcut => '&'},
-          'ARRAY' => {check => ['array reference',     q/ref $_[0] eq 'ARRAY'/],                                       shortcut => '@'},
-          'HASH'  => {check => ['hash reference',      q/ref $_[0] eq 'HASH'/],                                        shortcut => '%'},
-          'ARGS'  => {check => ['array or hash ref',   q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/]},
-          'REF'   => {check => ['reference',           'ref $_[0]']},
-          'OBJ'   => {check => ['is blessed object',   'blessed($_[0])']},
-          'DEF'   => {check => ['defined value',       'defined $_[0]']},
-          'ANY'   => {check => ['any data',             1]},
+  'TYPE'  => {check => ['type name',           'is_known $_[0]'],            parent => 'name',  default => 'str_ne'           },
+  'CODE'  => {check => ['code reference',      q/ref $_[0] eq 'CODE'/],                                        shortcut => '&'},
+  'ARRAY' => {check => ['array reference',     q/ref $_[0] eq 'ARRAY'/],                                       shortcut => '@'},
+  'HASH'  => {check => ['hash reference',      q/ref $_[0] eq 'HASH'/],                                        shortcut => '%'},
+  'ARGS'  => {check => ['array or hash ref',   q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/]},
+  'REF'   => {check => ['reference',           'ref $_[0]']},
+  'OBJ'   => {check => ['is blessed object',   'blessed($_[0])']},
+  'DEF'   => {check => ['defined value',       'defined $_[0]']},
+  'ANY'   => {check => ['any data',             1]},
 );
 my %shortcut = ( '-' => 0, '>' => 0, '<' => 0, ',' => 0,);
 ################################################################################
