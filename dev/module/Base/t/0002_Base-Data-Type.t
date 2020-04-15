@@ -61,7 +61,7 @@ ok( check_type('str', {}),                 'ref ist not a string');
 
 
 is( check_type('str_ne','das'),        '', 'recognize none empty string');
-ok( check_type('str_ne', ''),                'this is not a none empty string');
+ok( check_type('str_ne', ''),              'this is not a none empty string');
 
 is( check_type('str_uc', 'DAS'),       '', 'recognize upper case string');
 ok( check_type('str_uc', 'DaS'),           'this is not an upper case string');
@@ -122,8 +122,8 @@ my $type_name = 'test_type';
 is( Kephra::Base::Data::Type::is_known($type_name),   0, 'test type not present yet');
 is( Kephra::Base::Data::Type::is_owned('bool'),       0, 'default type bool is not recognized as own my current package');
 
-is( add($type_name, 'infive','-5 < $_[0] and $_[0] < 5',2,'int', '-'),   0, 'can not use - as type shortcut');
-is( add($type_name, 'infive','-5 < $_[0] and $_[0] < 5',2,'int', ':'),   1, 'added my custom type');
+ok( add($type_name, 'infive','-5 < $_[0] and $_[0] < 5',2,'int', '-'), 'can not use - as type shortcut');
+is( add($type_name, 'infive','-5 < $_[0] and $_[0] < 5',2,'int', ':'),   0, 'added my custom type');
 
 ok( ($type_name ~~ [Kephra::Base::Data::Type::list_names()]), 'new created type gets listed');
 ok( ('-' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'new created type shortcut gets listed');
@@ -141,13 +141,13 @@ ok( !(':' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'deleted types short
 is( Kephra::Base::Data::Type::resolve_shortcut(':'),  '', 'deleted shotcut can not be resolved');
 is( Kephra::Base::Data::Type::is_known($type_name),   0, 'test type not present again');
 is( Kephra::Base::Data::Type::is_known($type_name),   0, 'test type not present again');
-is( add($type_name, 'just for this test','-5 < $_[0] and $_[0] < 5', 12, 'int'), 0, 'default value of type has to be of type');
+ok( add($type_name, 'just for this test','-5 < $_[0] and $_[0] < 5', 12, 'int'), 'default value of type has to be of type');
 
 
 is( add($type_name => {default => 2, help => 'just for this test',
-                       check => '-5 < $_[0] and $_[0] < 5', parent => 'int',
-                       shortcut => ':'}),                      1, 'HASHref syntax for add type');
-is( add($type_name, 'infive','-5 < $_[0] and $_[0] < 5',2,'int'), 0, 'can not have two types with same name');
+                       code => '-5 < $_[0] and $_[0] < 5', parent => 'int',
+                       shortcut => ':'}),                      0, 'HASHref syntax for add type');
+ok( add($type_name, 'infive','-5 < $_[0] and $_[0] < 5',2,'int'), 'can not have two types with same name');
 ok( ($type_name ~~ [Kephra::Base::Data::Type::list_names()]),   'again created type gets listed');
 ok( ('-' ~~ [Kephra::Base::Data::Type::list_shortcuts()]),      'again created type shortcut gets listed');
 is( Kephra::Base::Data::Type::resolve_shortcut(':'), $type_name,'shortcut of type can be resolved');

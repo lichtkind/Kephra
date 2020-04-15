@@ -11,82 +11,76 @@ use Exporter 'import';
 our @EXPORT_OK = (qw/check_type guess_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-my %set = ( # standard types - no package can delete them
-  'value' =>{check => ['not a reference',     'not ref $_[0]'],                                default => ''},
-   bool   =>{check => ['0 or 1',              '$_[0] eq 0 or $_[0] eq 1'],  parent => 'value', default => 0,  shortcut => '?'},
-   num    =>{check => ['number',              'looks_like_number($_[0])'],  parent => 'value', default => 0,  shortcut => '+'},
-  'num_pos'=>{check => ['greater equal zero', '$_[0]>=0'],                  parent => 'num', },
-   int    =>{check => ['integer',             'int $_[0] == $_[0]'],        parent => 'num', },
-  'int_pos'=>{check => ['positive',           '$_[0]>=0'],                  parent => 'int', },
-  'int_spos'=>{check => ['greater zero',      '$_[0] > 0'],                 parent => 'int',   default => 1},
-  'str'   =>{check => [],                                                   parent => 'value'},
-  'str_ne'=>{check => ['none empty value',   '$_[0] or ~$_[0]'],            parent => 'str',   default =>' ', shortcut => '~'},
-  'str_lc'=>{check => ['only lower case character', 'lc $_[0] eq $_[0]'],   parent => 'str_ne'},
-  'str_uc'=>{check => ['only upper case character', 'uc $_[0] eq $_[0]'],   parent => 'str_ne'},
-  'str_wc'=>{check => ['only word case character','ucfirst $_[0] eq $_[0]'],parent => 'str_ne'},
-  'name'  =>{check => ['only word character', '$_[0] =~ /^\w+$/'],          parent => 'value', default => 'name'},
+my %set ;        # storage for all active types
+my @standard = ( # standard types - no package can delete them
+  'value'  => {help=> 'not a reference',     code=> 'not ref $_[0]',                               default=> ''                },
+  'bool'   => {help=> '0 or 1',              code=> '$_[0] eq 0 or $_[0] eq 1', parent=> 'value',  default=> 0,   shortcut=> '?'},
+  'num'    => {help=> 'number',              code=> 'looks_like_number($_[0])', parent=> 'value',  default=> 0,   shortcut=> '+'},
+  'num_pos'=> {help=> 'greater equal zero',  code=> '$_[0]>=0',                 parent=> 'num', },
+  'int'    => {help=> 'integer',             code=> 'int $_[0] == $_[0]',       parent=> 'num', },
+  'int_pos'=> {help=> 'positive integer',    code=> '$_[0]>=0',                 parent=> 'int', },
+  'int_spos'=>{help=> 'strictly positive',   code=> '$_[0] > 0',                parent=> 'int',    default=> 1},
+  'str'    => {                                                                 parent=> 'value'},                                 # pure rename
+  'str_ne' => {help=> 'none empty value',    code=> '$_[0] or ~$_[0]',          parent=> 'str',    default=> ' ', shortcut=> '~'}, # check it
+  'str_lc' => {help=> 'lower case character',code=> 'lc $_[0] eq $_[0]',        parent=> 'str_ne'},
+  'str_uc' => {help=> 'upper case character',code=> 'uc $_[0] eq $_[0]',        parent=> 'str_ne'},
+  'str_wc' => {help=> 'word case character', code=> 'ucfirst $_[0] eq $_[0]',   parent=> 'str_ne'},
+  'name'   => {help=> 'word character (alphanum+_)', code=> '$_[0] =~ /^\w+$/', parent=> 'value',  default=> 'name'},
 
-  'TYPE'  => {check => ['type name',           'is_known $_[0]'],            parent => 'name',  default => 'str_ne'           },
-  'CODE'  => {check => ['code reference',      q/ref $_[0] eq 'CODE'/],                                        shortcut => '&'},
-  'ARRAY' => {check => ['array reference',     q/ref $_[0] eq 'ARRAY'/],                                       shortcut => '@'},
-  'HASH'  => {check => ['hash reference',      q/ref $_[0] eq 'HASH'/],                                        shortcut => '%'},
-  'ARGS'  => {check => ['array or hash ref',   q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/]},
-  'REF'   => {check => ['reference',           'ref $_[0]']},
-  'OBJ'   => {check => ['is blessed object',   'blessed($_[0])']},
-  'DEF'   => {check => ['defined value',       'defined $_[0]']},
-  'ANY'   => {check => ['any data',             1]},
+  'TYPE'   => {help=> 'type name',           code=> 'is_known $_[0]',           parent=> 'name',   default=> 'str_ne'},
+  'CODE'   => {help=> 'code reference',      code=> q/ref $_[0] eq 'CODE'/,                                       shortcut=> '&'},
+  'ARRAY'  => {help=> 'array reference',     code=> q/ref $_[0] eq 'ARRAY'/,                                      shortcut=> '@'},
+  'HASH'   => {help=> 'hash reference',      code=> q/ref $_[0] eq 'HASH'/,                                       shortcut=> '%'},
+  'ARGS'   => {help=> 'array or hash ref',   code=> q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/},
+  'REF'    => {help=> 'reference',           code=> 'ref $_[0]'},
+  'OBJ'    => {help=> 'blessed object',      code=> 'blessed($_[0])'},
+  'DEF'    => {help=> 'defined value',       code=> 'defined $_[0]'},
+  'ANY'    => {help=> 'any data',            code=> 1},
 );
-my %shortcut = ( '-' => 0, '>' => 0, '<' => 0, ',' => 0,);
+my %shortcut = ( '-' => 0, '>' => 0, '<' => 0, ',' => 0,); #shortcut names 
 ################################################################################
-for my $type (keys %set){
-    die "type name $type contains none word character" unless $type =~ /^\w+$/;
-    _resolve_dependencies($type);
-    if (exists $set{$type}{'default'}){
-        my $msg = check($type, $set{$type}{'default'});
-        die "default value of type $type : $set{$type}{default} misses requirement, $msg" if $msg;
-    }
-    die 'type shortcut '.$shortcut{ $set{$type}{'shortcut'} }.' is used twice'
-        if exists $set{$type}{'shortcut'} and exists $shortcut{ $set{$type}{'shortcut'} };
-    $shortcut{ $set{$type}{'shortcut'} } = $type if exists $set{$type}{'shortcut'};
-}
-sub _resolve_dependencies {
-    my ($type) = @_;
-    die "can not resolve type $type" unless defined $type and exists $set{$type};
-    return unless exists $set{$type}{'parent'};
-    my $parent = $set{$type}{'parent'};
-    _resolve_dependencies($parent);
-    $set{$type}{default} = $set{$parent}{'default'} if not defined $set{$type}{'default'};
-    unshift @{$set{$type}{'check'}}, @{$set{$parent}{'check'}};
-    delete $set{$type}{'parent'};
+while (@standard){
+    my $error = add(shift @standard, shift @standard);
+    die $error if $error;
 }
 ################################################################################
 sub add    {                                # name help cref parent? --> bool
-    my ($type, $help, $check, $default, $parent, $shortcut) = @_;
-    return 0 if is_known($type);            # do not overwrite types
-    return 0 unless $type =~ /^\w+$/;       # type has to from type name
-    if (ref $help eq 'HASH'){               # name => {help =>'...', check => sub {},  parent => 'type'}
-        return 0 unless exists $help->{'help'};
+    my ($type, $help, $code, $default, $parent, $shortcut) = @_;
+    return "type name: '$type' is already in use" if is_known($type);
+    return "type name: '$type' contains none word character" unless $type =~ /^\w+$/;
+    if (ref $help eq 'HASH'){
         $shortcut = $help->{'shortcut'} if exists $help->{'shortcut'};
         $default = $help->{'default'}  if exists $help->{'default'};
         $parent = $help->{'parent'}  if exists $help->{'parent'};
-        $check = $help->{'check'};
-        $help = $help->{'help'};
+        $code  = $help->{'code'}  if exists $help->{'code'};
+        $help = exists $help->{'help'} ? $help->{'help'} : undef;
     }
-    return 0 unless defined $check; # need a checker
-    my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
-    return 0 if not $package;               # only package (classes) can have types
-    return 0 if defined $parent and $parent and not is_known($parent);
-    return 0 if defined $shortcut and exists $shortcut{ $shortcut };
-    $set{$type} = {package => $package, file => $file, check => [$help, $check]};
-    $set{$type}{'parent'}   = $parent if defined $parent;
-    $set{$type}{'shortcut'} = $shortcut if defined $shortcut;
-    _resolve_dependencies($type);
+    return "type name: '$type' has to have help and code or parent" if defined $code xor defined $help or (not defined $code and not defined $parent);
+    return "parent type: '$parent' of '$type' is unknown" if defined $parent and not is_known( $parent );
+    return "type shortcut: '$shortcut' is already used" if defined $shortcut and exists $shortcut{ $shortcut };
+    my ($package, $file, $line) = caller();
+    return "a type has to be created in a named package inside a file" unless defined $file and $package ne 'main';
+
+    $set{$type} = {check => [], };
+    push   @{$set{$type}{'check'}}, $help, $code if defined $code;
+    if (defined $parent){
+        unshift @{$set{$type}{'check'}}, @{$set{$parent}{'check'}};
+        $set{$type}{'default'} = $set{$parent}{'default'} if exists $set{$parent}{'default'};
+        $set{$type}{'parent'} = $parent;
+    }
+    if ($package ne __PACKAGE__){
+        $set{$type}{'file'}    = $file;
+        $set{$type}{'package'} = $package;
+    }
     if (defined $default){
-        if (check($type, $default)) {delete $set{$type}; return 0}
-        else                        {$set{$type}{default} = $default}
+        if (check($type, $default)) {delete $set{$type}; return "default value $default does not pass checker of type $type"}
+        else                        {$set{$type}{'default'} = $default}
     }
-    $shortcut{ $shortcut } = $type if defined $shortcut;
-    1;
+    if (defined $shortcut){
+        $set{$type}{'shortcut'} = $shortcut;
+        $shortcut{ $shortcut } = $type;
+    }
+    0;
 }
 sub delete {                              # name       -->  bool
     my ($name) = @_;
