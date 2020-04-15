@@ -1,6 +1,8 @@
 use v5.20;
 use warnings;
 
+# data type checker that tage arguments, standards (here) + added by any package (owner)
+
 package Kephra::Base::Data::Type::Relative;
 our $VERSION = 0.01;
 use Scalar::Util qw/blessed looks_like_number/;
@@ -10,11 +12,15 @@ use Exporter 'import';
 our @EXPORT_OK = (qw/check_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
-my %set = (index => {code =>'return out of range if $_[0] >= @{$_[1]}', arg =>[{label => 'array', type => 'ARRAY', default=>[]},], parent => 'int_pos' },
-     typed_array => {code => 'for my $vi (0..$#{$_[0]}){my $ret = $check->($_[0][$vi]); return "array element $vi : $ret" if $ret}', parent => 'ARRAY', shortcut => '@',
-                     arg  =>[{label => 'type name', type =>'TYPE', var => 'check', eval => 'Kephra::Base::Data::Type::get_callback($_[1])', default => 'str'} ,],},
-     typed_hash  => {code => 'for my $vk (keys %{$_[0]}){my $ret = $check->($_[0]{$vk}); return "hash value of key $vk : $ret" if $ret}', parent => 'HASH', shortcut => '%',
-                     arg  =>[{label => 'type name', type =>'TYPE', var => 'check', eval => 'Kephra::Base::Data::Type::get_callback($_[1])', default => 'str'} ,],},
+my %set = ( # standard types - no package can delete them
+  index => {code =>'return out of range if $_[0] >= @{$_[1]}', arguments =>[{name => 'array', type => 'ARRAY', default => []},], 
+            help => 'valid index of array', parent => 'int_pos' },
+  typed_array => {code => 'for my $vi (0..$#{$_[0]}){my $ret = $_[1]->($_[0][$vi]); return "array element $vi : $ret" if $ret}',
+                  arguments =>[{name => 'type name', type =>'TYPE', default => 'str', eval => 'Kephra::Base::Data::Type::get_callback($_[1])'} ,],
+                  help => 'array with typed elements', parent => 'ARRAY', shortcut => '@', },
+  typed_hash  => {code => 'for my $vk (keys %{$_[0]}){my $ret = $_[1]->($_[0]{$vk}); return "hash value of key $vk : $ret" if $ret}',
+                  arguments =>[{name => 'type name', type =>'TYPE', default => 'str', eval => 'Kephra::Base::Data::Type::get_callback($_[1])'} ,
+                  help => 'hash with typed values', parent => 'HASH', shortcut => '%',],},
 );
 my %shortcut = ( '-' => 0, '>' => 0, '<' => 0, ',' => 0,);
 ################################################################################
@@ -29,23 +35,28 @@ for my $type (keys %set){
     if exists $set{$type}{'shortcut'} and exists $shortcut{ $set{$type}{'shortcut'} };
     $shortcut{ $set{$type}{'shortcut'} } = $type if exists $set{$type}{'shortcut'};
 }
+sub _verify {
+    my ($type, $property) = @_;
+}
+
 ################################################################################
 
 sub add    {                                # name help cref parent? --> bool
-    my ($type, $code, $args, $default, $parent, $shortcut) = @_;
+    my ($type, $help, $code, $args, $default, $parent, $shortcut) = @_;
     return 0 if is_known($type);            # do not overwrite types
     return 0 unless $type =~ /^\w+$/;       # type name can only sontain word char
-    if (ref $code eq 'HASH'){               # name => {help =>'...', check => sub {},  parent => 'type'}
-        $shortcut = $code->{'shortcut'} if exists $code->{'shortcut'};
-        $default = $code->{'default'}  if exists $code->{'default'};
-        $parent = $code->{'parent'}   if exists $code->{'parent'};
-        $args = $code->{'arg'}       if exists $code->{'arg'};
-        $code = $code->{'code'}     if exists $code->{'code'};
+    if (ref $help eq 'HASH'){               # name => {help =>'...', check => sub {},  parent => 'type'}
+        return 0 unless exists $help->{'help'};
+        $shortcut = $help->{'shortcut'} if exists $help->{'shortcut'};
+        $default = $help->{'default'}  if exists $help->{'default'};
+        $parent = $help->{'parent'}   if exists $help->{'parent'};
+        $args = $help->{'arguments'} if exists $help->{'arguments'};
+        $code = $help->{'code'}     if exists $help->{'code'};
+        $help = $help->{'help'};
     }
     return 0 unless ref $args eq 'ARRAY' and @$args > 0; # need arg def
     for my $arg (@$args){
-        return 0 unless exists $arg->{'label'} and exists $arg->{'type'} and Kephra::Base::Data::Type::is_known($arg->{'type'});
-        return 0 if exists $arg->{'var'} xor exists $arg->{'eval'};
+        return 0 unless exists $arg->{'name'} and exists $arg->{'type'} and Kephra::Base::Data::Type::is_known($arg->{'type'});
     }
     return 0 if defined $parent and not Kephra::Base::Data::Type::is_known( $parent );
     return 0 if defined $shortcut and exists $shortcut{ $shortcut };

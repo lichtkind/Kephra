@@ -99,7 +99,6 @@ sub sub_caller {
         $package = substr($caller, 0, $pos);
         $sub     = substr($caller, $pos+2);
         next if substr($sub, 0, 1) eq '_';
-        #($package, $sub) = ("$package::$sub",'') if Kephra::Base::Data::Type::check('str+uc', substr($sub,0,1) );
         next if $package eq 'Kephra::API' and $sub;
         last;
     }
