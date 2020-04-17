@@ -4,7 +4,7 @@ use warnings;
 # serializable closure
 
 package Kephra::Base::Call;
-our $VERSION = 0.01;
+our $VERSION = 0.3;
 use Exporter 'import';
 our @EXPORT_OK = (qw/new_call/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);

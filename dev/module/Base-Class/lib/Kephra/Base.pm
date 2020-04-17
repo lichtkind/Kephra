@@ -1,13 +1,13 @@
 use v5.20;
 use warnings;
-use Kephra::Base::Call qw/new_call/;
-use Kephra::Base::Data;
 use Kephra::Base::Package;
+use Kephra::Base::Data;
+use Kephra::Base::Call qw/new_call/;
 
 package Kephra::Base;
 our $VERSION = 0.01;
 use Exporter 'import';
-our @EXPORT_OK = qw/create_counter date_time/;
+our @EXPORT_OK = qw/create_counter date_time new_call/;
 our %EXPORT_TAGS = (all  => [@EXPORT_OK]);
 
 

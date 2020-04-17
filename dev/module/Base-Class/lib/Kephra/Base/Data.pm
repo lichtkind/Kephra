@@ -6,13 +6,14 @@ our $VERSION = 0.01;
 use Scalar::Util qw/blessed/;
 use Kephra::Base::Data::Type::Relative;
 use Exporter 'import';
-our @EXPORT_OK = qw/clone_item clone_list/;
+our @EXPORT_OK = qw/clone clone_list clone_data/;
 
 my %copied_reftype   = ('' => 1, Regexp => 1, CODE => 1, FORMAT => 1, IO => 1, GLOB => 1, LVALUE => 1);
 
 ################################################################################
 
-sub clone_item {_clone($_[0],{})}# data --> data
+sub clone_data { &clone }
+sub clone      { _clone($_[0],{})}# data --> data
 sub _clone {
     my ($data, $dict) = @_;
     return unless defined $data;
@@ -32,8 +33,6 @@ sub _clone {
 
     $class ? bless($ret, $class) : $ret;
 }
-
-
 
 sub clone_list { #               [data] --> [data]
     my @ret;
