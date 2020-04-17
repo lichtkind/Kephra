@@ -2,6 +2,7 @@ use v5.20;
 use warnings;
 
 # mechanism to check data types, standards (here) + added by any package (owner)
+# types do inherit from each other, each child adds one check (code) and an according help message
 
 package Kephra::Base::Data::Type;
 our $VERSION = 0.07;

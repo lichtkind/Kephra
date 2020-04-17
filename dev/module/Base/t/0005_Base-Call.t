@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use v5.20;
 use warnings;
-use Test::More tests => 48;
+use Test::More tests => 61;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 use Kephra::Base::Call qw/new_call/;
@@ -31,7 +31,8 @@ my $counter = Kephra::Base::Call->new('state $cc = 0; $cc++;');
 is ($counter->run(), 0,              'counter works');
 is ($counter->run(), 1,              'every time');
 
-$counter = $counter->new('++$state;', 2);
+my $source = '++$state;';
+$counter = $counter->new($source, 2);
 is (ref $counter, 'Kephra::Base::Call', 'created counter by calling new on object');
 is ($counter->get_state(), 2,        'got init data back');
 is ($counter->run(), 3,              'data counter works');
@@ -52,9 +53,9 @@ is ($clone->get_state(), 6,          'counter clone took data from origin');
 is ($clone->run(), 7,                'counter clone works');
 is ($counter->get_state(), 9,        'original counter kept untouched');
 
-$counter = new_call('++$state;', 3);
+$counter = new_call($source, 3);
 is ($counter->run(), 4,              'also counter created by shortcut works');
-$counter = new_call('++$state;', 's', 'int');
+$counter = new_call($source, 's', 'int');
 is (ref $counter, '',                'bad init value returns error');
 
 $counter = new_call('++$state;', 6, 'int');
@@ -66,8 +67,12 @@ is ($counter->get_state(), 9,           'state of typed call was stored');
 is ($counter->set_state(9.1), 9,        'reject malformed data while set state of typed call');
 is ($counter->get_state(), 9,           'old state of typed call still there');
 
-$counter = new_call('++$state;',  -4, 'int', 'int_pos');
+
+$counter = new_call($source,  -4, 'int','int_pos');
 is (ref $counter, 'Kephra::Base::Call', 'created call with get and set type');
+is ($counter->get_source, $source,      'got source code from getter');
+is ($counter->get_settype, 'int',       'got type for setting state from getter');
+is ($counter->get_gettype, 'int_pos',   'got type for getting state from getter');
 ok ($counter->get_state() ne '-4',      'can not get init value due get type');
 is ($counter->set_state(-1), -1,        'set state of double typed call to calue I can set but not get');
 ok ($counter->get_state() ne '-1',      'could not get the value');
@@ -77,5 +82,17 @@ is ($counter->set_state(9), 9,          'set state of double typed call');
 is ($counter->set_state(9.1), 9,        'reject malformed data while set state of typed call');
 is ($counter->get_state(), 9,           'old state of typed call still there');
 
+my $state = $counter->state();
+is (ref $state,         'HASH',         'got state hash');
+is ($state->{'source'}, $source,        'got source from state hash');
+is ($state->{'state'}, 9,               'got state from state hash');
+is ($state->{'set_type'}, 'int',        'got set type from state hash');
+is ($state->{'get_type'}, 'int_pos',    'got get type from state hash');
+$clone = Kephra::Base::Call->restate($state);
+is ($clone->get_source, $source,      'got same source code from clone getter');
+is ($clone->get_settype, 'int',       'got same type for setting state from clone getter');
+is ($clone->get_gettype, 'int_pos',   'got same type for getting state from clone getter');
+is ($clone->get_state(), 9,           'got same state from clone');
+is ($clone->run(), 10,                'clone does run as expected');
 exit 0;
 
