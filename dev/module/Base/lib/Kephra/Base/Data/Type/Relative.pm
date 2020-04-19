@@ -62,7 +62,7 @@ sub add    {                                # name help cref parent? --> bool
     return 0 if defined $parent and not Kephra::Base::Data::Type::is_known( $parent );
     return 0 if defined $shortcut and exists $shortcut{ $shortcut };
 
-    my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
+    my ($package, $file, $line) = caller();
     return 0 if not $package;               # only package (classes) can have types
     return 0 if defined $parent and $parent and not is_known($parent);
     $set{$type} = {package => $package, file => $file, code => $code, arg => $args};
@@ -73,14 +73,14 @@ sub add    {                                # name help cref parent? --> bool
     0;
 }
 sub delete {                              # name       -->  bool
-    my ($type) = @_;
-    return 0 unless is_known($type);   # can only delete existing types
-    return 0 if is_standard($type);       # can't delete std types
-    my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
-    return 0 unless _owned($type, $package, $file); # only creator can delete type
-    delete $shortcut{ $set{$type}{'shortcut'} } if exists $set{$type}{'shortcut'};
-    delete $set{$type};
-    return 1;
+    my ($name) = @_;
+    return "type name $name in not in use" unless is_known($name);
+    return "type $name can not be deleted (is standard)" if is_standard($name);
+    my ($package, $file, $line) = caller();
+    return "type $name  is owned by another package and can not be deleted" unless _owned($name, $package, $file);
+    delete $shortcut{ $set{$name}{'shortcut'} } if exists $set{$name}{'shortcut'};
+    delete $set{$name};
+    return 0;
 }
 ################################################################################
 sub list_names     { keys %set }                    #            --> @~type

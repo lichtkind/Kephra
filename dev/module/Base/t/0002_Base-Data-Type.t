@@ -5,9 +5,12 @@ use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 use Kephra::Base::Data::Type qw/:all/;
-use Test::More tests => 134;
+use Test::More tests => 140;
+
+Kephra::Base::Data::Type::init();
 
 is( Kephra::Base::Data::Type::is_known('superkalifrailistisch'), 0, 'check for unknown type');
+ok( Kephra::Base::Data::Type::delete('superkalifrailistisch'), 'can not delete unknown type'); 
 is( Kephra::Base::Data::Type::is_known('value'), 1, 'some default type is known');
 is( known_type('value'),                         1, 'sub known_type got imported');
 is( 'num' ~~ [Kephra::Base::Data::Type::guess(2.3)], 1, 'guessed type num right');
@@ -69,7 +72,6 @@ is( Kephra::Base::Data::Type::get_default_value('str_uc'), ' ', 'this type has n
 
 is( check_type('str_lc', 'das'),       '', 'recognize lower case string');
 ok( check_type('str_lc', 'DaS'),           'this is not an lower case string');
-
 
 is( check_type('num',  1.5),           '', 'recognize number');
 is( check_type('num_pos', 1.5),        '', 'recognize positive number');
@@ -135,7 +137,7 @@ is( Kephra::Base::Data::Type::is_standard('int'),      1,'int is recognized as s
 is( Kephra::Base::Data::Type::get_default_value($type_name),2,'got default value of self made type');
 is( Kephra::Base::Data::Type::check($type_name,   1), '','test type accepts correctly');
 ok( Kephra::Base::Data::Type::check($type_name, -10),    'test type rejects correctly');
-is( Kephra::Base::Data::Type::delete($type_name),     1, 'deleted my custom type');
+is( Kephra::Base::Data::Type::delete($type_name),     0, 'deleted my custom type');
 ok( !($type_name ~~ [Kephra::Base::Data::Type::list_names()]), 'new deleted types gets not listed anymore');
 ok( !(':' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'deleted types shortcut gets not listed anymore');
 is( Kephra::Base::Data::Type::resolve_shortcut(':'),  '', 'deleted shotcut can not be resolved');
@@ -156,22 +158,22 @@ is( Kephra::Base::Data::Type::is_owned($type_name),          1, 'HASHref test ty
 is( Kephra::Base::Data::Type::get_default_value($type_name), 2, 'HASHref type got default value of self made type');
 is( Kephra::Base::Data::Type::check($type_name,   1),       '', 'HASHref test type accepts correctly');
 ok( Kephra::Base::Data::Type::check($type_name, -10),           'HASHref test type rejects correctly');
-is( Kephra::Base::Data::Type::delete($type_name),           1, 'deleted HASHref custom type');
+is( Kephra::Base::Data::Type::delete($type_name),            0, 'deleted HASHref custom type');
 
 
 my $child = 'three';
-is( Kephra::Base::Data::Type::delete('num'),          0, 'can not delete default types');
-is( Kephra::Base::Data::Type::delete($type_name),     0, 'can not delete none existing types');
-add($type_name, 'fiverr','-5 < $_[0] and $_[0] < 5', 0,'int');
+ok( Kephra::Base::Data::Type::delete('num'),             'can not delete default types');
+ok( Kephra::Base::Data::Type::delete($type_name),        'can not delete none existing types');
+add($type_name, 'fiverr','-5 < $_[0] and $_[0] < 5',  0, 'int');
 is( Kephra::Base::Data::Type::is_known($type_name),   1, 'test type is present again');
 add($child, 'test child type', '$_[0] ==3', 3, $type_name);
-is( Kephra::Base::Data::Type::is_known($child),    1, 'child test type is present');
-is( Kephra::Base::Data::Type::check($child,   3), '', 'child test type accepts correctly');
-ok( Kephra::Base::Data::Type::check($child,   2),     'child test type rejects correctly');
-is( Kephra::Base::Data::Type::delete($type_name),  1, 'deleted my custom type');
-is( Kephra::Base::Data::Type::is_known($child),    1, 'child test type is still present');
-is( Kephra::Base::Data::Type::check($child,   3), '', 'child test type still accepts correctly');
-ok( Kephra::Base::Data::Type::check($child,   2),     'child test type still rejects correctly');
+is( Kephra::Base::Data::Type::is_known($child),       1, 'child test type is present');
+is( Kephra::Base::Data::Type::check($child,   3),    '', 'child test type accepts correctly');
+ok( Kephra::Base::Data::Type::check($child,   2),        'child test type rejects correctly');
+is( Kephra::Base::Data::Type::delete($type_name),     0, 'deleted my custom type');
+is( Kephra::Base::Data::Type::is_known($child),       1, 'child test type is still present');
+is( Kephra::Base::Data::Type::check($child,   3),    '', 'child test type still accepts correctly');
+ok( Kephra::Base::Data::Type::check($child,   2),        'child test type still rejects correctly');
 add($type_name, 'fiverr', '-5 < $_[0] and $_[0] < 5', 0,'int');
 
 
@@ -192,7 +194,24 @@ sub add { Kephra::Base::Data::Type::add(@_) }
 package Typest;
 use Test::More;
 
-is( Kephra::Base::Data::Type::delete($type_name), 0, 'can not deleted what I did not create');
-is( Kephra::Base::Data::Type::is_known($type_name), 1, 'test type is still nown');
+ok( Kephra::Base::Data::Type::delete($type_name),      'can not deleted what I did not create');
+is( Kephra::Base::Data::Type::is_known($type_name), 1, 'test type is still known');
+
+Kephra::Base::Data::Type::init();
+is( Kephra::Base::Data::Type::is_known($type_name), 1, 'init could not delete self made types either');
+
+my $state = Kephra::Base::Data::Type::state();
+is( ref $state,               'HASH', 'got basic types state hash');
+is( ref $state->{'int'},      'HASH', 'int is known the state hash');
+is( $state->{'CODE'}{'shortcut'},'&', 'also shortcuts are saved');
+is( ref $state->{$type_name}, 'HASH', 'custom type is known the state hash');
+
+package Kephra::Base::Data::Type;
+%Kephra::Base::Data::Type::set = ();
+package Typer;
+
+#is( Kephra::Base::Data::Type::is_known('int'), 0, 'all types got deleted');
+
+
 
 exit 0;

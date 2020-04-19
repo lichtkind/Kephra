@@ -5,47 +5,67 @@ use warnings;
 # types do inherit from each other, each child adds one check (code) and an according help message
 
 package Kephra::Base::Data::Type;
-our $VERSION = 0.07;
+our $VERSION = 0.08;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Package;
 use Exporter 'import';
 our @EXPORT_OK = (qw/check_type guess_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
+my (%set, %shortcut);        # storage for all active types
+##############################################################################
+sub init {
+    return if %set;
+    %shortcut = ( '-' => 0, '>' => 0, '<' => 0, ',' => 0,);
+    my @standard = ( # standard types - no package can delete them
+    'value'  => {help=> 'not a reference',     code=> 'not ref $_[0]',                               default=> ''                },
+    'bool'   => {help=> '0 or 1',              code=> '$_[0] eq 0 or $_[0] eq 1', parent=> 'value',  default=> 0,   shortcut=> '?'},
+    'num'    => {help=> 'number',              code=> 'looks_like_number($_[0])', parent=> 'value',  default=> 0,   shortcut=> '+'},
+    'num_pos'=> {help=> 'greater equal zero',  code=> '$_[0]>=0',                 parent=> 'num', },
+    'int'    => {help=> 'integer',             code=> 'int $_[0] == $_[0]',       parent=> 'num', },
+    'int_pos'=> {help=> 'positive integer',    code=> '$_[0]>=0',                 parent=> 'int', },
+    'int_spos'=>{help=> 'strictly positive',   code=> '$_[0] > 0',                parent=> 'int',    default=> 1},
+    'str'    => {                                                                 parent=> 'value'},                                 # pure rename
+    'str_ne' => {help=> 'none empty value',    code=> '$_[0] or ~$_[0]',          parent=> 'str',    default=> ' ', shortcut=> '~'}, # check it
+    'str_lc' => {help=> 'lower case character',code=> 'lc $_[0] eq $_[0]',        parent=> 'str_ne'},
+    'str_uc' => {help=> 'upper case character',code=> 'uc $_[0] eq $_[0]',        parent=> 'str_ne'},
+    'str_wc' => {help=> 'word case character', code=> 'ucfirst $_[0] eq $_[0]',   parent=> 'str_ne'},
+    'name'   => {help=> 'word character (alphanum+_)', code=> '$_[0] =~ /^\w+$/', parent=> 'value',  default=> 'name'},
 
-my %set ;        # storage for all active types
-my @standard = ( # standard types - no package can delete them
-  'value'  => {help=> 'not a reference',     code=> 'not ref $_[0]',                               default=> ''                },
-  'bool'   => {help=> '0 or 1',              code=> '$_[0] eq 0 or $_[0] eq 1', parent=> 'value',  default=> 0,   shortcut=> '?'},
-  'num'    => {help=> 'number',              code=> 'looks_like_number($_[0])', parent=> 'value',  default=> 0,   shortcut=> '+'},
-  'num_pos'=> {help=> 'greater equal zero',  code=> '$_[0]>=0',                 parent=> 'num', },
-  'int'    => {help=> 'integer',             code=> 'int $_[0] == $_[0]',       parent=> 'num', },
-  'int_pos'=> {help=> 'positive integer',    code=> '$_[0]>=0',                 parent=> 'int', },
-  'int_spos'=>{help=> 'strictly positive',   code=> '$_[0] > 0',                parent=> 'int',    default=> 1},
-  'str'    => {                                                                 parent=> 'value'},                                 # pure rename
-  'str_ne' => {help=> 'none empty value',    code=> '$_[0] or ~$_[0]',          parent=> 'str',    default=> ' ', shortcut=> '~'}, # check it
-  'str_lc' => {help=> 'lower case character',code=> 'lc $_[0] eq $_[0]',        parent=> 'str_ne'},
-  'str_uc' => {help=> 'upper case character',code=> 'uc $_[0] eq $_[0]',        parent=> 'str_ne'},
-  'str_wc' => {help=> 'word case character', code=> 'ucfirst $_[0] eq $_[0]',   parent=> 'str_ne'},
-  'name'   => {help=> 'word character (alphanum+_)', code=> '$_[0] =~ /^\w+$/', parent=> 'value',  default=> 'name'},
-
-  'TYPE'   => {help=> 'type name',           code=> 'is_known $_[0]',           parent=> 'name',   default=> 'str_ne'},
-  'CODE'   => {help=> 'code reference',      code=> q/ref $_[0] eq 'CODE'/,                                       shortcut=> '&'},
-  'ARRAY'  => {help=> 'array reference',     code=> q/ref $_[0] eq 'ARRAY'/,                                      shortcut=> '@'},
-  'HASH'   => {help=> 'hash reference',      code=> q/ref $_[0] eq 'HASH'/,                                       shortcut=> '%'},
-  'ARGS'   => {help=> 'array or hash ref',   code=> q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/},
-  'REF'    => {help=> 'reference',           code=> 'ref $_[0]'},
-  'OBJ'    => {help=> 'blessed object',      code=> 'blessed($_[0])'},
-  'DEF'    => {help=> 'defined value',       code=> 'defined $_[0]'},
-  'ANY'    => {help=> 'any data',            code=> 1},
-);
-my %shortcut = ( '-' => 0, '>' => 0, '<' => 0, ',' => 0,); #shortcut names 
-################################################################################
-while (@standard){
-    my $error = add(shift @standard, shift @standard);
-    die $error if $error;
+    'TYPE'   => {help=> 'type name',           code=> 'is_known $_[0]',           parent=> 'name',   default=> 'str_ne'},
+    'CODE'   => {help=> 'code reference',      code=> q/ref $_[0] eq 'CODE'/,                                       shortcut=> '&'},
+    'ARRAY'  => {help=> 'array reference',     code=> q/ref $_[0] eq 'ARRAY'/,                                      shortcut=> '@'},
+    'HASH'   => {help=> 'hash reference',      code=> q/ref $_[0] eq 'HASH'/,                                       shortcut=> '%'},
+    'ARGS'   => {help=> 'array or hash ref',   code=> q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/},
+    'REF'    => {help=> 'reference',           code=> 'ref $_[0]'},
+    'OBJ'    => {help=> 'blessed object',      code=> 'blessed($_[0])'},
+    'DEF'    => {help=> 'defined value',       code=> 'defined $_[0]'},
+    'ANY'    => {help=> 'any data',            code=> 1},
+    );
+    while (@standard){
+        my $error = add(shift @standard, shift @standard);
+        die $error if $error;
+    }
+}
+sub state {
+    my %state = ();
+    for my $k (keys %set){
+        @{$state{$k}{'check'}} = @{$set{$k}{'check'}};
+        $state{$k}{'default'} = $set{$k}{'default'} if exists $set{$k}{'default'};
+        $state{$k}{'shortcut'} = $set{$k}{'shortcut'} if exists $set{$k}{'shortcut'};
+    }
+    \%state;
+}
+sub restate {
+    my ($state) = @_;
+    return if %set or ref $state ne 'HASH';
+    for my $k (keys %$state){
+        next unless ref $state->{$k} eq 'HASH' and ref $state->{$k}{'check'} eq 'ARRAY';
+        $set{$k} = $state->{$k};
+        $shortcut{ $state->{$k}{'shortcut'} } = $k if exists $state->{$k}{'shortcut'};
+    }
 }
 ################################################################################
-sub add    {                                # name help cref parent? --> bool
+sub add    { # ~type ~help ~check - $default ~parent ~shortcut --> ~error
     my ($type, $help, $code, $default, $parent, $shortcut) = @_;
     return "type name: '$type' is already in use" if is_known($type);
     return "type name: '$type' contains none word character" unless $type =~ /^\w+$/;
@@ -83,15 +103,15 @@ sub add    {                                # name help cref parent? --> bool
     }
     0;
 }
-sub delete {                              # name       -->  bool
+sub delete {  # ~type       -->  ~error
     my ($name) = @_;
-    return 0 unless is_known($name);      # can only delete existing types
-    return 0 if is_standard($name);       # can't delete std types
-    my ($package, $sub, $file, $line) = Kephra::Base::Package::sub_caller();
-    return 0 unless _owned($name, $package, $file); # only creator can delete type
+    return "type name $name in not in use" unless is_known($name);
+    return "type $name can not be deleted (is standard)" if is_standard($name);
+    my ($package, $file, $line) = caller();
+    return "type $name  is owned by another package and can not be deleted" unless _owned($name, $package, $file);
     delete $shortcut{ $set{$name}{'shortcut'} } if exists $set{$name}{'shortcut'};
     delete $set{$name};
-    return 1;
+    return 0;
 }
 ################################################################################
 sub list_names     { keys %set }                    #            --> @~type

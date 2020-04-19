@@ -4,8 +4,8 @@ use warnings;
 package Kephra::Base::Class::Attribute::Type;
 use Kephra::Base::Data::Type;
 
-sub add               {} # ~type %def           -->  ?         %def - parent @check default help?
-sub delete            {} # ~type                -->  ?
+sub add               {} # ~type %def           -->  ~error        %def - parent @check default help?
+sub delete            {} # ~type                -->  ~error
 sub list_names        {} #                      -->  @~type
 
 sub is_known          {} # ~type                -->  ?

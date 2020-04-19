@@ -7,17 +7,20 @@ use warnings;
 #            help => 'valid index of array', parent => 'int_pos' },
 
 package Kephra::Base::Data::Type::Relative;
-
 use Kephra::Base::Data::Type;
 
- #                                @arguments[] ~~ {~label, ~type - ~var, ~eval}
-sub add          {} # ~type ~code @arguments - $default ~parent ~shortcut --> ? 
-sub delete       {} # ~type                                               --> ?
+sub init               {} #                    compile default types
+sub state              {} #        --> %state  dump all active types data
+sub restate            {} # %state -->         recreate all type checker from data dump
 
-sub list_names       {}   #                      --> @~type
-sub list_shortcuts   {}   #                      --> @~shortcut
-sub resolve_shortcut {}   #  ~shortcut           -->  ~type
-sub resolve_compount {}   #  ~shortcut           -->  ~type
+ #                                @arguments[] ~~ {~label, ~type - ~var, ~eval}
+sub add                {} # ~type ~code @arguments - $default ~parent ~shortcut --> ~error 
+sub delete             {} # ~type                                               --> ~error
+
+sub list_names         {} #                      --> @~type
+sub list_shortcuts     {} #                      --> @~shortcut
+sub resolve_shortcut   {} #  ~shortcut           -->  ~type
+sub resolve_compount   {} #  ~shortcut           -->  ~type
 
 sub is_known           {} # ~type                -->  ?      # is a data type
 sub is_standard        {} # ~type                -->  ?      # is predefined ?
