@@ -50,7 +50,9 @@ sub state {
     my %state = ();
     for my $k (keys %set){
         @{$state{$k}{'check'}} = @{$set{$k}{'check'}};
-        $state{$k}{'default'} = $set{$k}{'default'} if exists $set{$k}{'default'};
+        $state{$k}{'default'}  = $set{$k}{'default'}  if exists $set{$k}{'default'};
+        $state{$k}{'file'}     = $set{$k}{'file'}     if exists $set{$k}{'file'};
+        $state{$k}{'package'}  = $set{$k}{'package'}  if exists $set{$k}{'package'};
         $state{$k}{'shortcut'} = $set{$k}{'shortcut'} if exists $set{$k}{'shortcut'};
     }
     \%state;
@@ -87,7 +89,6 @@ sub add    { # ~type ~help ~check - $default ~parent ~shortcut --> ~error
     if (defined $parent){
         unshift @{$set{$type}{'check'}}, @{$set{$parent}{'check'}};
         $set{$type}{'default'} = $set{$parent}{'default'} if exists $set{$parent}{'default'};
-        $set{$type}{'parent'} = $parent;
     }
     if ($package ne __PACKAGE__){
         $set{$type}{'file'}    = $file;

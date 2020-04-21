@@ -7,9 +7,11 @@ package Kephra::Base::Class::Attribute::Type;  # types with acess to attributes
 our $VERSION = 0.05;
 use Kephra::Base::Data::Type::Relative;
 
-sub new {  my ($pkg) = @_;   bless { } }
-sub state{   }
-sub restate{   }
+sub new {  my ($pkg) = @_;  bless { } }
+sub state {
+}
+sub restate { 
+}
 
 
 sub add            { # ~name %def -->  bool         %def : parent @check default? help?

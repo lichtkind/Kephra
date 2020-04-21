@@ -4,7 +4,7 @@ use warnings;
 package Kephra::Base::Data;
 our $VERSION = 0.01;
 use Scalar::Util qw/blessed/;
-use Kephra::Base::Data::Type::Relative;
+use Kephra::Base::Data::Type;
 use Exporter 'import';
 our @EXPORT_OK = qw/clone clone_list clone_data/;
 
@@ -41,5 +41,7 @@ sub clone_list { #               [data] --> [data]
 }
 
 ################################################################################
+
+Kephra::Base::Data::Type::init;
 
 1;

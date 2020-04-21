@@ -206,12 +206,10 @@ is( ref $state->{'int'},      'HASH', 'int is known the state hash');
 is( $state->{'CODE'}{'shortcut'},'&', 'also shortcuts are saved');
 is( ref $state->{$type_name}, 'HASH', 'custom type is known the state hash');
 
-package Kephra::Base::Data::Type;
-%Kephra::Base::Data::Type::set = ();
-package Typer;
-
-#is( Kephra::Base::Data::Type::is_known('int'), 0, 'all types got deleted');
-
-
+package main;
+#Kephra::Base::Data::Type::restate( $state );
+#is( Kephra::Base::Data::Type::is_known($type_name), 1, 'init could not delete self made types either');
+#is( check_type('int_pos',1),           '', 'recognize positive int');
+#is( check_type('bool',0),              '', 'recognize boolean value false');
 
 exit 0;

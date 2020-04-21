@@ -1,10 +1,12 @@
 use v5.20;
 use warnings;
 
-# data type checks that take more arguments // relative, meta types
+# data type checks that take more arguments // relative or meta types
 # example - valid index of an actual array
 #  index => {code =>'return out of range if $_[0] >= @{$_[1]}', arguments =>[{name => 'array', type => 'ARRAY', default => []},], 
 #            help => 'valid index of array', parent => 'int_pos' },
+# serialize keys: help, code, default, file, package
+
 
 package Kephra::Base::Data::Type::Relative;
 use Kephra::Base::Data::Type;
