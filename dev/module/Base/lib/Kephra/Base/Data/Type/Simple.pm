@@ -6,7 +6,6 @@ use warnings;
 package Kephra::Base::Data::Type::Simple;
 our $VERSION = 0.01;
 use Scalar::Util qw/blessed looks_like_number/;
-
 ################################################################################
 sub new {
     my ($pkg, $name, $help, $code, $file, $package, $default, $parent_type, $shortcut) = @_;
@@ -20,44 +19,59 @@ sub new {
         $help = $name->{'help'}  if exists $name->{'help'};
         $name = exists $name->{'name'} ? $name->{'name'} : undef;
     }
-    return "type name: '$name' contains none word character" unless $name and $name =~ /^\w+$/;
+    return "type name: '$name' contains none word character" unless $name and $name =~ /\W/;
+    return "shortcut of $name: '$shortcut' contains word character" if defined $shortcut and $shortcut =~ /\w/;
+    $help //= '';
+    $code //= '';
+    $file //= '';
+    $package //= '';
+    $shortcut //= '';
+    return "type '$name' has to have help and code or a parent" if $code xor $help or (not $code and ref $parent ne __PACKAGE__);
+    my $check = [];
+    push @$check, $help, $code if $code;
+    if (defined $parent){
+        unshift @$check, @{$parent->{'check'}};
+        $default //= $parent->{'default'};
+    }
+    no warnings "all";
+    my $source = 'sub { ';
+    for (my $i = 0; $i < @$check; $i+=2){
+        $source .= 'return "value $_[0]'." needed to be of type $name, but failed test: $check->[$i]\" unless $check->[$i+1];";
+    }
+    $source .= "return ''}";
+    my $callback = eval $source;
+    return "type $name source '$source' could not eval because $@ !" if $@;
+    my $error = $callback->( $default );
+    return "type $name default value: $default does not pass check: $error!" if $error;
+    bless { callback => $callback, check => $check, default => $default, shortcut => $shortcut, package => $package, file => $file };
 }
-
 sub restate {
-    my ($state) = @_;
-
+    my ($pkg, $state) = @_;
+    my $check = $state->{'check'};
+    no warnings "all";
+    my $source = 'sub { ';
+    for (my $i = 0; $i < @$check; $i+=2){
+        $source .= 'return "value $_[0]'." needed to be of type $name, but failed test: $check->[$i]\" unless $check->[$i+1];";
+    }
+    $source .= "return ''}";
+    $state->{'callback'} = eval $source;
+    bless $state;
 }
 ################################################################################
 sub state {                              
     my ($self) = @_;
-
+    { check => [@{$self->{'check'}}], default => $self->{'default'}, shortcut => $self->{'shortcut'}, 
+      package => $self->{'package'}, file => $self->{'file'} };
 }
-sub get_default_value { $_{0]->{'default'} }      # .type                 -->  $default
-sub get_shortcut      { $_{0]->{'shortcut'} }     # .type                 -->  ~shortcut
-sub is_standard       { not $_{0]->{'package'} }  # .type                 -->  ?
 sub is_owned          {                           # .type ~package ~file  -->  ?
     my ($self, $package, $file) = @_;
     $package eq $self->{'package'} and $file eq $self->{'file'};
 }
+sub is_standard       { not $_{0]->{'package'} }  # .type                 -->  ?
+sub get_default_value { $_{0]->{'default'} }      # .type                 -->  $default
+sub get_shortcut      { $_{0]->{'shortcut'} }     # .type                 -->  ~shortcut
+sub get_callback      { $_{0]->{'callback'} }     # .type                 --> &callback
 ################################################################################
-sub get_callback      {                           # .type                 --> &callback
-    my ($type) = @_;
-    return unless exists $set{$type};
-    return $set{$type}{'callback'} if exists $set{$type}{'callback'};
-    my $c = get_checks($type);
-    no warnings "all";
-    my $l = @$c;
-    $set{$type}{'callback'} = sub {
-        my $val = shift;
-        for (my $i = 0; $i < $l; $i+=2){return "$val needed to be of type $type, but failed test: $c->[$i]" unless $c->[$i+1]->($val)}'';
-    }
-}
-################################################################################
-sub check         {                               # .type $val            --> ~errormsg
-    my ($type, $value) = @_;
-    my $callback = get_callback($type);
-    return "no type named $type known" unless ref $callback;
-    $callback->($value);
-}
+sub check        { $_[0]->{'callback'}->($_[1]) } # .type $val            --> ~errormsg
 
 1;
