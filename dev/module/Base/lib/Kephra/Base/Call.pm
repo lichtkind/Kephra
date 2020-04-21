@@ -4,7 +4,7 @@ use warnings;
 # serializable closure
 
 package Kephra::Base::Call;
-our $VERSION = 0.3;
+our $VERSION = 0.4;
 use Exporter 'import';
 our @EXPORT_OK = (qw/new_call/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
@@ -13,6 +13,12 @@ use Kephra::Base::Data qw/clone_data/;
 sub new_call   {new(__PACKAGE__, @_)}
 sub new {
     my ($pkg, $source, $state, $set_type, $get_type) = @_;
+    if (ref $source eq 'HASH'){
+        $get_type = $source->{'get_type'} if exists $source->{'get_type'};
+        $set_type = $source->{'set_type'} if exists $source->{'set_type'};
+        $state    = $source->{'state'} if exists $source->{'state'};
+        $source   = exists $source->{'source'} ? $source->{'source'} : undef;
+    }
     return 'need at least one argument: the perl source code to run as this call' unless defined $source;
     return "set type: $set_type does not exist" if defined $set_type and not Kephra::Base::Data::Type::is_known( $set_type );
     return "get type: $get_type does not exist" if defined $get_type and not Kephra::Base::Data::Type::is_known( $get_type );
