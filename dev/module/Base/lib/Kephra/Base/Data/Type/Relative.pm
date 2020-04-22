@@ -1,12 +1,17 @@
 use v5.20;
 use warnings;
 
+package Kephra::Base::Data::Type::Relative;
+our $VERSION = 0.1;
+use Scalar::Util qw/blessed looks_like_number/;
+
+1;
+
+__END__
+
 # data type checker that tage arguments, standards (here) + added by any package (owner)
 # types can inherit from simple ones (KB::Data::Type), help is descrition, all error msg inside code
 
-package Kephra::Base::Data::Type::Relative;
-our $VERSION = 0.05;
-use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type;
 use Kephra::Base::Package;
 use Exporter 'import';

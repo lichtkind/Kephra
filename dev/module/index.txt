@@ -17,10 +17,11 @@ our development model in more details: doc/CompleteProgramming.pod
                                     N = Not yet (planned)
 --------------------------------------------------------------------------------
    Kephra::Base::Package                    C
-   Kephra::Base::Data::Type                 C
-   Kephra::Base::Data::Type::Relative           I
+   Kephra::Base::Data::Type::Simple         C
+   Kephra::Base::Data::Type::Relative             I
+   Kephra::Base::Data::Type                  P  MB
    Kephra::Base::Data                       C
-   Kephra::Base::Call                       CPSUMBI
+   Kephra::Base::Call                       C
  - Kephra::Base                             C
 --------------------------------------------------------------------------------
    Kephra::Base::Class::Scope               C

@@ -171,3 +171,6 @@ sub guess        { # val          --> [name]
 }
 ################################################################################
 1;
+__END__
+    return "type name: '$name' is empty or contains none word character" unless $name and $name !~ /\W/;
+    return "shortcut of $name: '$shortcut' contains word character" if defined $shortcut and $shortcut !~ /\w/;
