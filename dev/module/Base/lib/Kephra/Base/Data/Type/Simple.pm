@@ -21,7 +21,7 @@ sub new {
     $help //= '';
     $code //= '';
     return "need type 'name' as first or named argument to create simpe type object" unless defined $name;
-    return "parent type object of $name has to be instance of ".__PACKAGE__ if defined $parent and ref $parent ne __PACKAGE__;
+    return "parent type object of type $name has to be instance of ".__PACKAGE__ if defined $parent and ref $parent ne __PACKAGE__;
     return "need help text and code or a parent type object to create type $name" if $code xor $help or (not $code and not defined $parent);
     my $check = [];
     push @$check, $help, $code if $code;
@@ -29,7 +29,7 @@ sub new {
         unshift @$check, @{$parent->get_check_pairs};
         $default //= $parent->get_default_value;
     }
-    return "need a default value or at least a parent type to create type $name" unless defined $name;
+    return "need a default value or at least a parent type to create type $name" unless defined $default;
     my $source = _compile_( $name, $check );
     my $coderef = eval $source;
     return "type $name checker source code '$source' could not eval because: $@ !" if $@;
@@ -45,6 +45,7 @@ sub restate {                                     # %state                -->  .
 sub _compile_ {
     my ($name, $check) = @_;
     no warnings "all";
+    no strict;
     my $source = 'sub { ';
     for (my $i = 0; $i < @$check; $i+=2){
         $source .= 'return "value $_[0]'." needed to be of type $name, but failed test: $check->[$i]\" unless $check->[$i+1];";

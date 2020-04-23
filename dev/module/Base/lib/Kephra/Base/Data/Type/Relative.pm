@@ -18,9 +18,16 @@ sub new {
         $help = $name->{'help'}  if exists $name->{'help'};
         $name = exists $name->{'name'} ? $name->{'name'} : undef;
     }
-    return "need type 'name' as first or named argument to create simpe type object" unless defined $name;
-    return "parent type object of $name has to be instance of ".__PACKAGE__ if defined $parent and ref $parent ne __PACKAGE__;
-    return "need help text and code or a parent type object to create type $name" if $code xor $help or (not $code and not defined $parent);
+    return "need type 'name' as first or named argument to create relative type object" unless defined $name;
+    return "need 'help' string as second or named argument to create relative type $name" unless defined $help;
+    return "need argument definitions in a hash as third or named argument to create relative type $name" unless ref $args eq 'HASH';
+    return "need 'code' string as forth or named argument to create relative type $name" unless defined $code;
+    return "optional parent type object of type $name has to be instance of Kephra::Base::Data::Type::Simple"
+        if defined $parent and ref $parent ne 'Kephra::Base::Data::Type::Simple';
+    $default //= $parent->get_default_value if defined $parent;
+    return "need a default value or at least a parent type to create type $name" unless defined $default;
+
+
     my $check = [];
     push @$check, $help, $code if $code;
     if (defined $parent){
