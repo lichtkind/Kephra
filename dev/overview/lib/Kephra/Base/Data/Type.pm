@@ -2,9 +2,6 @@ use v5.20;
 use warnings;
 
 # KBOS data types, standards + added by any package (owner)
-# example      : bool  => {help=> '0 or 1', code=> '$_[0] eq 0 or $_[0] eq 1', parent=> 'value',  default=>0, shortcut=> '?'}
-# compiled to  : bool  => {check => ['not a reference', 'not ref $_[0]'], '0 or 1', '$_[0] eq 0 or $_[0] eq 1'], 
-#                          callback => eval{ sub{ return 'not a reference' if not ref $_[0]; ....; 0} } }
 # serialize keys: check, shortcut, default, file, package
 
 package Kephra::Base::Data::Type;

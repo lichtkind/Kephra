@@ -5,7 +5,7 @@ use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 use Kephra::Base::Data::Type::Simple;
-use Test::More tests => 55;
+use Test::More tests => 71;
 
 my $pkg = 'Kephra::Base::Data::Type::Simple';
 my $value = Kephra::Base::Data::Type::Simple->new('value','not a reference', 'not ref $_[0]', '');
@@ -14,6 +14,11 @@ is( $value->get_name, 'value',      'remembered type name');
 is( $value->get_default_value, '',  'remembered default value');
 is( $value->check(3), '',           'checker of type "value" has true positive result');
 ok( $value->check([]),              'checker of type "value" has true negative result');
+my $checks = $value->get_check_pairs;
+is( ref $checks, 'ARRAY',           'check pairs are stored in an ARRAY');
+is( @$checks, 2,                    'type value has only one check pair ');
+is( $checks->[0], 'not a reference','check pair key is help string');
+is( $checks->[1], 'not ref $_[0]',  'check pair value is code string');
 
 my $state = $value->state;
 is( ref $state, 'HASH',              'state dump is hash ref');
@@ -23,6 +28,11 @@ is( $vclone->get_name, 'value',     'type name is correct');
 is( $vclone->get_default_value, '', 'types default value is correct');
 is( $vclone->check(3), '',          'checker of type "value" clone has true positive result');
 ok( $vclone->check([]),             'checker of type "value" clone has true negative result');
+my $checks = $vclone->get_check_pairs;
+is( ref $checks, 'ARRAY',           'check pairs are stored in an ARRAY');
+is( @$checks, 2,                    'type value has only one check pair ');
+is( $checks->[0], 'not a reference','check pair key is help string');
+is( $checks->[1], 'not ref $_[0]',  'check pair value is code string');
 
 my $bool = Kephra::Base::Data::Type::Simple->new('bool','0 or 1', '$_[0] eq 0 or $_[0] eq 1', 0, $value);
 is( ref $bool, $pkg,               'created child type object bool');
@@ -33,6 +43,13 @@ is( $bool->check(1), '',           'checker of type "bool" has second true posit
 ok( $bool->check([]),              'checker of type "bool" has true negative result');
 ok( $bool->check(5),               'checker of type "bool" has second true negative result');
 ok( $bool->check('--'),            'checker of type "bool" has third true negative result');
+my $checks = $bool->get_check_pairs;
+is( ref $checks, 'ARRAY',           'check pairs are stored in an ARRAY');
+is( @$checks, 4,                    'type bools has two check pair ');
+is( $checks->[0], 'not a reference','first check pair key is inherited help string');
+is( $checks->[1], 'not ref $_[0]',  'first pair pair value is inherited code string');
+is( $checks->[2], '0 or 1',         'second check pair key is help string');
+is( $checks->[3], '$_[0] eq 0 or $_[0] eq 1',  'second check pair value is code string');
 
 my $bclone = Kephra::Base::Data::Type::Simple->restate( $bool->state );
 is( ref $bclone, $pkg,             'recreated child type object bool');
@@ -51,6 +68,11 @@ is( $str->get_default_value, '',   'inherited default value correctly');
 is( $str->check('-'), '',          'checker of type "str" has true positive result');
 is( $str->check(1), '',            'checker of type "str" has second true positive result');
 ok( $str->check([]),               'checker of type "str" has true negative result');
+my $checks = $str->get_check_pairs;
+is( ref $checks, 'ARRAY',           'check pairs are stored in an ARRAY');
+is( @$checks, 2,                    'type bools has two check pair ');
+is( $checks->[0], 'not a reference','first check pair key is inherited help string');
+is( $checks->[1], 'not ref $_[0]',  'first pair pair value is inherited code string');
 
 $str = Kephra::Base::Data::Type::Simple->new('str', '', '', undef, $value);
 is( ref $str, $pkg,                'created rename type object str with empty help and code');
@@ -69,5 +91,12 @@ is( $bool->check(1), '',           'checker of type "bool" has second true posit
 ok( $bool->check([]),              'checker of type "bool" has true negative result');
 ok( $bool->check(5),               'checker of type "bool" has second true negative result');
 ok( $bool->check('--'),            'checker of type "bool" has third true negative result');
+my $checks = $bool->get_check_pairs;
+is( ref $checks, 'ARRAY',           'check pairs are stored in an ARRAY');
+is( @$checks, 4,                    'type bools has two check pair ');
+is( $checks->[0], 'not a reference','first check pair key is inherited help string');
+is( $checks->[1], 'not ref $_[0]',  'first pair pair value is inherited code string');
+is( $checks->[2], '0 or 1',         'second check pair key is help string');
+is( $checks->[3], '$_[0] eq 0 or $_[0] eq 1',  'second check pair value is code string');
 
 exit 0;

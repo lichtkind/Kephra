@@ -10,6 +10,7 @@ sub restate            {} # %state                               --> .type | ~er
 sub state              {} # .type                 --> %state
 sub get_name           {} # .type                 --> ~name
 sub get_default_value  {} # .type                 --> $default
+sub get_check_pairs    {} # .type                 --> @checks   # [help, code, ..]
 sub check              {} # .type $val            --> ~errormsg
 
 1;
