@@ -3,39 +3,38 @@ use warnings;
 
 # serializable data type object that checks values against named and typed arguments if contract holds
 
-package Kephra::Base::Data::Type::Relative;
+package Kephra::Base::Data::Type::Parametric;
 our $VERSION = 0.1;
 use Scalar::Util qw/blessed looks_like_number/;
+use Kephra::Base::Type::Simple;
 
 ################################################################################
 sub new {
-    my ($pkg, $name, $help, $args, $code, $default, $parent) = @_;
+    my ($pkg, $name, $help, $parameter, $code, $parent, $default) = @_;
     if (ref $name eq 'HASH'){
-        $default  = $name->{'default'} if exists $name->{'default'};
-        $parent  = $name->{'parent'} if exists $name->{'parent'};
-        $code   = $name->{'code'}  if exists $name->{'code'};
-        $args  = $name->{'args'}  if exists $name->{'args'};
-        $help = $name->{'help'}  if exists $name->{'help'};
+        $parameter = $name->{'parameter'} if exists $name->{'parameter'};
+        $default  = $name->{'default'}  if exists $name->{'default'};
+        $parent  = $name->{'parent'}  if exists $name->{'parent'};
+        $code   = $name->{'code'}   if exists $name->{'code'};
+        $help  = $name->{'help'}  if exists $name->{'help'};
         $name = exists $name->{'name'} ? $name->{'name'} : undef;
     }
-    return "need type 'name' as first or named argument to create relative type object" unless defined $name;
-    return "need 'help' string as second or named argument to create relative type $name" unless defined $help;
-    return "need argument definitions in a hash as third or named argument to create relative type $name" unless ref $args eq 'HASH';
-    return "need 'code' string as forth or named argument to create relative type $name" unless defined $code;
-    return "optional parent type object of type $name has to be instance of Kephra::Base::Data::Type::Simple"
-        if defined $parent and ref $parent ne 'Kephra::Base::Data::Type::Simple';
-    $default //= $parent->get_default_value if defined $parent;
-    return "need a default value or at least a parent type to create type $name" unless defined $default;
+    return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref), 'code' (str) ".
+           "and 'parent' (Kephra::Base::Data::Type::Simple) to create parametric type object" 
+        unless defined $name and defined $help and defined $parameter and defined $code and defined $parent;
+    return "parameter definition has to be an hashref and contain the key 'type' (Kephra::Base::Data::Type::Simple) to create parametric type $name" 
+        if ref $parameter ne 'HASH' or ref $parameter->{'type'} ne 'Kephra::Base::Data::Type::Simple';
+    return "default value '$parameter->{default}' of type $name 's parameter does not match his type $parameter->{type}{name}" 
+        if exists $parameter->{'default'} and $parameter->{'type'}->check($parameter->{'default'});
+    return "parent has to be instance of Kephra::Base::Data::Type::Simple to create parametric type $name" 
+        if ref $parent ne 'Kephra::Base::Data::Type::Simple';
+    $default //= $parent->get_default_value;
+    $parameter->{'default'} //= $parameter->{'type'}->get_default_value;
+    $parameter->{'name'} //= $parameter->{'type'}->get_name;
 
-
-    my $check = [];
-    push @$check, $help, $code if $code;
-    if (defined $parent){
-        unshift @$check, @{$parent->get_checks};
-        $default //= $parent->get_default_value;
-    }
-    return "need a default value or at least a parent type to create type $name" unless defined $name;
+    my $check = @{$parent->get_checks};
     my $source = _compile_( $check, $name );
+    no warnings "all";
     my $callback = eval $source;
     return "type $name checker source code '$source' could not eval because: $@ !" if $@;
     my $error = $callback->( $default );
@@ -44,17 +43,19 @@ sub new {
 }
 sub restate {                                     # %state                -->  .type | ~errormsg
     my ($pkg, $state) = @_;
+    no warnings "all";
     $state->{'callback'} = eval _compile_( $state->{'check'}, $state->{'name'} );
     bless $state;
 }
 sub _compile_ {
-    my ($check, $name) = @_;
-    no warnings "all";
-    my $source = 'sub { ';
+    my ($name, $check, $code, $parameter) = @_;
+
+    my $source = 'sub { my ($val, $par) = @_;'.Kephra::Base::Data::Type::Simple::asm_($name, $check);
+   # $source .= "$parameter";
     for (my $i = 0; $i < @$check; $i+=2){
         $source .= 'return "value $_[0]'." needed to be of type $name, but failed test: $check->[$i]\" unless $check->[$i+1];";
     }
-    $source . "return ''}";
+    $source . $code."return ''}";
 }
 ################################################################################
 sub state {                                       # .type                 -->  %state
@@ -64,6 +65,7 @@ sub get_name          { $_[0]->{'name'} }         # .type                 -->  ~
 sub get_checks        { $_[0]->{'check'} }        # .type                 -->  @check
 sub get_default_value { $_[0]->{'default'} }      # .type                 -->  $default
 ################################################################################
+sub curry        { $_[0]->{'callback'}->($_[1]) } # .type $val            -->  ~errormsg
 sub check        { $_[0]->{'callback'}->($_[1]) } # .type $val            -->  ~errormsg
 ################################################################################
 

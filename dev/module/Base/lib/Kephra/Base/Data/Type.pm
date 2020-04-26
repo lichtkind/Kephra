@@ -8,6 +8,8 @@ package Kephra::Base::Data::Type;
 our $VERSION = 0.08;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Package;
+use Kephra::Base::Data::Type::Simple;
+use Kephra::Base::Data::Type::Parametric;
 use Exporter 'import';
 our @EXPORT_OK = (qw/check_type guess_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
@@ -21,7 +23,7 @@ sub init {
     'bool'   => {help=> '0 or 1',              code=> '$_[0] eq 0 or $_[0] eq 1', parent=> 'value',  default=> 0,   shortcut=> '?'},
     'num'    => {help=> 'number',              code=> 'looks_like_number($_[0])', parent=> 'value',  default=> 0,   shortcut=> '+'},
     'num_pos'=> {help=> 'greater equal zero',  code=> '$_[0]>=0',                 parent=> 'num', },
-    'int'    => {help=> 'integer',             code=> 'int $_[0] == $_[0]',       parent=> 'num', },
+    'int'    => {help=> 'integer',             code=> 'int $_[0] == $_[0]',       parent=> 'num',                   shortcut=> '|' },
     'int_pos'=> {help=> 'positive integer',    code=> '$_[0]>=0',                 parent=> 'int', },
     'int_spos'=>{help=> 'strictly positive',   code=> '$_[0] > 0',                parent=> 'int',    default=> 1},
     'str'    => {                                                                 parent=> 'value'},                                 # pure rename

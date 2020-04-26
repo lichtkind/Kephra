@@ -1,15 +1,22 @@
 use v5.20;
 use warnings;
 
-# data type checks that take more arguments // relative or meta types
-# example - valid index of an actual array
-#  index => {code =>'return out of range if $_[0] >= @{$_[1]}', arguments =>[{name => 'array', type => 'ARRAY', default => []},], 
-#            help => 'valid index of array', parent => 'int_pos' },
-# serialize keys: help, code, default, file, package
+# data type depending second value (parameter) // example - valid index of an actual array
+# { name => 'index', help => 'valid index of array', code =>'return out of range if $_[0] >= @{$_[1]}', 
+#                    parameter =>[{name => 'array', type => 'ARRAY', default => []},],      parent => 'int_pos' },
 
-
-package Kephra::Base::Data::Type::Relative;
+package Kephra::Base::Data::Type::Parametric;
 use Kephra::Base::Data::Type;
+
+sub new                {} # ~name ~help ~code - .parent $default --> .type | ~errormsg # optionally as %args # required: .parent | $default
+sub restate            {} # %state                               --> .type | ~errormsg
+sub state              {} # .type                 --> %state
+sub get_name           {} # .type                 --> ~name
+sub get_default_value  {} # .type                 --> $default
+sub get_check_pairs    {} # .type                 --> @checks   # [help, code, ..]
+sub check              {} # .type $val            --> ~errormsg
+sub curry              {} # .type $val            --> ~errormsg
+
 
 sub init               {} #                    compile default types
 sub state              {} #        --> %state  dump all active types data

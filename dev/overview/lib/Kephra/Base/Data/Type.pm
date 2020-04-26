@@ -32,3 +32,31 @@ sub guess_type        {} #                                         alias:
 sub guess             {} # $val                     -->  @~type
 
 1;
+
+__END__
+
+shortcuts
+
+@ arrayref
+% hashref
+\ any ref
+$ value - none ref
+~ string
+? bool
++ number
+\x{00a7} integer
+# 
+'
+"
+!
+/
+^
+| type name
+-
+:
+;
+=
+_
+
+
+not allowes , ( ) < >  { }

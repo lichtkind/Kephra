@@ -5,12 +5,13 @@ use warnings;
 # example      : {name => bool, help=> '0 or 1', code=> '$_[0] eq 0 or $_[0] eq 1', parent=> 'value',  default =>0}
 # compiled to  : {check => ['not a reference', 'not ref $_[0]', '0 or 1', '$_[0] eq 0 or $_[0] eq 1'], 
 #                 coderef => eval{ sub{ return $_[0] 'failed not a reference' unless not ref $_[0]; ...; 0} } }
+
 package Kephra::Base::Data::Type::Simple;
-our $VERSION = 0.1;
+our $VERSION = 1.0;
 use Scalar::Util qw/blessed looks_like_number/;
 ################################################################################
 sub new {
-    my ($pkg, $name, $help, $code, $default, $parent) = @_;
+    my ($pkg, $name, $help, $code, $parent, $default) = @_;
     if (ref $name eq 'HASH'){
         $default = $name->{'default'} if exists $name->{'default'};
         $parent = $name->{'parent'} if exists $name->{'parent'};
@@ -32,9 +33,9 @@ sub new {
     return "need a default value or at least a parent type to create type $name" unless defined $default;
     my $source = _compile_( $name, $check );
     my $coderef = eval $source;
-    return "type $name checker source code '$source' could not eval because: $@ !" if $@;
+    return "type '$name' checker source code '$source' could not eval because: $@ !" if $@;
     my $error = $coderef->( $default );
-    return "type $name default value '$default' does not pass check because: $error!" if $error;
+    return "type '$name' default value '$default' does not pass check because: $error!" if $error;
     bless { name => $name, coderef => $coderef, check => $check, default => $default };
 }
 sub restate {                                     # %state                -->  .type | ~errormsg
@@ -42,15 +43,15 @@ sub restate {                                     # %state                -->  .
     $state->{'coderef'} = eval _compile_( $state->{'name'}, $state->{'check'} );
     bless $state;
 }
-sub _compile_ {
+################################################################################
+sub _compile_ { 'sub { my ($value) = @_; no warnings "all";'. _asm_(@_) . "return ''}" }
+sub _asm_ {
     my ($name, $check) = @_;
-    no warnings "all";
-    no strict;
-    my $source = 'sub { ';
+    my $source = '';
     for (my $i = 0; $i < @$check; $i+=2){
-        $source .= 'return "value $_[0]'." needed to be of type $name, but failed test: $check->[$i]\" unless $check->[$i+1];";
+        $source .= 'return "value $value'." needed to be of type $name, but failed test: $check->[$i]\" unless $check->[$i+1];"
     }
-    $source . "return ''}";
+    $source;
 }
 ################################################################################
 sub state {                                       # .type                 -->  %state

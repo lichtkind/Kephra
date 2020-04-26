@@ -5,7 +5,7 @@ use warnings;
 
 package Kephra::Base::Data::Type::Simple;
 
-sub new                {} # ~name ~help ~code $default - .parent --> .type | ~errormsg # optionally as %args
+sub new                {} # ~name ~help ~code - .parent $default --> .type | ~errormsg # optionally as %args # required: .parent | $default
 sub restate            {} # %state                               --> .type | ~errormsg
 sub state              {} # .type                 --> %state
 sub get_name           {} # .type                 --> ~name
