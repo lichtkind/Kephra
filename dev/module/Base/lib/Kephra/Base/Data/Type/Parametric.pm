@@ -40,14 +40,15 @@ sub new {   # ~name  ~help  %parameter  ~code  .parent - $default --> .ptype | ~
     } else {
         $parameter = $parameter->{'type'};
     }
-    my $source = _compile_( $name, $parent->get_checks, $code, $parameter );
+    my $checks = $parent->get_check_pairs;
+    my $source = _compile_( $name, $checks, $code, $parameter );
     my $coderef = eval $source;
     return "parametric type $name checker source code '$source' could not eval because: $@ !" if $@;
     my $error = $coderef->( $default, $parameter->get_default_value);
-    return "type $name default value '$default' with parameter " . $parameter->get_name.' default value ' . $parameter->get_default_value.
+    return "type '$name' default value '$default' with parameter '" . $parameter->get_name.'\' default value ' . $parameter->get_default_value.
            " does not pass check '$source' because: $error!" if $error;
-    bless { name => $name, help => $help, code => $code, checks => $parent->get_checks, default => $default,
-            coderef => $coderef, trustcoderef => eval _compile_with_safe_param_( $name, $parent->get_checks, $code), parameter => $parameter};
+    bless { name => $name, help => $help, code => $code, checks => $checks, default => $default,
+            coderef => $coderef, trustcoderef => eval _compile_with_safe_param_( $name, $checks, $code), parameter => $parameter};
 }
 sub restate {                                     # %state                -->  .type | ~errormsg
     my ($pkg, $state) = @_;
@@ -60,7 +61,7 @@ sub restate {                                     # %state                -->  .
 sub _compile_ {
     my ($name, $check, $code, $parameter) = @_;
     'sub { my ($param, $value) = @_; no warnings "all";'
-    . Kephra::Base::Data::Type::Simple::_asm_("$name parameter ".$parameter->get_name, $parameter->get_checks)
+    . Kephra::Base::Data::Type::Simple::_asm_("$name parameter ".$parameter->get_name, $parameter->get_check_pairs)
     . '($value, $param)=($param, $value);' . Kephra::Base::Data::Type::Simple::_asm_($name, $check) . $code . ";return ''}"
 }
 sub _compile_with_safe_param_ {
