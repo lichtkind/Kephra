@@ -5,7 +5,7 @@ use warnings;
 
 package Kephra::Base::Class::Attribute::Type;  # types with acess to attributes
 our $VERSION = 0.05;
-use Kephra::Base::Data::Type::Relative;
+use Kephra::Base::Data::Type::Parametric;
 
 sub new {  my ($pkg) = @_;  bless { } }
 sub state {

@@ -60,3 +60,16 @@ _
 
 
 not allowes , ( ) < >  { }
+
+
+my @standard = ( # standard types - no package can delete them
+  index => {code =>'return out of range if $_[0] >= @{$_[1]}', arguments =>[{name => 'array', type => 'ARRAY', default => []},], 
+            help => 'valid index of array', parent => 'int_pos' },
+  typed_array => {code => 'for my $vi (0..$#{$_[0]}){my $ret = $_[1]->($_[0][$vi]); return "array element $vi : $ret" if $ret}',
+                  arguments =>[{name => 'type name', type =>'TYPE', default => 'str', eval => 'Kephra::Base::Data::Type::get_callback($_[1])'} ,],
+                  help => 'array with typed elements', parent => 'ARRAY', shortcut => '@', },
+  typed_hash  => {code => 'for my $vk (keys %{$_[0]}){my $ret = $_[1]->($_[0]{$vk}); return "hash value of key $vk : $ret" if $ret}',
+                  arguments =>[{name => 'type name', type =>'TYPE', default => 'str', eval => 'Kephra::Base::Data::Type::get_callback($_[1])'} ,
+                  help => 'hash with typed values', parent => 'HASH', shortcut => '%',],},
+);
+set
