@@ -3,7 +3,7 @@ use warnings;
 
 package  Kephra::Base::Call;
 
-sub new        {} # ~source - $state ~set_type ~get_type --> .call|~evalerror|~error   # create call object with own source and state
+sub new        {} # ~source - $state .set_type .get_type --> .call|~evalerror|~error   # create call object with own source and state
 sub clone      {} # .call                                --> .call                     # create call object with same source and types and same (or different) state
 sub restate    {} # %state                               --> .call|~evalerror|~error   # create call object from state
 sub state      {} # .call                                --> %state                    # dump complete internal state of object (all attr) {state => .., source => ..}

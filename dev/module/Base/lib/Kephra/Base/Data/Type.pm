@@ -5,8 +5,7 @@ use warnings;
 # types do inherit from each other, each child adds one check (code) and an according help message
 
 package Kephra::Base::Data::Type;
-our $VERSION = 0.08;
-use Scalar::Util qw/blessed looks_like_number/;
+our $VERSION = 0.1;
 use Kephra::Base::Package;
 use Kephra::Base::Data::Type::Simple;
 use Kephra::Base::Data::Type::Parametric;
@@ -14,34 +13,46 @@ use Exporter 'import';
 our @EXPORT_OK = (qw/check_type guess_type known_type/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 my (%set, %shortcut);        # storage for all active types
+my %forbidden_shortcuts = ('{' => 0, '}' => 0, '(' => 0, ')' => 0, '<' => 0, '>' => 0, ',' => 0);
 ##############################################################################
 sub init {
     return if %set;
-    %shortcut = ( '-' => 0, '>' => 0, '<' => 0, ',' => 0,);
-    my @standard = ( # standard types - no package can delete them
-    'value'  => {help=> 'not a reference',     code=> 'not ref $_[0]',                               default=> ''                },
-    'bool'   => {help=> '0 or 1',              code=> '$_[0] eq 0 or $_[0] eq 1', parent=> 'value',  default=> 0,   shortcut=> '?'},
-    'num'    => {help=> 'number',              code=> 'looks_like_number($_[0])', parent=> 'value',  default=> 0,   shortcut=> '+'},
-    'num_pos'=> {help=> 'greater equal zero',  code=> '$_[0]>=0',                 parent=> 'num', },
-    'int'    => {help=> 'integer',             code=> 'int $_[0] == $_[0]',       parent=> 'num',                   shortcut=> '|' },
-    'int_pos'=> {help=> 'positive integer',    code=> '$_[0]>=0',                 parent=> 'int', },
-    'int_spos'=>{help=> 'strictly positive',   code=> '$_[0] > 0',                parent=> 'int',    default=> 1},
-    'str'    => {                                                                 parent=> 'value'},                                 # pure rename
-    'str_ne' => {help=> 'none empty value',    code=> '$_[0] or ~$_[0]',          parent=> 'str',    default=> ' ', shortcut=> '~'}, # check it
-    'str_lc' => {help=> 'lower case character',code=> 'lc $_[0] eq $_[0]',        parent=> 'str_ne'},
-    'str_uc' => {help=> 'upper case character',code=> 'uc $_[0] eq $_[0]',        parent=> 'str_ne'},
-    'str_wc' => {help=> 'word case character', code=> 'ucfirst $_[0] eq $_[0]',   parent=> 'str_ne'},
-    'name'   => {help=> 'word character (alphanum+_)', code=> '$_[0] =~ /^\w+$/', parent=> 'value',  default=> 'name'},
-
-    'TYPE'   => {help=> 'type name',           code=> 'is_known $_[0]',           parent=> 'name',   default=> 'str_ne'},
-    'CODE'   => {help=> 'code reference',      code=> q/ref $_[0] eq 'CODE'/,                                       shortcut=> '&'},
-    'ARRAY'  => {help=> 'array reference',     code=> q/ref $_[0] eq 'ARRAY'/,                                      shortcut=> '@'},
-    'HASH'   => {help=> 'hash reference',      code=> q/ref $_[0] eq 'HASH'/,                                       shortcut=> '%'},
-    'ARGS'   => {help=> 'array or hash ref',   code=> q/ref $_[0] eq 'ARRAY' or ref $_[0] eq 'HASH'/},
-    'REF'    => {help=> 'reference',           code=> 'ref $_[0]'},
-    'OBJ'    => {help=> 'blessed object',      code=> 'blessed($_[0])'},
-    'DEF'    => {help=> 'defined value',       code=> 'defined $_[0]'},
-    'ANY'    => {help=> 'any data',            code=> 1},
+    %simple_shortcut = ( %forbidden_shortcuts, 
+    '~' => 'str', '?' => 'bool', '+' => 'num', '§' => 'int', '@' => 'array_ref', '%' => 'hash_ref', '&' => 'code_ref', '\' => 'any_ref',  );
+    %param_shortcut = ( %forbidden_shortcuts, '@' => 'typed_array', '%' => 'typed_hash');
+    my @standard_simple_types = ( # standard simple types - no package can delete them
+    {name => 'value',     help=> 'defined value',        code=> 'defined $value',                                 default=> '' },
+    {name => 'no_ref',    help=> 'not a reference',      code=> 'not ref $value',             parent=> 'value',                },
+    {name => 'bool',      help=> '0 or 1',               code=> '$value eq 0 or $value eq 1', parent=> 'no_ref',  default=> 0  },
+    {name => 'num',       help=> 'number',               code=> 'looks_like_number($value)',  parent=> 'no_ref',  default=> 0  },
+    {name => 'num_pos',   help=> 'greater equal zero',   code=> '$value >= 0',                parent=> 'num'                   },
+    {name => 'num_spos',  help=> 'greater equal zero',   code=> '$value > 0',                 parent=> 'num',     default=> 1  },
+    {name => 'int',       help=> 'number',               code=> 'int($value) eq $value',      parent=> 'no_ref',  default=> 0  },
+    {name => 'int_pos',   help=> 'greater equal zero',   code=> '$value >= 0',                parent=> 'int'                   },
+    {name => 'int_spos',  help=> 'strictly positive',    code=> '$value > 0',                 parent=> 'int',     default=> 1  },
+    {name => 'str',                                                                           parent=> 'no_ref',               },
+    {name => 'str_ne',    help=> 'none empty string',    code=> '$value or ~$value',          parent=> 'no_ref',  default=> ' '},
+    {name => 'str_lc',    help=> 'lower case string',    code=> 'lc $value eq $value',        parent=> 'str_ne',  default=> 'a'},
+    {name => 'str_uc',    help=> 'upper case string',    code=> 'uc $value eq $value',        parent=> 'str_ne',  default=> 'A'},
+    {name => 'word',      help=> 'word character',       code=> '$value =~ /^\w+$/',          parent=> 'str_ne',  default=> 'a'},
+    {name => 'arg_name',  help=> 'argument name',        code=> 'lc $value eq $value',        parent=> 'word',    default=> 'a'},
+    {name => 'type',      help=> 'simple type name',     code=> 'ref Kephra::Base::Data::Type::get($value)',                          
+                                                                                              parent=> 'arg_name',default=> 'noref'},
+    {name => 'scalar_ref',help=> 'array reference',      code=> q/ref $value eq 'ARRAY'/,                         default=> [] },
+    {name => 'array_ref', help=> 'array reference',      code=> q/ref $value eq 'ARRAY'/,                         default=> [] },
+    {name => 'hash_ref',  help=> 'hash reference',       code=> q/ref $value eq 'HASH'/,                          default=> {} },
+    {name => 'code_ref',  help=> 'code reference',       code=> q/ref $value eq 'CODE'/,                          default=> sub {} },
+    {name => 'object',    help=> 'object reference',     code=> q/blessed($value)/,                               default=> bless {} },
+#   {name => 'kb_object', help=> 'kephra base object',   code=> q/blessed($value)/,                               default=> bless {} },
+    {name => 'any_ref',   help=> 'reference of any sort',code=> q/ref $value/,                                    default=> [] }, 
+    ); #    'ARGS'   => 'ARRAY | HASH }, # ANY
+    my @standard_param_types = ( # standard simple types - no package can delete them
+    {name => 't_ref',     help=> 'reference of given type',  code=> 'return "value $value is not a $param reference" if ref $value ne $param',  parent => 'value',     default=> [] },
+                                                                                                            pameter => {   name => 'refname',     type => 'str',       default=> 'ARRAY'}, 
+    {name => 'index',     help=> 'valid index of array',     code=> 'return "value $value is out of range" if $value >= @$param',               parent => 'int_pos',   default=>  0 },
+                                                                                                            pameter => {   name => 'array',       type => 'array_ref', default=> [1]    }, 
+#    {name => 't_comp',    help=> 'array with typed elements',code=> 'for my $i(0..$#$value){my $error = $parame->check($value->[$i]); return "aray element $i $error" if $error}',
+#                          parent=> 'array_ref',  default=> [1] },  pameter => {   name => 'type name',   type => 'type',      default=> 'int'    }, 
     );
     while (@standard){
         my $error = add(shift @standard, shift @standard);
@@ -177,3 +188,45 @@ __END__
 my $Ttyped_array = para_type('Tarray', 'array with typed elements', {name => 'type', type => $Tval, default => 'ARRAY'}, 'return "value $value is not a $param reference" if ref ne $param', $Tarray, [1]);
     return "type name: '$name' is empty or contains none word character" unless $name and $name !~ /\W/;
     return "shortcut of $name: '$shortcut' contains word character" if defined $shortcut and $shortcut !~ /\w/;
+
+__END__
+
+shortcuts
+
+@ array_ref
+% hash_ref
+\ any_ref
+$ value
+~ string
+? bool
++ number
+§ integer
+^
+# 
+'
+"
+! none KBOS object
+. KBOS object
+/
+| type name
+-
+=
+: arg name
+;
+
+
+
+not allowes _ , ( ) < >  { }
+
+
+my @standard = ( # standard types - no package can delete them
+  index => {code =>'return out of range if $_[0] >= @{$_[1]}', arguments =>[{name => 'array', type => 'ARRAY', default => []},], 
+            help => 'valid index of array', parent => 'int_pos' },
+  typed_array => {code => 'for my $vi (0..$#{$_[0]}){my $ret = $_[1]->($_[0][$vi]); return "array element $vi : $ret" if $ret}',
+                  arguments =>[{name => 'type name', type =>'TYPE', default => 'str', eval => 'Kephra::Base::Data::Type::get_callback($_[1])'} ,],
+                  help => 'array with typed elements', parent => 'ARRAY', shortcut => '@', },
+  typed_hash  => {code => 'for my $vk (keys %{$_[0]}){my $ret = $_[1]->($_[0]{$vk}); return "hash value of key $vk : $ret" if $ret}',
+                  arguments =>[{name => 'type name', type =>'TYPE', default => 'str', eval => 'Kephra::Base::Data::Type::get_callback($_[1])'} ,
+                  help => 'hash with typed values', parent => 'HASH', shortcut => '%',],},
+);
+set
