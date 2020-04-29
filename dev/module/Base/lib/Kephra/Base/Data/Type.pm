@@ -174,5 +174,6 @@ sub guess        { # val          --> [name]
 ################################################################################
 1;
 __END__
+my $Ttyped_array = para_type('Tarray', 'array with typed elements', {name => 'type', type => $Tval, default => 'ARRAY'}, 'return "value $value is not a $param reference" if ref ne $param', $Tarray, [1]);
     return "type name: '$name' is empty or contains none word character" unless $name and $name !~ /\W/;
     return "shortcut of $name: '$shortcut' contains word character" if defined $shortcut and $shortcut !~ /\w/;
