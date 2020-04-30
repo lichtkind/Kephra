@@ -13,23 +13,26 @@ sub init              {} #                    compile default types
 sub state             {} #        --> %state  dump all active types data
 sub restate           {} # %state -->         recreate all type checker from data dump
 
-sub add               {} # ~type ~help ~check - $default ~parent ~shortcut --> ~error
-sub get_simple        {} # ~type ~help ~check - $default ~parent ~shortcut --> ~error
-sub get_param         {} # ~type ~help ~check - $default ~parent ~shortcut --> ~error
-sub delete            {} # ~type                                           --> ~error
 
-sub list_names        {} #                       --> @~type
-sub list_shortcuts    {} #                       --> @~shortcut
-sub resolve_shortcut  {} #  ~shortcut            -->  ~type
+sub create_simple     {} # ~name ~help ~code - .parent|~parent  $default     --> .type | ~errormsg
+sub create_param      {} # ~name ~help %parameter ~code .parent|~parent - $default --> .ptype | ~errormsg
+                         #             %{.type|~type - ~name $default }      
+
+sub add               {} # ~[p]type ~shortcut          --> ~errormsg
+sub remove            {} # ~type - ~param              --> ~errormsg
+sub get               {} # ~type - ~param ~uni         --> ~errormsg
+sub list_names        {} #                             --> @~[p]type
+sub list_shortcuts    {} #                             --> @~shortcut
+sub resolve_shortcut  {} # ~shortcut - ~param          -->  ~type
 
 sub known_type        {} #                                       alias:
-sub is_known          {} # ~type                 -->  ?
-sub is_standard       {} # ~type                 -->  ?
-sub is_owned          {} # ~type ~package ~file  -->  ?
+sub is_known          {} # ~[p]type                    -->  ?
+sub is_standard       {} # ~[p]type                    -->  ?
+sub is_owned          {} # ~[p]type                    -->  ?
 
 sub check_type        {} #                                         alias:
-sub check             {} # ~type $val               -->  ~error    = "reason $val"
+sub check             {} # ~type $val - $param         -->  ~errormsg    = "reason $val"
 sub guess_type        {} #                                         alias:
-sub guess             {} # $val                     -->  @~type
+sub guess             {} # $val                        -->  @~type
 
 1;
