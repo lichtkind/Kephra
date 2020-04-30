@@ -12,7 +12,7 @@ use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type::Simple;
 
 ################################################################################
-sub new {   # ~name  ~help  %parameter  ~code  .parent - $default --> .ptype | ~errormsg 
+sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            --> .ptype | ~errormsg 
     my ($pkg, $name, $help, $parameter, $code, $parent, $default) = @_;
     if (ref $name eq 'HASH'){
         $parameter = $name->{'parameter'} if exists $name->{'parameter'};
@@ -50,7 +50,7 @@ sub new {   # ~name  ~help  %parameter  ~code  .parent - $default --> .ptype | ~
     bless { name => $name, help => $help, code => $code, checks => $checks, default => $default,
             coderef => $coderef, trustcoderef => eval _compile_with_safe_param_( $name, $checks, $code), parameter => $parameter};
 }
-sub restate {                                     # %state                -->  .type | ~errormsg
+sub restate {                                        # %state                -->  .ptype | ~errormsg
     my ($pkg, $state) = @_;
     $state->{'parameter'} = Kephra::Base::Data::Type::Simple->restate( $state->{'parameter'} );
     $state->{'coderef'} = eval _compile_( $state->{'name'}, $state->{'checks'}, $state->{'code'}, $state->{'parameter'});
@@ -70,17 +70,18 @@ sub _compile_with_safe_param_ {
     . Kephra::Base::Data::Type::Simple::_asm_($name, $check) . $code . ";return ''}"
 }
 ################################################################################
-sub state {                                       # .type                 -->  %state
+sub state {                                          # .ptype                -->  %state
     { name => $_[0]->{'name'}, help => $_[0]->{'help'}, code => $_[0]->{'code'}, checks => [@{$_[0]->{'checks'}}], 
      default => $_[0]->{'default'}, parameter => $_[0]->{'parameter'}->state() }
 }
-sub get_name          { $_[0]->{'name'} }            # .type                 -->  ~name
-sub get_help          { $_[0]->{'help'} }            # .type                 -->  ~help
-sub get_default_value { $_[0]->{'default'} }         # .type                 -->  $default
-sub get_checker       { $_[0]->{'coderef'} }         # .type                 -->  &check
-sub get_trusting_checker { $_[0]->{'trustcoderef'} } # .type                 -->  &trusting_check  # when parameter is already type checked
+sub get_name          { $_[0]->{'name'} }            # .ptype                -->  ~name
+sub get_help          { $_[0]->{'help'} }            # .ptype                -->  ~help
+sub get_default_value { $_[0]->{'default'} }         # .ptype                -->  $default
+sub get_parameter     { $_[0]->{'parameter'} }       # .ptype                -->  .type
+sub get_checker       { $_[0]->{'coderef'} }         # .ptype                -->  &check
+sub get_trusting_checker { $_[0]->{'trustcoderef'} } # .ptype                -->  &trusting_check  # when parameter is already type checked
 ################################################################################
-sub check     { $_[0]->{'coderef'}->($_[1], $_[2]) } # .type $val $param     -->  ~errormsg
+sub check     { $_[0]->{'coderef'}->($_[1], $_[2]) } # .ptype $val $param    -->  ~errormsg
 ################################################################################
 
 1;
