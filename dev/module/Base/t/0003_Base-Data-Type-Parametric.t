@@ -5,7 +5,7 @@ use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 use Kephra::Base::Data::Type::Parametric;
-use Test::More tests => 120;
+use Test::More tests => 117;
 
 sub simple_type { Kephra::Base::Data::Type::Simple->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }

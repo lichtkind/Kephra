@@ -82,6 +82,23 @@ sub restate {
     }
 }
 ################################################################################
+sub create_simple     { # ~name ~help ~code - .parent|~parent  $default     --> .type | ~errormsg
+    my ($name, $help, $code, $parent, $default) = Kephra::Base::Data::Type::Simple::_unhash_arg_(@_);
+    $parent = get($parent) if ref $parent ne 'Kephra::Base::Data::Type::Simple';
+    return "fourth or named argument 'parent' has to be a name of a standard type or a simple type object" if ref $parent ne 'Kephra::Base::Data::Type::Simple';
+    Kephra::Base::Data::Type::Simple->new($pkg, $name, $help, $code, $parent, $default);
+}                       #             %{.type|~type - ~name $default }
+sub create_param      { # ~name ~help %parameter ~code .parent|~parent - $default --> .ptype | ~errormsg
+    my ($name, $help, $parameter, $code, $parent, $default) = Kephra::Base::Data::Type::Parametric::_unhash_arg_(@_);
+    return "third or named argument 'parameter' has to be a hash reference with the key 'type'" if ref $parameter ne 'HASH' or not exists $parameter->{'type'};
+    $parameter->{'type'} = get( $parameter->{'type'} ) if ref $parameter->{'type'} ne 'Kephra::Base::Data::Type::Simple';
+    return "'parameter' 'type' definition has to be a name of a standard type or a simple type object" if ref $parameter->{'type'} ne 'Kephra::Base::Data::Type::Simple';
+    $parent = get($parent) if ref $parent ne 'Kephra::Base::Data::Type::Simple';
+    return "fifth or named argument 'parent' has to be a name of a standard type or a simple type object" if ref $parent ne 'Kephra::Base::Data::Type::Simple';
+    Kephra::Base::Data::Type::Parametric->new($name, $help, $parameter, $code, $parent, $default);
+}
+
+################################################################################
 sub add    { # ~type ~help ~check - $default ~parent ~shortcut --> ~error
     my ($type, $help, $code, $default, $parent, $shortcut) = @_;
     return "type name: '$type' is already in use" if is_known($type);
@@ -118,6 +135,13 @@ sub add    { # ~type ~help ~check - $default ~parent ~shortcut --> ~error
         $shortcut{ $shortcut } = $type;
     }
     0;
+}
+sub remove {
+    
+}
+
+sub get {
+    
 }
 sub delete {  # ~type       -->  ~error
     my ($name) = @_;

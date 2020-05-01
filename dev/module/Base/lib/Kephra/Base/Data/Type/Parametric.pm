@@ -12,16 +12,12 @@ use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type::Simple;
 
 ################################################################################
+sub _unhash_arg_ {
+    ref $_[0] eq 'HASH' ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'parameter'}, $_[0]->{'code'}, $_[0]->{'parent'}, $_[0]->{'default'}) : @_;
+}
 sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            --> .ptype | ~errormsg 
-    my ($pkg, $name, $help, $parameter, $code, $parent, $default) = @_;
-    if (ref $name eq 'HASH'){
-        $parameter = $name->{'parameter'} if exists $name->{'parameter'};
-        $default  = $name->{'default'}  if exists $name->{'default'};
-        $parent  = $name->{'parent'}  if exists $name->{'parent'};
-        $code   = $name->{'code'}   if exists $name->{'code'};
-        $help  = $name->{'help'}  if exists $name->{'help'};
-        $name = exists $name->{'name'} ? $name->{'name'} : undef;
-    }
+    my $pkg = shift;
+    my ($name, $help, $parameter, $code, $parent, $default) = _unhash_arg_(@_);
     return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref), 'code' (str) ".
            "and 'parent' (Kephra::Base::Data::Type::Simple) to create parametric type object" 
         unless defined $name and defined $help and defined $parameter and defined $code and defined $parent;

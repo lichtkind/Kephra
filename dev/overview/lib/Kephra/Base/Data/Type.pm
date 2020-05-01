@@ -1,7 +1,7 @@
 use v5.20;
 use warnings;
 
-# KBOS data types, standards + added by any package (owner)
+# KBOS store for default data type checker objects, + added by owners + dep resolver +
 # serialize keys: check, shortcut, default, file, package
 
 package Kephra::Base::Data::Type;

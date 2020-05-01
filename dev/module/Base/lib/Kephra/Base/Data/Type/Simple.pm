@@ -10,15 +10,12 @@ package Kephra::Base::Data::Type::Simple;
 our $VERSION = 1.2;
 use Scalar::Util qw/blessed looks_like_number/;
 ################################################################################
+sub _unhash_arg_ {
+    ref $_[0] eq 'HASH' ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'code'}, $_[0]->{'parent'}, $_[0]->{'default'}) : @_;
+}
 sub new {        # ~name ~help ~code - .parent $default --> .type | ~errormsg 
-    my ($pkg, $name, $help, $code, $parent, $default) = @_;
-    if (ref $name eq 'HASH'){
-        $default = $name->{'default'} if exists $name->{'default'};
-        $parent = $name->{'parent'} if exists $name->{'parent'};
-        $code  = $name->{'code'}   if exists $name->{'code'};
-        $help  = $name->{'help'}  if exists $name->{'help'};
-        $name = exists $name->{'name'} ? $name->{'name'} : undef;
-    }
+    my $pkg = shift;
+    my ($name, $help, $code, $parent, $default) = _unhash_arg_(@_);
     $help //= '';
     $code //= '';
     return "need type 'name' as first or named argument to create simpe type object" unless defined $name;
