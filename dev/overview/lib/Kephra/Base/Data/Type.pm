@@ -5,7 +5,7 @@ use warnings;
 # serialize keys: check, shortcut, default, file, package
 
 package Kephra::Base::Data::Type;
-our $VERSION = 0.1;
+our $VERSION = 0.5;
 use Kephra::Base::Data::Type::Simple;
 use Kephra::Base::Data::Type::Parametric;
 

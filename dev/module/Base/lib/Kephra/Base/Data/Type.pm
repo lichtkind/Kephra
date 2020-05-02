@@ -4,7 +4,7 @@ use warnings;
 # store of standard types, owners (packages can add and remove types)
 
 package Kephra::Base::Data::Type;
-our $VERSION = 0.1;
+our $VERSION = 0.5;
 use Kephra::Base::Package;
 use Kephra::Base::Data::Type::Simple;
 use Kephra::Base::Data::Type::Parametric;
