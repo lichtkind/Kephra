@@ -5,4 +5,4 @@
 
 perl 5.20 - postfix deref and smartmatch
 Wx        - GUI frontend
-
+Sereal    - serialisation data format
