@@ -5,7 +5,7 @@ use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 use Kephra::Base::Data::Type::Parametric;
-use Test::More tests => 117;
+use Test::More tests => 139;
 
 sub simple_type { Kephra::Base::Data::Type::Simple->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }
@@ -17,15 +17,15 @@ my $Tval   = simple_type('value', 'not a reference', 'not ref $value', undef, ''
 my $Tstr   = simple_type('str', undef, undef, $Tval );
 my $Tint   = simple_type('int', 'integer number', 'int $value eq $value', $Tval, 0);
 my $Tpint  = simple_type('pos_int', 'positive integer', '$value >= 0', $Tint);
-my $Tarray = simple_type('ARRAY', 'array reference', 'ref $value eq "ARRAY"', undef, []);
+my $Tarray = simple_type('ARRAY', 'array reference', 'ref $value eq "ARRAY"', undef, $crefdef);
 my $Ttype  = simple_type('ARRAY', 'array reference', 'ref $value eq "ARRAY"', $Tstr, 'ANY');
 my $sclass  = 'Kephra::Base::Data::Type::Simple';
 my $class  = 'Kephra::Base::Data::Type::Parametric';
 
-my $Tindex = para_type('index', 'valid index of array', {name => 'array', type => $Tarray, default => $crefdef}, 
-                       'return "value $value is out of range" if $value >= @$param', $Tpint, 0);
+my $Tindex = para_type('index', 'valid index of array', {name => 'array', type => $Tarray},    # inherit both defaults
+                       'return "value $value is out of range" if $value >= @$param', $Tpint);
 my $Tref = para_type({name => 'reference', help => 'reference of given type', parameter => {name => 'refname', type => $Tstr, default => 'ARRAY'}, 
-                     code => 'return "value $value is not a $param reference" if ref $value ne $param', parent => $Tany, default => $erefdef});
+                     code => 'return "value $value is not a $param reference" if ref $value ne $param', parent => $Tany, default => $erefdef}); # overwrite both defaults
 
 is ( ref $Tindex, $class,                      'created first prametric type object, type "index" with positional arguments');
 is ( $Tindex->get_name, 'index',               'got attribute "name" from getter of "index"');
@@ -70,7 +70,7 @@ is ( ref $Ticlone, $class,                     'recreated first prametric type o
 is ( $Ticlone->get_name, 'index',              'got attribute "name" from getter of "index" clone');
 is ( $Ticlone->get_help,'valid index of array','got attribute "help" from getter of "index" clone');
 is ( $Ticlone->get_default_value, 0,           'got attribute "default" value from getter of "index" clone');
-my $param = $Ticlone->get_parameter();
+$param = $Ticlone->get_parameter();
 is ( ref $param, $sclass,                      'got attribute "parameter" object from getter of "index" clone');
 is ( $param->get_name, 'array',                'got attribute "name" from "index" clone parameter');
 is ( $param->get_default_value, $crefdef,      'got attribute "default" from "index" clone parameter');
@@ -129,7 +129,7 @@ is ( $Tref->check(1, ''), '',                  'check method of type "ref" accep
 ok ( $Tref->check([],'Regex'),                 'check method of type "ref" denies with error correctly ARRAY ref as not a Regex ref');
 ok ( $Tref->check([],[]),                      'check method of type "ref" denies with error correctly when parameter is not a str');
 
-my $state = $Tref->state;
+$state = $Tref->state;
 is ( ref $state, 'HASH',                       'state of "ref" type is a HASH ref');
 is ( ref $state->{'parameter'}, 'HASH',        'state of "ref" type parameter is a HASH ref');
 is ( $state->{'name'},          'reference',   '"name" in type "ref" state HASH is correct');
@@ -164,5 +164,36 @@ is ( $Trefclone->check( $Tref, $class), '',    'check method of type "ref" clone
 is ( $Trefclone->check(1, ''), '',             'check method of type "ref" clone accepts correctly none ref');
 ok ( $Trefclone->check([],'Regex'),            'check method of type "ref" clone denies with error correctly ARRAY ref as not a Regex ref');
 ok ( $Trefclone->check([],[]),                 'check method of type "ref" clone denies with error correctly when parameter is not a str');
+
+
+my $para = {name => 'array', type => $Tarray, default => $crefdef};
+my $kode = 'return "value $value is out of range" if $value >= @$param';
+
+ok( not( ref para_type()),                                                'can not create type without any argument');
+ok( not( ref para_type(undef,'valid index of array', $para, $kode, $Tpint)),    'can not create type without argument "name"');
+ok( not( ref para_type('index', undef, $para, $kode, $Tpint, 0)),               'can not create type without argument "help"');
+ok( not( ref para_type('index', 'valid index of array', undef, $kode, $Tpint)), 'can not create type without argument "parameter"');
+ok( not( ref para_type('index', 'valid index of array', $para, undef, $Tpint)), 'can not create type without argument "code"');
+ok( not( ref para_type('index', 'valid index of array', $para, $kode, undef)),  'can not create type without argument "parent"');
+ok( not( ref para_type('index', 'valid index of array', {}, $kode, $Tpint)),    'can not create type with empty "parameter" definition');
+is( ref para_type('index', 'valid index of array', {type => $Tarray}, $kode, $Tpint), $class, '"parameter" definition with just a type to inherit from name and default is good');
+ok( not( ref para_type('index', 'valid index of array', {type => $Tarray, default => {}}, $kode, $Tpint)), '"parameter" default value has to adhere type constrains');
+ok( not( ref para_type('index', 'valid index of array', $para, 'rerun', $Tpint)),   'can not create type with "code" that can not eval');
+ok( not( ref para_type('index', 'valid index of array', $para, $kode, $Tpint, -5)), 'can not create type with "default" that is outside type constrains');
+
+ok( not( ref para_type({})),                                                                                      'can not create param type with empty HASH definition');
+ok( not( ref para_type({help => 'valid index of array', parameter => $para, code => $kode, parent => $Tpint})),   'can not create type without named argument "name"');
+ok( not( ref para_type({name => 'index', parameter => $para, code => $kode, parent => $Tpint})),                  'can not create type without named argument "help"');
+ok( not( ref para_type({name => 'index', help => 'valid index of array', code => $kode, parent => $Tpint})),      'can not create type without argument "parameter"');
+ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => {}, code => $kode, parent => $Tpint})), 'can not create type with empty "parameter" definition');
+ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => {type => $Tarray, default=>{}}, code => $kode, parent => $Tpint})),
+                                                                                                                  '"parameter" default value has to adhere type constrains');
+is( ref para_type({name => 'index', help => 'valid index of array', parameter => {type => $Tarray}, code => $kode, parent => $Tpint}),$class,
+                                                                                                                  'named "parameter" definition with just a type to inherit from name and default is good');
+ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, parent => $Tpint})), 'can not create type without argument "code"');
+ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, code => 'rerun', parent => $Tpint})), 'can not create type without "code" that can eval');
+ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, code => $kode})),     'can not create type without argument "parent"');
+ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, code => $kode, parent => $Tpint, default => -5})),
+                                                                                                                   'can not create type with "default" that is outside type constrains');
 
 exit 0;

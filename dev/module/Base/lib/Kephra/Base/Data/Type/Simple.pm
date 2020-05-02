@@ -18,7 +18,7 @@ sub new {        # ~name ~help ~code - .parent $default --> .type | ~errormsg
     my ($name, $help, $code, $parent, $default) = _unhash_arg_(@_);
     $help //= '';
     $code //= '';
-    return "need type 'name' as first or named argument to create simpe type object" unless defined $name;
+    return "need type 'name' as first or named argument to create simpe type object" unless defined $name and $name;
     return "parent type object of type $name has to be instance of ".__PACKAGE__ if defined $parent and ref $parent ne __PACKAGE__;
     return "need help text and code or a parent type object to create type $name" if $code xor $help or (not $code and not defined $parent);
     my $checks = [];

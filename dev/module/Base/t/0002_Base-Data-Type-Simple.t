@@ -127,20 +127,21 @@ is( $checks->[1], $vc,               'first pair pair value is inherited code st
 is( $checks->[2], '0 or 1',          'second check pair key is help string');
 is( $checks->[3], $bc,               'second check pair value is code string');
 
-ok( create_type({}),                      'can not create type with empty hash definition');
-ok( create_type(),                        'can not create type without any argument');
-ok( create_type(undef, $vh, $vc, ''),     'can not create type without argument name');
-ok( create_type('value', undef, $vc, ''), 'can not create type without argument help');
-ok( create_type('value', $vh, undef, ''),         'can not create type without argument code');
-ok( create_type('value', $vh, 'not ref $value'),  'can not create type without argument default value');
-ok( create_type('value', $vh, 'not ref ', undef, ''),  'can not create type without argument functioning code');
-ok( create_type('value', $vh, 'not ref $value', undef, []),  'can not create type without default value adhering type checks');
-ok( create_type({help => $vh,   code => $vc, default => ''}), 'can not create type with hash ref def without argument name');
-ok( create_type({name=>'value', code => $vc, default => ''}), 'can not create type with hash ref def without argument help');
-ok( create_type({name=>'value', help => $vh, default => ''}), 'can not create type with hash ref def without argument code');
-ok( create_type({name=>'value', help => $vh, code => $vc}),   'can not create type with hash ref def without argument default value');
-ok( create_type({name=>'value', help => $vh, code => 'not ref', default => ''}), 'can not create type with hash ref def without functioning code');
-ok( create_type({name=>'value', help => $vh, code => $vc, default => []}),       'can not create type without default value adhering type checks');
+
+ok( not (ref create_type()),                        'can not create type without any argument');
+ok( not (ref create_type(undef, $vh, $vc, '')),     'can not create type without argument "name"');
+ok( not (ref create_type('value', undef, $vc, '')), 'can not create type without argument "help"');
+ok( not (ref create_type('value', $vh, undef, '')),         'can not create type without argument "code"');
+ok( not (ref create_type('value', $vh, 'not ref $value')),  'can not create type without argument "default" value');
+ok( not (ref create_type('value', $vh, 'no ref ', undef, '')),  'can not create type without argument functioning "code"');
+ok( not (ref create_type('value', $vh, 'not ref $value', undef, [])),  'can not create type without default value adhering type "checks"');
+ok( not (ref create_type({})),                      'can not create type with empty hash definition');
+ok( not (ref create_type({help => $vh,   code => $vc, default => ''})), 'can not create type with hash ref def without argument "name"');
+ok( not (ref create_type({name=>'value', code => $vc, default => ''})), 'can not create type with hash ref def without argument "help"');
+ok( not (ref create_type({name=>'value', help => $vh, default => ''})), 'can not create type with hash ref def without argument "code"');
+ok( not (ref create_type({name=>'value', help => $vh, code => $vc})),   'can not create type with hash ref def without argument "default" value');
+ok( not (ref create_type({name=>'value', help => $vh, code => 'no ref', default => ''})), 'can not create type with hash ref def without functioning "code"');
+ok( not (ref create_type({name=>'value', help => $vh, code => $vc, default => []})),       'can not create type without default value adhering type "checks"');
 
 
 exit 0;

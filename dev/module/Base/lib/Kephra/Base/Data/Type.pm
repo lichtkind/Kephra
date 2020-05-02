@@ -1,5 +1,6 @@
 use v5.20;
 use warnings;
+use utf8;
 
 # store of standard types, owners (packages can add and remove types)
 

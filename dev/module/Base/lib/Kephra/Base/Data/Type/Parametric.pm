@@ -20,7 +20,7 @@ sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            -->
     my ($name, $help, $parameter, $code, $parent, $default) = _unhash_arg_(@_);
     return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref), 'code' (str) ".
            "and 'parent' (Kephra::Base::Data::Type::Simple) to create parametric type object" 
-        unless defined $name and defined $help and defined $parameter and defined $code and defined $parent;
+        unless defined $name and $name and defined $help and $help and defined $parameter and defined $code and $code and defined $parent;
     return "parameter definition has to be an hashref and contain the key 'type' (Kephra::Base::Data::Type::Simple) to create parametric type $name" 
         if ref $parameter ne 'HASH' or ref $parameter->{'type'} ne 'Kephra::Base::Data::Type::Simple';
     return "default value '$parameter->{default}' of type $name 's parameter does not match his type $parameter->{type}{name}" 
