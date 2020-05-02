@@ -1,7 +1,7 @@
 use v5.20;
 use warnings;
 
-# KBOS store for default data type checker objects, + added by owners + dep resolver +
+# KBOS store for standard data type checker objects, + added by owners + dep resolver +
 # serialize keys: check, shortcut, default, file, package
 
 package Kephra::Base::Data::Type;
@@ -21,7 +21,8 @@ sub create_param      {} # ~name ~help %parameter ~code .parent|~parent - $defau
 sub add               {} # ~[p]type ~shortcut          --> ~errormsg
 sub remove            {} # ~type - ~param              --> ~errormsg
 sub get               {} # ~type - ~param ~uni         --> ~errormsg
-sub list_names        {} #                             --> @~[p]type
+sub get_shortcut      {} # ~type - ~param ~uni         --> ~errormsg
+sub list_names        {} #                             --> @~type|@~ptype|@~param
 sub list_shortcuts    {} #                             --> @~shortcut
 sub resolve_shortcut  {} # ~shortcut - ~param          -->  ~type
 
@@ -31,8 +32,9 @@ sub is_standard       {} # ~[p]type                    -->  ?
 sub is_owned          {} # ~[p]type                    -->  ?
 
 sub check_type        {} #                                         alias:
-sub check             {} # ~type $val - $param         -->  ~errormsg    = "reason $val"
+sub check_simple      {} # ~type $val                  -->  ~errormsg            # = "reason $val"
+sub check_param       {} # ~type $param $val $pval     -->  ~errormsg    
 sub guess_type        {} #                                         alias:
-sub guess             {} # $val                        -->  @~type
+sub guess             {} # $val                        -->  @~type               # guess simple type
 
 1;

@@ -41,7 +41,7 @@ sub restate {    # %state                               --> .type | ~errormsg
     bless $state;
 }
 ################################################################################
-sub _compile_ { 'sub { my ($value) = @_; no warnings "all";'. _asm_(@_) . "return ''}" }
+sub _compile_ { 'sub { my( $value ) = @_; no warnings "all";'. _asm_(@_) . "return ''}" }
 sub _asm_ {
     my ($name, $checks) = @_;
     my $source = '';

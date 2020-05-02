@@ -9,8 +9,13 @@ use Test::More tests => 140;
 
 Kephra::Base::Data::Type::init();
 
-is( Kephra::Base::Data::Type::is_known('superkalifrailistisch'), 0, 'check for unknown type');
-ok( Kephra::Base::Data::Type::delete('superkalifrailistisch'), 'can not delete unknown type'); 
+is( Kephra::Base::Data::Type::is_known('superkalifrailistisch'), '', 'check for unknown type');
+ok( Kephra::Base::Data::Type::remove('superkalifrailistisch'), 'can not delete unknown type'); 
+
+exit 0;
+
+__END__
+
 is( Kephra::Base::Data::Type::is_known('value'), 1, 'some default type is known');
 is( known_type('value'),                         1, 'sub known_type got imported');
 is( 'num' ~~ [Kephra::Base::Data::Type::guess(2.3)], 1, 'guessed type num right');
@@ -212,4 +217,3 @@ package main;
 #is( check_type('int_pos',1),           '', 'recognize positive int');
 #is( check_type('bool',0),              '', 'recognize boolean value false');
 
-exit 0;
