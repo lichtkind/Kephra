@@ -7,6 +7,11 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 use Kephra::Base::Call qw/new_call/;
 
 is (ref Kephra::Base::Call->new(), '', 'new needs at least one argument');
+
+exit 0;
+
+__END__
+
 my $call = Kephra::Base::Call->new(1);
 is (ref $call, 'Kephra::Base::Call',   'created most simple call');
 is ($call->run(), 1,                   'call object can run evaluated code');
@@ -103,5 +108,4 @@ is ($clone->get_settype, 'int',       'got same type for setting state from clon
 is ($clone->get_gettype, 'int_pos',   'got same type for getting state from clone getter');
 is ($clone->get_state(), 9,           'got same state from clone');
 is ($clone->run(), 10,                'clone does run as expected');
-exit 0;
 

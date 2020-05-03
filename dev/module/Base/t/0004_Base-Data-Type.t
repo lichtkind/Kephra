@@ -4,13 +4,45 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
+
+package TypeTester; 
 use Kephra::Base::Data::Type qw/:all/;
 use Test::More tests => 140;
 
-Kephra::Base::Data::Type::init();
+my $sclass  = 'Kephra::Base::Data::Type::Simple';
+my $pclass  = 'Kephra::Base::Data::Type::Parametric';
 
-is( Kephra::Base::Data::Type::is_known('superkalifrailistisch'), '', 'check for unknown type');
-ok( Kephra::Base::Data::Type::remove('superkalifrailistisch'), 'can not delete unknown type'); 
+is( Kephra::Base::Data::Type::list_names(), 0,                         'no type names to list now');
+is( Kephra::Base::Data::Type::list_shortcuts(), 0,                     'no type name shortcuts to list now');
+is( Kephra::Base::Data::Type::is_known('superkalifrailistisch'), 0,    'check for unknown type');
+ok( Kephra::Base::Data::Type::remove('superkalifrailistisch'),         'can not delete unknown type'); 
+ok( Kephra::Base::Data::Type::create_simple( 'value!', 'not a reference', 'not ref $value', undef, '' ), 'could not create type with special char in name');
+ok( Kephra::Base::Data::Type::create_simple( 'Value', 'not a reference', 'not ref $value', undef, '' ), 'could not create type with upper case char in name');
+ok( Kephra::Base::Data::Type::create_simple( 'va', 'not a reference', 'not ref $value', undef, '' ), 'could not create type with too short name');
+ok( Kephra::Base::Data::Type::create_simple( 'superkalifrailistisch',  'not a reference', 'not ref $value', undef, '' ), 'could not create type with too long name');
+
+my $Tval = Kephra::Base::Data::Type::create_simple('value',   'defined value', 'defined $value', undef, '');
+is( ref $Tval,                                    $sclass,    'created simple data type via method "create_simple"');
+is( Kephra::Base::Data::Type::add($Tval, '$'), '',            'could add the type "value" to the standard');
+my $got = Kephra::Base::Data::Type::get('value');
+is( ref $got, $sclass,                                        'could "get" the added type by name');
+is( $got->get_name, 'value',                                  'got the right type');
+is( Kephra::Base::Data::Type::get_shortcut('value'), '$',     'got shortcut from type name');
+is( Kephra::Base::Data::Type::resolve_shortcut('$'), 'value', 'resolve shortcut to given type name');
+is( Kephra::Base::Data::Type::is_known('value'), 1,           'our new type is known');
+is( Kephra::Base::Data::Type::is_owned('value'), 1,           'our new type is owned');
+is( Kephra::Base::Data::Type::is_standard('value'), 0,        'our new type is not standard');
+is( Kephra::Base::Data::Type::check_type('value',1), '',      'checked value agains type "value" and got correct positive');
+ok( Kephra::Base::Data::Type::check_type('value',undef),      'checked value agains type "value" and got correct negative');
+is( Kephra::Base::Data::Type::list_names(), 1,                'can list one type name');
+my @names = Kephra::Base::Data::Type::list_names();
+is( $names[0], 'value',                                       'and name is correct');
+
+my $Tint   = new_type('int',  'integer number', 'int $value eq $value', 'value', 0);
+#my $Tpint  = simple_type('pos_int', 'positive integer', '$value >= 0', $Tint);
+
+
+Kephra::Base::Data::Type::init();
 
 exit 0;
 

@@ -44,7 +44,7 @@ sub restate {
     bless {source => $obj_state->{'source'}, code => $code, state => \$state, type => $type};
 }
 sub state {
-    {source => $_[0]->{'source'}, state => ${$_[0]->{'state'}}, type => (defined $_[0]->{'type'} and $_[0]->{'type'} ? $_[0]->{'type'}->state : undef };
+    {source => $_[0]->{'source'}, state => ${$_[0]->{'state'}}, type => (defined $_[0]->{'type'} and $_[0]->{'type'}) ? $_[0]->{'type'}->state : undef };
 }
 ################################################################################
 sub get_source { $_[0]->{'source'} }
@@ -52,10 +52,7 @@ sub get_type   { $_[0]->{'type'} }
 sub get_state  { ${$_[0]->{'state'}} }
 sub set_state  { ${$_[0]->{'state'}} = $_[1] unless $_[0]->{'type'} and $_[0]->{'type'}->check($_[1]) }
 ################################################################################
-sub run {
-    my ($self) = shift;
-    $self->{'code'}->(@_);
-}
+sub run { my ($self) = shift; $self->{'code'}->(@_) }
 ################################################################################
 
 1;
