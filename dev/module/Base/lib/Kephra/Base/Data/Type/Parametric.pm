@@ -39,10 +39,10 @@ sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            -->
     my $checks = $parent->get_check_pairs;
     my $source = _compile_( $name, $checks, $code, $parameter );
     my $coderef = eval $source;
-    return "parametric type '$name' checker source code '$source' could not eval because: $@ !" if $@;
+    return "parametric type '$name' checker source code - '$source' - could not eval because: $@ !" if $@;
     my $error = $coderef->( $default, $parameter->get_default_value);
     return "type '$name' default value '$default' with parameter '" . $parameter->get_name.'\' default value \'' . $parameter->get_default_value.
-           "' does not pass check '$source' because: $error!" if $error;
+           "' does not pass check - '$source' - because: $error!" if $error;
     bless { name => $name, help => $help, code => $code, checks => $checks, default => $default,
             coderef => $coderef, trustcoderef => eval _compile_with_safe_param_( $name, $checks, $code), parameter => $parameter};
 }

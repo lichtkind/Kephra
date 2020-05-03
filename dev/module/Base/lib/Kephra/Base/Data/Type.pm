@@ -17,10 +17,10 @@ my %forbidden_shortcut = ('{' => 1, '}' => 1, '(' => 1, ')' => 1, '<' => 1, '>' 
 ##############################################################################
 sub init {
     return if %simple_type;
-    my %simple_sc = ( 'str' => '~', 'bool' => '?', 'num' => '+', 'int' => '-', # ^ # ' " ! . / - = §;
-                      'value' => '$', 'array_ref' => '@', 'hash_ref' => '%', 'code_ref' => '&', 'any_ref' => '\\', 'type' => '|', 'arg_name' => ':');
-    my %param_sc = ( 'typed_array' => '@', 'typed_hash' => '%');
-    my @standard_simple_types = ( # standard simple types - no package can delete them
+    my %simple_sc = ( str => '~', bool => '?', num => '+', int => '-', pos_int => '=',# ^ # ' " ! . /  §;
+                      value => '$', array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', type => '|', arg_name => ':', object => '!');
+    my %param_sc = ( typed_array => '@', typed_hash => '%');
+    my @standard_simple_types = ( # no package can delete them
     {name => 'value',     help=> 'defined value',        code=> 'defined $value',                                  default=> '' },
     {name => 'no_ref',    help=> 'not a reference',      code=> 'not ref $value',             parent=> 'value',                },
     {name => 'bool',      help=> '0 or 1',               code=> '$value eq 0 or $value eq 1', parent=> 'no_ref',   default=> 0  },
@@ -81,7 +81,7 @@ sub state {
 }
 sub restate {
     my ($state) = @_;
-    return unless ref $state eq 'HASH';
+    return unless ref $state eq 'HASH' and ref $state->{'simple'} eq 'HASH' and ref $state->{'param'} eq 'HASH';
     %simple_type = %{$state->{'simple'}};
     %param_type = %{$state->{'param'}};
     for my $typedef (values %simple_type){

@@ -30,9 +30,9 @@ sub new {        # ~name ~help ~code - .parent $default --> .type | ~errormsg
     return "need a default value or at least a parent type to create type $name" unless defined $default;
     my $source = _compile_( $name, $checks );
     my $coderef = eval $source;
-    return "simpel type '$name' checker source code '$source' could not eval because: $@ !" if $@;
+    return "simpel type '$name' checker source code - '$source' - could not eval because: $@ !" if $@;
     my $error = $coderef->( $default );
-    return "type '$name' default value '$default' does not pass check '$source' because: $error!" if $error;
+    return "type '$name' default value '$default' does not pass check - '$source' - because: $error!" if $error;
     bless { name => $name, coderef => $coderef, checks => $checks, default => $default };
 }
 sub restate {    # %state                               --> .type | ~errormsg

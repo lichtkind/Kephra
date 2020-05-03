@@ -22,8 +22,8 @@ sub add               {} # ~[p]type ~shortcut          --> ~errormsg
 sub remove            {} # ~type - ~param              --> ~errormsg
 sub get               {} # ~type - ~param ~uni         --> ~errormsg
 sub get_shortcut      {} # ~type - ~param ~uni         --> ~errormsg
-sub list_names        {} #                             --> @~type|@~ptype|@~param
-sub list_shortcuts    {} #                             --> @~shortcut
+sub list_names        {} # - ~kind ~name               --> @~type|@~ptype|@~param   # ~kind = 'simple'|'para[meter]'
+sub list_shortcuts    {} # - ~kind                            --> @~shortcut
 sub resolve_shortcut  {} # ~shortcut - ~param          -->  ~type
 
 sub known_type        {} #                                       alias:
