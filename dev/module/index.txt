@@ -8,7 +8,7 @@ our development model in more details: doc/CompleteProgramming.pod
 
 --------------------------------------------------------------------------------
                              C = Complete
-                              P = Partially there, nothing missing now
+                              P = Partially there, nothing missing now (or only tests)
                                S = Small feature missing
                                 U = Usable
                                  M = Major feature missing
@@ -19,8 +19,8 @@ our development model in more details: doc/CompleteProgramming.pod
    Kephra::Base::Package                    C              low level symbol manipulation
    Kephra::Base::Data::Type::Simple         C              inheritable absolute value checker
    Kephra::Base::Data::Type::Parametric     C              contracts between several values
-   Kephra::Base::Data::Type                   SU  I        standard types
-   Kephra::Base::Data                        P   
+   Kephra::Base::Data::Type                 CP             standard types
+   Kephra::Base::Data                       CP   
    Kephra::Base::Call                         S  B 
  - Kephra::Base                             C
 --------------------------------------------------------------------------------

@@ -5,7 +5,7 @@ use utf8;
 # store of standard types, owners (packages can add and remove types)
 
 package Kephra::Base::Data::Type;
-our $VERSION = 0.5;
+our $VERSION = 1.0;
 use Kephra::Base::Package;
 use Kephra::Base::Data::Type::Simple;
 use Kephra::Base::Data::Type::Parametric;
@@ -49,31 +49,49 @@ sub init {
     );
     my @standard_param_types = ( # standard simple types - no package can delete them
     {name => 'typed_ref', help=> 'reference of given type',  code=> 'return "value $value is not a $param reference" if ref $value ne $param',  parent=> 'value',     default=> [], 
-                                                                                                            parameter => {   name => 'refname',     type=> 'str',       default=> 'ARRAY'}, },
+                                                                                                          parameter => {   name => 'refname',     type=> 'str',       default=> 'ARRAY'}, },
     {name => 'index',     help=> 'valid index of array',     code=> 'return "value $value is out of range" if $value >= @$param',               parent=> 'int_pos',   default=>  0, 
-                                                                                                            parameter => {   name => 'array',       type=> 'array_ref', default=> [1]    }, },
-    {name => 'typed_array',help=> 'array with typed elements',                                                                                  parent=> 'array_ref', default=> [1],
-                                                             code=> 'for my $i(0..$#$value){my $error = $param->check($value->[$i]); return "aray element $i $error" if $error}',
-                                                                                                            parameter => {   name => 'element_type',type=> 'type',                 },  }, 
+                                                                                                          parameter => {   name => 'array',       type=> 'array_ref', default=> [1]    }, },
+    {name =>'typed_array',help=> 'array with typed elements',code=> 'for my $i(0..$#$value){my $error = $param->check($value->[$i]); return "aray element $i $error" if $error}',
+                                                                                                                                                parent=> 'array_ref', default=> [1],
+                                                                                                          parameter => {   name => 'element_type',type=> 'type',                       }, }, 
     );
     for my $typedef (@standard_simple_types){
-        my $type = create_simple($typedef);
-        die $type unless ref $type;
-        my $error = add($type, $simple_sc{ $type->get_name });
-        die 'standard simple type definition error - '.$error if $error;
+        my $type  = create_simple($typedef);                     die $type unless ref $type;
+        my $error = add($type, $simple_sc{ $type->get_name });   die 'standard simple type definition error - '.$error if $error;
     }
     for my $typedef (@standard_param_types){
-        my $type = create_param($typedef);
-        die $type unless ref $type;
-        my $error = add($type, $param_sc{ $type->get_name });
-        die 'standard parametric type definition error - '.$error if $error;
+        my $type  = create_param($typedef);                      die $type unless ref $type;
+        my $error = add($type, $param_sc{ $type->get_name });    die 'standard parametric type definition error - '.$error if $error;
     }
 }
 sub state {
     my %state = ();
+    for my $type (values %simple_type) {
+        my $name = $type->{'object'}->get_name;
+        $state{'simple'}{ $name } = { 'object' => $type->{'object'}->state, file => $type->{'file'}, package => $type->{'package'}};
+        $state{'simple'}{ $name }{'shortcut'} = $type->{'shortcut'} if exists $type->{'shortcut'};
+    }
+    for my $type (values %param_type) {
+        my $name = $type->{'object'}->get_name;
+        $state{'param'}{ $name } = { 'object' => $type->{'object'}->state, file => $type->{'file'}, package => $type->{'package'}};
+        $state{'param'}{ $name }{'shortcut'} = $type->{'shortcut'} if exists $type->{'shortcut'};
+    }
+    \%state;
 }
 sub restate {
     my ($state) = @_;
+    return unless ref $state eq 'HASH';
+    %simple_type = %{$state->{'simple'}};
+    %param_type = %{$state->{'param'}};
+    for my $typedef (values %simple_type){
+        $typedef->{'object'} = create_simple($typedef->{'object'});
+        $simple_shortcut{ $typedef->{'shortcut'} } = $typedef->{'name'} if exists $typedef->{'shortcut'};
+    }
+    for my $typedef (values %param_type){
+        $typedef->{'object'} = create_param($typedef->{'object'});
+        $param_shortcut{ $typedef->{'shortcut'} } = $typedef->{'name'} if exists $typedef->{'shortcut'};
+    }
 }
 ################################################################################
 sub create_simple     {  # ~name ~help ~code - .parent|~parent  $default     --> .type | ~errormsg
