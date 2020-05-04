@@ -4,58 +4,70 @@ use warnings;
 # serializable closure
 
 package Kephra::Base::Call;
-our $VERSION = 0.5;
+our $VERSION = 0.7;
 use Exporter 'import';
 our @EXPORT_OK = (qw/new_call/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
-use Kephra::Base::Data qw/clone_data/;
+use Kephra::Base::Data qw/clone_data check_type/;
 ################################################################################
 sub new_call   {new(__PACKAGE__, @_)}
 sub new {
-    my ($pkg, $source, $state, $type) = @_;
-    if (ref $source eq 'HASH'){
-        $type     = $source->{'type'} if exists $source->{'type'};
-        $state    = $source->{'state'} if exists $source->{'state'};
-        $source   = exists $source->{'source'} ? $source->{'source'} : undef;
+    my ($pkg, $code, $state, $type) = @_;
+    if (ref $code eq 'HASH'){
+        $type     = $code->{'type'} if exists $code->{'type'};
+        $state    = $code->{'state'} if exists $code->{'state'};
+        $code   = exists $code->{'code'} ? $code->{'code'} : undef;
     }
-    return 'need at least one argument: the perl source code to run as this call' unless defined $source;
-    $type = Kephra::Base::Data::Type::Standard::get($type) unless not defined $type or ref $type;
-    return "third or named argument 'type' has to be a Kephra::Base::Data::Type::Simple object or the name of a standard type"
-        if defined $type and ref $type ne 'Kephra::Base::Data::Type::Simple';
-    return 'start value $state does not match type: '.$type->get_name if defined $state and defined $type and $type->check( $state );
+    return 'need at least one argument: the perl source code to run as this call' unless defined $code;
+    my $std_type;
+    if (defined $type){
+        if (ref $type){
+            return "third or named argument 'type' has to be a Kephra::Base::Data::Type::Simple object or the name of a initial standard type"
+                if ref $type ne 'Kephra::Base::Data::Type::Simple';
+            return 'start value $state does not match type: '.$type->get_name if defined $state and $type->check( $state );
+        } else {
+            return "third or named argument 'type' has to be a Kephra::Base::Data::Type::Simple object or the name of a initial standard type"
+                unless Kephra::Base::Data::Type::Standard::is_initial($type);
+            return 'start value $state does not match type: '.$type if defined $state and check_type($type, $state);
+            $std_type = $type; 
+            $type = undef;
+        }
+    }
+    $state //= $type->get_default_value if defined $type;
     $state = clone_data($state);
-    my $code = eval "sub {$source}";
-    return "can not create call object, because source code - '$source' - evaluates with error: $@" if $@;
-    bless { source => $source, code => $code, state => \$state, type => $type };
+    my $coderef = eval "sub {$code}";
+    return "can not create call object, because source code - '$code' - evaluates with error: $@" if $@;
+    bless { code => $code, coderef => $coderef, state => \$state, type => $type, std_type => $std_type};
 }
 sub clone { 
     my ($origin, $state) = @_;
-    my $source = $origin->get_source();
+    my $code = $origin->get_code();
     $state //= ${$origin->{'state'}};
-    $state = clone_data($state);    bless { source => $source, code => eval "sub {$source}", state => \$state, type => $origin->get_type() };
+    $state = clone_data($state);    bless { code => $code, coderef => eval "sub {$code}", state => \$state, type => $origin->{'type'}, std_type => $origin->{'std_type'} };
 }
 sub restate {
     my ($pkg, $obj_state) = @_;
-    return 'need a hash ref with at least state property "source"' unless ref $obj_state eq 'HASH' and exists $obj_state->{'source'};
+    return 'need a hash ref with at least state property "source"' unless ref $obj_state eq 'HASH' and exists $obj_state->{'code'};
     my $state = clone_data( $obj_state->{'state'} );
-    my $code = eval "sub {$obj_state->{source}}";
-    return "can not create call object, because sources - $obj_state->{source} - evaluates with error: $@" if $@;
-    my $type = (not defined $obj_state->{'type'}) ? undef :
-               (ref $obj_state->{'type'} eq 'HASH') ? Kephra::Base::Data::Type::Simple->restate($obj_state->{'type'}) 
-                                                    : Kephra::Base::Data::Type::Standard::get($obj_state->{'type'});
-    bless {source => $obj_state->{'source'}, code => $code, state => \$state, type => $type};
+    my $coderef = eval "sub {$obj_state->{code}}";
+    return "can not create call object, because source code - $obj_state->{code} - evaluates with error: $@" if $@;
+    bless {code => $obj_state->{'code'}, coderef => $coderef, state => \$state, std_type => $obj_state->{'std_type'},
+           type => (defined $obj_state->{'type'}) ? Kephra::Base::Data::Type::Simple->restate($obj_state->{'type'}) : undef,};
 }
 sub state {
-    {source => $_[0]->{'source'}, state => ${$_[0]->{'state'}}, 
-     type => (not defined $_[0]->{'type'} ? undef : Kephra::Base::Data::Type::Standard::is_initial($_[0]->{'type'}->get_name) ? $_[0]->{'type'}->get_name : $_[0]->{'type'}->state )};
+    {code => $_[0]->{'code'}, state => ${$_[0]->{'state'}}, std_type => $_[0]->{'std_type'}, type => (defined $_[0]->{'type'}) ? $_[0]->{'type'}->state : undef };
 }
 ################################################################################
-sub get_source { $_[0]->{'source'} }
-sub get_type   { $_[0]->{'type'} }
+sub get_code   { $_[0]->{'code'} }
+sub get_type   { (defined $_[0]->{'std_type'}) ? Kephra::Base::Data::Type::Standard::get($_[0]->{'std_type'}) : $_[0]->{'type'} }
 sub get_state  { ${$_[0]->{'state'}} }
-sub set_state  { ${$_[0]->{'state'}} = $_[1] unless $_[0]->{'type'} and $_[0]->{'type'}->check($_[1]) }
+sub set_state  {
+    my $error = (defined $_[0]->{'type'})     ? $_[0]->{'type'}->check($_[1]) :
+                (defined $_[0]->{'std_type'}) ? check_type($_[0]->{'std_type'}, $_[1]) : '';
+    $error or (${$_[0]->{'state'}} = $_[1]);
+}
 ################################################################################
-sub run { my ($self) = shift; $self->{'code'}->(@_) }
+sub run { my ($self) = shift; $self->{'coderef'}->(@_) }
 ################################################################################
 
 1;

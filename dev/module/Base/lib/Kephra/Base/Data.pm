@@ -4,9 +4,10 @@ use warnings;
 package Kephra::Base::Data;
 our $VERSION = 0.01;
 use Scalar::Util qw/blessed/;
-use Kephra::Base::Data::Type;
+use Kephra::Base::Data::Type qw/:all/;
 use Exporter 'import';
-our @EXPORT_OK = qw/clone_data/;
+our @EXPORT_OK = ('clone_data', @Kephra::Base::Data::Type::EXPORT_OK);
+our %EXPORT_TAGS = (all => [@EXPORT_OK], type => [@Kephra::Base::Data::Type::EXPORT_OK]);
 
 my %copied_reftype   = ('' => 1, Regexp => 1, CODE => 1, FORMAT => 1, IO => 1, GLOB => 1, LVALUE => 1);
 
