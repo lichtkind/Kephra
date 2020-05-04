@@ -19,7 +19,7 @@ sub new {
         $source   = exists $source->{'source'} ? $source->{'source'} : undef;
     }
     return 'need at least one argument: the perl source code to run as this call' unless defined $source;
-    $type = Kephra::Base::Data::Type::get($type) unless not defined $type or ref $type;
+    $type = Kephra::Base::Data::Type::Standard::get($type) unless not defined $type or ref $type;
     return "third or named argument 'type' has to be a Kephra::Base::Data::Type::Simple object or the name of a standard type"
         if defined $type and ref $type ne 'Kephra::Base::Data::Type::Simple';
     return 'start value $state does not match type: '.$type->get_name if defined $state and defined $type and $type->check( $state );
@@ -40,11 +40,14 @@ sub restate {
     my $state = clone_data( $obj_state->{'state'} );
     my $code = eval "sub {$obj_state->{source}}";
     return "can not create call object, because sources - $obj_state->{source} - evaluates with error: $@" if $@;
-    my $type = (ref $obj_state->{'type'} eq 'HASH') ? Kephra::Base::Data::Type::Simple->new($obj_state->{'type'}) : undef; 
+    my $type = (not defined $obj_state->{'type'}) ? undef :
+               (ref $obj_state->{'type'} eq 'HASH') ? Kephra::Base::Data::Type::Simple->restate($obj_state->{'type'}) 
+                                                    : Kephra::Base::Data::Type::Standard::get($obj_state->{'type'});
     bless {source => $obj_state->{'source'}, code => $code, state => \$state, type => $type};
 }
 sub state {
-    {source => $_[0]->{'source'}, state => ${$_[0]->{'state'}}, type => (defined $_[0]->{'type'} and $_[0]->{'type'}) ? $_[0]->{'type'}->state : undef };
+    {source => $_[0]->{'source'}, state => ${$_[0]->{'state'}}, 
+     type => (not defined $_[0]->{'type'} ? undef : Kephra::Base::Data::Type::Standard::is_initial($_[0]->{'type'}->get_name) ? $_[0]->{'type'}->get_name : $_[0]->{'type'}->state )};
 }
 ################################################################################
 sub get_source { $_[0]->{'source'} }

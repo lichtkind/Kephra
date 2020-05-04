@@ -6,7 +6,7 @@ our $VERSION = 0.01;
 use Scalar::Util qw/blessed/;
 use Kephra::Base::Data::Type;
 use Exporter 'import';
-our @EXPORT_OK = qw/clone clone_list clone_data/;
+our @EXPORT_OK = qw/clone_data/;
 
 my %copied_reftype   = ('' => 1, Regexp => 1, CODE => 1, FORMAT => 1, IO => 1, GLOB => 1, LVALUE => 1);
 
@@ -42,6 +42,5 @@ sub clone_list { #               [data] --> [data]
 
 ################################################################################
 
-Kephra::Base::Data::Type::init;
 
 1;
