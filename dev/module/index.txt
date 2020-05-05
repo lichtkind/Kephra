@@ -1,5 +1,5 @@
 Module prototypes are the place to develope libraries (internal API's).
-Several connected libraries can be joined in one proto.
+Several connected libraries can be joined in one proto module (separated by ---).
 Latest copies of all necessary libraries are copied into a proto before dev takes place.
 
 design of the API's is done in: dev/overview
@@ -7,36 +7,36 @@ relation between different types of protos: dev/roadmap.txt
 our development model in more details: doc/CompleteProgramming.pod
 
 --------------------------------------------------------------------------------
-                                            C = Complete
-                                             P = Partially there, nothing missing now (or only tests)
-                                              S = Small feature missing
-                                               U = Usable
-                                                M = Major feature missing
-                                                 B = Buggy/old Deprecated code
-                                                  I = In Progress (currently worked on)
-                                                   N = Not yet (planned)
+   K ~~ Kephra                        C = Complete
+   B ~~ Base                           P = Partially there, nothing missing now (or only tests)
+   C ~~ Class                           S = Small feature missing
+                                         U = Usable
+                                          M = Major feature missing
+                                           B = Buggy/old Deprecated code
+                                            I = In Progress (currently worked on)
+                                             N = Not yet (planned)
 --------------------------------------------------------------------------------
-   Kephra::Base::Package                    C         1.0   low level symbol manipulation
-   Kephra::Base::Data::Type::Simple         C         1.2   inheritable absolute value checker
-   Kephra::Base::Data::Type::Parametric     C         1.0   contracts between several values
-   Kephra::Base::Data::Type::Standard       CP        1.1   standard types
-   Kephra::Base::Data::Type                 CP        0.1   
-   Kephra::Base::Data                       CP        0.1
-   Kephra::Base::Closure                    C         1.0   serializable closure
- - Kephra::Base                             CP        0.1
+   K::B::Package                      C         1.0    low level symbol manipulation
+   K::B::Data::Type::Simple           C         1.2    inheritable absolute value checker
+   K::B::Data::Type::Parametric       C         1.0    contracts between several values
+   K::B::Data::Type::Standard         CP        1.2    standard types
+   K::B::Data::Type                   CP        0.1   
+   K::B::Data                         CP        0.1
+   K::B::Closure                      C         1.0    serializable closure
+ - K::Base                            CP        0.1
 --------------------------------------------------------------------------------
-   Kephra::Base::Class::Scope               C         1.0   namespace constants & priority logic
-   Kephra::Base::Class::Attribute::Type      P
-   Kephra::Base::Class::Attribute           C
-   Kephra::Base::Class::Definition              MB
-   Kephra::Base::Class::Instance               UMB
-   Kephra::Base::Class::Method::Argument         B
-   Kephra::Base::Class::Method::Signature        B
-   Kephra::Base::Class::Method::Hook             B
-   Kephra::Base::Class::Method                   B
-   Kephra::Base::Class::Builder                UMB
-   Kephra::Base::Class::Syntax                   B
- - Kephra::Base::Class                       P
+   K::B::C::Scope                     C         1.0    namespace constants & priority logic
+   K::B::C::Attribute::Type            P
+   K::B::C::Attribute                 C
+   K::B::C::Definition                    MB
+   K::B::C::Instance                     UMB
+   K::B::C::Method::Argument               B
+   K::B::C::Method::Signature              B
+   K::B::C::Method::Hook                   B
+   K::B::C::Method                         B
+   K::B::C::Builder                      UMB
+   K::B::C::Syntax                         B
+ - K::B::Class                         P
 --------------------------------------------------------------------------------
 ================================================================================
  - Kephra::Base::Object

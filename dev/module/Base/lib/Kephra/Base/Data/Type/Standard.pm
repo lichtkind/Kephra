@@ -5,7 +5,7 @@ use utf8;
 # store of standard types, owners (packages can add and remove types)
 
 package Kephra::Base::Data::Type::Standard;
-our $VERSION = 1.1;
+our $VERSION = 1.2;
 use Kephra::Base::Data::Type::Simple;
 use Kephra::Base::Data::Type::Parametric;
 use Exporter 'import';
@@ -174,8 +174,8 @@ sub remove {                                   # ~type - ~param              -->
     return "type $type_name is unknown and can not be removed from standard" unless $def;
     my ($package, $file, $line) = caller();
     return "type $type_name is not owned by caller " unless $def->{'package'} eq $package and $def->{'file'} eq $file ;
-    if (defined $param_name) { delete $param_type{$type_name}{$param_name} }
-    else                     { delete $simple_type{$type_name} }
+    if (defined $param_name) { delete $param_type{$type_name}{$param_name};  delete $param_shortcut{ $def->{'shortcut'}} if exists $def->{'shortcut'}}
+    else                     { delete $simple_type{$type_name};              delete $simple_shortcut{ $def->{'shortcut'}} if exists $def->{'shortcut'}}
     $def->{'object'};
 }
 sub _get_ {
@@ -189,23 +189,23 @@ sub _get_ {
 }
 sub get {                                      # ~type - ~param ~uni         --> ~errormsg
     my ($tdef) = _get_(@_);
-    ref $tdef ? $tdef->{'object'} : '';
+    ref $tdef ? $tdef->{'object'} : undef;
 }
 sub get_shortcut {                             # ~type - ~param ~uni         --> ~errormsg
     my ($tdef) = _get_(@_);
-    ref $tdef ? $tdef->{'shortcut'} : '';
+    ref $tdef ? $tdef->{'shortcut'} : undef;
 }
 sub list_names        {                        # - ~kind ~pname              --> @~type|@~ptype|@~param
     my ($kind, $type_name) = @_;
     if (defined $kind and index($kind, 'param') > -1) {
         if (defined $type_name){
-            keys %{$param_type{$type_name}} if exists $param_type{$type_name}
-        } else { keys %param_type }
-    } else { keys %simple_type }
+            sort( keys %{$param_type{$type_name}}) if exists $param_type{$type_name}
+        } else { sort( keys %param_type) }
+    } else { sort( keys %simple_type) }
 }
 sub list_shortcuts    {                        #                             --> @~shortcut
     my ($kind) = @_;
-    (defined $kind and index($kind, 'param') > -1) ? keys( %param_shortcut ) : keys( %simple_shortcut );
+    (defined $kind and index($kind, 'param') > -1) ? sort keys %param_shortcut  : sort keys %simple_shortcut ;
 }
 sub resolve_shortcut  {                        # ~shortcut - ~param          -->  ~type
     my ($shortcut, $kind) = @_;
@@ -243,8 +243,8 @@ sub guess_type   {&guess}
 sub guess        {                             # $val                        --> @name
     my ($value) = @_;
     my @name;
-    for my $name (list_names()) {push @name, $name unless check($name, $value)}
-    @name;
+    for my $name (list_names()) {push @name, $name unless check_simple($name, $value)}
+    sort @name;
 }
 ################################################################################
 1;

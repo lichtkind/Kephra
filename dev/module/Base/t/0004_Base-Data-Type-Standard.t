@@ -12,8 +12,10 @@ use Test::More tests => 140;
 my $sclass  = 'Kephra::Base::Data::Type::Simple';
 my $pclass  = 'Kephra::Base::Data::Type::Parametric';
 
-is( Kephra::Base::Data::Type::Standard::list_names(), 0,                         'no type names to list now');
-is( Kephra::Base::Data::Type::Standard::list_shortcuts(), 0,                     'no type name shortcuts to list now');
+my @names = Kephra::Base::Data::Type::Standard::list_names();
+my @sc = Kephra::Base::Data::Type::Standard::list_shortcuts();
+is( int @names, 0,                                                               'no type names to list now');
+is( int @sc, 0,                                                                  'no type name shortcuts to list now');
 is( Kephra::Base::Data::Type::Standard::is_known('superkalifrailistisch'), 0,    'check for unknown type');
 ok( Kephra::Base::Data::Type::Standard::remove('superkalifrailistisch'),         'can not delete unknown type'); 
 ok( Kephra::Base::Data::Type::Standard::create_simple( 'value!','not a reference','not ref $value', undef, '' ), 'could not create type with special char in name');
@@ -22,25 +24,80 @@ ok( Kephra::Base::Data::Type::Standard::create_simple( 'va', 'not a reference', 
 ok( Kephra::Base::Data::Type::Standard::create_simple( 'superkalifrailistisch',  'not a reference', 'not ref $value', undef, '' ), 'could not create type with too long name');
 
 my $Tval = Kephra::Base::Data::Type::Standard::create_simple('value',   'defined value', 'defined $value', undef, '');
-is( ref $Tval,                                    $sclass,    'created simple data type via method "create_simple"');
+is( ref $Tval,                                    $sclass,              'created simple data type via method "create_simple"');
 is( Kephra::Base::Data::Type::Standard::add($Tval, '$'), '',            'could add the type "value" to the standard');
+ok( Kephra::Base::Data::Type::Standard::add($Tval, '$'),                'could not add the type "value" twice to standard');
 my $got = Kephra::Base::Data::Type::Standard::get('value');
-is( ref $got, $sclass,                                        'could "get" the added type by name');
-is( $got->get_name, 'value',                                  'got the right type');
-is( Kephra::Base::Data::Type::Standard::get_shortcut('value'), '$',     'got shortcut from type name');
-is( Kephra::Base::Data::Type::Standard::resolve_shortcut('$'), 'value', 'resolve shortcut to given type name');
-is( Kephra::Base::Data::Type::Standard::is_known('value'), 1,           'our new type is known');
-is( Kephra::Base::Data::Type::Standard::is_owned('value'), 1,           'our new type is owned');
-is( Kephra::Base::Data::Type::Standard::is_initial('value'), 0,         'our new type is not standard');
-is( Kephra::Base::Data::Type::Standard::check_type('value',1), '',      'checked value agains type "value" and got correct positive');
-ok( Kephra::Base::Data::Type::Standard::check_type('value',undef),      'checked value agains type "value" and got correct negative');
-is( Kephra::Base::Data::Type::Standard::list_names(), 1,                'can list one type name');
-my @names = Kephra::Base::Data::Type::Standard::list_names();
-is( $names[0], 'value',                                       'and name is correct');
+is( ref $got, $sclass,                                                  'could "get" the added type by name');
+is( $got->get_name, 'value',                                            'got the right type');
+is( Kephra::Base::Data::Type::Standard::get_shortcut('value'), '$',     'got shortcut from type name "value"');
+is( Kephra::Base::Data::Type::Standard::resolve_shortcut('$'), 'value', 'resolve shortcut $ to type name "value"');
+is( Kephra::Base::Data::Type::Standard::is_known('value'), 1,           'type "value" is known');
+is( Kephra::Base::Data::Type::Standard::is_owned('value'), 1,           'type "value" is owned');
+is( Kephra::Base::Data::Type::Standard::is_initial('value'), 0,         'type "value" is not initial (installed by standard lib package)');
+is( Kephra::Base::Data::Type::Standard::check_type('value',1), '',      'checked value 1 against type "value" and got correct positive');
+is( Kephra::Base::Data::Type::Standard::check_simple('value',[]), '',   'checked ref value against type "value" and got correct positive');
+ok( Kephra::Base::Data::Type::Standard::check_type('value',undef),      'checked undef against type "value" and got correct negative');
+@names = Kephra::Base::Data::Type::Standard::list_names();
+is( int @names, 1,                                                      'can list one type name');
+is( $names[0], 'value',                                                 'and name is correct');
+@sc = Kephra::Base::Data::Type::Standard::list_shortcuts();
+is( @sc, 1,                                                             'there is now one type shortcut to list');
+is( $sc[0], '$',                                                        'and name is correct');
 
 my $Tint   = new_type('int',  'integer number', 'int $value eq $value', 'value', 0);
-#my $Tpint  = simple_type('pos_int', 'positive integer', '$value >= 0', $Tint);
+is( ref $Tint,                                    $sclass,              'created simple data type "int" that has parent');
+is( Kephra::Base::Data::Type::Standard::is_known('int'), 0,             'type "int" is not known yet');
+ok( Kephra::Base::Data::Type::Standard::add($Tint, '$'),                'could add the type "int" to the standard with under shortcut of value');
+is( Kephra::Base::Data::Type::Standard::add($Tint, '#'), '',            'could add the type "int" to the standard with own shortcut');
+$got = Kephra::Base::Data::Type::Standard::get('int');
+is( ref $got, $sclass,                                                  'could "get" the added type by name');
+is( $got->get_name, 'int',                                              'got the right type');
+is( Kephra::Base::Data::Type::Standard::get_shortcut('int'), '#',       'got shortcut from type name "int"');
+is( Kephra::Base::Data::Type::Standard::resolve_shortcut('#'), 'int',   'resolve shortcut to given type name');
+is( Kephra::Base::Data::Type::Standard::get_shortcut('value'), '$',     'got shortcut from type name "value"');
+is( Kephra::Base::Data::Type::Standard::resolve_shortcut('$'), 'value', 'resolve shortcut $ to type name "value"');
+is( Kephra::Base::Data::Type::Standard::is_known('int'), 1,             'type "int" is known');
+is( Kephra::Base::Data::Type::Standard::is_owned('int'), 1,             'type "int" is owned');
+is( Kephra::Base::Data::Type::Standard::is_initial('int'), 0,           'type "int" is not initial');
+is( Kephra::Base::Data::Type::Standard::check_type('int',1), '',        'checked value 1 against type "int" and got correct positive');
+ok( Kephra::Base::Data::Type::Standard::check_simple('int',[]),         'checked ref value against type "int" and got correct negative');
+ok( Kephra::Base::Data::Type::Standard::check_type('int',undef),        'checked undef against type "int" and got correct negative');
+@names = Kephra::Base::Data::Type::Standard::list_names();
+is( int @names, 2,                                                      'can list now two type names');
+is( $names[0], 'int',                                                   'and name is correct');
+@sc = Kephra::Base::Data::Type::Standard::list_shortcuts();
+is( @sc, 2,                                                             'there are now two type shortcut to list');
+is( $sc[0], '#',                                                        'and name is correct');
 
+my $type = Kephra::Base::Data::Type::Standard::remove('value');
+is( ref $type,   $sclass,                                               'removed type "value"');
+is( $type->get_name,  'value',                                          'removed correct type');
+is( Kephra::Base::Data::Type::Standard::is_known('value'), 0,           'type "value" is no longer known');
+is( Kephra::Base::Data::Type::Standard::get('value'), undef,            'type "value" can not be given');
+is( Kephra::Base::Data::Type::Standard::get_shortcut('value'), undef,   'got shortcut from type name "value" is also no longer known');
+is( Kephra::Base::Data::Type::Standard::resolve_shortcut('$'), undef,      'shortcut for type "value" also can not be resolved');
+is( Kephra::Base::Data::Type::Standard::is_owned('value'), undef,       'type "value" is not owned because deleted');
+
+
+my $Tpint  = new_type('pos_int', 'positive integer', '$value >= 0', 'int');
+my $Tarray = new_type('array_ref', 'array reference', 'ref $value eq "ARRAY"', undef, []);
+Kephra::Base::Data::Type::Standard::add($Tpint, '=');
+Kephra::Base::Data::Type::Standard::add($Tarray, '@');
+@names = Kephra::Base::Data::Type::Standard::guess([]);
+is( int @names, 1,                                                      'ARRAY ref resulted in one guess');
+is( $names[0], 'array_ref',                                             'type "array_ref" could be guessed');
+@names = Kephra::Base::Data::Type::Standard::guess(3);
+is( int @names, 2,                                                      'int 3 resulted in two guesses');
+is( $names[0], 'int',                                                   'int 3 was guessed as "int"');
+is( $names[1], 'pos_int',                                               'int 3 was guessed as positive int');
+@names = guess_type(-3);
+is( int @names, 1,                                                      'int -3 resulted in one guess');
+is( $names[0], 'int',                                                   'int -3 was guessed as "int"');
+
+
+# TODO: group shortcut 
+# state restate param type
 
 Kephra::Base::Data::Type::Standard::init();
 
