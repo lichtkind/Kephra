@@ -7,7 +7,7 @@ use warnings;
 # plans: inheritance?
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 0.5;
+our $VERSION = 1.0;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type::Simple;
 

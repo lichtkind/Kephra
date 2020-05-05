@@ -7,35 +7,35 @@ relation between different types of protos: dev/roadmap.txt
 our development model in more details: doc/CompleteProgramming.pod
 
 --------------------------------------------------------------------------------
-                             C = Complete
-                              P = Partially there, nothing missing now (or only tests)
-                               S = Small feature missing
-                                U = Usable
-                                 M = Major feature missing
-                                  B = Buggy/old Deprecated code
-                                   I = In Progress (currently worked on)
-                                    N = Not yet (planned)
+                                            C = Complete
+                                             P = Partially there, nothing missing now (or only tests)
+                                              S = Small feature missing
+                                               U = Usable
+                                                M = Major feature missing
+                                                 B = Buggy/old Deprecated code
+                                                  I = In Progress (currently worked on)
+                                                   N = Not yet (planned)
 --------------------------------------------------------------------------------
-   Kephra::Base::Package                    C              low level symbol manipulation
-   Kephra::Base::Data::Type::Simple         C              inheritable absolute value checker
-   Kephra::Base::Data::Type::Parametric     C              contracts between several values
-   Kephra::Base::Data::Type::Standard       CP             standard types
-   Kephra::Base::Data::Type                 CP             
-   Kephra::Base::Data                       CP   
-   Kephra::Base::Closure                    C              serializable closure
- - Kephra::Base                             CP
+   Kephra::Base::Package                    C         1.0   low level symbol manipulation
+   Kephra::Base::Data::Type::Simple         C         1.2   inheritable absolute value checker
+   Kephra::Base::Data::Type::Parametric     C         1.0   contracts between several values
+   Kephra::Base::Data::Type::Standard       CP        1.1   standard types
+   Kephra::Base::Data::Type                 CP        0.1   
+   Kephra::Base::Data                       CP        0.1
+   Kephra::Base::Closure                    C         1.0   serializable closure
+ - Kephra::Base                             CP        0.1
 --------------------------------------------------------------------------------
-   Kephra::Base::Class::Scope               C
+   Kephra::Base::Class::Scope               C         1.0   namespace constants & priority logic
    Kephra::Base::Class::Attribute::Type      P
    Kephra::Base::Class::Attribute           C
-   Kephra::Base::Class::Definition              MD
-   Kephra::Base::Class::Instance               UMD
-   Kephra::Base::Class::Method::Argument         D
-   Kephra::Base::Class::Method::Signature        D
-   Kephra::Base::Class::Method::Hook             D
-   Kephra::Base::Class::Method                   D
-   Kephra::Base::Class::Builder                UMD
-   Kephra::Base::Class::Syntax                   D
+   Kephra::Base::Class::Definition              MB
+   Kephra::Base::Class::Instance               UMB
+   Kephra::Base::Class::Method::Argument         B
+   Kephra::Base::Class::Method::Signature        B
+   Kephra::Base::Class::Method::Hook             B
+   Kephra::Base::Class::Method                   B
+   Kephra::Base::Class::Builder                UMB
+   Kephra::Base::Class::Syntax                   B
  - Kephra::Base::Class                       P
 --------------------------------------------------------------------------------
 ================================================================================

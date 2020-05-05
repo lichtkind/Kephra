@@ -4,6 +4,7 @@ use warnings;
 # low level package and sub manipulation in symbol table // export all
 
 package Kephra::Base::Package;
+our $VERSION = 1.0;
 
 sub package_loaded { } # ~package                   --> bool
 sub count_sub      { } # ~package                   --> @subname

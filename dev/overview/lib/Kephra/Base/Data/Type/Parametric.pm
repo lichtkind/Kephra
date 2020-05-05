@@ -5,7 +5,7 @@ use warnings;
 # example : valid index (positive int) of an actual array (parameter)
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 0.5;
+our $VERSION = 1.0;
 use Kephra::Base::Data::Type;
 
                            #               %{.type - ~name $default }      

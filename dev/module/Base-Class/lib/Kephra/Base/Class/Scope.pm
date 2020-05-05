@@ -5,7 +5,7 @@ use experimental qw/switch/;
 # method namespace constants and their priority logic
 
 package Kephra::Base::Class::Scope;
-our $VERSION = 0.04;
+our $VERSION = 1.0;
 use Exporter 'import';
 our @EXPORT_OK = qw/cat_scope_path/;
 our %EXPORT_TAGS = (all  => [@EXPORT_OK]);

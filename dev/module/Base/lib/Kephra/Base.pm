@@ -5,7 +5,7 @@ use Kephra::Base::Data;
 use Kephra::Base::Closure qw/new_closure/;
 
 package Kephra::Base;
-our $VERSION = 0.01;
+our $VERSION = 0.1;
 use Exporter 'import';
 our @EXPORT_OK = qw/new_counter date_time new_closure/;
 our %EXPORT_TAGS = (all  => [@EXPORT_OK]);
