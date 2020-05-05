@@ -7,4 +7,6 @@ use Kephra::Base::Data::Type;
 sub clone      {} #  $data  --> $data            # only one parameter
 sub clone_list {} #  @data  --> @data
 
+sub date_time      {}
+
 1;

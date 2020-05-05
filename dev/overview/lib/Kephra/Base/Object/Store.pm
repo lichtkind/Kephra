@@ -6,7 +6,6 @@ use parent qw(Kephra::Base::Object);
 use Kephra::API qw/:log/;
 use Kephra::Base::Class::Method::Hook;
 use Kephra::Base::Object::Queue;
-use Kephra::Base::Call::Template;
 
 sub new {} # pkg class {getter => setter}? hsize? factory? --> obj
                              #                                                 =class:classname of items 

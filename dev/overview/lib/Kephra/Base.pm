@@ -1,7 +1,10 @@
 use v5.20;
 use warnings;
 
-use Kephra::Base::Call;
+
+use Kephra::Base::Package;
+use Kephra::Base::Data;
+use Kephra::Base::Closure;
 use Kephra::Base::Class;
 use Kephra::Base::Object;
 use Kephra::Base::Message::Net;
@@ -13,8 +16,7 @@ use Kephra::Base::Plugin::Manager;
 
 package Kephra::Base;
 
-sub create_counter {}
-sub date_time      {}
+sub new_counter {}
 
 
 1;

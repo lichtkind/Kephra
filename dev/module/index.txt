@@ -19,10 +19,11 @@ our development model in more details: doc/CompleteProgramming.pod
    Kephra::Base::Package                    C              low level symbol manipulation
    Kephra::Base::Data::Type::Simple         C              inheritable absolute value checker
    Kephra::Base::Data::Type::Parametric     C              contracts between several values
-   Kephra::Base::Data::Type                 CP             standard types
+   Kephra::Base::Data::Type::Standard       CP             standard types
+   Kephra::Base::Data::Type                 CP             
    Kephra::Base::Data                       CP   
-   Kephra::Base::Call                         S  B 
- - Kephra::Base                             C
+   Kephra::Base::Closure                    C              serializable closure
+ - Kephra::Base                             CP
 --------------------------------------------------------------------------------
    Kephra::Base::Class::Scope               C
    Kephra::Base::Class::Attribute::Type      P

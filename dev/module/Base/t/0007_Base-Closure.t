@@ -4,67 +4,67 @@ use warnings;
 use Test::More tests => 133;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
-use Kephra::Base::Call qw/new_call/;
+use Kephra::Base::Closure qw/new_closure/;
 use Kephra::Base::Data::Type::Standard qw/check_type/;
 
-my $class = 'Kephra::Base::Call';
+my $class = 'Kephra::Base::Closure';
 my $tclass = 'Kephra::Base::Data::Type::Simple';
 sub simple_type { Kephra::Base::Data::Type::Simple->new(@_) }
 my $Tval  = simple_type('value', 'not a reference', 'not ref $value', undef, '');
 my $Tint  = simple_type('int', 'integer number', 'int $value eq $value', $Tval, 0);
 my $Aref  = [];
-my ($call, $clone, $counter, $state, $copy);
+my ($closure, $clone, $counter, $state, $copy);
 
-is (ref Kephra::Base::Call->new(),  '', 'new needs at least one positional argument');
-is (ref Kephra::Base::Call->new({}),'', 'new needs at least one named argument');
-is (ref Kephra::Base::Call->new('blub'), '', 'need valid perl code to make a Call object');
-$call = Kephra::Base::Call->new(1);
-is (ref $call, $class,                  '- created most simple KB::Call object with positional argument');
-is ($call->run(), 1,                    'method run works');
-is ($call->get_code(), 1,               'code getter works');
-is ($call->get_type(), undef,           'type getter works');
-is ($call->get_state(), undef,          'state getter works');
-is ($call->set_state(3), 3,             'state setter works');
-is ($call->get_state(), 3,              'state getter works');
+is (ref Kephra::Base::Closure->new(),      '', 'new needs at least one positional argument');
+is (ref Kephra::Base::Closure->new({}),    '', 'new needs at least one named argument');
+is (ref Kephra::Base::Closure->new('blub'),'', 'need valid perl code to make a Closure object');
+$closure = Kephra::Base::Closure->new(1);
+is (ref $closure, $class,                  '- created most simple KB::Closure object with positional argument');
+is ($closure->run(), 1,                    'method run works');
+is ($closure->get_code(), 1,               'code getter works');
+is ($closure->get_type(), undef,           'type getter works');
+is ($closure->get_state(), undef,          'state getter works');
+is ($closure->set_state(3), 3,             'state setter works');
+is ($closure->get_state(), 3,              'state getter works');
 
-$call = Kephra::Base::Call->new({code =>1});
-is (ref $call, $class,                  '- created most simple KB::Call object with named argument');
-is ($call->run(), 1,                    'method run works');
-is ($call->get_code(), 1,               'code getter works');
-is ($call->get_type(), undef,           'type getter works');
-is ($call->get_state(), undef,          'state getter works');
+$closure = Kephra::Base::Closure->new({code =>1});
+is (ref $closure, $class,                  '- created most simple KB::Closure object with named argument');
+is ($closure->run(), 1,                    'method run works');
+is ($closure->get_code(), 1,               'code getter works');
+is ($closure->get_type(), undef,           'type getter works');
+is ($closure->get_state(), undef,          'state getter works');
 
-$clone = $call->clone();
-is (ref $clone, $class,                 '- created clone of most simple KB::Call object');
+$clone = $closure->clone();
+is (ref $clone, $class,                 '- created clone of most simple KB::Closure object');
 is ($clone->run(), 1,                   'method run works');
 is ($clone->get_code(), 1,              'code getter works');
 is ($clone->get_type(), undef,          'type getter works');
 is ($clone->get_state(), undef,         'state getter works');
 
-$copy = Kephra::Base::Call->restate($call->state);
-is (ref $clone, $class,                 '- created copy of most simple KB::Call object');
+$copy = Kephra::Base::Closure->restate($closure->state);
+is (ref $clone, $class,                 '- created copy of most simple KB::Closure object');
 is ($clone->run(), 1,                   'method run works');
 is ($clone->get_code(), 1,              'code getter works');
 is ($clone->get_type(), undef,          'type getter works');
 is ($clone->get_state(), undef,         'state getter works');
 
 
-$call = Kephra::Base::Call->new('$_[0]');
-is ($call->run(2), 2,                   'args to code get transported');
-is ($call->run('eq'), 'eq',             'every time');
-is (int $call->run($Aref), int $Aref,   'even on refs');
+$closure = Kephra::Base::Closure->new('$_[0]');
+is ($closure->run(2), 2,                   'args to code get transported');
+is ($closure->run('eq'), 'eq',             'every time');
+is (int $closure->run($Aref), int $Aref,   'even on refs');
 
-$counter = Kephra::Base::Call->new('state $cc = 0; $cc++;');
-is (ref $call, $class,                  '- created call with none state variables');
+$counter = Kephra::Base::Closure->new('state $cc = 0; $cc++;');
+is (ref $closure, $class,                  '- created closure with none state variables');
 is ($counter->run(), 0,                 'counter initialized with none state var');
 is ($counter->run(), 1,                 'counter works with none state var');
 
-$counter = Kephra::Base::Call->new('$state++');
-is (ref $call, $class,                  '- created call using the official state variable');
+$counter = Kephra::Base::Closure->new('$state++');
+is (ref $closure, $class,                  '- created closure using the official state variable');
 is ($counter->run(), 0,                 'counter initialized with state var');
 is ($counter->run(), 1,                 'counter works with state var');
 
-$counter = Kephra::Base::Call->new('$state++', 7);
+$counter = Kephra::Base::Closure->new('$state++', 7);
 is ($counter->get_state(),      7,      'got state from argument of new');
 is ($counter->run(),            7,      'code uses state value given as argument');
 is ($counter->run(),            8,      'counter works');
@@ -78,8 +78,8 @@ is ($counter->run(),          8.8,      'counter restarts with 0 after bad value
 is ($counter->run(),          9.8,      'counter works even with real numbers');
 
 
-$counter = new_call({code => '$state++', state => 8, type => 'int'});
-is (ref $counter, $class,               '- created KB::Call with shortcut sub and standard type name');
+$counter = new_closure({code => '$state++', state => 8, type => 'int'});
+is (ref $counter, $class,               '- created KB::Closure with shortcut sub and standard type name');
 my $type = $counter->get_type();
 is (ref $type,  $tclass,                'standard type name got resolved');
 is ($counter->get_type->get_name, 'int','looks like got resolved to right type');
@@ -91,8 +91,8 @@ isnt ($counter->set_state('+'), '+',    'state setter returned error because typ
 is ($counter->get_state(),  1,          'previous state still present');
 
 
-$counter = Kephra::Base::Call->new('$state++', 9, 'int');
-is (ref $counter, $class,               '- created KB::Call with type restriction of state by standard type');
+$counter = Kephra::Base::Closure->new('$state++', 9, 'int');
+is (ref $counter, $class,               '- created KB::Closure with type restriction of state by standard type');
 $type = $counter->get_type();
 is (ref $type,  $tclass,                'standard type name got resolved');
 is ($type->get_name, 'int',             'looks like got resolved to right type');
@@ -104,7 +104,7 @@ isnt ($counter->set_state('-'), '-',    'state setter returned error because typ
 is ($counter->get_state(),  2,          'previous state still present');
 
 $clone = $counter->clone();
-is (ref $clone, $class,                 '- created KB::Call clone');
+is (ref $clone, $class,                 '- created KB::Closure clone');
 isnt($clone, $counter,                  'clone is different ref from original');
 is ($clone->get_type->get_name, 'int',  'looks like clone got right standard type');
 is ($clone->get_code(),  '$state++',    'getter gives correct source code');
@@ -117,10 +117,10 @@ is ($clone->run(),        3,            'clone code does run');
 is ($clone->run(),        4,            'clone code works');
 
 $state = $clone->state();
-is (ref $state, 'HASH',                 'saved state of Call copy into HASH ref');
+is (ref $state, 'HASH',                 'saved state of Closure copy into HASH ref');
 is ($state->{'std_type'}, 'int',        'only type name is saved from standard type');
-$copy = Kephra::Base::Call->restate($state);
-is (ref $copy, $class,                  '- created KB::Call copy of a clone');
+$copy = Kephra::Base::Closure->restate($state);
+is (ref $copy, $class,                  '- created KB::Closure copy of a clone');
 isnt($copy, $counter,                   'copy ref is different ref from original');
 isnt($copy, $clone,                     'copy ref is different ref from clone');
 is ($copy->get_type->get_name, 'int',   'looks like copy got right standard type');
@@ -134,7 +134,7 @@ is ($copy->run(),        4,             'clone code does run');
 is ($copy->run(),        5,             'clone code works');
 
 $clone = $copy->clone();
-is (ref $clone, $class,                 '- created KB::Call copy of clone of copy');
+is (ref $clone, $class,                 '- created KB::Closure copy of clone of copy');
 isnt($clone, $copy,                     'clone is different ref from "copy" (original)');
 is ($clone->get_type->get_name, 'int',  'looks like clone got right standard type');
 is ($clone->get_code(),  '$state++',    'getter gives correct source code');
@@ -147,8 +147,8 @@ is ($clone->run(),        5,            'clone code does run');
 is ($clone->run(),        6,            'clone code works');
 
 
-$counter = Kephra::Base::Call->new({code => '$state++', state => 12, type => $Tint});
-is (ref $counter, $class,               '- created KB::Call with type restriction  and HASH args');
+$counter = Kephra::Base::Closure->new({code => '$state++', state => 12, type => $Tint});
+is (ref $counter, $class,               '- created KB::Closure with type restriction  and HASH args');
 is (int $Tint, int $counter->get_type(),'type object was stored properly');
 is ($counter->get_code(), '$state++',   'getter gives correct source code');
 is ($counter->get_state(), 12,          'getter still works');
@@ -158,10 +158,10 @@ isnt ($counter->set_state('-'), '-',    'state setter returned error because typ
 is ($counter->get_state(),  6,          'previous state still present');
 
 $state = $counter->state();
-is (ref $state, 'HASH',                 'saved state of Call into HASH ref');
+is (ref $state, 'HASH',                 'saved state of Closure into HASH ref');
 is (ref $state->{'type'}, 'HASH',       'none standard type state was saved in HASH');
-$copy = Kephra::Base::Call->restate($state);
-is (ref $copy, $class,                  '- created copy of a KB::Call');
+$copy = Kephra::Base::Closure->restate($state);
+is (ref $copy, $class,                  '- created copy of a KB::Closure');
 isnt($copy, $counter,                   'copy ref is different ref from original');
 isnt (int $Tint, int $copy->get_type(), 'type object got marshalled too');
 is ($copy->get_code(),  '$state++',     'getter gives correct source code');
@@ -174,7 +174,7 @@ is ($copy->run(),        7,             'code of copy does run');
 is ($copy->run(),        8,             'code of copy works');
 
 $clone = $copy->clone();
-is (ref $clone, $class,                 '- created KB::Call clone of copy');
+is (ref $clone, $class,                 '- created KB::Closure clone of copy');
 isnt($clone, $copy,                     'clone is different ref from "copy"');
 isnt($clone, $counter,                  'clone is different ref from "original"');
 is ($clone->get_type->get_name, 'int',  'looks like clone got right standard type');

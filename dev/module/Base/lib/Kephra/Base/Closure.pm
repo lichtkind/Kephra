@@ -3,14 +3,14 @@ use warnings;
 
 # serializable closure
 
-package Kephra::Base::Call;
+package Kephra::Base::Closure;
 our $VERSION = 0.7;
 use Exporter 'import';
-our @EXPORT_OK = (qw/new_call/);
+our @EXPORT_OK = (qw/new_closure/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 use Kephra::Base::Data qw/clone_data check_type/;
 ################################################################################
-sub new_call   {new(__PACKAGE__, @_)}
+sub new_closure   {new(__PACKAGE__, @_)}
 sub new {
     my ($pkg, $code, $state, $type) = @_;
     if (ref $code eq 'HASH'){
