@@ -5,10 +5,10 @@ use warnings;
 # example : valid index (positive int) of an actual array (parameter)
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 1.0;
+our $VERSION = 1.1;
 use Kephra::Base::Data::Type;
 
-                           #               %{.type - ~name $default }      
+                           #               .type | %{.type - ~name $default }      
 sub new                 {} # ~name  ~help  %parameter  ~code .parent - $default --> .ptype | ~errormsg  # optionally as %args
 sub state               {} # .ptype                                             --> %state                serialize
 sub restate             {} # %state                                             --> .ptype                recreate all type checker from data dump

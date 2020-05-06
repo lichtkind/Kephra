@@ -7,9 +7,10 @@ use warnings;
 # plans: inheritance?
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 1.0;
+our $VERSION = 1.1;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type::Simple;
+my $stype = 'Kephra::Base::Data::Type::Simple';
 
 ################################################################################
 sub _unhash_arg_ {
@@ -18,23 +19,21 @@ sub _unhash_arg_ {
 sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            --> .ptype | ~errormsg 
     my $pkg = shift;
     my ($name, $help, $parameter, $code, $parent, $default) = _unhash_arg_(@_);
-    return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref), 'code' (str) ".
-           "and 'parent' (Kephra::Base::Data::Type::Simple) to create parametric type object" 
+    return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref), 'code' (str) and 'parent' ($stype) to create parametric type object" 
         unless defined $name and $name and defined $help and $help and defined $parameter and defined $code and $code and defined $parent;
-    return "parameter definition has to be an hashref and contain the key 'type' (Kephra::Base::Data::Type::Simple) to create parametric type $name" 
-        if ref $parameter ne 'HASH' or ref $parameter->{'type'} ne 'Kephra::Base::Data::Type::Simple';
+    return "argument 'parameter' has to be $stype or a hash ref definition that contains at least the key 'type' to create parametric type $name" 
+        if ref $parameter ne $stype and (ref $parameter ne 'HASH' or ref $parameter->{'type'} ne $stype);
     return "default value '$parameter->{default}' of type $name 's parameter does not match his type $parameter->{type}{name}" 
-        if exists $parameter->{'default'} and $parameter->{'type'}->check($parameter->{'default'});
-    return "parent has to be instance of Kephra::Base::Data::Type::Simple to create parametric type $name" 
-        if ref $parent ne 'Kephra::Base::Data::Type::Simple';
+        if ref $parameter eq 'HASH' and exists $parameter->{'default'} and $parameter->{'type'}->check($parameter->{'default'});
+    return "parent has to be instance of $stype to create parametric type $name" if ref $parent ne $stype;
     $default //= $parent->get_default_value;
-    if (exists $parameter->{'default'} or exists $parameter->{'name'}){
-        $parameter = Kephra::Base::Data::Type::Simple->new( {
-                name => $parameter->{'name'} // $parameter->{'type'}->get_name,
-                default => $parameter->{'default'} // $parameter->{'type'}->get_default_value,
-                parent => $parameter->{'type'} } );
-    } else {
-        $parameter = $parameter->{'type'};
+    if (ref $parameter eq 'HASH'){
+        if (not exists $parameter->{'name'} and not exists $parameter->{'default'}){ $parameter = $parameter->{'type'} } 
+        else { $parameter = Kephra::Base::Data::Type::Simple->new( {
+                    name => $parameter->{'name'} // $parameter->{'type'}->get_name,
+                    default => $parameter->{'default'} // $parameter->{'type'}->get_default_value,
+                    parent => $parameter->{'type'} } );
+        }
     }
     my $checks = $parent->get_check_pairs;
     my $source = _compile_( $name, $checks, $code, $parameter );

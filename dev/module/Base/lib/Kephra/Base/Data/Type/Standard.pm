@@ -13,6 +13,7 @@ our @EXPORT_OK = (qw/new_type check_type guess_type is_type_known/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 my (%simple_type, %param_type, %name_by_shortcut, %shortcut_by_name);   # storage for all active types
 my %forbidden_shortcut = ('{' => 1, '}' => 1, '(' => 1, ')' => 1, '<' => 1, '>' => 1, ',' => 1, '-' => 1);
+my $stclass = 'Kephra::Base::Data::Type::Simple';
 ##############################################################################
 sub init {
     return if (caller)[0] ne 'Kephra::Base::Data::Type';
@@ -76,10 +77,10 @@ sub state {
     for my $type_name (keys %param_type) {
         my $shortcut = $shortcut_by_name{'param'}{$type_name};
         for my $param_name (keys %{$param_type{$type_name}}) {
-		    my $type_def = $param_type{$type_name}{$param_name};
-			$state{'param'}{$type_name}{$param_name} = { 'object' => $type_def->{'object'}->state, file => $type_def->{'file'}, package => $type_def->{'package'} };
-			$state{'param'}{$type_name}{$param_name}{'shortcut'} = $shortcut_by_name{'param'}{$type_name} if exists $shortcut_by_name{'param'}{$type_name};
-		}
+            my $type_def = $param_type{$type_name}{$param_name};
+            $state{'param'}{$type_name}{$param_name} = { 'object' => $type_def->{'object'}->state, file => $type_def->{'file'}, package => $type_def->{'package'} };
+            $state{'param'}{$type_name}{$param_name}{'shortcut'} = $shortcut_by_name{'param'}{$type_name} if exists $shortcut_by_name{'param'}{$type_name};
+        }
     }
     \%state;
 }
@@ -95,12 +96,12 @@ sub restate {
     }
     for my $type_name (keys %param_type) {
         for my $param_name (keys %{$param_type{$type_name}}) {
-		    my $type_def = $param_type{$type_name}{$param_name};
+            my $type_def = $param_type{$type_name}{$param_name};
             $type_def->{'object'} = create_param($type_def->{'object'});
             if (exists $type_def->{'shortcut'}){
-				$name_by_shortcut{'param'}{ $type_def->{'shortcut'} } = $type_name; 
-				$shortcut_by_name{'param'}{ $type_name }             = delete $type_def->{'shortcut'}; 
-			}
+                $name_by_shortcut{'param'}{ $type_def->{'shortcut'} } = $type_name; 
+                $shortcut_by_name{'param'}{ $type_name }             = delete $type_def->{'shortcut'}; 
+            }
         }
     }
 }
@@ -111,9 +112,9 @@ sub create_simple     {  # ~name ~help ~code - .parent|~parent  $default     -->
     my $name_error = _validate_name_($name);
     return $name_error if $name_error;
     if (defined $parent){
-        $parent = get($parent) if ref $parent ne 'Kephra::Base::Data::Type::Simple';
+        $parent = get($parent) if ref $parent ne $stclass;
         return "fourth or named argument 'parent' of type '$name' has to be a name of a standard type or a simple type object"
-            if ref $parent ne 'Kephra::Base::Data::Type::Simple';
+            if ref $parent ne $stclass;
     }
     Kephra::Base::Data::Type::Simple->new($name, $help, $code, $parent, $default);
 }                       #             %{.type|~type - ~name $default }
@@ -121,11 +122,15 @@ sub create_param      { # ~name ~help %parameter ~code .parent|~parent - $defaul
     my ($name, $help, $parameter, $code, $parent, $default) = Kephra::Base::Data::Type::Parametric::_unhash_arg_(@_);
     my $name_error = _validate_name_($name);
     return $name_error if $name_error;
-    return "third or named argument 'parameter' of type '$name' has to be a hash reference with the key 'type'" if ref $parameter ne 'HASH' or not exists $parameter->{'type'};
-    $parameter->{'type'} = get( $parameter->{'type'} ) if ref $parameter->{'type'} ne 'Kephra::Base::Data::Type::Simple';
-    return "'parameter' 'type' definition has to be a name of a standard type or a simple type object" if ref $parameter->{'type'} ne 'Kephra::Base::Data::Type::Simple';
-    $parent = get($parent) if ref $parent ne 'Kephra::Base::Data::Type::Simple';
-    return "fifth or named argument 'parent' has to be a name of a standard type or a simple type object" if ref $parent ne 'Kephra::Base::Data::Type::Simple';
+    $parameter = get( $parameter ) unless ref $parameter;
+    my $par_ref = ref $parameter;
+    return "third or named argument 'parameter' has to be of type '$name', a name of a standard type or a parameter definition (hash ref)" 
+        if $par_ref ne $stclass and $par_ref ne 'HASH';
+    $parameter->{'type'} = get( $parameter->{'type'} ) if $par_ref eq 'HASH' and defined $parameter->{'type'} and $parameter->{'type'} ne $stclass;
+    return "key 'type' in der parameter definition (hash ref) has to be a simple standard type name or a simple type object" 
+        if $par_ref eq 'HASH' and ref $parameter->{'type'} ne $stclass;
+    $parent = get($parent) if ref $parent ne $stclass;
+    return "fifth or named argument 'parent' has to be a name of a standard type or a simple type object" if ref $parent ne $stclass;
     Kephra::Base::Data::Type::Parametric->new($name, $help, $parameter, $code, $parent, $default);
 }
 ################################################################################
