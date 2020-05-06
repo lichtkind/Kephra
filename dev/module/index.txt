@@ -19,7 +19,7 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::Package                      C         1.0    low level symbol manipulation
    K::B::Data::Type::Simple           C         1.2    inheritable absolute value checker
    K::B::Data::Type::Parametric       C         1.0    contracts between several values
-   K::B::Data::Type::Standard         CP        1.2    standard types
+   K::B::Data::Type::Standard         CP        1.3    store of standard types
    K::B::Data::Type                   CP        0.1   
    K::B::Data                         CP        0.1
    K::B::Closure                      C         1.0    serializable closure

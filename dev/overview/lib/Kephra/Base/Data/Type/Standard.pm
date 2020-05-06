@@ -20,8 +20,8 @@ sub create_param      {} # ~name ~help %parameter ~code .parent|~parent - $defau
 
 sub add               {} # ~[p]type ~shortcut          --> ~errormsg
 sub remove            {} # ~type - ~param              --> ~errormsg
-sub get               {} # ~type - ~param ~uni         --> ~errormsg
-sub get_shortcut      {} # ~type - ~param ~uni         --> ~errormsg
+sub get               {} # ~type - ~param              --> ~errormsg
+sub get_shortcut      {} # ~type - ~kind               --> ~errormsg
 sub list_names        {} # - ~kind ~name               --> @~type|@~ptype|@~param   # ~kind = 'simple'|'para[meter]'
 sub list_shortcuts    {} # - ~kind                            --> @~shortcut
 sub resolve_shortcut  {} # ~shortcut - ~param          -->  ~type

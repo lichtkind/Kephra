@@ -7,7 +7,7 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 package TypeTester; 
 use Kephra::Base::Data::Type::Standard qw/:all/;
-use Test::More tests => 140;
+use Test::More tests => 215;
 
 my $sclass  = 'Kephra::Base::Data::Type::Simple';
 my $pclass  = 'Kephra::Base::Data::Type::Parametric';
@@ -70,52 +70,160 @@ is( $names[0], 'int',                                                   'and nam
 is( @sc, 2,                                                             'there are now two type shortcut to list');
 is( $sc[0], '#',                                                        'and name is correct');
 
+
+package Elsewhere;
+Test::More::ok(Kephra::Base::Data::Type::Standard::remove('value'),     'can not remove type owned by different package'); 
+Test::More::is( Kephra::Base::Data::Type::Standard::is_owned('value'), 0,'type "value" is not owned by this package');
+package TypeTester; 
 my $type = Kephra::Base::Data::Type::Standard::remove('value');
 is( ref $type,   $sclass,                                               'removed type "value"');
 is( $type->get_name,  'value',                                          'removed correct type');
 is( Kephra::Base::Data::Type::Standard::is_known('value'), 0,           'type "value" is no longer known');
 is( Kephra::Base::Data::Type::Standard::get('value'), undef,            'type "value" can not be given');
 is( Kephra::Base::Data::Type::Standard::get_shortcut('value'), undef,   'got shortcut from type name "value" is also no longer known');
-is( Kephra::Base::Data::Type::Standard::resolve_shortcut('$'), undef,      'shortcut for type "value" also can not be resolved');
+is( Kephra::Base::Data::Type::Standard::resolve_shortcut('$'), undef,   'shortcut for type "value" also can not be resolved');
 is( Kephra::Base::Data::Type::Standard::is_owned('value'), undef,       'type "value" is not owned because deleted');
 
+is( Kephra::Base::Data::Type::Standard::is_known('int'), 1,             'type "int" is still known');
+is( ref Kephra::Base::Data::Type::Standard::get('int'), $sclass,        'type "int" can be fetched');
+is( Kephra::Base::Data::Type::Standard::get_shortcut('int'), '#',       'got shortcut from type name "int"');
+is( Kephra::Base::Data::Type::Standard::resolve_shortcut('#'), 'int',   'resolve shortcut to given type name');
 
-my $Tpint  = new_type('pos_int', 'positive integer', '$value >= 0', 'int');
+
+my $Tpint  = new_type('int_pos', 'positive integer', '$value >= 0', 'int');
+my $Tstr   = new_type('str', 'string', 'not ref $value', $Tval, '');
 my $Tarray = new_type('array_ref', 'array reference', 'ref $value eq "ARRAY"', undef, []);
+my $Thash  = new_type('hash_ref', 'hash reference', 'ref $value eq "HASH"', undef, {});
+my $Tw     = new_type('weird', 'improbable type', '$value eq "weird"', undef, 'weird');
+is(ref $Tpint, $sclass,                                                  'created simple type by shortcut sub');
 Kephra::Base::Data::Type::Standard::add($Tpint, '=');
+is (Kephra::Base::Data::Type::Standard::add($Tstr, '~'), '',            'add type with none standard parent');
 Kephra::Base::Data::Type::Standard::add($Tarray, '@');
+Kephra::Base::Data::Type::Standard::add($Thash, '%');
+Kephra::Base::Data::Type::Standard::add($Tw, "'");
+
+my $TindexA = Kephra::Base::Data::Type::Standard::create_param('index', 'valid index of array', {name => 'array', type=> 'array_ref', default=> [1]},
+                                                                        'return "value $value is out of range" if $value >= @$param', 'int_pos');
+my $TindexH = Kephra::Base::Data::Type::Standard::create_param('index', 'valid index of array', {name => 'hash', type=> 'hash_ref', default=> {'' => 1}},
+                                                                        'return "value $value is no valid key" unless exists $param->{$value}', 'str');
+is(ref $TindexA, $pclass,                                               'could create parametric type');
+is(ref $TindexH, $pclass,                                                   'could create parametric type sibling');
+is( Kephra::Base::Data::Type::Standard::add($TindexA, '#'), '',             'could add parametric type' );
+is( Kephra::Base::Data::Type::Standard::add($TindexH), '',                  'could add parametric type sibling' );
+$got = Kephra::Base::Data::Type::Standard::get('index','array');
+is( ref $got, $pclass,                                                          'could "get" the added type by name');
+is( $got->get_name, 'index',                                                    'got the right type');
+is( $got->get_parameter->get_name, 'array',                                     'even parameter has the right type');
+is( Kephra::Base::Data::Type::Standard::get_shortcut('index','param'),'#',      'got shortcut from type "inex of array"');
+is( Kephra::Base::Data::Type::Standard::resolve_shortcut('#','param'), 'index', 'resolve shortcut of parametric type "index of array"');
+is( Kephra::Base::Data::Type::Standard::get_shortcut('index', 'array'), '#',    'got shortcut from parametric type "index"');
+is( Kephra::Base::Data::Type::Standard::get_shortcut('index', 'hash'),  '#',    'got shortcut from parametric type "index" sibling');
+is( Kephra::Base::Data::Type::Standard::resolve_shortcut('#','param'), 'index', 'resolve shortcut # to parametric type "index"');
+is( Kephra::Base::Data::Type::Standard::is_known('index', 'array'), 1,          'type "index of array" is known');
+is( Kephra::Base::Data::Type::Standard::is_known('index', 'hash'), 1,           'type "index of hash" is known');
+is( Kephra::Base::Data::Type::Standard::is_owned('index', 'array'), 1,          'type "index of array" is owned');
+is( Kephra::Base::Data::Type::Standard::is_owned('index', 'hash'), 1,           'type "index of hash" is owned');
+is( Kephra::Base::Data::Type::Standard::is_initial('index', 'array'), 0,        'type "index of array" is not initial');
+is( Kephra::Base::Data::Type::Standard::is_initial('index', 'hash'), 0,         'type "index of hash" is not initial');
+is( Kephra::Base::Data::Type::Standard::check_param('index', 'array', 2,[1,2,3]),'','checked value 2 and array ref against type "index of array" and got correct positive');
+ok( Kephra::Base::Data::Type::Standard::check_param('index', 'array', 2,[1,2]),    'checked value 2 and too small array against type "index of array" and got correct negative');
+ok( Kephra::Base::Data::Type::Standard::check_param('index', 'array', 2,{2=>3}),   'checked value 2 and hash against type "index of array" and got correct negative');
+ok( Kephra::Base::Data::Type::Standard::check_param('index', 'array', -1,[]),      'checked value -1 against type "index of array" and got correct negative');
+is( Kephra::Base::Data::Type::Standard::check_param('index', 'hash', 2,{2=>3}), '','checked value 2 and hash against type "index of hash" and got correct positive');
+ok( Kephra::Base::Data::Type::Standard::check_param('index', 'hash', 2,{1=>2}),    'checked value 2 and hash ref against type "index of hash" and got correct negative');
+ok( Kephra::Base::Data::Type::Standard::check_param('index', 'hash', 2,[1,2]),     'checked value 2 and array ref against type "index of hash" and got correct negative');
+ok( Kephra::Base::Data::Type::Standard::check_param('index', 'hash', [],{''=>2}),  'checked value array ref and hash ref against type "index of hash" and got correct negative');
+@names = Kephra::Base::Data::Type::Standard::list_names('param');
+is( int @names, 1,                                                              'only one parametric type can be listed');
+is( $names[0], 'index',                                                         'listed correct name');
+@names = Kephra::Base::Data::Type::Standard::list_names('param','index');
+is( int @names, 2,                                                              'parameter of "index" type can be of one of two options');
+is( $names[0], 'array',                                                         'one of them is "array"');
+is( $names[1], 'hash',                                                          'the other is "hash"');
+my $state = Kephra::Base::Data::Type::Standard::state;
+
+
+ok( Kephra::Base::Data::Type::Standard::remove('a','b'),                'can not "remove" none existing parametric type');
+ok( Kephra::Base::Data::Type::Standard::remove('index','c'),            'can not "remove" existing type with none existing parameter');
+$type = Kephra::Base::Data::Type::Standard::remove('index', 'hash');
+is( ref $type,   $pclass,                                               'removed type "index of hash"');
+is( $type->get_name,  'index',                                          'removed correct "index"');
+is( $type->get_parameter->get_name,  'hash',                            'removed correct type: "index of hash"');
+is( Kephra::Base::Data::Type::Standard::is_known('index', 'hash'),  0,  'type "index of hash" is no longer known');
+is( Kephra::Base::Data::Type::Standard::is_known('index', 'array'), 1,  'type "index of array" is still around');
+is( Kephra::Base::Data::Type::Standard::is_owned('index', 'array'), 1,  'type "index of array" is owned');
+is( Kephra::Base::Data::Type::Standard::is_owned('index', 'hash'),undef,'type "index of hash" is owned');
+@names = Kephra::Base::Data::Type::Standard::list_names('param');
+is( int @names, 1,                                                      'only one parametric type can be listed');
+is( $names[0], 'index',                                                 'listed correct name');
+@names = Kephra::Base::Data::Type::Standard::list_names('param','index');
+is( int @names, 1,                                                      'parameter of "index" type can be of one option');
+is( $names[0], 'array',                                                 'it is "array"');
+
 @names = Kephra::Base::Data::Type::Standard::guess([]);
 is( int @names, 1,                                                      'ARRAY ref resulted in one guess');
 is( $names[0], 'array_ref',                                             'type "array_ref" could be guessed');
 @names = Kephra::Base::Data::Type::Standard::guess(3);
-is( int @names, 2,                                                      'int 3 resulted in two guesses');
+is( int @names, 3,                                                      'int 3 resulted in two guesses');
 is( $names[0], 'int',                                                   'int 3 was guessed as "int"');
-is( $names[1], 'pos_int',                                               'int 3 was guessed as positive int');
+is( $names[1], 'int_pos',                                               'int 3 was guessed as positive int');
+is( $names[2], 'str',                                                   'int 3 was guessed as positive str');
 @names = guess_type(-3);
-is( int @names, 1,                                                      'int -3 resulted in one guess');
+is( int @names, 2,                                                      'int -3 resulted in one guess');
 is( $names[0], 'int',                                                   'int -3 was guessed as "int"');
-
-
-# TODO: group shortcut 
-# state restate param type
+is( $names[1], 'str',                                                   'int -3 was guessed as "str"');
 
 Kephra::Base::Data::Type::Standard::init();
+is( Kephra::Base::Data::Type::Standard::is_known('weird'), 1,           '"init" had no effect when called from normal package');
+is( Kephra::Base::Data::Type::Standard::resolve_shortcut("'"), 'weird', 'illegal "init" did not delete shortcuts');
+Kephra::Base::Data::Type::Standard::restate({});
+is( Kephra::Base::Data::Type::Standard::is_known('weird'), 1,           '"restate" had no effect when called from normal package');
+is( Kephra::Base::Data::Type::Standard::resolve_shortcut("'"), 'weird', 'illegal "restate" did not delete shortcuts');
+is( Kephra::Base::Data::Type::Standard::add($Tval, '$'), '',            'could add again the type "value" to the standard');
+is( is_type_known('value'), 1,                                          'type value is there, (checked by shortcut sub)');
 
-exit 0;
+package Kephra::Base::Data::Type; 
+Kephra::Base::Data::Type::Standard::restate($state);
+package TypeTester; 
+@names = Kephra::Base::Data::Type::Standard::list_names('param');
+is( int @names, 1,                                                      'only one parametric type can be listed');
+is( $names[0], 'index',                                                 'listed correct name');
+@names = Kephra::Base::Data::Type::Standard::list_names('param','index');
+is( int @names, 2,                                                      'after  restate parameter of "index" can be again of one of two options');
+is( $names[0], 'array',                                                 'one of them is "array"');
+is( $names[1], 'hash',                                                  'the other is "hash"');
+is( Kephra::Base::Data::Type::Standard::is_known('value'), 0,           '"restate" deleted type "value" again');
 
-__END__
 
-is( Kephra::Base::Data::Type::is_known('value'), 1, 'some default type is known');
-is( known_type('value'),                         1, 'sub known_type got imported');
-is( 'num' ~~ [Kephra::Base::Data::Type::guess(2.3)], 1, 'guessed type num right');
-is( 'num' ~~ [guess_type(2.3)],                 1, 'sub guess_type got imported');
+Kephra::Base::Data::Type::Standard::init();
+is( Kephra::Base::Data::Type::Standard::is_known('weird'), 1,           'type "weird" is still there because "init" from random package is illegal');
+package Kephra::Base::Data::Type; 
+Kephra::Base::Data::Type::Standard::init();
+package TypeTester; 
+is( Kephra::Base::Data::Type::Standard::is_known('value'), 1,           'after "init" the initial type "value" is known');
+is( Kephra::Base::Data::Type::Standard::is_known('weird'), 0,           '"init" deleted "weird" type');
+is( Kephra::Base::Data::Type::Standard::resolve_shortcut("'"), undef,   '"init" also deleted "weird" shortcut');
 
-is( Kephra::Base::Data::Type::check('value',1),'', 'recognize 1 as value');
-is( check_type('value',1),             '', 'sub check_type got imported');
+
+
+is( 'num' ~~ [guess_type(2.3)],         1, 'sub guess_type got imported');
+is( check_type('value',1),             '', 'recognize 1 as value');
+is( check_type('value','1'),           '', 'even "1" is a value');
 is( check_type('value',0),             '', 'recognize 0 as value');
 is( check_type('value',''),            '', 'recognize empty string as value');
 is( check_type('value','d'),           '', 'recognize letter value');
-ok( check_type('value',[]),                'recognize that a ref is not a value');
+is( check_type('value',[]),            '', 'recognize that ref is a value');
+ok( check_type('value',undef),             'only undef is not a value');
+
+is( check_type('no_ref', 1),           '', 'recognize 1 as value');
+is( check_type('no_ref', 2.3E2),       '', 'recognize sci real as value');
+is( check_type('no_ref', 0),           '', 'recognize 0 as value');
+is( check_type('no_ref', 'd'),         '', 'recognize string as value');
+is( check_type('no_ref', ''),          '', 'recognize empty string as value');
+ok( check_type('no_ref',[]),               'ARRAY is a ref');
+ok( check_type('no_ref',{}),               'HASH is a ref');
+ok( check_type('no_ref',sub {}),           'CODE is a ref');
+ok( check_type('no_ref',qr//),             'Regex is a ref');
 
 is( check_type('bool',1),              '', 'recognize boolean value true');
 is( check_type('bool',0),              '', 'recognize boolean value false');
@@ -124,13 +232,15 @@ ok( check_type('bool','der'),              'string is not boolean');
 ok( check_type('bool',2),                  'int is not boolean');
 ok( check_type('bool',2.3),                'float is not boolean');
 ok( check_type('bool',[]),                 'ref is not boolean');
+is( Kephra::Base::Data::Type::Standard::get('bool')->get_default_value(), 0, 'got default bool');
 
 is( check_type('num',22),              '', 'recognize an integer as a number');
 is( check_type('num',1.5),             '', 'recognize small float as number');
 is( check_type('num',0.1e-5),          '', 'recognize scientific number');
+is( check_type('num',1000_00),         '', 'recognize underscore seperated number');
 ok( check_type('num','das'),               'string is not a number');
 ok( check_type('num', sub{}),              'coderef is not a number');
-is( Kephra::Base::Data::Type::get_default_value('num'), 0, 'got default number');
+is( Kephra::Base::Data::Type::Standard::get('num')->get_default_value(), 0, 'got default number');
 
 is( check_type('num_pos',1.5),         '', 'recognize positive number');
 is( check_type('num_pos',0),           '', 'zero is positive number');
@@ -162,7 +272,7 @@ ok( check_type('str_ne', ''),              'this is not a none empty string');
 
 is( check_type('str_uc', 'DAS'),       '', 'recognize upper case string');
 ok( check_type('str_uc', 'DaS'),           'this is not an upper case string');
-is( Kephra::Base::Data::Type::get_default_value('str_uc'), ' ', 'this type has no default');
+is( Kephra::Base::Data::Type::Standard::get('str_uc')->get_default_value(), 'A', 'got default upper case string');
 
 is( check_type('str_lc', 'das'),       '', 'recognize lower case string');
 ok( check_type('str_lc', 'DaS'),           'this is not an lower case string');
@@ -171,11 +281,6 @@ is( check_type('num',  1.5),           '', 'recognize number');
 is( check_type('num_pos', 1.5),        '', 'recognize positive number');
 is( check_type('int',     5),          '', 'recognize integer');
 is( check_type('int_pos', 5),          '', 'recognize positive integer');
-
-is( Kephra::Base::Data::Type::resolve_shortcut('~'), 'str_ne', 'resolved string shortcut');
-is( Kephra::Base::Data::Type::resolve_shortcut('?'), 'bool', 'resolved boolean shortcut');
-ok( ('~' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'string shortcut gets listed');
-ok( ('?' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'boolean shortcut gets listed');
 
 
 my @type = guess_type(5);
@@ -186,7 +291,8 @@ ok( 'int_spos' ~~ \@type, '5 is a strictly positive integer');
 ok( 'num' ~~ \@type,      '5 is a number');
 ok( 'num_pos' ~~ \@type,  '5 is a positive number');
 ok( 'str_ne' ~~ \@type,   '5 is none empty string');
-ok( 'ANY' ~~ \@type,      '5 is a value');
+ok( 'any' ~~ \@type,      '5 is anything');
+
 
 @type = guess_type(0);
 ok( 'bool' ~~ \@type,     '0 is a boolean');
@@ -195,114 +301,21 @@ ok( 'int_pos' ~~ \@type,  '0 is a positive integer');
 ok( 'num' ~~ \@type,      '0 is a number');
 ok( 'num_pos' ~~ \@type,  '0 is a positive number');
 ok( 'str_ne' ~~ \@type,   '0 is none empty string');
-ok( 'ANY' ~~ \@type,      '0 is a value');
+ok( 'any' ~~ \@type,      '0 is a value');
 
 @type = guess_type('');
 ok( !('bool' ~~ \@type),  'empty string is not a boolean');
 ok( !('int' ~~ \@type),   'empty string is not an integer');
 ok( !('num' ~~ \@type),   'empty string is not a number');
 ok( !('str_ne' ~~ \@type),'not empty string');
-ok( 'ANY' ~~ \@type,      'empty string is a value');
+ok( 'any' ~~ \@type,      'empty string is a value');
 
-@type = Kephra::Base::Data::Type::list_names();
+@type = Kephra::Base::Data::Type::Standard::list_names();
 ok( ('bool' ~~ \@type),  'bool type is known, list works');
 ok( ('num' ~~ \@type),   'num type is known, list works');
 ok( ('int' ~~ \@type),   'int type is known, list works');
-ok( ('ANY' ~~ \@type),   'any type is known, list works');
+ok( ('any' ~~ \@type),   'any type is known, list works');
 
 
-package Typer;
-use Test::More;
-
-my $type_name = 'test_type';
-is( Kephra::Base::Data::Type::is_known($type_name),   0, 'test type not present yet');
-is( Kephra::Base::Data::Type::is_owned('bool'),       0, 'default type bool is not recognized as own my current package');
-
-ok( add($type_name, 'infive','-5 < $_[0] and $_[0] < 5',2,'int', '-'), 'can not use - as type shortcut');
-is( add($type_name, 'infive','-5 < $_[0] and $_[0] < 5',2,'int', ':'),   0, 'added my custom type');
-
-ok( ($type_name ~~ [Kephra::Base::Data::Type::list_names()]), 'new created type gets listed');
-ok( ('-' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'new created type shortcut gets listed');
-is( Kephra::Base::Data::Type::resolve_shortcut(':'), $type_name, 'shortcut of new type can be resolved');
-is( Kephra::Base::Data::Type::is_known($type_name),   1, 'test type is present now');
-is( Kephra::Base::Data::Type::is_owned($type_name),   1, 'test type is recognized as owned by my current package');
-is( Kephra::Base::Data::Type::is_standard($type_name), 0,'test type is not recognized as standard');
-is( Kephra::Base::Data::Type::is_standard('int'),      1,'int is recognized as standard');
-is( Kephra::Base::Data::Type::get_default_value($type_name),2,'got default value of self made type');
-is( Kephra::Base::Data::Type::check($type_name,   1), '','test type accepts correctly');
-ok( Kephra::Base::Data::Type::check($type_name, -10),    'test type rejects correctly');
-is( Kephra::Base::Data::Type::delete($type_name),     0, 'deleted my custom type');
-ok( !($type_name ~~ [Kephra::Base::Data::Type::list_names()]), 'new deleted types gets not listed anymore');
-ok( !(':' ~~ [Kephra::Base::Data::Type::list_shortcuts()]), 'deleted types shortcut gets not listed anymore');
-is( Kephra::Base::Data::Type::resolve_shortcut(':'),  '', 'deleted shotcut can not be resolved');
-is( Kephra::Base::Data::Type::is_known($type_name),   0, 'test type not present again');
-is( Kephra::Base::Data::Type::is_known($type_name),   0, 'test type not present again');
-ok( add($type_name, 'just for this test','-5 < $_[0] and $_[0] < 5', 12, 'int'), 'default value of type has to be of type');
-
-
-is( add($type_name => {default => 2, help => 'just for this test',
-                       code => '-5 < $_[0] and $_[0] < 5', parent => 'int',
-                       shortcut => ':'}),                      0, 'HASHref syntax for add type');
-ok( add($type_name, 'infive','-5 < $_[0] and $_[0] < 5',2,'int'), 'can not have two types with same name');
-ok( ($type_name ~~ [Kephra::Base::Data::Type::list_names()]),   'again created type gets listed');
-ok( ('-' ~~ [Kephra::Base::Data::Type::list_shortcuts()]),      'again created type shortcut gets listed');
-is( Kephra::Base::Data::Type::resolve_shortcut(':'), $type_name,'shortcut of type can be resolved');
-is( Kephra::Base::Data::Type::is_known($type_name),          1, 'HASHref test type is present now');
-is( Kephra::Base::Data::Type::is_owned($type_name),          1, 'HASHref test type is recognized as own my current package');
-is( Kephra::Base::Data::Type::get_default_value($type_name), 2, 'HASHref type got default value of self made type');
-is( Kephra::Base::Data::Type::check($type_name,   1),       '', 'HASHref test type accepts correctly');
-ok( Kephra::Base::Data::Type::check($type_name, -10),           'HASHref test type rejects correctly');
-is( Kephra::Base::Data::Type::delete($type_name),            0, 'deleted HASHref custom type');
-
-
-my $child = 'three';
-ok( Kephra::Base::Data::Type::delete('num'),             'can not delete default types');
-ok( Kephra::Base::Data::Type::delete($type_name),        'can not delete none existing types');
-add($type_name, 'fiverr','-5 < $_[0] and $_[0] < 5',  0, 'int');
-is( Kephra::Base::Data::Type::is_known($type_name),   1, 'test type is present again');
-add($child, 'test child type', '$_[0] ==3', 3, $type_name);
-is( Kephra::Base::Data::Type::is_known($child),       1, 'child test type is present');
-is( Kephra::Base::Data::Type::check($child,   3),    '', 'child test type accepts correctly');
-ok( Kephra::Base::Data::Type::check($child,   2),        'child test type rejects correctly');
-is( Kephra::Base::Data::Type::delete($type_name),     0, 'deleted my custom type');
-is( Kephra::Base::Data::Type::is_known($child),       1, 'child test type is still present');
-is( Kephra::Base::Data::Type::check($child,   3),    '', 'child test type still accepts correctly');
-ok( Kephra::Base::Data::Type::check($child,   2),        'child test type still rejects correctly');
-add($type_name, 'fiverr', '-5 < $_[0] and $_[0] < 5', 0,'int');
-
-
-my $cb = Kephra::Base::Data::Type::get_callback('int');
-my $cb2 = Kephra::Base::Data::Type::get_callback('int');
-ok( ref $cb eq 'CODE',                    'got a real callback');
-ok( $cb eq $cb2,                          'got a same callback twice');
-is( $cb->(5),                         '', 'recognize integer by callback');
-is( $cb->(-12),                       '', 'recognize negative integer by callback');
-is( $cb->(1_2e12),                    '', 'recognize huge integer by callback');
-ok( $cb->(1.5),                           'real is not an integer by callback');
-ok( $cb->('das'),                         'string is not an integer, found by callback');
-ok( $cb->({}),                            'hash ref is not an integer, found by callback');
-
-
-sub add { Kephra::Base::Data::Type::add(@_) }
-
-package Typest;
-use Test::More;
-
-ok( Kephra::Base::Data::Type::delete($type_name),      'can not deleted what I did not create');
-is( Kephra::Base::Data::Type::is_known($type_name), 1, 'test type is still known');
-
-Kephra::Base::Data::Type::init();
-is( Kephra::Base::Data::Type::is_known($type_name), 1, 'init could not delete self made types either');
-
-my $state = Kephra::Base::Data::Type::state();
-is( ref $state,               'HASH', 'got basic types state hash');
-is( ref $state->{'int'},      'HASH', 'int is known the state hash');
-is( $state->{'CODE'}{'shortcut'},'&', 'also shortcuts are saved');
-is( ref $state->{$type_name}, 'HASH', 'custom type is known the state hash');
-
-package main;
-#Kephra::Base::Data::Type::restate( $state );
-#is( Kephra::Base::Data::Type::is_known($type_name), 1, 'init could not delete self made types either');
-#is( check_type('int_pos',1),           '', 'recognize positive int');
-#is( check_type('bool',0),              '', 'recognize boolean value false');
+exit 0;
 
