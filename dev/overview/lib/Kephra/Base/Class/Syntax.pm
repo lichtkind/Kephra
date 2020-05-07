@@ -15,9 +15,11 @@ __END__
 class C;                                                # final ; are optional except on class def
 
 
-type name => {check => sub {$val = @_}, help => 'description what is checked' - parent => type_name, default => val };
+type name => {help => 'description what is checked', code => '...', default => val - parent => type_name  };
 
-relative type name => {check => sub {$val, $obj = @_}, help => '....' -      parent => type_name, default => val };
+parametric type name => {check => sub {$val, $obj = @_}, help => '....' -      parent => type_name, default => val };
+
+argument type name =>
 
 
 attribute name => {help => '',                          # help = long name
@@ -46,8 +48,8 @@ delegator [method] name (sig) {$self, $args, $attribute->attr_method() = @_}
 wrapper [method] name (sig) {$self, $args, $attribute->attr_method() = @_}
 
 [multi] method name (sig)  {$self, $parameter = @};     # defaults: public, not multi   # $self has all methods in private (public included) scope 
-public [multi] method name (sig) ...                    # same just method,             # ..
-private [multi] method name (sig) ...                   # only callable in methods      # ..
+public [multi] method name (sig) {...}                  # same just method,             # ..
+private [multi] method name (sig) {...}                 # only callable in methods      # ..
 
                                                         # (sig) = (type parametername,, - type parametername,, --> return type)
                                                         #          required parameter     optional parameter

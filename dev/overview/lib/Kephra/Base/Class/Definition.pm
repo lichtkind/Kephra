@@ -4,18 +4,22 @@ use warnings;
 package Kephra::Base::Class::Definition;
 
 
-sub new_class   {} # ~class                     --> ~error
+sub new_class   {} # ~name                     --> ~errormsg
 
-sub complete    {} # ~class                     --> ?
-sub is_complete {} # ~class                     --> ?
-sub is_known    {} # ~class                     --> ?
-
-
+sub complete    {} # .cdef                     --> ?
+sub is_complete {} # .cdef                     --> ?
+sub is_known    {} # .cdef                     --> ?
 
 
-sub add_simple_attribute {}    # ~class, ~name, %properties --> ~error
-sub add_delegating_attribute {}# ~class, ~name, %properties --> ~error
-sub add_wrapping_attribute {}  # ~class, ~name, %properties --> ~error
+
+
+sub add_data_attribute       {}    # .cdef ~name %properties --> ~error
+sub add_delegating_attribute {}    # .cdef ~name %properties --> ~error
+sub add_wrapping_attribute   {}    # .cdef ~name %properties --> ~error
+
+sub add_method               {}    # .cdef ~name %sig ~code ~scope
+sub add_type                 {}    # .cdef ~name %properties
+
 
 
 sub resolve_dependencies {}    #                            --> ~errror
@@ -27,7 +31,6 @@ sub get_types          {} # ~class                     --> \Kephra::Base::Class:
 sub get_attributes     {} # ~class                     --> %attr_type
 
 sub add_attribute {}      # ~class, ~attr, ~type --> ?
-sub add_method    {}      # ~class
 sub get_attribute_type {} # ~class, ~attr        --> ~type
 
 

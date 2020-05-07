@@ -2,7 +2,7 @@ use v5.20;
 use warnings;
 
 package  Kephra::Base::Closure;
-our $VERSION = 1.0;
+our $VERSION = 1.01;
 use Kephra::Base::Data;
 
 sub new        {} # ~code - $state .btype|~btype           --> .closure|~errormsg # create call object with own source and state
