@@ -7,9 +7,9 @@ use warnings;
 # plans: inheritance?
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 1.1;
+our $VERSION = 1.11;
 use Scalar::Util qw/blessed looks_like_number/;
-use Kephra::Base::Data::Type::Simple;
+use Kephra::Base::Data::Type::Basic;
 my $stype = 'Kephra::Base::Data::Type::Basic';
 
 ################################################################################
@@ -29,7 +29,7 @@ sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            -->
     $default //= $parent->get_default_value;
     if (ref $parameter eq 'HASH'){
         if (not exists $parameter->{'name'} and not exists $parameter->{'default'}){ $parameter = $parameter->{'type'} } 
-        else { $parameter = Kephra::Base::Data::Type::Simple->new( {
+        else { $parameter = Kephra::Base::Data::Type::Basic->new( {
                     name => $parameter->{'name'} // $parameter->{'type'}->get_name,
                     default => $parameter->{'default'} // $parameter->{'type'}->get_default_value,
                     parent => $parameter->{'type'} } );
@@ -47,7 +47,7 @@ sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            -->
 }
 sub restate {                                        # %state                -->  .ptype | ~errormsg
     my ($pkg, $state) = @_;
-    $state->{'parameter'} = Kephra::Base::Data::Type::Simple->restate( $state->{'parameter'} );
+    $state->{'parameter'} = Kephra::Base::Data::Type::Basic->restate( $state->{'parameter'} );
     $state->{'coderef'} = eval _compile_( $state->{'name'}, $state->{'checks'}, $state->{'code'}, $state->{'parameter'});
     $state->{'trustcoderef'} = eval _compile_with_safe_param_( $state->{'name'}, $state->{'checks'}, $state->{'code'});
     bless $state;
@@ -56,13 +56,13 @@ sub restate {                                        # %state                -->
 sub _compile_ {
     my ($name, $check, $code, $parameter) = @_;
     'sub { my ($param, $value) = @_; no warnings "all";'
-    . Kephra::Base::Data::Type::Simple::_asm_("$name parameter ".$parameter->get_name, $parameter->get_check_pairs)
-    . '($value, $param)=($param, $value);' . Kephra::Base::Data::Type::Simple::_asm_($name, $check) . $code . ";return ''}"
+    . Kephra::Base::Data::Type::Basic::_asm_("$name parameter ".$parameter->get_name, $parameter->get_check_pairs)
+    . '($value, $param)=($param, $value);' . Kephra::Base::Data::Type::Basic::_asm_($name, $check) . $code . ";return ''}"
 }
 sub _compile_with_safe_param_ {
     my ($name, $check, $code) = @_;
     'sub { my ($value, $param) = @_; no warnings "all";'
-    . Kephra::Base::Data::Type::Simple::_asm_($name, $check) . $code . ";return ''}"
+    . Kephra::Base::Data::Type::Basic::_asm_($name, $check) . $code . ";return ''}"
 }
 ################################################################################
 sub state {                                          # .ptype                -->  %state

@@ -52,7 +52,7 @@ sub restate {
     my $coderef = eval "sub {$obj_state->{code}}";
     return "can not create call object, because source code - $obj_state->{code} - evaluates with error: $@" if $@;
     bless {code => $obj_state->{'code'}, coderef => $coderef, state => \$state, std_type => $obj_state->{'std_type'},
-           type => (defined $obj_state->{'type'}) ? Kephra::Base::Data::Type::Simple->restate($obj_state->{'type'}) : undef,};
+           type => (defined $obj_state->{'type'}) ? Kephra::Base::Data::Type::Basic->restate($obj_state->{'type'}) : undef,};
 }
 sub state {
     {code => $_[0]->{'code'}, state => ${$_[0]->{'state'}}, std_type => $_[0]->{'std_type'}, type => (defined $_[0]->{'type'}) ? $_[0]->{'type'}->state : undef };

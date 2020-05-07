@@ -7,7 +7,7 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 use Kephra::Base::Data::Type::Parametric;
 use Test::More tests => 155;
 
-sub simple_type { Kephra::Base::Data::Type::Simple->new(@_) }
+sub simple_type { Kephra::Base::Data::Type::Basic->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }
 
 my $erefdef = [];
@@ -19,20 +19,20 @@ my $Tint   = simple_type('int', 'integer number', 'int $value eq $value', $Tval,
 my $Tpint  = simple_type('pos_int', 'positive integer', '$value >= 0', $Tint);
 my $Tarray = simple_type('ARRAY', 'array reference', 'ref $value eq "ARRAY"', undef, $crefdef);
 my $Ttype  = simple_type('ARRAY', 'array reference', 'ref $value eq "ARRAY"', $Tstr, 'ANY');
-my $sclass  = 'Kephra::Base::Data::Type::Simple';
-my $pclass  = 'Kephra::Base::Data::Type::Parametric';
+my $btclass = 'Kephra::Base::Data::Type::Basic';
+my $ptclass = 'Kephra::Base::Data::Type::Parametric';
 
 my $Tindex = para_type('index', 'valid index of array', {name => 'array', type => $Tarray},    # inherit both defaults
                        'return "value $value is out of range" if $value >= @$param', $Tpint);
 my $Tref = para_type({name => 'reference', help => 'reference of given type', parameter => {name => 'refname', type => $Tstr, default => 'ARRAY'}, 
                      code => 'return "value $value is not a $param reference" if ref $value ne $param', parent => $Tany, default => $erefdef}); # overwrite both defaults
 
-is ( ref $Tindex, $pclass,                     'created first prametric type object, type "index" with positional arguments');
+is ( ref $Tindex, $ptclass,                    'created first prametric type object, type "index" with positional arguments');
 is ( $Tindex->get_name, 'index',               'got attribute "name" from getter of "index"');
 is ( $Tindex->get_help, 'valid index of array','got attribute "help" from getter of "index"');
 is ( $Tindex->get_default_value, 0,            'got attribute "default" value from getter of "index"');
 my $param = $Tindex->get_parameter();
-is ( ref $param, $sclass,                      'got attribute "parameter" object from getter of "index"');
+is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "index"');
 is ( $param->get_name, 'array',                'got attribute "name" from "index" parameter');
 is ( $param->get_default_value, $crefdef,      'got attribute "default" from "index" parameter');
 my $checker = $Tindex->get_checker;
@@ -66,12 +66,12 @@ is ( ref $state->{'parameter'}, 'HASH',        'state of "index" type parameter 
 is ( $state->{'name'},          'index',       '"name" in type "index" state HASH is correct');
 is ( $state->{'parameter'}{'name'}, 'array',   'parameter "name" in type "index" state is correct');
 my $Ticlone = Kephra::Base::Data::Type::Parametric->restate($state);
-is ( ref $Ticlone, $pclass,                    'recreated first prametric type object, type "index" by restate from dumped state');
+is ( ref $Ticlone, $ptclass,                   'recreated first prametric type object, type "index" by restate from dumped state');
 is ( $Ticlone->get_name, 'index',              'got attribute "name" from getter of "index" clone');
 is ( $Ticlone->get_help,'valid index of array','got attribute "help" from getter of "index" clone');
 is ( $Ticlone->get_default_value, 0,           'got attribute "default" value from getter of "index" clone');
 $param = $Ticlone->get_parameter();
-is ( ref $param, $sclass,                      'got attribute "parameter" object from getter of "index" clone');
+is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "index" clone');
 is ( $param->get_name, 'array',                'got attribute "name" from "index" clone parameter');
 is ( $param->get_default_value, $crefdef,      'got attribute "default" from "index" clone parameter');
 $checker = $Ticlone->get_checker;
@@ -99,12 +99,12 @@ ok ( $Tindex->check([],[1,2,3]),               'check method of type "index" clo
 ok ( $Tindex->check(0,{1=>2}),                 'check method of type "index" clone denies with error correctly none ARRAY parameter');
 
 $Tindex = para_type('index', 'valid index of array', $Tarray, 'return "value $value is out of range" if $value >= @$param', $Tpint);
-is ( ref $Tindex, $pclass,                     'created first prametric type "index" with direct type object as parameter');
+is ( ref $Tindex, $ptclass,                    'created first prametric type "index" with direct type object as parameter');
 is ( $Tindex->get_name, 'index',               'got attribute "name" from getter of "index"');
 is ( $Tindex->get_help, 'valid index of array','got attribute "help" from getter of "index"');
 is ( $Tindex->get_default_value, 0,            'got attribute "default" value from getter of "index"');
 $param = $Tindex->get_parameter();
-is ( ref $param, $sclass,                      'got attribute "parameter" object from getter of "index"');
+is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "index"');
 is ( $param->get_name, 'ARRAY',                'got attribute "name" from "index" parameter');
 is ( $param->get_default_value, $crefdef,      'got attribute "default" from "index" parameter');
 $checker = $Tindex->get_checker;
@@ -121,12 +121,12 @@ ok ( $tchecker->(3,[1,2,3]),                   'trusting checker of type "index"
 
 
 
-is ( ref $Tref, $pclass,                       'created second prametric type object, type "ref" with named arguments');
+is ( ref $Tref, $ptclass,                      'created second prametric type object, type "ref" with named arguments');
 is ( $Tref->get_name, 'reference',             'got attribute "name" from getter of type "ref"');
 is ( $Tref->get_help,'reference of given type','got attribute "help" from getter of type "ref"');
 is ( $Tref->get_default_value, $erefdef,       'got attribute "default" value from getter of "ref"');
 $param = $Tref->get_parameter();
-is ( ref $param, $sclass,                      'got attribute "parameter" object from getter of "ref"');
+is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "ref"');
 is ( $param->get_name, 'refname',              'got attribute "name" from "ref" parameter');
 is ( $param->get_default_value, 'ARRAY',       'got attribute "default" from "ref" parameter');
 $checker = $Tref->get_checker;
@@ -134,19 +134,19 @@ $tchecker = $Tref->get_trusting_checker;
 is ( ref $checker, 'CODE',                     'attribute "checker" is a CODE ref');
 is ( $checker->( {}, 'HASH'), '',              'checker of type "ref" accepts correctly HASH ref');
 is ( $checker->( sub {}, 'CODE'), '',          'checker of type "ref" accepts correctly CODE ref');
-is ( $checker->( $Tref, $pclass), '',          'checker of type "ref" accepts correctly own ref');
+is ( $checker->( $Tref, $ptclass), '',         'checker of type "ref" accepts correctly own ref');
 is ( $checker->(1, ''), '',                    'checker of type "ref" accepts correctly none ref');
 ok ( $checker->([],'Regex'),                   'checker of type "ref" denies with error correctly ARRAY ref as not a Regex ref');
 ok ( $checker->([],[]),                        'checker of type "ref" denies with error correctly when parameter is not a str');
 is ( ref $tchecker, 'CODE',                    'attribute "trusting checker" is a CODE ref');
 is ( $tchecker->( {}, 'HASH'), '',             'trusting checker of type "ref" accepts correctly HASH ref');
 is ( $tchecker->( sub {}, 'CODE'), '',         'trusting checker of type "ref" accepts correctly CODE ref');
-is ( $tchecker->( $Tref, $pclass), '',         'trusting checker of type "ref" accepts correctly own ref');
+is ( $tchecker->( $Tref, $ptclass), '',        'trusting checker of type "ref" accepts correctly own ref');
 is ( $tchecker->(1, ''), '',                   'trusting checker of type "ref" accepts correctly none ref');
 ok ( $tchecker->([],'Regex'),                  'trusting checker of type "ref" denies with error correctly ARRAY ref as not a Regex ref');
 is ( $Tref->check( {}, 'HASH'), '',            'check method of type "ref" accepts correctly HASH ref');
 is ( $Tref->check( sub {}, 'CODE'), '',        'check method of type "ref" accepts correctly CODE ref');
-is ( $Tref->check( $Tref, $pclass), '',        'check method of type "ref" accepts correctly own ref');
+is ( $Tref->check( $Tref, $ptclass), '',       'check method of type "ref" accepts correctly own ref');
 is ( $Tref->check(1, ''), '',                  'check method of type "ref" accepts correctly none ref');
 ok ( $Tref->check([],'Regex'),                 'check method of type "ref" denies with error correctly ARRAY ref as not a Regex ref');
 ok ( $Tref->check([],[]),                      'check method of type "ref" denies with error correctly when parameter is not a str');
@@ -157,12 +157,12 @@ is ( ref $state->{'parameter'}, 'HASH',        'state of "ref" type parameter is
 is ( $state->{'name'},          'reference',   '"name" in type "ref" state HASH is correct');
 is ( $state->{'parameter'}{'name'}, 'refname', 'parameter "name" in type "ref" state is correct');
 my $Trefclone = Kephra::Base::Data::Type::Parametric->restate($state);
-is ( ref $Trefclone, $pclass,                  'recreated prametric type object, "ref" by restate from dumped state');
+is ( ref $Trefclone, $ptclass,                 'recreated prametric type object, "ref" by restate from dumped state');
 is ( $Trefclone->get_name, 'reference',        'got attribute "name" from getter of "ref" clone');
 is ( $Trefclone->get_help, 'reference of given type','got attribute "help" from getter of "ref" clone');
 is ( $Trefclone->get_default_value, $erefdef,  'got attribute "default" value from getter of "ref"');
 $param = $Trefclone->get_parameter();
-is ( ref $param, $sclass,                      'got attribute "parameter" object from getter of "ref" clone');
+is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "ref" clone');
 is ( $param->get_name, 'refname',              'got attribute "name" from "ref" clone parameter');
 is ( $param->get_default_value, 'ARRAY',       'got attribute "default" from "ref" clone parameter');
 $checker = $Trefclone->get_checker;
@@ -170,19 +170,19 @@ $tchecker = $Trefclone->get_trusting_checker;
 is ( ref $checker, 'CODE',                     'attribute "checker" is a CODE ref');
 is ( $checker->( {}, 'HASH'), '',              'checker of type "ref" clone accepts correctly HASH ref');
 is ( $checker->( sub {}, 'CODE'), '',          'checker of type "ref" clone accepts correctly CODE ref');
-is ( $checker->( $Tref, $pclass), '',          'checker of type "ref" clone accepts correctly own ref');
+is ( $checker->( $Tref, $ptclass), '',         'checker of type "ref" clone accepts correctly own ref');
 is ( $checker->(1, ''), '',                    'checker of type "ref" clone accepts correctly none ref');
 ok ( $checker->([],'Regex'),                   'checker of type "ref" clone denies with error correctly ARRAY ref as not a Regex ref');
 ok ( $checker->([],[]),                        'checker of type "ref" clone denies with error correctly when parameter is not a str');
 is ( ref $tchecker, 'CODE',                    'attribute "trusting checker" is a CODE ref');
 is ( $tchecker->( {}, 'HASH'), '',             'trusting checker of type "ref" clone accepts correctly HASH ref');
 is ( $tchecker->( sub {}, 'CODE'), '',         'trusting checker of type "ref" clone accepts correctly CODE ref');
-is ( $tchecker->( $Tref, $pclass), '',         'trusting checker of type "ref" clone accepts correctly own ref');
+is ( $tchecker->( $Tref, $ptclass), '',        'trusting checker of type "ref" clone accepts correctly own ref');
 is ( $tchecker->(1, ''), '',                   'trusting checker of type "ref" clone accepts correctly none ref');
 ok ( $tchecker->([],'Regex'),                  'trusting checker of type "ref" clone denies with error correctly ARRAY ref as not a Regex ref');
 is ( $Trefclone->check( {}, 'HASH'), '',       'check method of type "ref" clone accepts correctly HASH ref');
 is ( $Trefclone->check( sub {}, 'CODE'), '',   'check method of type "ref" clone accepts correctly CODE ref');
-is ( $Trefclone->check( $Tref, $pclass), '',   'check method of type "ref" clone accepts correctly own ref');
+is ( $Trefclone->check( $Tref, $ptclass), '',  'check method of type "ref" clone accepts correctly own ref');
 is ( $Trefclone->check(1, ''), '',             'check method of type "ref" clone accepts correctly none ref');
 ok ( $Trefclone->check([],'Regex'),            'check method of type "ref" clone denies with error correctly ARRAY ref as not a Regex ref');
 ok ( $Trefclone->check([],[]),                 'check method of type "ref" clone denies with error correctly when parameter is not a str');
@@ -198,7 +198,7 @@ ok( not( ref para_type('index', 'valid index of array', undef, $kode, $Tpint)), 
 ok( not( ref para_type('index', 'valid index of array', $para, undef, $Tpint)), 'can not create type without argument "code"');
 ok( not( ref para_type('index', 'valid index of array', $para, $kode, undef)),  'can not create type without argument "parent"');
 ok( not( ref para_type('index', 'valid index of array', {}, $kode, $Tpint)),    'can not create type with empty "parameter" definition');
-is( ref para_type('index', 'valid index of array', {type => $Tarray}, $kode, $Tpint), $pclass, '"parameter" definition with just a type to inherit from name and default is good');
+is( ref para_type('index', 'valid index of array', {type => $Tarray}, $kode, $Tpint), $ptclass, '"parameter" definition with just a type to inherit from name and default is good');
 ok( not( ref para_type('index', 'valid index of array', {type => $Tarray, default => {}}, $kode, $Tpint)), '"parameter" default value has to adhere type constrains');
 ok( not( ref para_type('index', 'valid index of array', $para, 'rerun', $Tpint)),   'can not create type with "code" that can not eval');
 ok( not( ref para_type('index', 'valid index of array', $para, $kode, $Tpint, -5)), 'can not create type with "default" that is outside type constrains');
@@ -210,7 +210,7 @@ ok( not( ref para_type({name => 'index', help => 'valid index of array', code =>
 ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => {}, code => $kode, parent => $Tpint})), 'can not create type with empty "parameter" definition');
 ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => {type => $Tarray, default=>{}}, code => $kode, parent => $Tpint})),
                                                                                                                   '"parameter" default value has to adhere type constrains');
-is( ref para_type({name => 'index', help => 'valid index of array', parameter => {type => $Tarray}, code => $kode, parent => $Tpint}), $pclass,
+is( ref para_type({name => 'index', help => 'valid index of array', parameter => {type => $Tarray}, code => $kode, parent => $Tpint}), $ptclass,
                                                                                                                   'named "parameter" definition with just a type to inherit from name and default is good');
 ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, parent => $Tpint})), 'can not create type without argument "code"');
 ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, code => 'rerun', parent => $Tpint})), 'can not create type without "code" that can eval');

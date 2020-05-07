@@ -5,8 +5,8 @@ use warnings;
 # example : valid index (positive int) of an actual array (parameter)
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 1.1;
-use Kephra::Base::Data::Type;
+our $VERSION = 1.11;
+use Kephra::Base::Data::Type::Basic;
 
                            #               .btype | %{.btype - ~name $default }      
 sub new                 {} # ~name  ~help  %parameter  ~code .parent - $default --> .ptype | ~errormsg  # optionally as %args
@@ -20,7 +20,7 @@ sub get_parameter       {} # .ptype                                             
 sub get_checker         {} # .ptype                                             -->  &check
 sub get_trusting_checker{} # .type                                              -->  &trusting_check    # when parameter is already type checked
 
-sub check               {} # .type $val $param                                  -->  ~errormsg
+sub check               {} # .ptype $val $param                                 -->  ~errormsg
 
 
 1;

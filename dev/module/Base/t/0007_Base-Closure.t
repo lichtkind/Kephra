@@ -8,8 +8,8 @@ use Kephra::Base::Closure qw/new_closure/;
 use Kephra::Base::Data::Type::Standard qw/check_type/;
 
 my $class = 'Kephra::Base::Closure';
-my $tclass = 'Kephra::Base::Data::Type::Simple';
-sub simple_type { Kephra::Base::Data::Type::Simple->new(@_) }
+my $tclass = 'Kephra::Base::Data::Type::Basic';
+sub simple_type { Kephra::Base::Data::Type::Basic->new(@_) }
 my $Tval  = simple_type('value', 'not a reference', 'not ref $value', undef, '');
 my $Tint  = simple_type('int', 'integer number', 'int $value eq $value', $Tval, 0);
 my $Aref  = [];

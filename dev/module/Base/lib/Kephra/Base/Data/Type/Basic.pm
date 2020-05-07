@@ -7,7 +7,7 @@ use warnings;
 #                 coderef => eval{ sub{ return $_[0] 'failed not a reference' unless not ref $_[0]; ...; 0} } }
 
 package Kephra::Base::Data::Type::Basic;
-our $VERSION = 1.2;
+our $VERSION = 1.3;
 use Scalar::Util qw/blessed looks_like_number/;
 ################################################################################
 sub _unhash_arg_ {

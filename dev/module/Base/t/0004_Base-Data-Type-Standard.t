@@ -9,7 +9,7 @@ package TypeTester;
 use Kephra::Base::Data::Type::Standard qw/:all/;
 use Test::More tests => 215;
 
-my $sclass  = 'Kephra::Base::Data::Type::Simple';
+my $sclass  = 'Kephra::Base::Data::Type::Basic';
 my $pclass  = 'Kephra::Base::Data::Type::Parametric';
 
 my @names = Kephra::Base::Data::Type::Standard::list_names();
