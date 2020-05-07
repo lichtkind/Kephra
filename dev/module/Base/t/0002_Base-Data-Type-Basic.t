@@ -6,10 +6,10 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 use Test::More tests => 100;
 
-use Kephra::Base::Data::Type::Simple;
-sub create_type { Kephra::Base::Data::Type::Simple->new(@_) }
+use Kephra::Base::Data::Type::Basic;
+sub create_type { Kephra::Base::Data::Type::Basic->new(@_) }
 
-my $pkg = 'Kephra::Base::Data::Type::Simple';
+my $pkg = 'Kephra::Base::Data::Type::Basic';
 my $vh = 'not a reference'; # type value help
 my $vc = 'not ref $value'; # type value code
 my $Tvalue = create_type('value', $vh, $vc, undef, '');
@@ -37,7 +37,7 @@ is( $Tvalue->check($val),
 
 my $state = $Tvalue->state;
 is( ref $state, 'HASH',              'state dump is hash ref');
-my $Tvclone = Kephra::Base::Data::Type::Simple->restate($state);
+my $Tvclone = Kephra::Base::Data::Type::Basic->restate($state);
 is( ref $Tvclone, $pkg,              'recreated object for type "value" from serialized state');
 is( $Tvclone->get_name, 'value',     'got attribute "name" from getter');
 is( $Tvclone->get_default_value, '', 'got attribute "default" value from getter');
@@ -76,7 +76,7 @@ ok( $Tbool->check(5),                'check method of type "bool" denies with er
 ok( $Tbool->check('--'),             'check method of type "bool" denies with error correctly string value --');
 
 
-my $Tbclone = Kephra::Base::Data::Type::Simple->restate( $Tbool->state );
+my $Tbclone = Kephra::Base::Data::Type::Basic->restate( $Tbool->state );
 is( ref $Tbclone, $pkg,              'recreated child type object bool');
 is( $Tbclone->get_name, 'bool',      'got attribute "name" from getter');
 is( $Tbclone->get_default_value, 0,  'got attribute "default" value from getter');

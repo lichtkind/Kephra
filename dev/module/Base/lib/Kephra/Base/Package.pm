@@ -2,8 +2,8 @@ use v5.16;
 no warnings qw/experimental redefine/;
 
 package Kephra::Base::Package;
-our $VERSION = 1.0;
-use Kephra::Base::Data::Type;
+our $VERSION = 1.01;
+
 use Exporter 'import';
 our @EXPORT_OK = qw/package_loaded count_sub has_sub has_hash has_array get_sub get_hash get_array set_sub set_hash set_array call_sub sub_caller/;
 our %EXPORT_TAGS = (all  => [@EXPORT_OK]);

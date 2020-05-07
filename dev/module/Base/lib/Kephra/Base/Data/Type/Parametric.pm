@@ -10,7 +10,7 @@ package Kephra::Base::Data::Type::Parametric;
 our $VERSION = 1.1;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type::Simple;
-my $stype = 'Kephra::Base::Data::Type::Simple';
+my $stype = 'Kephra::Base::Data::Type::Basic';
 
 ################################################################################
 sub _unhash_arg_ {

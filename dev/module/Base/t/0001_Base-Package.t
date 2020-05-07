@@ -6,7 +6,7 @@ use Test::More tests => 62;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! do not edit file format is part of tests !!!!!!!!!!!!!!!!!!!!
-use Kephra::Base::Data::Type qw/:all/;
+
 use Kephra::Base::Package qw/:all/;
 use TestClass;
 

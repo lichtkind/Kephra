@@ -9,6 +9,7 @@ use Exporter 'import';
 our @EXPORT_OK = (qw/new_closure/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 use Kephra::Base::Data qw/clone_data check_type/;
+my $tclass = 'Kephra::Base::Data::Type::Basic';
 ################################################################################
 sub new_closure   {new(__PACKAGE__, @_)}
 sub new {
@@ -22,11 +23,10 @@ sub new {
     my $std_type;
     if (defined $type){
         if (ref $type){
-            return "third or named argument 'type' has to be a Kephra::Base::Data::Type::Simple object or the name of a initial standard type"
-                if ref $type ne 'Kephra::Base::Data::Type::Simple';
+            return "third or named argument 'type' has to be a $tclass object or the name of a initial standard type" if ref $type ne $tclass;
             return 'start value $state does not match type: '.$type->get_name if defined $state and $type->check( $state );
         } else {
-            return "third or named argument 'type' has to be a Kephra::Base::Data::Type::Simple object or the name of a initial standard type"
+            return "third or named argument 'type' has to be a $tclass object or the name of a initial basic standard type"
                 unless Kephra::Base::Data::Type::Standard::is_initial($type);
             return 'start value $state does not match type: '.$type if defined $state and check_type($type, $state);
             $std_type = $type; 

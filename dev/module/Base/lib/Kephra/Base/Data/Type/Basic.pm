@@ -6,7 +6,7 @@ use warnings;
 # compiled to  : {check => ['not a reference', 'not ref $_[0]', '0 or 1', '$_[0] eq 0 or $_[0] eq 1'], 
 #                 coderef => eval{ sub{ return $_[0] 'failed not a reference' unless not ref $_[0]; ...; 0} } }
 
-package Kephra::Base::Data::Type::Simple;
+package Kephra::Base::Data::Type::Basic;
 our $VERSION = 1.2;
 use Scalar::Util qw/blessed looks_like_number/;
 ################################################################################

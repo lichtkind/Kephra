@@ -6,7 +6,7 @@ use warnings;
 
 package Kephra::Base::Data::Type::Standard;
 our $VERSION = 1.2;
-use Kephra::Base::Data::Type::Simple;
+use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
 
 sub init              {} #                    compile default types

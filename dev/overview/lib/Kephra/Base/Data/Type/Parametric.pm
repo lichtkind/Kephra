@@ -8,7 +8,7 @@ package Kephra::Base::Data::Type::Parametric;
 our $VERSION = 1.1;
 use Kephra::Base::Data::Type;
 
-                           #               .type | %{.type - ~name $default }      
+                           #               .btype | %{.btype - ~name $default }      
 sub new                 {} # ~name  ~help  %parameter  ~code .parent - $default --> .ptype | ~errormsg  # optionally as %args
 sub state               {} # .ptype                                             --> %state                serialize
 sub restate             {} # %state                                             --> .ptype                recreate all type checker from data dump

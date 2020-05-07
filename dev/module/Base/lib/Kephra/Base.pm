@@ -1,7 +1,7 @@
 use v5.20;
 use warnings;
 use Kephra::Base::Package;
-use Kephra::Base::Data;
+use Kephra::Base::Data qw/:all/;
 use Kephra::Base::Closure qw/new_closure/;
 
 package Kephra::Base;

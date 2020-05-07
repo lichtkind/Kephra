@@ -1,7 +1,7 @@
 use v5.20;
 use warnings;
 
-# store of standard types, owners (packages can add and remove types)
+# organize  and foreward type related symbols
 
 package Kephra::Base::Data::Type;
 our $VERSION = 0.1;

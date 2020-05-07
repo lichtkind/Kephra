@@ -6,14 +6,14 @@ use utf8;
 
 package Kephra::Base::Data::Type::Standard;
 our $VERSION = 1.3;
-use Kephra::Base::Data::Type::Simple;
+use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
 use Exporter 'import';
 our @EXPORT_OK = (qw/new_type check_type guess_type is_type_known/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 my (%simple_type, %param_type, %name_by_shortcut, %shortcut_by_name);   # storage for all active types
 my %forbidden_shortcut = ('{' => 1, '}' => 1, '(' => 1, ')' => 1, '<' => 1, '>' => 1, ',' => 1, '-' => 1);
-my $stclass = 'Kephra::Base::Data::Type::Simple';
+my $stclass = 'Kephra::Base::Data::Type::Basic';
 ##############################################################################
 sub init {
     return if (caller)[0] ne 'Kephra::Base::Data::Type';
