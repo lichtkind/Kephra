@@ -2,11 +2,12 @@ use v5.16;
 use warnings;
 
 package Kephra::Base::Data;
-our $VERSION = 0.01;
+our $VERSION = 0.1;
 use Scalar::Util qw/blessed/;
-use Kephra::Base::Data::Type::Relative;
+use Kephra::Base::Data::Type qw/:all/;
 use Exporter 'import';
-our @EXPORT_OK = qw/clone clone_list clone_data/;
+our @EXPORT_OK = ('clone_data', 'date_time', @Kephra::Base::Data::Type::EXPORT_OK);
+our %EXPORT_TAGS = (all => [@EXPORT_OK], type => [@Kephra::Base::Data::Type::EXPORT_OK]);
 
 my %copied_reftype   = ('' => 1, Regexp => 1, CODE => 1, FORMAT => 1, IO => 1, GLOB => 1, LVALUE => 1);
 
@@ -41,5 +42,11 @@ sub clone_list { #               [data] --> [data]
 }
 
 ################################################################################
+
+sub date_time {
+    my @time = (localtime);
+    sprintf ("%02u.%02u.%u", $time[3], $time[4]+ 1, $time[5]+ 1900),
+    sprintf ("%02u:%02u:%02u:%03u", @time[2,1,0], int((gettimeofday())[1]/1_000));
+}
 
 1;

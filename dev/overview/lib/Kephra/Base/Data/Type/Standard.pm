@@ -2,12 +2,13 @@ use v5.20;
 use warnings;
 
 # KBOS store for standard data type checker objects, + added by owners + dep resolver +
-# serialize keys: check, shortcut, default, file, package
+#      serialize keys: check, shortcut, default, file, package
 
 package Kephra::Base::Data::Type::Standard;
-our $VERSION = 1.2;
+our $VERSION = 1.3;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
+
 
 sub init              {} #                    compile default types
 sub state             {} #        --> %state  dump all active types data
