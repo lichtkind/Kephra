@@ -2,7 +2,7 @@ use v5.16;
 use warnings;
 
 # central storage for all object refs (class instances, created by KBOS)
-# Base::Object is namespace for self made aux classes 
+# Base::Class::* is namespace for self made aux classes 
 
 package Kephra::Base::Class::Instance;
 our $VERSION = 0.02;
