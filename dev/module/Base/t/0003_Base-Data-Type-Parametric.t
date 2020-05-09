@@ -4,8 +4,10 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
+package Very::Long::Package; sub new {bless {}} 
+
 use Kephra::Base::Data::Type::Parametric;
-use Test::More tests => 155;
+use Test::More tests => 170;
 
 sub simple_type { Kephra::Base::Data::Type::Basic->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }
@@ -26,6 +28,8 @@ my $Tindex = para_type('index', 'valid index of array', {name => 'array', type =
                        'return "value $value is out of range" if $value >= @$param', $Tpint);
 my $Tref = para_type({name => 'reference', help => 'reference of given type', parameter => {name => 'refname', type => $Tstr, default => 'ARRAY'}, 
                      code => 'return "value $value is not a $param reference" if ref $value ne $param', parent => $Tany, default => $erefdef}); # overwrite both defaults
+my $Tshortref = para_type({name => 'short_ref', help => 'reference with short, given name',  
+                     code => 'return "reference $param is too long " if length $param > 9',             parent => $Tref}); # 
 
 is ( ref $Tindex, $ptclass,                    'created first prametric type object, type "index" with positional arguments');
 is ( $Tindex->get_name, 'index',               'got attribute "name" from getter of "index"');
@@ -188,9 +192,32 @@ ok ( $Trefclone->check([],'Regex'),            'check method of type "ref" clone
 ok ( $Trefclone->check([],[]),                 'check method of type "ref" clone denies with error correctly when parameter is not a str');
 
 
+is ( ref $Tshortref, $ptclass,                      'created prametric type that inherits from another param type');
+is ( $Tshortref->get_name, 'short_ref',             'got attribute "name" from getter of type "short_ref"');
+is ( $Tshortref->get_help,'reference with short, given name', 'got attribute "help" from getter of type "short_ref"');
+is ( $Tshortref->get_default_value, $erefdef,       'got attribute "default" value from getter of "short_ref" (was inherited properly)');
+$param = $Tshortref->get_parameter();
+is ( ref $param, $btclass,                          'got attribute "parameter" object from getter of "short_ref" (was inherited properly)');
+is ( $param->get_name, 'refname',                   'got attribute "name" from "short_ref" parameter');
+is ( $param->get_default_value, 'ARRAY',            'got attribute "default" from "short_ref" parameter (was inherited properly)');
+$checker = $Tshortref->get_checker;
+$tchecker = $Tshortref->get_trusting_checker;
+is ( ref $checker, 'CODE',                          'attribute "checker" of "short_ref" type is a CODE ref');
+is ( $checker->( {}, 'HASH'), '',                   'checker of type "short_ref" clone accepts correctly HASH ref');
+ok ( $checker->( [], 'HASH'),                       'checker of type "short_ref" bad ref type correctly');
+ok ( $checker->( Very::Long::Package->new(), 'Very::Long::Package'),  'checker of type "short_ref" denied too long ref name correctly');
+is ( ref $tchecker, 'CODE',                         'attribute "trusting checker" of "short_ref" type is a CODE ref');
+is ( $tchecker->( {}, 'HASH'), '',                  'trusting checker of type "short_ref" clone accepts correctly HASH ref');
+ok ( $tchecker->( [], 'HASH'),                      'trusting checker of type "short_ref" bad ref type correctly');
+ok ( $tchecker->( Very::Long::Package->new(), 'Very::Long::Package'),  'trusting  checker of type "short_ref" denied too long ref name correctly');
+
+
+
+ para_type({name => 'short_ref', help => 'reference with short, given name',  
+                     code => 'return "reference $param is too long " if length $param > 9',             parent => $Tref}); # 
+
 my $para = {name => 'array', type => $Tarray, default => $crefdef};
 my $kode = 'return "value $value is out of range" if $value >= @$param';
-
 ok( not( ref para_type()),                                                'can not create type without any argument');
 ok( not( ref para_type(undef,'valid index of array', $para, $kode, $Tpint)),    'can not create type without argument "name"');
 ok( not( ref para_type('index', undef, $para, $kode, $Tpint, 0)),               'can not create type without argument "help"');
@@ -216,6 +243,8 @@ ok( not( ref para_type({name => 'index', help => 'valid index of array', paramet
 ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, code => 'rerun', parent => $Tpint})), 'can not create type without "code" that can eval');
 ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, code => $kode})),     'can not create type without argument "parent"');
 ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, code => $kode, parent => $Tpint, default => -5})),
+
+
                                                                                                                    'can not create type with "default" that is outside type constrains');
 
 exit 0;

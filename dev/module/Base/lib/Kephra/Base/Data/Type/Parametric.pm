@@ -20,12 +20,12 @@ sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            -->
     my $pkg = shift;
     my ($name, $help, $parameter, $code, $parent, $default) = _unhash_arg_(@_);
     return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref), 'code' (str) and 'parent' ($stype) to create parametric type object" 
-        unless defined $name and $name and defined $help and $help and defined $parameter and defined $code and $code and defined $parent;
+        unless defined $name and $name and defined $help and $help and defined $code and $code and defined $parent;
     return "argument 'parameter' has to be $stype or a hash ref definition that contains at least the key 'type' to create parametric type $name" 
-        if ref $parameter ne $stype and (ref $parameter ne 'HASH' or ref $parameter->{'type'} ne $stype);
+        if ref $parameter ne $stype and (ref $parameter ne 'HASH' or ref $parameter->{'type'} ne $stype) and ref $parent ne __PACKAGE__;
     return "default value '$parameter->{default}' of type $name 's parameter does not match his type $parameter->{type}{name}" 
         if ref $parameter eq 'HASH' and exists $parameter->{'default'} and $parameter->{'type'}->check($parameter->{'default'});
-    return "parent has to be instance of $stype to create parametric type $name" if ref $parent ne $stype;
+    return "parent has to be instance of $stype or ".__PACKAGE__." to create parametric type $name" if ref $parent ne $stype and ref $parent ne __PACKAGE__;
     $default //= $parent->get_default_value;
     if (ref $parameter eq 'HASH'){
         if (not exists $parameter->{'name'} and not exists $parameter->{'default'}){ $parameter = $parameter->{'type'} } 
@@ -35,7 +35,11 @@ sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            -->
                     parent => $parameter->{'type'} } );
         }
     }
-    my $checks = $parent->get_check_pairs;
+    if (ref $parent eq __PACKAGE__){
+        $parameter = $parent->get_parameter if ref $parameter ne $stype;
+        $code = $parent->{'code'}.';'.$code;
+    }
+    my $checks = $parent->{'checks'};
     my $source = _compile_( $name, $checks, $code, $parameter );
     my $coderef = eval $source;
     return "parametric type '$name' checker source code - '$source' - could not eval because: $@ !" if $@;
@@ -72,7 +76,7 @@ sub state {                                          # .ptype                -->
 sub get_name          { $_[0]->{'name'} }            # .ptype                -->  ~name
 sub get_help          { $_[0]->{'help'} }            # .ptype                -->  ~help
 sub get_default_value { $_[0]->{'default'} }         # .ptype                -->  $default
-sub get_parameter     { $_[0]->{'parameter'} }       # .ptype                -->  .type
+sub get_parameter     { $_[0]->{'parameter'} }       # .ptype                -->  .btype
 sub get_checker       { $_[0]->{'coderef'} }         # .ptype                -->  &check
 sub get_trusting_checker { $_[0]->{'trustcoderef'} } # .ptype                -->  &trusting_check  # when parameter is already type checked
 ################################################################################
