@@ -26,7 +26,7 @@ our development model in more details: doc/CompleteProgramming.pod
  - K::Base                            C         0.11
 --------------------------------------------------------------------------------
    K::B::C::Definition                    MB
-   K::B::C::Scope                     C         1.0    namespace constants & priority logic
+   K::B::C::Scope                     CP        1.5    namespace constants & priority logic
    K::B::C::Attribute::Type            P
    K::B::C::Attribute                 C
    K::B::C::Instance                     UMB

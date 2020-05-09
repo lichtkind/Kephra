@@ -34,7 +34,7 @@ sub cat_method_paths {
     }
 }
 sub cat_hook_path      {return unless @_ == 2; "$_[0]::$prefix::METHOD::$_[1]::HOOK" }
-sub cat_argument_path  {return unless @_ == 2; "$_[0]::$prefix::METHOD::$_[1]::ARGUMENT" }
+sub cat_arguments_path {return unless @_ == 2; "$_[0]::$prefix::METHOD::$_[1]::ARGUMENT" }
 sub cat_attribute_path {return unless @_ == 2; "$_[0]::$prefix::ATTRIBUTE::$_[1]" }
 ################################################################################
 
