@@ -4,25 +4,16 @@ use warnings;
 package Kephra::Base::Class::Definition;
 
 
-sub new_class   {} # ~name                     --> ~errormsg
+sub new         {} # ~name                     --> .cdef
 
-sub complete    {} # .cdef                     --> ?
+sub complete    {} # .cdef                     --> ~errormsg
 sub is_complete {} # .cdef                     --> ?
-sub is_known    {} # .cdef                     --> ?
 
 
-
-
-sub add_data_attribute       {}    # .cdef ~name %properties --> ~error
-sub add_delegating_attribute {}    # .cdef ~name %properties --> ~error
-sub add_wrapping_attribute   {}    # .cdef ~name %properties --> ~error
-
+sub add_type                 {}    # .cdef ~name %properties          --> ~errormsg
+sub add_argument             {}    # .cdef ~name %properties          --> ~errormsg
+sub add_attribute            {}    # .cdef ~name %properties          --> ~errormsg
 sub add_method               {}    # .cdef ~name %sig ~code ~scope
-sub add_type                 {}    # .cdef ~name %properties
-
-
-
-sub resolve_dependencies {}    #                            --> ~errror
 
 
 

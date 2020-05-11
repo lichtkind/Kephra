@@ -1,12 +1,12 @@
 use v5.20;
 use warnings;
 
-# central kv storage for all data stored in attributes and creation of direct data accessors
+# central kv storage for all types of attributes and creation of direct data accessors
 
 package Kephra::Base::Class::Instance::Attribute;
 our $VERSION = 0.1;
 use Kephra::Base::Package qw/set_sub has_sub/;
-use Kephra::Base::Class::Scope qw/cat_scope_path/;
+use Kephra::Base::Class::Scope;
 use Kephra::Base::Data::Type;
 
 my (%data, %attr_name, %setter, %resetter, %attr_ref_getter, %attr_ref_setter, %attr_ref_getsetter, %self_ref);
@@ -14,13 +14,13 @@ my $universal_getter = sub{$data{int $_[0]} if ref $_[0] and exists $data{int $_
 
 ################################################################################
 sub create {
-    my ($class, $attribute, $attr_types, $type) = @_;
-    return 0 unless ref $attr_types eq 'Kephra::Base::Class::Attribute::Type' and defined $type;
+    my ($class, $attr_name, $attr_def) = @_;
+    return 0 unless ref $attr_def eq 'HASH';
     my $callback = $attr_types->get_callback($type);
     my $default_value = $attr_types->get_default_value($type);
     return 0 unless ref $callback eq 'CODE';
 
-    my $scope = cat_scope_path( 'attribute', $class, $attribute);
+    my $attr_path = cat_attribute_path($class, $attr_name);
     my $k = '';
     my $attr_ref = bless \$k, $scope;
     $data{int $attr_ref} = $default_value if defined $default_value;
@@ -39,9 +39,9 @@ sub create {
         $data{int $_[0]} = $default_value;
     } unless ref $resetter{$class}{$type};
 
-    set_sub( $scope.'::get', $universal_getter);
-    set_sub( $scope.'::set', $setter{$class}{$type});
-    set_sub( $scope.'::reset', $resetter{$class}{$type});
+    set_sub( $attr_path.'::get', $universal_getter);
+    set_sub( $attr_path.'::set', $setter{$class}{$type});
+    set_sub( $attr_path.'::reset', $resetter{$class}{$type});
     $attr_ref;
 }
 
