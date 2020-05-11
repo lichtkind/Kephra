@@ -2,7 +2,7 @@ use v5.20;
 use warnings;
 use experimental qw/switch/;
 
-# method namespace constants and their priority logic
+# namespace constants, paths & priority logic
 
 package Kephra::Base::Class::Scope;
 our $VERSION = 1.5;

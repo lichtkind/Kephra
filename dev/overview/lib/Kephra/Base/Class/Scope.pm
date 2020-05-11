@@ -1,7 +1,7 @@
 use v5.20;
 use warnings;
 
-# method namespace name constants and their priority logic
+# namespace constants, paths & priority logic
 
 package Kephra::Base::Class::Scope;
 our $VERSION = 1.5;

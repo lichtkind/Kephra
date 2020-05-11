@@ -3,7 +3,7 @@ use warnings;
 
 # handling everything about signatures
 
-package Kephra::Base::Class::Method::Signature;
+package Kephra::Base::Class::Syntax::Signature;
 
 sub parse {
     my $sig = shift;

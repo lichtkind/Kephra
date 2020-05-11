@@ -1,6 +1,8 @@
 use v5.20;
 use warnings;
 
+# root package of self made language extensions
+
 package Kephra::Base;
 our $VERSION = 0.11;
 use Exporter 'import';

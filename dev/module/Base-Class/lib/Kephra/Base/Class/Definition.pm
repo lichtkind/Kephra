@@ -1,6 +1,8 @@
 use v5.20;
 use warnings;
 
+# data structure to build a KBOS class from
+
 # central store for all KBOS class definitions (specs, which attr methods and so on)
 # delegate calls for class creation; phases: types -> methods -> attributs -> new
 

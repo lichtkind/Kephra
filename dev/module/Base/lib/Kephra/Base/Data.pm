@@ -1,6 +1,8 @@
 use v5.16;
 use warnings;
 
+# root of none OO data handling
+
 package Kephra::Base::Data;
 our $VERSION = 0.1;
 use Scalar::Util qw/blessed/;

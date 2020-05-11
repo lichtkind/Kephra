@@ -3,7 +3,7 @@ use warnings;
 
 # create parameter objects (revieved by methods) and store their values
 
-package Kephra::Base::Class::Method::Argument;
+package Kephra::Base::Class::Instance::Argument;
 our $VERSION = 0.01;
 use Kephra::Base::Package;
 use Kephra::Base::Class::Scope qw/cat_scope_path/;
