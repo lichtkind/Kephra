@@ -51,4 +51,4 @@ sub date_time {
     sprintf ("%02u:%02u:%02u:%03u", @time[2,1,0], int((gettimeofday())[1]/1_000));
 }
 
-1;
+6;

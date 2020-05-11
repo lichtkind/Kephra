@@ -83,4 +83,4 @@ sub get_trusting_checker { $_[0]->{'trustcoderef'} } # .ptype                -->
 sub check     { $_[0]->{'coderef'}->($_[1], $_[2]) } # .ptype $val $param    -->  ~errormsg
 ################################################################################
 
-1;
+2;

@@ -1,19 +1,23 @@
 use v5.20;
 use warnings;
 
+# serializable data set to build a KBOS class from
+
 package Kephra::Base::Class::Definition;
+our $VERSION = 0.1;
 
+sub new              {}     # ~name                     --> .cdef
+sub restate          {}     # %state                    --> .cdef
+sub state            {}     # .cdef                     --> %state
 
-sub new            {}       # ~name                     --> .cdef
+sub complete         {}     # .cdef                     --> ~errormsg
+sub is_complete      {}     # .cdef                     --> ?
+sub get_dependencies {}     # .cdef                     --> @~name
 
-sub complete       {}       # .cdef                     --> ~errormsg
-sub is_complete    {}       # .cdef                     --> ?
-
-sub add_type       {}       # .cdef ~name %properties   --> ~errormsg
-sub add_argument   {}       # .cdef ~name %properties   --> ~errormsg
-sub add_attribute  {}       # .cdef ~name %properties   --> ~errormsg
-sub add_method     {}       # .cdef ~name %properties   --> ~errormsg
-
+sub add_type         {}     # .cdef ~name %properties   --> ~errormsg
+sub add_argument     {}     # .cdef ~name %properties   --> ~errormsg
+sub add_attribute    {}     # .cdef ~name %properties   --> ~errormsg
+sub add_method       {}     # .cdef ~name %properties   --> ~errormsg
 
 sub get_types               {}  # .cdef                 --> @%type_def
 sub get_arguments           {}  # .cdef                 --> @%arg_def

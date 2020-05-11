@@ -16,4 +16,4 @@ our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 Kephra::Base::Data::Type::Standard::init;
 
-1;
+5;
