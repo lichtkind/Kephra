@@ -232,8 +232,8 @@ sub list_names        {                        # - ~kind ~pname              -->
     } else { sort( keys %simple_type) }
 }
 sub _key_from_kind_ {
-	return 'simple' if not $_[0] or $_[0] eq 'simple';
-	return 'param' if index($_[0], 'param') > -1;
+    return 'simple' if not $_[0] or $_[0] eq 'simple';
+    return 'param' if index($_[0], 'param') > -1;
 }
 sub list_shortcuts    {                        #                             --> @~shortcut
     my ($kind) = _key_from_kind_(@_);
@@ -247,7 +247,7 @@ sub resolve_shortcut  {                        # ~shortcut - ~param          -->
 }
 ################################################################################
 sub is_type_known { &is_known }
-sub is_known      { ref _get_(@_) ? 1 :0 }     # ~type - ~param              -->  ?
+sub is_known      { ref _get_(@_) ? 1 : 0 }    # ~type - ~param              -->  ?
 sub is_initial    {                            # ~type - ~param              -->  ?
     my ($tdef) = _get_(@_);
     return unless ref $tdef;

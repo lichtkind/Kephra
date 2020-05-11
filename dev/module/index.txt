@@ -25,7 +25,7 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::Closure                      C         1.01   serializable closure (code and date)
  - K::Base                            C         0.11   root package of self made language extensions
 --------------------------------------------------------------------------------
-   K::B::C::Definition                     BI          serializable data set to build a KBOS class from
+   K::B::C::Definition                     BI   0.1    serializable data set to build a KBOS class from
    K::B::C::Scope                     CP        1.5    namespace constants, paths & priority logic
    K::B::C::Instance::Attribute            B N         central store for attribute ref
    K::B::C::Instance::Arguments            B N         central store for arguments ref
