@@ -7,6 +7,8 @@ use warnings;
 package Kephra::Base::Class::Syntax;
 our $VERSION = 0.06;
 use Keyword::Simple;
+use Kephra::Base::Class::Syntax::Parser;
+use Kephra::Base::Class::Syntax::Signature;
 use Kephra::Base::Class::Builder;
 ################################################################################
 my %rules = (

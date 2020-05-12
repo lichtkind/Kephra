@@ -25,9 +25,9 @@ sub get_argument      {}  # .cdef                       --> %arg_def
 sub get_attribute     {}  # .cdef                       --> %attr_def
 sub get_method        {}  # .cdef                       --> %method_def
 
-sub list_types        {}  # .cdef - ~kind ~name         --> @~name
+sub list_types        {}  # .cdef - ~kind ~ptname       --> @~name    # ~kind = ''='simple'|'param...', ~ptname = param type
 sub list_arguments    {}  # .cdef                       --> @~name
-sub list_attributes   {}  # .cdef - ~kind               --> @~name
-sub list_methods      {}  # .cdef - ~kind ~scope ?multi --> @~name
-
+sub list_attributes   {}  # .cdef - ~kind               --> @~name    # ~kind = 'data'|'deleg...'|'wrap...'
+sub list_methods      {}  # .cdef - ~kind ~scope ?multi --> @~name    # ~kind = ''|'simple'|'getter'|'setter'|'accessor'|'wrapper'|'delegator'|'constructor'
+                                                                      # ~scope = 'public'|'private'|'access'|'build'
 1;

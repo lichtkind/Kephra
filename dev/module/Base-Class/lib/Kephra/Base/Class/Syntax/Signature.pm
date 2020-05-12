@@ -1,7 +1,7 @@
-use v5.16;
+use v5.20;
 use warnings;
 
-# handling everything about signatures
+# parsing signatures into data structure
 
 package Kephra::Base::Class::Syntax::Signature;
 

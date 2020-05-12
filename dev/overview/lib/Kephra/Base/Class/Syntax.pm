@@ -26,7 +26,7 @@ type name => {help => 'description what is checked',
 
 argument name => {help => 'description', 
                   type => 'name', 
-            ?     attribute => 'name'};                 # argument is relative to what attribute
+           ? attribute => 'name'};                      # argument is relative to what attribute
 
 
 attribute name => {help => '',                          # help = long name

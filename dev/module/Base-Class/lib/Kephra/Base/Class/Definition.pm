@@ -17,7 +17,7 @@ sub restate        {        # %state                    --> .cdef
 }
 sub state          {        # .cdef                     --> %state
     my $self = (@_);
-    $state = {};
+    my $state = {};
     $state; 
 }
 ################################################################################
@@ -29,7 +29,7 @@ sub get_dependencies { @{ $_[0]->{'deps'}} } # .cdef                         -->
 ################################################################################
 sub add_type       {        # .cdef ~name %properties   --> ~errormsg
     my ($self, $name, $property) = (@_);
-    return "type definition in class $self->{name} got needs a name as first argument" unless defined $name;
+    return "type definition in class $self->{name} needs a name as first argument" unless defined $name;
     return "type $name of class $self->{name} got no properties to define itself" unless ref $property eq 'HASH';
     $property->{'name'} = $name;
     if (exists $property->{'parameter'}){
@@ -42,19 +42,25 @@ sub add_type       {        # .cdef ~name %properties   --> ~errormsg
 }
 sub add_argument   {        # .cdef ~name %properties       --> ~errormsg
     my ($self, $name, $property) = (@_);
-    return "argument $name of class $self->{name} got no properties to define itself" unless ref $property eq 'HASH';
+    return "argument definition in class $self->{name} needs a name as first argument" unless defined $name;
+    return "argument $name of class $self->{name} got no property hash to define itself" unless ref $property eq 'HASH';
+    return "argument $name needs a descriptive 'help' text" unless exists $property->{'help'};
+    return "argument $name needs a to refer to a 'type' name" unless exists $property->{'type'};
     $property->{'name'} = $name;
     $self->{'argument'}{$name} = $property;
 }
 sub add_attribute  {        # .cdef ~name %properties       --> ~errormsg
     my ($self, $name, $property) = (@_);
-    return "attribute $name of class $self->{name} got no properties to define itself" unless ref $property eq 'HASH';
+    return "attribute definition in class $self->{name} needs a name as first argument" unless defined $name;
+    return "attribute $name of class $self->{name} got no property hash to define itself" unless ref $property eq 'HASH';
+    return "attribute $name needs a descriptive 'help' text" unless exists $property->{'help'};
+    return "attribute $name needs a to refer to a 'type' or 'class' name" unless exists $property->{'type'} or $property->{'class'};
     $property->{'name'} = $name;
     $self->{'attribute'}{$name} = $property;
 }
 sub add_method     {        # .cdef ~name %properties       --> ~errormsg
-    my ($self, $name, $property) = (@_);
-    return "method $name of class $self->{name} got no properties to define itself" unless ref $property eq 'HASH';
+    my ($self, $name, $property) = (@_); # signature code mutli scope type name
+    return "method $name of class $self->{name} got no property hash to define itself" unless ref $property eq 'HASH';
     $property->{'name'} = $name;
     $self->{'method'}{$name} = $property;
 }
@@ -83,16 +89,22 @@ sub get_method              {   # .cdef                                      -->
 sub list_types                  {   # .cdef - ~kind                          --> @~name
     my ($self, $kind, $name) = (@_);
     $kind = Kephra::Base::Data::Type::Standard::_key_from_kind_($kind);
-
+    return keys %{$self->{'type'}{'simple'}} if $kind eq 'simple';
+    if ($kind eq 'param'){
+        return keys %{$self->{'type'}{'param'}} unless defined $name;
+        return unless exists $self->{'type'}{'param'}{$name};
+        return keys %{$self->{'type'}{'param'}{$name}};
+    }
 }
-sub list_arguments              {   # .cdef                                  --> @~name
-    my ($self) = (@_);
-}
+sub list_arguments { keys %{$_[0]->{'argument'}} }  # .cdef                  --> @~name
+    
 sub list_attributes         {   # .cdef                 --> @~name
     my ($self, $kind) = (@_);
+    keys %{$self->{'attribute'}};
 }
 sub list_methods            {   # .cdef                 --> @~name
     my ($self, $kind, $scope, $multi) = (@_);
+    keys %{$self->{'method'}};
 }
 ################################################################################
 1;
