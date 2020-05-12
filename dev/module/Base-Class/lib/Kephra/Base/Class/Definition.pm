@@ -9,7 +9,7 @@ use Kephra::Base::Data::Type qw/is_type_known/;
 ################################################################################
 sub new            {        # ~name                     --> .cdef
     return "need only one argument ('name') to create class definition" unless @_ == 2;
-    bless {name => $_[1], complete => 0, type => {basic => {}, param =>{}}, attribute => {}, argument=>{},  method => {}, deps => [] }; # dependencies
+    bless {name => $_[1], complete => 0, type => {basic => {}, param =>{}}, attribute => {}, argument=>{},  method => {state =>{},restate =>{},}, deps => [] }; # dependencies
 }
 sub restate        {        # %state                    --> .cdef
     my ($self, $state) = (@_);
@@ -31,70 +31,68 @@ sub add_type       {        # .cdef ~name %properties   --> ~errormsg
     my ($self, $name, $property) = (@_);
     return "type definition in class $self->{name} got needs a name as first argument" unless defined $name;
     return "type $name of class $self->{name} got no properties to define itself" unless ref $property eq 'HASH';
+    $property->{'name'} = $name;
     if (exists $property->{'parameter'}){
-        return "class $self->{name} already has a type named '$name' with parameter '$property->{'parameter'}{'name'}'"
-            if exists $self->{'type'}{'param'}{ $self->{'name'} }{ $property->{'parameter'}{'name'} };
-        return "type '$name' with parameter '$property->{'parameter'}{'name'}' is already defined in class $self->{name}" if is_type_known($name, $property->{'parameter'}{'name'});
+        return "definition of class $self->{name} already knows a type '$name' with parameter '$property->{parameter}{name}'" if defined $self->get_type($name, $property->{'parameter'}{'name'});
+        $self->{'type'}{'param'}{$name}{ $property->{'parameter'} } = $property;
     } else {
-        return "class $self->{name} already has a type named '$name'" if exists $self->{'type'}{'basic'}{$self->{'name'}};
-        return "can not overwrite name of standard type in class  $self->{name} definition" if is_type_known($name);
+        return "definition of class $self->{name} already knows a type '$name'" if defined $self->get_type($name);
+        $self->{'type'}{'basic'}{$name} = $property;
     }
 }
 sub add_argument   {        # .cdef ~name %properties       --> ~errormsg
     my ($self, $name, $property) = (@_);
+    return "argument $name of class $self->{name} got no properties to define itself" unless ref $property eq 'HASH';
+    $property->{'name'} = $name;
+    $self->{'argument'}{$name} = $property;
 }
 sub add_attribute  {        # .cdef ~name %properties       --> ~errormsg
     my ($self, $name, $property) = (@_);
+    return "attribute $name of class $self->{name} got no properties to define itself" unless ref $property eq 'HASH';
+    $property->{'name'} = $name;
+    $self->{'attribute'}{$name} = $property;
 }
 sub add_method     {        # .cdef ~name %properties       --> ~errormsg
     my ($self, $name, $property) = (@_);
+    return "method $name of class $self->{name} got no properties to define itself" unless ref $property eq 'HASH';
+    $property->{'name'} = $name;
+    $self->{'method'}{$name} = $property;
 }
 ################################################################################
-sub get_type                {   # .cdef                     --> .type
+sub get_type                {   # .cdef                                      --> .type
     my ($self, $name, $parameter) = (@_);
+    return unless defined $name;
+    if (defined $parameter) {
+        return $self->{'type'}{'param'}{$name}{$parameter} if exists $self->{'type'}{'param'}{$name} and exists $self->{'type'}{'param'}{$name}{$parameter};
+        return Kephra::Base::Data::Type::Standard::get($name, $parameter) if is_type_known($name, $parameter);
+    } else {
+        return $self->{'type'}{'basic'}{$name} if exists $self->{'type'}{'basic'}{$name};
+        return Kephra::Base::Data::Type::Standard::get($name) if is_type_known($name);
+    }
 }
-sub get_argument            {   # .cdef                     --> %arg_def
+sub get_argument            {   # .cdef                                      --> %arg_def
     my ($self, $name) = (@_);
 }
-sub get_attribute           {   # .cdef                     --> %attr_def
+sub get_attribute           {   # .cdef                                      --> %attr_def
     my ($self, $name) = (@_);
 }
-sub get_method              {   # .cdef                     --> %method_def
+sub get_method              {   # .cdef                                      --> %method_def
     my ($self, $name) = (@_);
 }
 ################################################################################
-sub list_types                  {   # .cdef                 --> @~name
+sub list_types                  {   # .cdef - ~kind                          --> @~name
+    my ($self, $kind, $name) = (@_);
+    $kind = Kephra::Base::Data::Type::Standard::_key_from_kind_($kind);
+
+}
+sub list_arguments              {   # .cdef                                  --> @~name
+    my ($self) = (@_);
+}
+sub list_attributes         {   # .cdef                 --> @~name
     my ($self, $kind) = (@_);
 }
-sub list_arguments              {   # .cdef                 --> @~name
-    my ($self) = (@_);
-}
-sub list_data_attributes        {   # .cdef                 --> @~name
-    my ($self) = (@_);
-}
-sub list_delegating_attributes  {   # .cdef                 --> @~name
-    my ($self) = (@_);
-}
-sub list_wrapping_attributes    {   # .cdef                 --> @~name
-    my ($self) = (@_);
-}
-sub list_all_attributes         {   # .cdef                 --> @~name
-    my ($self) = (@_);
-}
-sub list_simple_methods         {   # .cdef                 --> @~name
-    my ($self) = (@_);
-}
-sub list_multi_methods          {   # .cdef                 --> @~name
-    my ($self) = (@_);
-}
-sub list_accessor_methods       {   # .cdef                 --> @~name
-    my ($self) = (@_);
-}
-sub list_constructor_methods    {   # .cdef                 --> @~name
-    my ($self) = (@_);
-}
-sub list_all_methods            {   # .cdef                 --> @~name
-    my ($self, $scope) = (@_);
+sub list_methods            {   # .cdef                 --> @~name
+    my ($self, $kind, $scope, $multi) = (@_);
 }
 ################################################################################
 1;
