@@ -13,11 +13,11 @@ sub new               {} # - 'open'   --> .tstore                               
 sub state             {} #            --> %state          dump all active types data
 sub restate           {} # %state     --> .tstore         recreate all type checker from data dump
 
-                         #                                                              .type|%{.type|~type - ~name $default }
+                         #                                                              .type|%{.type|~type - ~name $default}
                          #         .type |{~name ~help ~code - .parent|~parent $default %parameter}
 sub add_type          {} # .tstore .type - ~shortcut       --> ~errormsg
 sub add_shortcut      {} # .tstore ~kind ~type ~shortcut   --> ~errormsg
-sub remove_type       {} # .tstore ~type - ~param          --> ~errormsg
+sub remove_type       {} # .tstore ~type - ~param          --> .type|~errormsg
 sub remove_shortcut   {} # .tstore ~kind ~shortcut         --> ~errormsg
 sub is_open           {} # .tstore                         --> ?
 sub close             {} # .tstore                         --> ?

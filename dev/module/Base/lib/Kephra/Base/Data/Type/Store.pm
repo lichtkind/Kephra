@@ -59,100 +59,82 @@ sub restate {
     $self;
 }
 ################################################################################
-sub new_basic_type   {  # ~name ~help ~code - .parent|~parent  $default     --> .type | ~errormsg
-    my ($self, $name, $help, $code, $parent, $default, $shortcut) = @_;
-    return 'can not add to a finalized type store' unless $self->{'open'};
-    $shortcut = $name->{'shortcut'} if ref $name eq 'HASH';
-    ($name, $help, $code, $parent, $default) = Kephra::Base::Data::Type::Basic::_unhash_arg_(@_);
-    my $name_error = _validate_name_($name);
-    return $name_error if $name_error;
-    if (defined $parent){
-        $parent = $self->get_type($parent) if ref $parent ne $btclass;
-        return "type store can not create basic type '$name', because fourth or named argument 'parent' has to be a basic type object or name a stored basic type"
-            if ref $parent ne $btclass;
-    }
-    my $type = Kephra::Base::Data::Type::Basic->new($name, $help, $code, $parent, $default);
-    return "type store can not create basic type '$name', because $type" if ref $type ne $btclass;
-    $parent = $self->add_type($type, $shortcut);
-}                       #             %{.type|~type - ~name $default }
-sub new_param_type    { # ~name ~help %parameter ~code .parent|~parent - $default --> .ptype | ~errormsg
-    my ($self, $name, $help, $parameter, $code, $parent, $default, $shortcut) = @_;
-    return 'can not add to a finalized type store' if $self->{'final'};
-    $shortcut = $name->{'shortcut'} if ref $name eq 'HASH';
-#Kephra::Base::Data::Type::Parametric::_unhash_arg_(@_);
-    my $name_error = _validate_name_($name);
-    return $name_error if $name_error;
-    $parameter = get( $parameter ) unless ref $parameter;
-    my $par_ref = ref $parameter;
-    return "third or named argument 'parameter' has to be of type '$name', a name of a standard type or a parameter definition (hash ref)" 
-        if $par_ref ne $btclass and $par_ref ne 'HASH';
-    $parameter->{'type'} = get( $parameter->{'type'} ) if $par_ref eq 'HASH' and defined $parameter->{'type'} and $parameter->{'type'} ne $btclass;
-    return "key 'type' in der parameter definition (hash ref) has to be a simple standard type name or a simple type object" 
-        if $par_ref eq 'HASH' and ref $parameter->{'type'} ne $btclass;
-    $parent = get($parent) if ref $parent ne $btclass;
-    return "fifth or named argument 'parent' has to be a name of a standard type or a simple type object" if ref $parent ne $btclass;
-    Kephra::Base::Data::Type::Parametric->new($name, $help, $parameter, $code, $parent, $default);
-}
-################################################################################
-sub _validate_name_ {
-    my $self = shift;
-    return "type name is not defined" unless defined $_[0];
-    return "type name $_[0] contains none id character" if  $_[0] !~ /[a-zA-Z0-9_]/;
-    return "type name $_[0] contains upper chase character" if  lc $_[0] ne $_[0];
-    return "type name $_[0] is too long" if  length $_[0] > 12;
-    return "type name $_[0] is not long enough" if  length $_[0] < 3;
-    '';
-}
-sub _validate_shortcut_ {
-    my $self = shift;
-    return "type shortcut is undefined" unless defined $_[0];
-    return "type shortcut $_[0] contains id character" if  $_[0] =~ /[a-zA-Z0-9_]/;
-    return "type shortcut $_[0] is too long" if length $_[0] > 1;
-    return "type shortcut $_[0] is not allowed" if $_[0] ~~ $self->{'forbid_shortcut'};
-    '';
-}
-
 sub add_type {                                 # .type - ~shortcut           --> ~errormsg
     my ($self, $type, $shortcut) = @_;
     return 'can not add to a closed type store' unless $self->{'open'};
-    return "$type is not a type object and can not be added to the standard" if ref $type ne $btclass and ref $type ne 'Kephra::Base::Data::Type::Parametric';
-    if (defined $shortcut){
-        my $shortcut_error = _validate_shortcut_( $shortcut );
-        return $shortcut_error if $shortcut_error;
+    if (ref $type eq 'HASH'){
+        if (exists $type->{'parameter'}){
+            if (ref $type->{'parameter'}{'type'} ne $btclass){
+                my $param_type = $self->get_type($type->{'parameter'}{'type'});
+                return "parameter type '$type->{'parameter'}{'type'}' is unknown to this type store" unless ref $param_type;
+                $type->{'parameter'}{'type'} = $param_type;
+            }
+            if (ref $type->{'parent'} ne $btclass){
+                my $parent = $self->get_type($type->{'parent'});
+                $parent = $self->get_type($type->{'parent'}, $type->{'parameter'}{'type'}->get_name) unless ref $parent;
+                return "'parent' type '$type->{parent}' is unknown to this type store" unless ref $parent;
+                $type->{'parent'} = $parent;
+            }
+            $type = Kephra::Base::Data::Type::Parametric->new($type);
+        } else {
+            if (ref $type->{'parent'} ne $btclass){
+                my $parent = $self->get_type($type->{'parent'});
+                return "'parent' type '$type->{parent}' is unknown to this type store" unless ref $parent;
+                $type->{'parent'} = $parent;
+            }
+            $type = Kephra::Base::Data::Type::Basic->new($type);
+        }
+        return "type store can not create and add type, because $type" unless ref $type;
     }
+    return "type store can not add type, because $type is neither instance of $btclass or $ptclass" if ref $type ne $btclass and ref $type ne $ptclass;
     my $type_name = $type->get_name;
-    my $name_error = _validate_name_( $type_name );
-    return $name_error if $name_error;
+    my $name_error = $self->_validate_type_name_( $type_name );
+    return "type store can not add type $type_name, because $name_error" if $name_error;
+    if (defined $shortcut){
+        my $shortcut_error = $self->_validate_shortcut_( $shortcut );
+        return "type store can not add type $type_name with shortcut $shortcut, because $shortcut_error" if $shortcut_error;
+    }
     my ($package, $file, $line) = caller();
     my $type_def = {object => $type, package => $package , file => $file };
-    if (ref $type eq 'Kephra::Base::Data::Type::Parametric'){
+    if (ref $type eq $ptclass){
         my $param_name = $type->get_parameter->get_name;
-        my $name_error = _validate_name_( $type->get_parameter->get_name );
-        return "type $type_name parameter: $name_error" if $name_error;
-        return "type name $type_name with parameter $param_name is already in use" if exists $param_type{$type_name}{$param_name};
+        my $name_error = $self->_validate_type_name_( $param_name );
+        return "type store can not add type $type_name, because of its parameter name: $name_error" if $name_error;
+        return "type 'name' $type_name with 'parameter' 'name' $param_name is already in use" if exists $self->{'param_type'}{$type_name} 
+                                                                                             and exists $self->{'param_type'}{$type_name}{$param_name};
         if (defined $shortcut){
-            my $type_with_same_sc = $name_by_shortcut{'param'}{ $shortcut };
-            return "parametric type shortcut $shortcut is already used by different parametric type" if defined $type_with_same_sc and $type_with_same_sc ne $type_name;
-            $name_by_shortcut{'param'}{ $shortcut } = $type_name;
-            $shortcut_by_name{'param'}{ $type_name } = $shortcut;
+            my $type_with_same_sc = $self->{'param_name_by_shortcut'}{ $shortcut };
+            return "can not add type $type_name, because parametric type shortcut $shortcut is already in use" if defined $type_with_same_sc and $type_with_same_sc ne $type_name;
+            $self->{'param_name_by_shortcut'}{ $shortcut } = $type_name;
+            $self->{'param_shortcut_by_name'}{ $type_name } = $shortcut;
         }
-        $param_type{$type_name}{$param_name} = $type_def;
+        $self->{'param_type'}{$type_name}{$param_name} = $type_def;
     } else {
-        return "simple type name $type_name is already in use" if exists $simple_type{ $type_name };
+        return "basic type 'name' $type_name is already in use" if exists $self->{'basic_type'}{ $type_name };
         if (defined $shortcut){
-            return "simple type shortcut $shortcut is already in use" if exists $name_by_shortcut{'simple'}{ $shortcut };
-            $name_by_shortcut{'simple'}{ $shortcut } = $type_name;
+            return "basic type shortcut $shortcut of type $type_name is already in use" if exists $self->{'basic_name_by_shortcut'}{ $shortcut };
+            $self->{'basic_name_by_shortcut'}{ $shortcut } = $type_name;
             $type_def->{'shortcut'} = $shortcut;
         } 
-        $simple_type{$type_name} = $type_def;
-    }
-    '';
+        $self->{'basic_type'}{$type_name} = $type_def;
+    }'';
 }
 sub add_shortcut      {                    # .tstore ~kind ~type ~shortcut   --> ~errormsg
-    my ($self, $type, $shortcut) = @_;
+    my ($self, $kind, $type_name, $shortcut) = @_;
     return 'can not add to a closed type store' unless $self->{'open'};
+    if (_key_from_kind_($kind) eq 'param'){
+        return "parametric type shortcut $shortcut is already in use" if exists $self->{'param_name_by_shortcut'}{ $shortcut };
+        return "parametric type $type_name is unknown to this store" unless exists $self->{'param_type'}{$type_name};
+        $self->{'param_name_by_shortcut'}{ $shortcut } = $type_name;
+        $self->{'param_shortcut_by_name'}{ $type_name } = $shortcut;
+    } else {
+        return "basic type shortcut $shortcut is already in use" if exists $self->{'basic_name_by_shortcut'}{ $shortcut };
+        return "basic type $type_name is unknown to this store" unless exists $self->{'basic_type'}{$type_name};
+        $self->{'basic_name_by_shortcut'}{ $shortcut } = $type_name;
+        $self->{'basic_type'}{$type_name}{'shortcut'} = $shortcut;
+    }'';
 }
-sub remove {                               # ~type - ~param                  --> ~errormsg
+sub remove_type {                          # ~type - ~param                  --> .type|~errormsg
     my ($self, $type_name, $param_name) = @_;
     return 'can not remove from a closed type store' unless $self->{'open'};
     my $def = _get_(@_);
@@ -172,19 +154,42 @@ sub remove {                               # ~type - ~param                  -->
 sub remove_shortcut   {                    # .tstore ~kind ~shortcut         --> ~errormsg
     my ($self, $kind, $shortcut) = @_;
     return 'can not remove from a closed type store' unless $self->{'open'};
+    '';
 }
 sub is_open{ $_[0]->{'open'} }                                               # --> ?
 sub close  { return 0 if $_[0]->{'open'} eq 'open'; $_[0]->{'open'} = 0; 1 } # --> ?
 ################################################################################
-sub _get_ {
-    my ($type_name, $param_name) = @_;
+sub _validate_type_name_ {
+    my $self = shift;
+    return "type name is not defined" unless defined $_[0];
+    return "type name $_[0] contains none id character" if  $_[0] !~ /[a-zA-Z0-9_]/;
+    return "type name $_[0] contains upper chase character" if  lc $_[0] ne $_[0];
+    return "type name $_[0] is too long" if  length $_[0] > 12;
+    return "type name $_[0] is not long enough" if  length $_[0] < 3;
+    '';
+}
+sub _validate_shortcut_ {
+    my $self = shift;
+    return "type shortcut is undefined" unless defined $_[0];
+    return "type shortcut $_[0] contains id character" if  $_[0] =~ /[a-zA-Z0-9_]/;
+    return "type shortcut $_[0] is too long" if length $_[0] > 1;
+    return "type shortcut $_[0] is not allowed" if $_[0] ~~ $self->{'forbid_shortcut'};
+    '';
+}
+sub _key_from_kind_ {
+    return 'basic' if not $_[0] or $_[0] eq 'basic';
+    return 'param' if index($_[0], 'param') > -1;
+}
+sub _get_type_def_ {
+    my ($self, $type_name, $param_name) = @_;
     return unless defined $type_name;
     if (defined $param_name) {
-        $param_type{$type_name}{$param_name} if exists $param_type{$type_name} and exists $param_type{$type_name}{$param_name};
+        $self->{'param_type'}{$type_name}{$param_name} if exists $self->{'param_type'}{$type_name} and exists $self->{'param_type'}{$type_name}{$param_name};
     } else {
-        $simple_type{$type_name}             if exists $simple_type{$type_name};
+        $self->{'basic_type'}{$type_name}              if exists $self->{'basic_type'}{$type_name};
     }
 }
+################################################################################
 sub get_type {                                 # ~type - ~param              --> ~errormsg
     my ($tdef) = _get_(@_);
     ref $tdef ? $tdef->{'object'} : undef;
@@ -207,10 +212,6 @@ sub list_names        {                        # - ~kind ~pname              -->
             sort( keys %{$param_type{$type_name}}) if exists $param_type{$type_name}
         } else { sort( keys %param_type) }
     } else { sort( keys %simple_type) }
-}
-sub _key_from_kind_ {
-    return 'basic' if not $_[0] or $_[0] eq 'basic';
-    return 'param' if index($_[0], 'param') > -1;
 }
 sub list_shortcuts    {                        #                             --> @~shortcut
     my ($kind) = _key_from_kind_(@_);

@@ -7,7 +7,7 @@ use warnings;
 #                 coderef => eval{ sub{ return $_[0] 'failed not a reference' unless not ref $_[0]; ...; 0} } }
 
 package Kephra::Base::Data::Type::Basic;
-our $VERSION = 1.3;
+our $VERSION = 1.31;
 use Scalar::Util qw/blessed looks_like_number/;
 ################################################################################
 sub _unhash_arg_ {
@@ -18,19 +18,19 @@ sub new {        # ~name ~help ~code - .parent $default --> .type | ~errormsg
     my ($name, $help, $code, $parent, $default) = _unhash_arg_(@_);
     $help //= '';
     $code //= '';
-    return "need type 'name' as first or named argument to create simpe type object" unless defined $name and $name;
-    return "parent type object of type $name has to be instance of ".__PACKAGE__ if defined $parent and ref $parent ne __PACKAGE__;
-    return "need help text and code or a parent type object to create type $name" if $code xor $help or (not $code and not defined $parent);
+    return "got no type 'name' as first or named argument to create basic type object" unless defined $name and $name;
+    return "'parent' of basic type '$name' has to be instance of ".__PACKAGE__ if defined $parent and ref $parent ne __PACKAGE__;
+    return "basic type '$name' definition misses 'help' text and 'code' or a 'parent' type object" if $code xor $help or (not $code and not defined $parent);
     my $checks = [];
     push @$checks, $help, $code if $code;
     if (defined $parent){
         unshift @$checks, @{$parent->get_check_pairs};
         $default //= $parent->get_default_value;
     }
-    return "need a default value or at least a parent type to create type $name" unless defined $default;
+    return "basic type '$name' misses 'default' value or a 'parent' type" unless defined $default;
     my $source = _compile_( $name, $checks );
     my $coderef = eval $source;
-    return "simpel type '$name' checker source code - '$source' - could not eval because: $@ !" if $@;
+    return "basic type '$name' checker source 'code' - '$source' - could not eval because: $@ !" if $@;
     my $error = $coderef->( $default );
     return "type '$name' default value '$default' does not pass check - '$source' - because: $error!" if $error;
     bless { name => $name, coderef => $coderef, checks => $checks, default => $default };
