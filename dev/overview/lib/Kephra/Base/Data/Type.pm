@@ -8,6 +8,7 @@ our $VERSION = 0.1;
 
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
+use Kephra::Base::Data::Type::Store;
 use Kephra::Base::Data::Type::Standard;
 
 
