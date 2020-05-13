@@ -3,6 +3,7 @@
   Requirements of Kephra CP
 ==============================
 
-perl 5.20 - postfix deref and smartmatch
-Wx        - GUI frontend
-Sereal    - serialisation data format
+perl 5.20       - postfix deref and smartmatch
+Wx              - GUI frontend
+Sereal          - serialisation data format
+Keyword::Simple - to extend the language

@@ -4,15 +4,19 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-
-package TypeTester; 
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
-use Kephra::Base::Data::Type::Store qw/:all/;
+use Kephra::Base::Data::Type::Store;
+
+package TypeTester; 
 use Test::More tests => 215;
 
-my $sclass  = 'Kephra::Base::Data::Type::Basic';
+my $bclass  = 'Kephra::Base::Data::Type::Basic';
 my $pclass  = 'Kephra::Base::Data::Type::Parametric';
+
+my $store = Kephra::Base::Data::Type::Store->new();
+
+__END__
 
 my @names = Kephra::Base::Data::Type::Standard::list_names();
 my @sc = Kephra::Base::Data::Type::Standard::list_shortcuts();

@@ -22,7 +22,7 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::Data::Type::Store             P U B    0.0    collection of type objects
    K::B::Data::Type::Standard          P U B    1.3    definition of standard types
    K::B::Data::Type                   CP U B    0.1    manage type related symbols
-   K::B::Data                         CP        0.1    root of none OO data handling
+   K::B::Data                         CP        0.2    root of none OO data handling
    K::B::Closure                      C         1.01   serializable closure (code and date)
  - K::Base                            C         0.11   root package of self made language extensions
 --------------------------------------------------------------------------------

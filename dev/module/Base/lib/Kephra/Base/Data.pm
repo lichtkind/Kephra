@@ -4,7 +4,7 @@ use warnings;
 # root of none OO data handling
 
 package Kephra::Base::Data;
-our $VERSION = 0.1;
+our $VERSION = 0.2;
 use Scalar::Util qw/blessed/;
 use Kephra::Base::Data::Type qw/:all/;
 use Exporter 'import';
@@ -51,4 +51,4 @@ sub date_time {
     sprintf ("%02u:%02u:%02u:%03u", @time[2,1,0], int((gettimeofday())[1]/1_000));
 }
 
-6;
+7;
