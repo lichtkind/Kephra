@@ -2,16 +2,16 @@ use v5.20;
 use warnings;
 use utf8;
 
-# definitions of for standard data type checker objects
+# definitions of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
-our $VERSION = 2.0;
+our $VERSION = 2.1;
 use Kephra::Base::Data::Type::Basic;
 
 our @forbidden_shortcuts = qw/{ } ( ) < > , -/;
 our %basic_shortcuts = (   str => '~', bool => '?', num => '+', int => '#', pos_int => '=', #  ^ ' " ! . /  §;
                           value => '$', array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', 
-                           type => '|', arg_name => ':', object => '!');
+                           type => '|', arg_name => ':',  object => '!');
 our %parametric_shortcuts = ( typed_array => '@', typed_hash => '%');
 our @basic_types = (
     {name => 'any',       help=> 'anything',             code=> '1',                                                default=> '' },
@@ -21,7 +21,7 @@ our @basic_types = (
     {name => 'num',       help=> 'number',               code=> 'looks_like_number($value)',  parent=> 'no_ref',    default=> 0  },
     {name => 'num_pos',   help=> 'greater equal zero',   code=> '$value >= 0',                parent=> 'num'                     },
     {name => 'num_spos',  help=> 'greater equal zero',   code=> '$value > 0',                 parent=> 'num',       default=> 1  },
-    {name => 'int',       help=> 'number',               code=> 'int($value) eq $value',      parent=> 'no_ref',    default=> 0  },
+    {name => 'int',       help=> 'integer',              code=> 'int($value) eq $value',      parent=> 'no_ref',    default=> 0  },
     {name => 'int_pos',   help=> 'greater equal zero',   code=> '$value >= 0',                parent=> 'int'                     },
     {name => 'int_spos',  help=> 'strictly positive',    code=> '$value > 0',                 parent=> 'int',       default=> 1  },
     {name => 'str',                                                                           parent=> 'no_ref',                 },
@@ -44,12 +44,12 @@ our @basic_types = (
 
 our @parametric_types =  ( # standard simple types - no package can delete them
     {name => 'typed_ref', help=> 'reference of given type',  code=> 'return "value $value is not a $param reference" if ref $value ne $param',  parent=> 'value',     default=> [], 
-                                                                                                          parameter => {   name => 'refname',     type=> 'str',       default=> 'ARRAY'}, },
+                                                                                                          parameter => {   name => 'refname',   parent=> 'str',       default=> 'ARRAY'}, },
     {name => 'index',     help=> 'valid index of array',     code=> 'return "value $value is out of range" if $value >= @$param',               parent=> 'int_pos',   default=>  0, 
-                                                                                                          parameter => {   name => 'array',       type=> 'array_ref', default=> [1]    }, },
+                                                                                                          parameter => {   name => 'array',     parent=> 'array_ref', default=> [1]    }, },
     {name =>'typed_array',help=> 'array with typed elements',code=> 'for my $i(0..$#$value){my $error = $param->check($value->[$i]); return "aray element $i $error" if $error}',
                                                                                                                                                 parent=> 'array_ref', default=> [1],
-                                                                                                          parameter => {   name => 'element_type',type=> 'type',                       }, },
+                                                                                                          parameter => {  name =>'element_type',parent=> 'type',                       }, },
 );
 
 5;

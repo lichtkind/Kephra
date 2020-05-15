@@ -24,9 +24,9 @@ my $Ttype  = simple_type('ARRAY', 'array reference', 'ref $value eq "ARRAY"', $T
 my $btclass = 'Kephra::Base::Data::Type::Basic';
 my $ptclass = 'Kephra::Base::Data::Type::Parametric';
 
-my $Tindex = para_type('index', 'valid index of array', {name => 'array', type => $Tarray},    # inherit both defaults
+my $Tindex = para_type('index', 'valid index of array', {name => 'array', parent => $Tarray},    # inherit both defaults
                        'return "value $value is out of range" if $value >= @$param', $Tpint);
-my $Tref = para_type({name => 'reference', help => 'reference of given type', parameter => {name => 'refname', type => $Tstr, default => 'ARRAY'}, 
+my $Tref = para_type({name => 'reference', help => 'reference of given type', parameter => {name => 'refname', parent => $Tstr, default => 'ARRAY'}, 
                      code => 'return "value $value is not a $param reference" if ref $value ne $param', parent => $Tany, default => $erefdef}); # overwrite both defaults
 my $Tshortref = para_type({name => 'short_ref', help => 'reference with short, given name',  
                      code => 'return "reference $param is too long " if length $param > 9',             parent => $Tref}); # 
@@ -191,7 +191,6 @@ is ( $Trefclone->check(1, ''), '',             'check method of type "ref" clone
 ok ( $Trefclone->check([],'Regex'),            'check method of type "ref" clone denies with error correctly ARRAY ref as not a Regex ref');
 ok ( $Trefclone->check([],[]),                 'check method of type "ref" clone denies with error correctly when parameter is not a str');
 
-
 is ( ref $Tshortref, $ptclass,                      'created prametric type that inherits from another param type');
 is ( $Tshortref->get_name, 'short_ref',             'got attribute "name" from getter of type "short_ref"');
 is ( $Tshortref->get_help,'reference with short, given name', 'got attribute "help" from getter of type "short_ref"');
@@ -218,15 +217,15 @@ ok ( $tchecker->( Very::Long::Package->new(), 'Very::Long::Package'),  'trusting
 
 my $para = {name => 'array', type => $Tarray, default => $crefdef};
 my $kode = 'return "value $value is out of range" if $value >= @$param';
-ok( not( ref para_type()),                                                'can not create type without any argument');
+ok( not( ref para_type()),                                                      'can not create type without any argument');
 ok( not( ref para_type(undef,'valid index of array', $para, $kode, $Tpint)),    'can not create type without argument "name"');
 ok( not( ref para_type('index', undef, $para, $kode, $Tpint, 0)),               'can not create type without argument "help"');
 ok( not( ref para_type('index', 'valid index of array', undef, $kode, $Tpint)), 'can not create type without argument "parameter"');
 ok( not( ref para_type('index', 'valid index of array', $para, undef, $Tpint)), 'can not create type without argument "code"');
 ok( not( ref para_type('index', 'valid index of array', $para, $kode, undef)),  'can not create type without argument "parent"');
 ok( not( ref para_type('index', 'valid index of array', {}, $kode, $Tpint)),    'can not create type with empty "parameter" definition');
-is( ref para_type('index', 'valid index of array', {type => $Tarray}, $kode, $Tpint), $ptclass, '"parameter" definition with just a type to inherit from name and default is good');
-ok( not( ref para_type('index', 'valid index of array', {type => $Tarray, default => {}}, $kode, $Tpint)), '"parameter" default value has to adhere type constrains');
+ok( para_type('index', 'valid index of array', {parent => $Tarray}, $kode, $Tpint), '"parameter" definition with just a type to inherit from name and default is not good');
+ok( not( ref para_type('index', 'valid index of array', {parent => $Tarray, default => {}}, $kode, $Tpint)), '"parameter" default value has to adhere type constrains');
 ok( not( ref para_type('index', 'valid index of array', $para, 'rerun', $Tpint)),   'can not create type with "code" that can not eval');
 ok( not( ref para_type('index', 'valid index of array', $para, $kode, $Tpint, -5)), 'can not create type with "default" that is outside type constrains');
 
@@ -235,10 +234,10 @@ ok( not( ref para_type({help => 'valid index of array', parameter => $para, code
 ok( not( ref para_type({name => 'index', parameter => $para, code => $kode, parent => $Tpint})),                  'can not create type without named argument "help"');
 ok( not( ref para_type({name => 'index', help => 'valid index of array', code => $kode, parent => $Tpint})),      'can not create type without argument "parameter"');
 ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => {}, code => $kode, parent => $Tpint})), 'can not create type with empty "parameter" definition');
-ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => {type => $Tarray, default=>{}}, code => $kode, parent => $Tpint})),
+ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => {parent => $Tarray, default=>{}}, code => $kode, parent => $Tpint})),
                                                                                                                   '"parameter" default value has to adhere type constrains');
-is( ref para_type({name => 'index', help => 'valid index of array', parameter => {type => $Tarray}, code => $kode, parent => $Tpint}), $ptclass,
-                                                                                                                  'named "parameter" definition with just a type to inherit from name and default is good');
+ok( para_type({name => 'index', help => 'valid index of array', parameter => {parent => $Tarray}, code => $kode, parent => $Tpint}),
+                                                                                                                  'named "parameter" definition with just a type to inherit from name and default is not good');
 ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, parent => $Tpint})), 'can not create type without argument "code"');
 ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, code => 'rerun', parent => $Tpint})), 'can not create type without "code" that can eval');
 ok( not( ref para_type({name => 'index', help => 'valid index of array', parameter => $para, code => $kode})),     'can not create type without argument "parent"');

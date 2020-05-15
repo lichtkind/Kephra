@@ -2,14 +2,13 @@ use v5.20;
 use warnings;
 
 # data type depending second value (parameter) // example - valid index (type) of an actual array (parameter)
-# { name => 'index', help => 'valid index of array', parent => 'int_pos', code =>'return "value $value is out of range" if $value >= @$param', 
-#   parameter =>{name => 'array reference', type => 'ARRAY', default => []}, default => 0    }   # type is required
+# { name => 'index', help => 'valid index of array', parent => 'int_pos', code =>'return "value $value is out of range" if $value >= @$param', default => 0,
+#   parameter =>{name => 'ARRAY', help => 'array reference', code => 'ref $value eq "ARRAY"', default => []}    }   # type is required
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 1.2;
+our $VERSION = 1.3;
 use Scalar::Util qw/blessed looks_like_number/;
-use Kephra::Base::Data::Type::Basic;
-my $btype = 'Kephra::Base::Data::Type::Basic';
+use Kephra::Base::Data::Type::Basic;         my $btype = 'Kephra::Base::Data::Type::Basic';
 
 ################################################################################
 sub _unhash_arg_ {
@@ -20,24 +19,15 @@ sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            -->
     my ($name, $help, $parameter, $code, $parent, $default) = _unhash_arg_(@_);
     return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref), 'code' (str) and 'parent' ($btype) to create parametric type object" 
         unless defined $name and $name and defined $help and $help and defined $code and $code and defined $parent;
-    return "argument 'parameter' has to be $btype or a hash ref definition that contains at least the key 'type' to create parametric type $name" 
-        if ref $parameter ne $btype and (ref $parameter ne 'HASH' or ref $parameter->{'type'} ne $btype) and ref $parent ne __PACKAGE__;
-    return "default value '$parameter->{default}' of type $name 's parameter does not match his type $parameter->{type}{name}" 
-        if ref $parameter eq 'HASH' and exists $parameter->{'default'} and $parameter->{'type'}->check($parameter->{'default'});
     return "parent has to be instance of $btype or ".__PACKAGE__." to create parametric type $name" if ref $parent ne $btype and ref $parent ne __PACKAGE__;
-    $default //= $parent->get_default_value;
-    if (ref $parameter eq 'HASH'){
-        if (not exists $parameter->{'name'} and not exists $parameter->{'default'}){ $parameter = $parameter->{'type'} } 
-        else { $parameter = Kephra::Base::Data::Type::Basic->new( {
-                    name => $parameter->{'name'} // $parameter->{'type'}->get_name,
-                    default => $parameter->{'default'} // $parameter->{'type'}->get_default_value,
-                    parent => $parameter->{'type'} } );
-        }
-    }
     if (ref $parent eq __PACKAGE__){
-        $parameter = $parent->get_parameter if ref $parameter ne $btype;
+        $parameter //= $parent->get_parameter;
         $code = $parent->{'code'}.';'.$code;
     }
+    return "argument 'parameter' of parametric type $name has to be $btype or a hash ref definition " if ref $parameter ne $btype and ref $parameter ne 'HASH';
+    $parameter = Kephra::Base::Data::Type::Basic->new( $parameter ) if ref $parameter eq 'HASH';
+    return "'parameter' definition of parametric type $name has issue: $parameter " unless ref $parameter;
+    $default //= $parent->get_default_value;
     my $checks = $parent->{'checks'};
     my $source = _compile_( $name, $checks, $code, $parameter );
     my $coderef = eval $source;
