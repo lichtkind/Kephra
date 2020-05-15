@@ -6,11 +6,9 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 
 package TypeTester; 
-use Kephra::Base::Data::Type::Standard qw/:all/;
+use Kephra::Base::Data::Type::Standard;    my $sclass  = 'Kephra::Base::Data::Type::Basic';
+use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Type::Parametric';
 use Test::More tests => 215;
-
-my $sclass  = 'Kephra::Base::Data::Type::Basic';
-my $pclass  = 'Kephra::Base::Data::Type::Parametric';
 
 my @names = Kephra::Base::Data::Type::Standard::list_names();
 my @sc = Kephra::Base::Data::Type::Standard::list_shortcuts();

@@ -4,17 +4,149 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Kephra::Base::Data::Type::Basic;
-use Kephra::Base::Data::Type::Parametric;
-use Kephra::Base::Data::Type::Store;
+use Kephra::Base::Data::Type::Basic;       my $bclass  = 'Kephra::Base::Data::Type::Basic';
+use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Type::Parametric';
+use Kephra::Base::Data::Type::Store;       my $sclass  = 'Kephra::Base::Data::Type::Store';
 
 package TypeTester; 
 use Test::More tests => 215;
 
-my $bclass  = 'Kephra::Base::Data::Type::Basic';
-my $pclass  = 'Kephra::Base::Data::Type::Parametric';
-
 my $store = Kephra::Base::Data::Type::Store->new();
+is( ref $store, $sclass,                                                  'could create a closable store object');
+is( $store->list_type_names('basic'),                      undef,         'no basic types can be listed');
+is( $store->list_type_names('param'),                      undef,         'no parametric types can be listed');
+is( $store->list_shortcuts('basic'),                       undef,         'no basic shortcut can be listed');
+is( $store->list_shortcuts('param'),                       undef,         'no parametric shortcut can be listed');
+is( $store->list_forbidden_shortcuts(),                    undef,         'no forbidden shortcut can be listed');
+is( $store->guess_basic_type(''),                          undef,         'no types there to guess value from');
+is( $store->is_open(),                                         1,         'newly made type store is open');
+is( $store->is_type_known('superkalifrailistisch'),            0,         'check for unknown basic type');
+is( $store->is_type_known('superkalifrailistisch', 'p'),       0,         'check for unknown parametric type');
+is( $store->is_type_owned('superkalifrailistisch'),            0,         'caller does not own unknown basic type');
+is( $store->is_type_owned('superkalifrailistisch', 'p'),       0,         'caller does not own unknown parametric type');
+is( $store->get_type('superkalifrailistisch'),             undef,         'can not get unknown basic type');
+is( $store->get_type('superkalifrailist','isch'),          undef,         'can not get unknown parametric type');
+is( $store->is_type_known('superkalifrailistisch'),            0,         'get did not create a basic type entry');
+is( $store->is_type_known('superkalifrailistisch', 'p'),       0,         'get did not create a prametric type entry');
+is( $store->get_shortcut('basic','superkalifrailistisch'), undef,         'can not get shortcut from unknown basic type');
+is( $store->get_shortcut('param','superkalifrailistisch'), undef,         'can not get shortcut from unknown parametric type');
+is( $store->resolve_shortcut('basic','='),                 undef,         'can not resolve unknown shortcut for basic types');
+is( $store->resolve_shortcut('param','='),                 undef,         'can not resolve unknown shortcut for parametric types');
+is( $store->list_type_names('basic'),                      undef,         'list of basic types is still clean');
+is( $store->list_type_names('param'),                      undef,         'list of parametric types is still clean');
+is( $store->list_type_names('param','a'),                  undef,         'list of known parameters of unknown param type is also clean');
+
+
+my $Tval = Kephra::Base::Data::Type::Basic->new({name => 'value', help => 'defined value', code =>'defined $value', default => ''});
+my $Tnref = Kephra::Base::Data::Type::Basic->new({name => 'no_ref', help => 'not a reference', code =>'not ref $value', parent => $Tval});
+
+is( $store->is_type_known('value'),                            0,         'type is not known before creation');
+is( $store->get_type('value'),                             undef,         'can not get type before creation');
+is( ref $Tval,                                           $bclass,         'created a valid basic type');
+is( $store->add_type($Tval),                                  '',         'could add basic type "value"');
+is( $store->get_type('value'),                             $Tval,         'got same type object out by getter');
+is( $store->is_type_known('value'),                            1,         'type "value" is known after addition');
+is( $store->is_type_owned('value'),                            1,         'type "value" is owned by creator');
+is( $store->check_basic_type('value', 1),                     '',         'type "value" can be checked, correct positive');
+ok( $store->check_basic_type('value', undef),                             'type "value" can be chacked, correct negative');
+my @list = $store->list_type_names('basic');
+is( @list,                                                     1,         'can list now one basic type');
+is( $list[0],                                            'value',         'new basic type "value" shows up in list');
+is( $store->list_type_names('param'),                      undef,         'no parametric types can be listed');
+@list = $store->guess_basic_type(1);
+is( @list,                                                     1,         'can list now one type guess');
+is( $list[0],                                            'value',         'new basic type "value" can be guessed');
+is( $store->remove_type('value'),                          $Tval,         'could remove basic type "value"');
+is( $store->get_type('value'),                             undef,         'type "value" is gone');
+is( $store->is_type_known('value'),                            0,         'type "value" is unknown again');
+
+is( $store->add_type({name => 'value', help => 'defined value', code =>'defined $value', default => 1}), '', 'could creade and add basic type "value" without parent');
+is( ref $store->get_type('value'),                       $bclass,         'got basic type "value" object by getter');
+is( $store->is_type_known('value'),                            1,         'type "value" is known after creation and addition');
+is( $store->is_type_owned('value'),                            1,         'type "value" is owned by creator');
+package Other;
+use Test::More;
+is( $store->is_type_owned('value'),                            0,         'type "value" is not owned by other pacjages');
+package TypeTester; 
+is( $store->check_basic_type('value', 'a'),                   '',         'type "value" can be checked, correct positive');
+ok( $store->check_basic_type('value', undef),                             'type "value" can be checked, correct negative');
+@list = $store->list_type_names('basic');
+is( @list,                                                     1,         'can list now one basic type');
+is( $list[0],                                            'value',         'new basic type "value" shows up in list');
+is( $store->list_type_names('param'),                      undef,         'no parametric types can be listed');
+@list = $store->guess_basic_type(1);
+is( @list,                                                     1,         'can list now one type guess');
+is( $list[0],                                            'value',         'new basic type "value" can be guessed');
+is( ref $store->remove_type('value'),                    $bclass,         'could remove created basic type "value"');
+
+is( $store->add_type($Tnref),                                 '',         'could and add basic type "no_ref" with none stored parent');
+is( $store->is_type_known('no_ref'),                           1,         'type "no_ref" is known after creation and addition');
+is( ref $store->get_type('no_ref'),                      $bclass,         'got basic type "no_ref" object by getter');
+@list = $store->list_type_names('basic');
+is( @list,                                                     1,         'can list now one basic type');
+is( $list[0],                                            'no_ref',         'new basic type "value" shows up in list');
+is( $store->check_basic_type('no_ref', 'a'),                  '',         'type "no_ref" can be checked, correct positive');
+ok( $store->check_basic_type('no_ref', []),                               'type "no_ref" can be checked, correct negative');
+is( $store->add_type({name => 'int', help => 'integer', code=> 'int($value) eq $value', default => 1, parent => 'no_ref'},'#'), '', 'could create and add basic type with stored parent and shortcut');
+is( $store->is_type_known('int'),                              1,         'type "int" is known after creation and addition');
+is( ref $store->get_type('int'),                      $bclass,         'got basic type "int" object by getter');
+is( $store->check_basic_type('int', '-10'),                   '',         'type "int" can be checked, correct positive');
+ok( $store->check_basic_type('int', 1.1),                                 'type "int" can be checked, correct negative');
+is( $store->get_shortcut('no_ref','int'),                  undef,         'got shortcut of basic type "int"');
+is( $store->get_shortcut('basic','int'),                     '#',         'got shortcut of basic type "int"');
+is( $store->resolve_shortcut('basic','#'),                 'int',         'resolved shortcut of basic type "int"');
+@list = $store->list_type_names('basic');
+is( @list,                                                     2,         'can list now two basic types');
+is( $list[0],                                              'int',         'new basic type "int" shows up in list');
+is( $list[1],                                           'no_ref',         'new basic type "no_ref" shows up in list');
+@list = $store->list_shortcuts('basic');
+is( @list,                                                     1,         'can list now one basic shortcut');
+is( $list[0],                                                '#',         'new shortcut of basic type "int" shows up in list');
+is( $store->add_type({name => 'num', help => 'number', code=> 'looks_like_number($value)', default => 1, parent => 'no_ref'}), '', 'could creade and add basic type with stored parent and shortcut');
+is( $store->add_shortcut('basic','num','+'),                  '',         'added shortcut to already known basic type "num"');
+is( $store->get_shortcut('basic','num'),                     '+',         'got shortcut of basic type "num"');
+is( $store->resolve_shortcut('basic','+'),                 'num',         'resolved shortcut of basic type "num"');
+@list = $store->list_shortcuts('basic');
+is( @list,                                                     2,         'can list now two basic shortcut');
+is( $list[0],                                                '#',         'new shortcut of basic type "int" shows up in list');
+is( $list[1],                                                '+',         'new shortcut of basic type "num" shows up in list');
+is( $store->list_type_names('param'),                      undef,         'no parametric types can be listed');
+is( $store->list_shortcuts('param'),                       undef,         'no parametric shortcut can be listed');
+@list = $store->guess_basic_type(1);
+is( @list,                                                     3,         'value "1" can be of three types');
+is( 'int' ~~ [@list],                                          1,         'it can be "int"');
+is( 'num' ~~ [@list],                                          1,         'it can be "num"');
+is( 'no_ref' ~~ [@list],                                       1,         'it can be "no_ref"');
+@list = $store->guess_basic_type(1.1);
+is( @list,                                                     2,         'value "1.1" can be of two types');
+is( $list[0],                                              'num',         '"num" is the most likly type');
+@list = $store->guess_basic_type('c');
+is( @list,                                                     1,         'value "c" can only be of one type');
+is( $list[0],                                           'no_ref',         'it is basic type "no_ref"');
+is( ref $store->remove_type('no_ref'),                    $bclass,        'could remove created basic type "no_ref"');
+@list = $store->list_type_names('basic');
+is( @list,                                                     2,         'can list now two basic types');
+is( $list[0],                                              'int',         'new basic type "int" shows up in list');
+is( $list[1],                                              'num',         'new basic type "num" shows up in list');
+is( $store->remove_shortcut('basic','#'),                     '',         'removed shortcut of basic type "int"');
+is( $store->get_shortcut('basic','int'),                   undef,         'basic type "int" has no more shortcut');
+is( $store->resolve_shortcut('basic','#'),                 undef,         'resolved shortcut of basic type "int" has to be undef');
+@list = $store->list_shortcuts('basic');
+is( @list,                                                     1,         'one basic shortcut is left');
+is( $list[0],                                                '+',         'it is the shortcut of basic type "num"');
+is( ref $store->remove_type('num'),                      $bclass,         'removed basic type "num"');
+is( $store->list_shortcuts('basic'),                       undef,         'no more shortcuts after deleting last type with shortcut');
+@list = $store->list_type_names('basic');
+is( @list,                                                     1,         'can list only one basic type name');
+is( $list[0],                                              'int',         'new basic type "int" shows up in list');
+
+my $Tindex = Kephra::Base::Data::Type::Parametric->new({name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', default => [1], parent => 'int', 
+                                                        parameter => {name => 'array', help => 'array reference', code => 'ref $value eq "ARRAY"', default => []}});
+is( $store->add_type($Tindex, '^'),                           '',         'could create and add parametric type with stored parent and shortcut');
+
+say $Tindex;
+
+exit 0;
 
 __END__
 

@@ -1,7 +1,7 @@
 use v5.20;
 use warnings;
 
-# definitions of for standard data type checker objects
+# definitions of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
 our $VERSION = 2.0;
