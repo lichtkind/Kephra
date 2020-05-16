@@ -7,6 +7,7 @@ use utf8;
 package Kephra::Base::Data::Type::Standard;
 our $VERSION = 2.1;
 use Kephra::Base::Data::Type::Basic;
+use Kephra::Base::Data::Type::Parametric;
 
 our @forbidden_shortcuts = qw/{ } ( ) < > , -/;
 our %basic_shortcuts = (   str => '~', bool => '?', num => '+', int => '#', pos_int => '=', #  ^ ' " ! . /  §;

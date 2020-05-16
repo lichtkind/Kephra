@@ -45,16 +45,14 @@ sub _compile_ { 'sub { my( $value ) = @_; no warnings "all";'. _asm_(@_) . "retu
 sub _asm_ {
     my ($name, $checks) = @_;
     my $source = '';
-    for (my $i = 0; $i < @$checks; $i+=2){
+    for (my $i = 0; $i < @$checks; $i+=2) {
         $source .= 'return "value $value'." needed to be of type $name, but failed test: $checks->[$i]\" unless $checks->[$i+1];"
     }
     $source;
 }
 sub assemble_code { _asm_($_[0]->get_name, $_[0]->get_check_pairs) }
 ################################################################################
-sub state {                                       # .type                 -->  %state
-    { name => $_[0]->{'name'}, checks => [@{$_[0]->{'checks'}}], default => $_[0]->{'default'} }
-}
+sub state             { {name => $_[0]->{'name'}, checks => [@{$_[0]->{'checks'}}], default => $_[0]->{'default'} }}  # .type  -->  %state
 sub get_name          { $_[0]->{'name'} }            # .type                 -->  ~name
 sub get_check_pairs   { $_[0]->{'checks'} }          # .type                 -->  @checks
 sub get_default_value { $_[0]->{'default'} }         # .type                 -->  $default

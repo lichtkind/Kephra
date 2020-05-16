@@ -8,6 +8,8 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 package TypeTester; 
 use Kephra::Base::Data::Type::Standard;    my $sclass  = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Type::Parametric';
+use Kephra::Base::Data::Type::Store;       my $sclass  = 'Kephra::Base::Data::Type::Store';
+
 use Test::More tests => 215;
 
 my @names = Kephra::Base::Data::Type::Standard::list_names();
