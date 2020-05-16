@@ -5,11 +5,11 @@ use utf8;
 # definitions of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
-our $VERSION = 2.1;
+our $VERSION = 2.2;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
 
-our @forbidden_shortcuts = qw/{ } ( ) < > , -/;
+our @forbidden_shortcuts = (qw/{ } ( ) < > -/, ",");
 our %basic_shortcuts = (   str => '~', bool => '?', num => '+', int => '#', pos_int => '=', #  ^ ' " ! . /  §;
                           value => '$', array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', 
                            type => '|', arg_name => ':',  object => '!');
@@ -52,5 +52,11 @@ our @parametric_types =  ( # standard simple types - no package can delete them
                                                                                                                                                 parent=> 'array_ref', default=> [1],
                                                                                                           parameter => {  name =>'element_type',parent=> 'type',                       }, },
 );
+
+sub init {
+}
+my $standard_types = Kephra::Base::Data::Type::Store->new(''); 
+
+
 
 5;

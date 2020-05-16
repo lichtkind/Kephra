@@ -12,7 +12,7 @@ package TypeTester;
 use Test::More tests => 250;
 
 my $store = Kephra::Base::Data::Type::Store->new();
-is( ref $store, $sclass,                                                  'could create a closable store object');
+is( ref $store, $sclass,                                                  'could create a closable type store object');
 is( $store->list_type_names('basic'),                      undef,         'no basic types can be listed');
 is( $store->list_type_names('param'),                      undef,         'no parametric types can be listed');
 is( $store->list_shortcuts('basic'),                       undef,         'no basic shortcut can be listed');

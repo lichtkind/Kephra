@@ -6,11 +6,29 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 
 package TypeTester; 
-use Kephra::Base::Data::Type::Standard;    my $sclass  = 'Kephra::Base::Data::Type::Basic';
+use Kephra::Base::Data::Type::Standard;    my $bclass  = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Type::Parametric';
 use Kephra::Base::Data::Type::Store;       my $sclass  = 'Kephra::Base::Data::Type::Store';
 
-use Test::More tests => 215;
+my $ts = 2 * @Kephra::Base::Data::Type::Standard::basic_types +
+         2 * @Kephra::Base::Data::Type::Standard::parametric_types;
+
+#@Kephra::Base::Data::Type::Standard::forbidden_shortcuts;
+#%Kephra::Base::Data::Type::Standard::basic_shortcuts;
+#%Kephra::Base::Data::Type::Standard::parametric_shortcuts;
+#@Kephra::Base::Data::Type::Standard::basic_types;
+#@Kephra::Base::Data::Type::Standard::parametric_types;
+
+use Test::More tests => 1;
+
+
+my $store = Kephra::Base::Data::Type::Store->new();
+is( ref $store, $sclass,                                    'could create initial type store object');
+
+for my $type_def (@Kephra::Base::Data::Type::Standard::basic_types){
+}
+
+__END__
 
 my @names = Kephra::Base::Data::Type::Standard::list_names();
 my @sc = Kephra::Base::Data::Type::Standard::list_shortcuts();

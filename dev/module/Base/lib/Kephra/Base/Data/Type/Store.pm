@@ -8,7 +8,7 @@ no warnings 'experimental::smartmatch';
 #       multiple parametric types with same name and different parameters must have same owner and shortcut (basic type shortcuts have own name space)
 
 package Kephra::Base::Data::Type::Store;
-our $VERSION = 1.0;
+our $VERSION = 1.1;
 use Kephra::Base::Data::Type::Basic;             my $btclass = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;        my $ptclass = 'Kephra::Base::Data::Type::Parametric';
 ##############################################################################
@@ -53,27 +53,44 @@ sub restate {  # %state     --> .tstore
 sub is_open{ $_[0]->{'open'} }                                               # --> ?
 sub close  { return 0 if $_[0]->{'open'} eq 'open'; $_[0]->{'open'} = 0; 1 } # --> ?
 ################################################################################
+sub list_type_names   {                        # - ~kind ~ptype              --> @~btype|@~ptype|@~param
+    my ($self, $kind, $type_name) = @_;
+    ($kind = _key_from_kind_($kind)) or return;
+    if (defined $type_name){
+        return unless exists $self->{'param_type'}{$type_name} and $kind eq 'param';
+        return sort keys %{ $self->{'param_type'}{$type_name}{'object'} };
+    }
+    sort keys %{$self->{$kind.'_type'}};
+}
+sub list_shortcuts    {                        #                             --> @~shortcut
+    my ($self, $kind) = @_;
+    ($kind = _key_from_kind_($kind)) or return;
+    sort keys( %{$self->{$kind.'_name_by_shortcut'}});
+}
+sub list_forbidden_shortcuts { @{$_[0]->{'forbid_shortcut'}} ? @{$_[0]->{'forbid_shortcut'}} : undef } # .tstore     --> @~shortcut
+################################################################################
+sub substitude_type_names { # .tstore {~name ~help ~code - .parent|~parent $default %parameter}  --> ~errormsg
+    my ($self, $type_def) = @_;
+    return "need a type definition (hash ref) as argument" unless ref $type_def eq 'HASH';
+    if (defined $type_def->{'parent'} and not ref $type_def->{'parent'}){
+        my $tmp = $self->get_type( $type_def->{'parent'} );              $type_def->{'parent'} = $tmp if ref $tmp;
+    } elsif (defined $type_def->{'parent'} and ref $type_def->{'parent'} eq 'ARRAY'){
+        my $tmp = $self->get_type( @{$type_def->{'parent'}} );           $type_def->{'parent'} = $tmp if ref $tmp;
+    }
+    if (ref $type_def->{'parameter'} eq 'HASH' and exists $type_def->{'parameter'}{'parent'} and not ref $type_def->{'parameter'}{'parent'}){
+        my $tmp = $self->get_type($type_def->{'parameter'}{'parent'});   $type_def->{'parameter'}{'parent'} = $tmp if ref $tmp;
+    } elsif (exists $type_def->{'parameter'} and not ref $type_def->{'parameter'}){
+        my $tmp = $self->get_type( $type_def->{'parameter'} );           $type_def->{'parameter'} = $tmp if ref $tmp;
+    }
+}
 sub add_type {                                 # .type - ~shortcut           --> ~errormsg
     my ($self, $type, $shortcut) = @_;
     return 'can not add to a closed type store' unless $self->{'open'};
     if (ref $type eq 'HASH'){
-        if (defined $type->{'parent'} and not ref $type->{'parent'}){
-            $type->{'parent'} = $self->get_type( my $tmp = $type->{'parent'} );
-            return "parent '$tmp' of type $type->{name} is unknown to this type store" unless ref $type->{'parent'};
-        } elsif (defined $type->{'parent'} and ref $type->{'parent'} eq 'ARRAY'){
-            $type->{'parent'} = $self->get_type( my @tmp = @{$type->{'parent'}} );
-            return "type '$tmp[0]' with parameter '$tmp[1]', parent of type $type->{name} is unknown to this type store" unless ref $type->{'parent'};
-        }
+        $self->substitude_type_names( $type );
         if (exists $type->{'parameter'} or ref $type->{'parent'} eq $ptclass){
-            if (ref $type->{'parameter'} eq 'HASH' and exists $type->{'parameter'}{'parent'} and not ref $type->{'parameter'}{'parent'}){
-                $type->{'parameter'}{'parent'} = $self->get_type( my $tmp = $type->{'parameter'}{'parent'} );
-                return "parameter parent type '$tmp' of type $type->{name} is unknown to this type store" unless ref $type->{'parameter'}{'parent'};
-            } elsif (exists $type->{'parameter'} and not ref $type->{'parameter'}){
-                $type->{'parameter'} = $self->get_type( my $tmp = $type->{'parameter'} );
-                return "parameter type '$tmp' of type $type->{name} is unknown to this type store" unless ref $type->{'parameter'};
-            }
-            $type = Kephra::Base::Data::Type::Parametric->new($type);
-        } else { $type = Kephra::Base::Data::Type::Basic->new($type)}
+                 $type = Kephra::Base::Data::Type::Parametric->new($type)
+        } else { $type = Kephra::Base::Data::Type::Basic->new($type) }
         return "type store can not create type from hash definition, because $type" unless ref $type;
     }
     return "type store can not add type, because $type is neither instance of $btclass or $ptclass" if ref $type ne $btclass and ref $type ne $ptclass;
@@ -181,6 +198,12 @@ sub resolve_shortcut  {                        # ~kind ~shortcut             -->
     ($kind = _key_from_kind_($kind)) or return;
     $self->{$kind.'_name_by_shortcut'}{$shortcut};
 }
+sub forbid_shortcuts  {                        # .tstore @~shortcut          --> ~errormsg
+    my ($self) = shift;
+    return 'can not remove from a closed type store' unless $self->{'open'};
+    my %sc = map {$_ => 1} @{$self->{'forbid_shortcut'}}, keys %{$self->{'basic_name_by_shortcut'}}, keys %{$self->{'param_name_by_shortcut'}};
+    for (@_){push @{$self->{'forbid_shortcut'}}, $_ unless exists $sc{$_}; $sc{$_}++ };
+}
 ################################################################################
 sub _validate_type_name_ {
     my $self = shift;
@@ -208,28 +231,6 @@ sub _get_type_def_ {
     return unless defined $type_name;
     if (defined $param_name) { $self->{'param_type'}{$type_name} if exists $self->{'param_type'}{$type_name} and exists $self->{'param_type'}{$type_name}{'object'}{$param_name} }
     else                     { $self->{'basic_type'}{$type_name}                                                          }
-}
-################################################################################
-sub list_type_names   {                        # - ~kind ~ptype              --> @~btype|@~ptype|@~param
-    my ($self, $kind, $type_name) = @_;
-    ($kind = _key_from_kind_($kind)) or return;
-    if (defined $type_name){
-        return unless exists $self->{'param_type'}{$type_name} and $kind eq 'param';
-        return sort keys %{ $self->{'param_type'}{$type_name}{'object'} };
-    }
-    sort keys %{$self->{$kind.'_type'}};
-}
-sub list_shortcuts    {                        #                             --> @~shortcut
-    my ($self, $kind) = @_;
-    ($kind = _key_from_kind_($kind)) or return;
-    sort keys( %{$self->{$kind.'_name_by_shortcut'}});
-}
-sub list_forbidden_shortcuts { @{$_[0]->{'forbid_shortcut'}} ? @{$_[0]->{'forbid_shortcut'}} : undef } # .tstore     --> @~shortcut
-sub forbid_shortcuts  {                        # .tstore @~shortcut          --> ~errormsg
-    my ($self) = shift;
-    return 'can not remove from a closed type store' unless $self->{'open'};
-    my %sc = map {$_ => 1} @{$self->{'forbid_shortcut'}}, keys %{$self->{'basic_name_by_shortcut'}}, keys %{$self->{'param_name_by_shortcut'}};
-    for (@_){push @{$self->{'forbid_shortcut'}}, $_ unless exists $sc{$_}; $sc{$_}++ };
 }
 ################################################################################
 sub check_basic_type {                     # .tstore ~type $val              -->  ~errormsg
