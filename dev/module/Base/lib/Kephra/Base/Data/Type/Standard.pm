@@ -5,10 +5,12 @@ use utf8;
 # definitions and store of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
-our $VERSION = 2.2;
+our $VERSION = 2.3;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
 use Kephra::Base::Data::Type::Store;
+
+our @type_class_names = qw/Kephra::Base::Data::Type::Basic Kephra::Base::Data::Type::Parametric/;
 
 our @basic_type_definitions = (
     {name => 'any',       help=> 'anything',             code=> '1',                                                default=> '' },
@@ -27,16 +29,16 @@ our @basic_type_definitions = (
     {name => 'str_uc',    help=> 'upper case string',    code=> 'uc $value eq $value',        parent=> 'str_ne',    default=> 'A'},
     {name => 'word',      help=> 'word character',       code=> '$value !~ /[^a-zA-Z0-9_]/',  parent=> 'str_ne',    default=> 'a'},
     {name => 'arg_name',  help=> 'argument name',        code=> '$value !~ /[^a-z0-9_]/',     parent=> 'str_ne',    default=> 'a'},
-    {name => 'type_name', help=> 'simple type name',     code=> 'Kephra::Base::Data::Type::Standard::get_store->is_type_known($value)',
-                                                                                              parent=> 'arg_name',  default=> 'any'},
+    {name => 'type_name', help=> 'simple type name',     code=> __PACKAGE__.'::get_store->is_type_known($value)',   parent=> 'arg_name', default=> 'any', },
+    {name => 'any_ref',   help=> 'reference of any sort',code=> q/ref $value/,                                      default=> [] }, 
     {name => 'scalar_ref',help=> 'array reference',      code=> q/ref $value eq 'SCALAR'/,                          default=> \1  },
     {name => 'array_ref', help=> 'array reference',      code=> q/ref $value eq 'ARRAY'/,                           default=> []   },
     {name => 'hash_ref',  help=> 'hash reference',       code=> q/ref $value eq 'HASH'/,                            default=> {}    },
     {name => 'code_ref',  help=> 'code reference',       code=> q/ref $value eq 'CODE'/,                            default=> sub {} },
-    {name => 'type',      help=> 'code reference',       code=> q/ref $value eq 'Kephra::Base::Data::Type::Basic'/, default=> Kephra::Base::Data::Type::Basic->new('t','test',3,undef,4) },
     {name => 'object',    help=> 'object reference',     code=> q/blessed($value)/,                                 default=> bless {} },
+    {name => 'type',      help=> 'type checker object',  code=> 'ref $value ~~ [@Kephra::Base::Data::Type::Standard::type_class_names]', 
+                                                                  default=> Kephra::Base::Data::Type::Basic->new('t','test',3,undef,4) },
 #   {name => 'kb_object', help=> 'kephra base object',   code=> q/blessed($value)/,                                 default=> bless {} },
-    {name => 'any_ref',   help=> 'reference of any sort',code=> q/ref $value/,                                      default=> [] }, 
     );
 
 our @parametric_type_definitions =  (

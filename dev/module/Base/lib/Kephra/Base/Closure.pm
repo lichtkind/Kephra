@@ -4,7 +4,7 @@ use warnings;
 # serializable closure
 
 package Kephra::Base::Closure;
-our $VERSION = 1.01;
+our $VERSION = 1.1;
 use Exporter 'import';
 our @EXPORT_OK = (qw/new_closure/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);

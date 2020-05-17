@@ -4,7 +4,7 @@ use warnings;
 # serializable data type object that compiles a coderef (type checker)
 
 package Kephra::Base::Data::Type::Basic;
-our $VERSION = 1.3;
+our $VERSION = 1.32;
 
 sub new                {} # ~name ~help ~code - .parent $default --> .btype | ~errormsg # optionally as %args # required: ~name & (.parent | ~help ~code $default)
 sub restate            {} # %state                               --> .btype | ~errormsg

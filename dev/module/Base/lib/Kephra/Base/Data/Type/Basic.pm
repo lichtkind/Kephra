@@ -1,5 +1,7 @@
 use v5.20;
 use warnings;
+use feature "switch";
+no warnings 'experimental::smartmatch';
 
 # serializable data type object that compiles help msg and check code to coderef (checker)
 # example      : {name => bool, help=> '0 or 1', code=> '$_[0] eq 0 or $_[0] eq 1', parent=> 'value',  default =>0}
@@ -7,7 +9,7 @@ use warnings;
 #                 coderef => eval{ sub{ return $_[0] 'failed not a reference' unless not ref $_[0]; ...; 0} } }
 
 package Kephra::Base::Data::Type::Basic;
-our $VERSION = 1.31;
+our $VERSION = 1.32;
 use Scalar::Util qw/blessed looks_like_number/;
 ################################################################################
 sub _unhash_arg_ {

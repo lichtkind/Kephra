@@ -1,12 +1,14 @@
 use v5.20;
 use warnings;
+use feature "switch";
+no warnings 'experimental::smartmatch';
 
 # data type depending second value (parameter) // example - valid index (type) of an actual array (parameter)
 # { name => 'index', help => 'valid index of array', parent => 'int_pos', code =>'return "value $value is out of range" if $value >= @$param', default => 0,
 #   parameter =>{name => 'ARRAY', help => 'array reference', code => 'ref $value eq "ARRAY"', default => []}    }   # type is required
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 1.3;
+our $VERSION = 1.31;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type::Basic;         my $btype = 'Kephra::Base::Data::Type::Basic';
 

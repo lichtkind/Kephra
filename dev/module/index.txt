@@ -17,13 +17,13 @@ our development model in more details: doc/CompleteProgramming.pod
                                              N = Not yet (planned)
 --------------------------------------------------------------------------------
    K::B::Package                      C         1.01   low level symbol manipulation
-   K::B::Data::Type::Basic            C         1.31   inheritable single value checker
-   K::B::Data::Type::Parametric       C         1.3    checks the relation of two values
+   K::B::Data::Type::Basic            C         1.32   inheritable single value checker
+   K::B::Data::Type::Parametric       C         1.31   checks the relation of two values
    K::B::Data::Type::Store            C         1.2    collection of type objects
-   K::B::Data::Type::Standard         CP        2.2    definition of standard types
-   K::B::Data::Type                   CP U B    0.1    manage type related symbols
-   K::B::Data                         CP        0.2    root of none OO data handling
-   K::B::Closure                      C         1.01   serializable closure (code and date)
+   K::B::Data::Type::Standard         C         2.3    definition of standard types
+   K::B::Data::Type                   C         0.5    manage type related symbols
+   K::B::Data                         C         0.2    root of none OO data handling
+   K::B::Closure                      C         1.1    serializable closure (code and date)
  - K::Base                            C         0.11   root package of self made language extensions
 --------------------------------------------------------------------------------
    K::B::C::Definition                     BI   0.1    serializable data set to build a KBOS class from
