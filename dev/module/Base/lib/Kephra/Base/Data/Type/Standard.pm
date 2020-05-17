@@ -2,19 +2,15 @@ use v5.20;
 use warnings;
 use utf8;
 
-# definitions of standard data type checker objects
+# definitions and store of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
 our $VERSION = 2.2;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
+use Kephra::Base::Data::Type::Store;
 
-our @forbidden_shortcuts = (qw/{ } ( ) < > -/, ",");
-our %basic_shortcuts = (   str => '~', bool => '?', num => '+', int => '#', pos_int => '=', #  ^ ' " ! . /  §;
-                          value => '$', array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', 
-                           type => '|', arg_name => ':',  object => '!');
-our %parametric_shortcuts = ( typed_array => '@', typed_hash => '%');
-our @basic_types = (
+our @basic_type_definitions = (
     {name => 'any',       help=> 'anything',             code=> '1',                                                default=> '' },
     {name => 'value',     help=> 'defined value',        code=> 'defined $value',                                   default=> '' },
     {name => 'no_ref',    help=> 'not a reference',      code=> 'not ref $value',             parent=> 'value',                  },
@@ -29,10 +25,10 @@ our @basic_types = (
     {name => 'str_ne',    help=> 'none empty string',    code=> '$value or ~$value',          parent=> 'no_ref',    default=> ' '},
     {name => 'str_lc',    help=> 'lower case string',    code=> 'lc $value eq $value',        parent=> 'str_ne',    default=> 'a'},
     {name => 'str_uc',    help=> 'upper case string',    code=> 'uc $value eq $value',        parent=> 'str_ne',    default=> 'A'},
-    {name => 'word',      help=> 'word character',       code=> '$value =~ /^\w+$/',          parent=> 'str_ne',    default=> 'a'},
-    {name => 'arg_name',  help=> 'argument name',        code=> 'lc $value eq $value',        parent=> 'word',      default=> 'a'},
-    {name => 'type_name', help=> 'simple type name',     code=> 'ref Kephra::Base::Data::Type::Standard::get($value)',                          
-                                                                                              parent=> 'arg_name',  default=> 'no_ref'},
+    {name => 'word',      help=> 'word character',       code=> '$value !~ /[^a-zA-Z0-9_]/',  parent=> 'str_ne',    default=> 'a'},
+    {name => 'arg_name',  help=> 'argument name',        code=> '$value !~ /[^a-z0-9_]/',     parent=> 'str_ne',    default=> 'a'},
+    {name => 'type_name', help=> 'simple type name',     code=> 'Kephra::Base::Data::Type::Standard::get_store->is_type_known($value)',
+                                                                                              parent=> 'arg_name',  default=> 'any'},
     {name => 'scalar_ref',help=> 'array reference',      code=> q/ref $value eq 'SCALAR'/,                          default=> \1  },
     {name => 'array_ref', help=> 'array reference',      code=> q/ref $value eq 'ARRAY'/,                           default=> []   },
     {name => 'hash_ref',  help=> 'hash reference',       code=> q/ref $value eq 'HASH'/,                            default=> {}    },
@@ -43,20 +39,39 @@ our @basic_types = (
     {name => 'any_ref',   help=> 'reference of any sort',code=> q/ref $value/,                                      default=> [] }, 
     );
 
-our @parametric_types =  ( # standard simple types - no package can delete them
-    {name => 'typed_ref', help=> 'reference of given type',  code=> 'return "value $value is not a $param reference" if ref $value ne $param',  parent=> 'value',     default=> [], 
-                                                                                                          parameter => {   name => 'refname',   parent=> 'str',       default=> 'ARRAY'}, },
+our @parametric_type_definitions =  (
     {name => 'index',     help=> 'valid index of array',     code=> 'return "value $value is out of range" if $value >= @$param',               parent=> 'int_pos',   default=>  0, 
                                                                                                           parameter => {   name => 'array',     parent=> 'array_ref', default=> [1]    }, },
-    {name =>'typed_array',help=> 'array with typed elements',code=> 'for my $i(0..$#$value){my $error = $param->check($value->[$i]); return "aray element $i $error" if $error}',
+    {name =>'typed_array',help=> 'array with typed elements',code=> 'for my $i(0..$#$value){my $error = $param->check($value->[$i]); return "array element $i $error" if $error}',
                                                                                                                                                 parent=> 'array_ref', default=> [1],
                                                                                                           parameter => {  name =>'element_type',parent=> 'type',                       }, },
+    {name =>'typed_array', help=> 'array with typed elements',                                            parameter => 'type_name',             parent=> 'array_ref',  default=> [1],
+     code => '$param = Kephra::Base::Data::Type::Standard::get_store->get_type($param);for my $i(0..$#$value){my $error = $param->check($value->[$i]); return "array element $i $error" if $error}' },
+    {name =>'typed_hash', help=> 'hash with typed values',   code=> 'for my $k(keys %$value){my $error = $param->check($value->{$k}); return "hash value of key $k $error" if $error}',
+                                                                                                                                                parent=> 'hash_ref',  default=> {''=>1},
+                                                                                                          parameter => {  name =>'element_type',parent=> 'type',                       },  },
+    {name =>'typed_hash', help=> 'hash with typed values',                                                parameter => 'type_name',             parent=> 'hash_ref',  default=> {''=>1},
+     code => '$param = Kephra::Base::Data::Type::Standard::get_store->get_type($param);for my $k(keys %$value){my $error = $param->check($value->{$k}); return "hash value of key $k $error" if $error}' },
+    {name => 'typed_ref', help=> 'reference of given type',  code=> 'return "value $value is not a $param reference" if ref $value ne $param',  parent=> 'value',     default=> [], 
+                                                                                                          parameter => {   name => 'ref_name',  parent=> 'str',       default=> 'ARRAY'}, },
 );
+our @forbidden_shortcuts = (qw/{ } ( ) < > -/, ",");
+our %basic_type_shortcut = ( str => '~', bool => '?', num => '+', int => '#', int_pos => '=', #  ^ ' " ! . /  §;
+                           value => '$', array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', 
+                            type => '|', arg_name => ':',  object => '!');
+our %parametric_type_shortcut = ( typed_array => '@', typed_hash => '%');
 
-sub init {
+
+
+my $store = Kephra::Base::Data::Type::Store->new(); 
+sub get_store { $store }                              #    -->  .tstore
+sub init_store {                                      #    -->  _          # void context
+    $store = Kephra::Base::Data::Type::Store->new();
+    $store->forbid_shortcuts(@forbidden_shortcuts);
+    $store->add_type( $_ ) for @basic_type_definitions, @parametric_type_definitions;
+    $store->add_shortcut( 'basic', $_, $basic_type_shortcut{$_} )   for keys %basic_type_shortcut;
+    $store->add_shortcut( 'param', $_, $parametric_type_shortcut{$_} ) for keys %parametric_type_shortcut;
+    $store->close();
 }
-my $standard_types = Kephra::Base::Data::Type::Store->new(''); 
-
-
 
 5;

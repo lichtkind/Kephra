@@ -8,7 +8,7 @@ no warnings 'experimental::smartmatch';
 #       multiple parametric types with same name and different parameters must have same owner and shortcut (basic type shortcuts have own name space)
 
 package Kephra::Base::Data::Type::Store;
-our $VERSION = 1.1;
+our $VERSION = 1.2;
 use Kephra::Base::Data::Type::Basic;             my $btclass = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;        my $ptclass = 'Kephra::Base::Data::Type::Parametric';
 ##############################################################################
@@ -67,7 +67,7 @@ sub list_shortcuts    {                        #                             -->
     ($kind = _key_from_kind_($kind)) or return;
     sort keys( %{$self->{$kind.'_name_by_shortcut'}});
 }
-sub list_forbidden_shortcuts { @{$_[0]->{'forbid_shortcut'}} ? @{$_[0]->{'forbid_shortcut'}} : undef } # .tstore     --> @~shortcut
+sub list_forbidden_shortcuts { @{$_[0]->{'forbid_shortcut'}} ? sort(@{$_[0]->{'forbid_shortcut'}}) : undef } # .tstore     --> @~shortcut
 ################################################################################
 sub substitude_type_names { # .tstore {~name ~help ~code - .parent|~parent $default %parameter}  --> ~errormsg
     my ($self, $type_def) = @_;

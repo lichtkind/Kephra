@@ -9,7 +9,7 @@ use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Ty
 use Kephra::Base::Data::Type::Store;       my $sclass  = 'Kephra::Base::Data::Type::Store';
 
 package TypeTester; 
-use Test::More tests => 250;
+use Test::More tests => 264;
 
 my $store = Kephra::Base::Data::Type::Store->new();
 is( ref $store, $sclass,                                                  'could create a closable type store object');
@@ -178,6 +178,7 @@ is( $store->add_type({name => 'array',  parent => 'array_ref', default => [1]}),
 $Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', parent => 'int_pos', 
                                 parameter => {name => 'array', parent => 'array_ref', default => [1]}};
 is( $store->add_type($Tindex_def),                            '',         'created and added parametric type "index of array" with stored parent and stored parameter parent');
+ok( $store->add_type($Tindex_def),                                        'can not add same parametric type twice');
 is( $store->add_shortcut('param', 'index', "'"),              '',         'added shortcut to parametric type "index of array"');
 is( $store->get_shortcut('param', 'index'),                  "'",         'got shortcut of parametric type "index" of "array"');
 is( $store->resolve_shortcut('param',"'"),               'index',         'resolved shortcut of parametric type "index" of "array"');
@@ -255,7 +256,11 @@ is( $old_store->check_param_type('index', 'hash', 'a', {a=>1}), '',       'param
 ok( $old_store->check_param_type('index', 'hash', 'b', {a=>1}),           'parametric type "index of hash" can be checked, correct negative');
 ok( $old_store->check_param_type('index', 'hash', [],  {a=>1}),           'parametric type "index of hash" can be checked, correct negative - value does not match evem parent type');
 ok( $old_store->check_param_type('index', 'hash', 'a', undef),            'parametric type "index of hash" can be checked, correct negative - bad parameter');
-
+is( $old_store->is_open(),                                       1,       'copied store is open');
+$old_store->close();
+is( $old_store->is_open(),                                       0,       'copied store was just closed');
+is( $old_store->is_open(),                                       0,       'copied store was just closed');
+is (Kephra::Base::Data::Type::Store->restate($old_store->state)->is_open(), 0, 'copy stays closed');
 
 $Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', parent => 'int_pos', parameter => 'array'};
 is( ref $store->add_type($Tindex_def, '@'),                   '',         'add parametric type "index of array"');
@@ -328,5 +333,29 @@ is( $ostore->add_type({name => 'int',  help => 'integer', code => 'int $value ==
 is( $ostore->is_type_known('int'),                             1,         'basic type "int" is known');
 ok( $ostore->add_shortcut('int', '-'),                                    'could not add forbidden shortcut to basic type "int"');
 is( $ostore->get_shortcut('basic', 'int'),                 undef,         'basic type "int" has still no shortcut');
+
+$store = Kephra::Base::Data::Type::Store->new();
+is( $store->add_type({name => 'value',  help => 'defined value', code => 'defined $value', default => '' }), '', 'added basic type "value" to new store');
+my $Tint = {name => 'int', help => 'integer', code=> 'int($value) eq $value', default => 0, parent => 'value'};
+$store->substitude_type_names($Tint);
+is( $store->add_type($Tint),                                  '',         'subsitution of basic type name "value" was successful');
+is( $store->add_type({name => 'str',      help => 'string of characters', code => 'not ref $value',        parent => 'value' }), '', 'added basic type "str" to new store');
+is( $store->add_type({name => 'array_ref', help => 'array reference',  code => 'ref $value eq "ARRAY"', parent => 'value' , default => [1]}), '', 'added basic type "array" to new store');
+$Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', parent => 'int', 
+                                parameter => {name => 'array', parent => 'array_ref', default => [1]}};
+$store->substitude_type_names($Tindex_def);
+is( $store->add_type($Tindex_def),                            '',         'subsitution of parametric type "index of array" was successful');
+is( $store->is_type_known('index', 'array'),                   1,         'parametric type "index of array" was added');
+
+# test mthod substitude_type_names
+my $Tpos_index_def = {name => 'index_pos', help => 'index of array', code =>'return "value $value is negative" if $value < 0', parent => ['index','array'],};
+$store->substitude_type_names($Tpos_index_def);
+is( $store->add_type( $Tpos_index_def ),                      '',         'subsitution of parametric type "positive index of array" parent and parameter parent name was successful');
+is( $store->is_type_known('index_pos', 'array'),               1,         'parametric type "positive index of array" was added');
+$Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', parent => 'int', parameter => 'array_ref'};
+$store->substitude_type_names($Tindex_def);
+$store->remove_type('index', 'array');
+is( $store->add_type( $Tindex_def ),                          '',         'subsitution of parametric type "positive index of array" parent and parameter name was successful');
+
 
 exit 0;
