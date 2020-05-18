@@ -4,10 +4,11 @@ use warnings;
 # serializable data type object that compiles a coderef (type checker)
 
 package Kephra::Base::Data::Type::Basic;
-our $VERSION = 1.32;
+our $VERSION = 1.4;
 
-sub new                {} # ~name ~help ~code - .parent $default --> .btype | ~errormsg # optionally as %args # required: ~name & (.parent | ~help ~code $default)
-sub restate            {} # %state                               --> .btype | ~errormsg
+                          # %typedef = { ~name ~help ~code - .parent|%typedef $default }
+sub new                {} # ~name ~help ~code - .parent|%typedef $default --> .btype | ~errormsg  # required: ~name & (.parent | ~help ~code $default)
+sub restate            {} # %state                                        --> .btype | ~errormsg
 sub state              {} # .btype                 --> %state
 sub assemble_code      {} # .btype                 --> ~checkcode
 

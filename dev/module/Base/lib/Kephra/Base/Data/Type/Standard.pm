@@ -63,8 +63,6 @@ our %basic_type_shortcut = ( str => '~', bool => '?', num => '+', int => '#', in
                             type => '|', arg_name => ':',  object => '!');
 our %parametric_type_shortcut = ( typed_array => '@', typed_hash => '%');
 
-
-
 my $store = Kephra::Base::Data::Type::Store->new(); 
 sub get_store { $store }                              #    -->  .tstore
 sub init_store {                                      #    -->  _          # void context

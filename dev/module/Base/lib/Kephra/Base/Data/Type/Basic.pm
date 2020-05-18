@@ -9,7 +9,7 @@ no warnings 'experimental::smartmatch';
 #                 coderef => eval{ sub{ return $_[0] 'failed not a reference' unless not ref $_[0]; ...; 0} } }
 
 package Kephra::Base::Data::Type::Basic;
-our $VERSION = 1.32;
+our $VERSION = 1.4;
 use Scalar::Util qw/blessed looks_like_number/;
 ################################################################################
 sub _unhash_arg_ {
@@ -21,11 +21,13 @@ sub new {        # ~name ~help ~code - .parent $default --> .type | ~errormsg
     $help //= '';
     $code //= '';
     return "got no type 'name' as first or named argument to create basic type object" unless defined $name and $name;
-    return "'parent' of basic type '$name' has to be instance of ".__PACKAGE__ if defined $parent and ref $parent ne __PACKAGE__;
+    return "'parent' of basic type '$name' has to be a hash definition or an instance of ".__PACKAGE__ if defined $parent and ref $parent ne __PACKAGE__ and ref $parent ne 'HASH';
     return "basic type '$name' definition misses 'help' text and 'code' or a 'parent' type object" if $code xor $help or (not $code and not defined $parent);
     my $checks = [];
     push @$checks, $help, $code if $code;
     if (defined $parent){
+        $parent = Kephra::Base::Data::Type::Basic->new($parent) if ref $parent eq 'HASH';
+        return "can not create type $name, because definition of parent has issue: $parent" unless ref $parent;
         unshift @$checks, @{$parent->get_check_pairs};
         $default //= $parent->get_default_value;
     }

@@ -17,7 +17,7 @@ our development model in more details: doc/CompleteProgramming.pod
                                              N = Not yet (planned)
 --------------------------------------------------------------------------------
    K::B::Package                      C         1.01   low level symbol manipulation
-   K::B::Data::Type::Basic            C         1.32   inheritable single value checker
+   K::B::Data::Type::Basic            C         1.4    inheritable single value checker
    K::B::Data::Type::Parametric       C         1.31   checks the relation of two values
    K::B::Data::Type::Store            C         1.2    collection of type objects
    K::B::Data::Type::Standard         C         2.3    definition of standard types
