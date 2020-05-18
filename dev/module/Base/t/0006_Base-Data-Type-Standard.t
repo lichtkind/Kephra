@@ -11,6 +11,7 @@ use Kephra::Base::Data::Type::Standard;
 my (%pos_val, %pos_param_val, %neg_val, %neg_param_val, $tcc);
 
 BEGIN {
+    Kephra::Base::Data::Type::Standard::init_store();
     %pos_val = (value => [1, 'str', [], sub{}],
                 no_ref => [0,1,'--'],
                 bool => [0,1],
@@ -53,10 +54,12 @@ BEGIN {
                 object => [[], {}, 4, '', undef],
 
     );
-    %pos_param_val = (index     => {array  =>  [ [0,[1,2]], [2,[1,2,3]],    ]},
-                      typed_ref => {ref_name => [ [[],'ARRAY'], [{},'HASH'], ]},
-                    typed_array => {type_name => [ [[2,4,-7,0],'int'], [['-', '', 'was'],'str'], ]},
-                     typed_hash => {type_name => [ [{1=>2, 7=>0, 3=>-1},'int'], [{1=>' ', 7=>'was', 3=>''},'str'], ]},
+    %pos_param_val = (index     => {array  =>  [ [0,[1,2]], [2,[1,2,3]],    ],                                                                 },
+                      typed_ref => {ref_name => [ [[],'ARRAY'], [{},'HASH'], ],                                                                },
+                    typed_array => {type_name =>   [ [[2,4,-7,0],'int'], [['-', '', 'was'],'str'], ],  
+                                    element_type =>[ [[2,4,-7,0], Kephra::Base::Data::Type::Standard::store->get_type('int')], ],              },
+                    typed_hash =>  {type_name => [ [{1=>2, 7=>0, 3=>-1},'int'], [{1=>' ', 7=>'was', 3=>''},'str'], ],                     
+                                    element_type => [ [{1=>2, 7=>0, 3=>-1}, Kephra::Base::Data::Type::Standard::store->get_type('int')], ],    },
     );
     %neg_param_val = (index => {array =>   [ [-1,[1,2]], [2,[]]  ]},
                       typed_ref => {ref_name => [ [{} ,'ARRAY'], [undef, 'HASH'], ]},
@@ -76,8 +79,7 @@ use Test::More tests =>  3 + $tcc +
 ;
 
 
-Kephra::Base::Data::Type::Standard::init_store();
-my $store = Kephra::Base::Data::Type::Standard::get_store();
+my $store = Kephra::Base::Data::Type::Standard::store();
 
 is( ref $store,        'Kephra::Base::Data::Type::Store',    'got the official store of the standard types');
 is( $store->is_open,                                   0,    'the store is closed');

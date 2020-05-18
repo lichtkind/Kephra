@@ -14,7 +14,7 @@ our @forbidden_shortcuts;
 our %basic_type_shortcut;
 our %parametric_type_shortcut;
 
-sub init      {}   #    -->  _          # void context
-sub get_store {}   #    -->  .tstore
+sub init_store   {}   #    -->  _          # void context
+sub store        {}   #    -->  .tstore
 
-5;
+6;

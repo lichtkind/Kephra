@@ -69,25 +69,10 @@ sub list_shortcuts    {                        #                             -->
 }
 sub list_forbidden_shortcuts { @{$_[0]->{'forbid_shortcut'}} ? sort(@{$_[0]->{'forbid_shortcut'}}) : undef } # .tstore     --> @~shortcut
 ################################################################################
-sub substitude_type_names { # .tstore {~name ~help ~code - .parent|~parent $default %parameter}  --> ~errormsg
-    my ($self, $type_def) = @_;
-    return "need a type definition (hash ref) as argument" unless ref $type_def eq 'HASH';
-    if (defined $type_def->{'parent'} and not ref $type_def->{'parent'}){
-        my $tmp = $self->get_type( $type_def->{'parent'} );              $type_def->{'parent'} = $tmp if ref $tmp;
-    } elsif (defined $type_def->{'parent'} and ref $type_def->{'parent'} eq 'ARRAY'){
-        my $tmp = $self->get_type( @{$type_def->{'parent'}} );           $type_def->{'parent'} = $tmp if ref $tmp;
-    }
-    if (ref $type_def->{'parameter'} eq 'HASH' and exists $type_def->{'parameter'}{'parent'} and not ref $type_def->{'parameter'}{'parent'}){
-        my $tmp = $self->get_type($type_def->{'parameter'}{'parent'});   $type_def->{'parameter'}{'parent'} = $tmp if ref $tmp;
-    } elsif (exists $type_def->{'parameter'} and not ref $type_def->{'parameter'}){
-        my $tmp = $self->get_type( $type_def->{'parameter'} );           $type_def->{'parameter'} = $tmp if ref $tmp;
-    }
-}
 sub add_type {                                 # .type - ~shortcut           --> ~errormsg
     my ($self, $type, $shortcut) = @_;
     return 'can not add to a closed type store' unless $self->{'open'};
     if (ref $type eq 'HASH'){
-        $self->substitude_type_names( $type );
         if (exists $type->{'parameter'} or ref $type->{'parent'} eq $ptclass){
                  $type = Kephra::Base::Data::Type::Parametric->new($type)
         } else { $type = Kephra::Base::Data::Type::Basic->new($type) }

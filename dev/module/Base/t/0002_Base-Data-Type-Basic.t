@@ -4,7 +4,7 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Test::More tests => 100;
+use Test::More tests => 120;
 
 use Kephra::Base::Data::Type::Basic;
 sub create_type { Kephra::Base::Data::Type::Basic->new(@_) }
@@ -126,6 +126,33 @@ is( $checks->[0], $vh,               'first check pair key is inherited help str
 is( $checks->[1], $vc,               'first pair pair value is inherited code string');
 is( $checks->[2], '0 or 1',          'second check pair key is help string');
 is( $checks->[3], $bc,               'second check pair value is code string');
+
+
+$Tbool = create_type({name => 'bool', help => '0 or 1', code => '$value eq 0 or $value eq 1',default => 0, 
+                                      parent => {name => 'value', help => $vh, code => $vc, default => ''}});
+is( ref $Tbool, $pkg,                'created type "bool", with hash definition of parent type "value" in place');
+is( $Tbool->get_name, 'bool',        'got attribute "name" from getter of type bool');
+is( $Tbool->get_default_value, 0,    'got attribute "default" value from getter');
+is( $Tbool->check(1), '',            'check method of type "bool" accepts correctly 1');
+ok( $Tbool->check([]),               'check method of type "bool" denies with error correctly value ARRAY ref');
+ok( $Tbool->check(5),                'check method of type "bool" denies with error correctly value 5');
+ok( $Tbool->check('--'),             'check method of type "bool" denies with error correctly string value "--"');
+$checks = $Tbool->get_check_pairs;
+is( ref $checks, 'ARRAY',            'check pairs are stored in an ARRAY');
+is( @$checks, 4,                     'type bool has two check pair ');
+is( $checks->[0], $vh,               'first check pair key is inherited help string');
+is( $checks->[1], $vc,               'first pair pair value is inherited code string');
+is( $checks->[2], '0 or 1',          'second check pair key is help string');
+is( $checks->[3], $bc,               'second check pair value is code string');
+
+$Tbool = create_type('bool', '0 or 1', '$value eq 0 or $value eq 1', {name => 'value', help => $vh, code => $vc, default => ''},0);
+is( ref $Tbool, $pkg,                'created type "bool", with positional definition of parent type "value" in place');
+is( $Tbool->check(1), '',            'check method of type "bool" accepts correctly 1');
+ok( $Tbool->check([]),               'check method of type "bool" denies with error correctly value ARRAY ref');
+ok( $Tbool->check(5),                'check method of type "bool" denies with error correctly value 5');
+ok( $Tbool->check('--'),             'check method of type "bool" denies with error correctly string value "--"');
+is( $checks->[0], $vh,               'first check pair key is inherited help string');
+is( $checks->[1], $vc,               'first pair pair value is inherited code string');
 
 
 ok( not (ref create_type()),                        'can not create type without any argument');

@@ -15,4 +15,4 @@ use Kephra::Base::Closure qw/new_closure/;
 
 sub new_counter { new_closure('$state++', 0) }
 
-9;
+10;

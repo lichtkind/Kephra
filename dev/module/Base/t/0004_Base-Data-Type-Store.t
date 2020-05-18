@@ -9,7 +9,7 @@ use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Ty
 use Kephra::Base::Data::Type::Store;       my $sclass  = 'Kephra::Base::Data::Type::Store';
 
 package TypeTester; 
-use Test::More tests => 264;
+use Test::More tests => 255;
 
 my $store = Kephra::Base::Data::Type::Store->new();
 is( ref $store, $sclass,                                                  'could create a closable type store object');
@@ -88,9 +88,10 @@ is( @list,                                                     1,         'can l
 is( $list[0],                                            'no_ref',         'new basic type "value" shows up in list');
 is( $store->check_basic_type('no_ref', 'a'),                  '',         'type "no_ref" can be checked, correct positive');
 ok( $store->check_basic_type('no_ref', []),                               'type "no_ref" can be checked, correct negative');
-is( $store->add_type({name => 'int', help => 'integer', code=> 'int($value) eq $value', default => 0, parent => 'no_ref'},'#'), '', 'could create and add basic type with stored parent and shortcut');
+is( $store->add_type({name => 'int', help => 'integer', code=> 'int($value) eq $value', default => 0, parent => $store->get_type('no_ref')},'#'),
+                                                              '',         'could create and add basic type with stored parent and shortcut');
 is( $store->is_type_known('int'),                              1,         'type "int" is known after creation and addition');
-is( ref $store->get_type('int'),                      $bclass,         'got basic type "int" object by getter');
+is( ref $store->get_type('int'),                         $bclass,         'got basic type "int" object by getter');
 is( $store->check_basic_type('int', '-10'),                   '',         'type "int" can be checked, correct positive');
 ok( $store->check_basic_type('int', 1.1),                                 'type "int" can be checked, correct negative');
 is( $store->get_shortcut('no_ref','int'),                  undef,         'got shortcut of basic type "int"');
@@ -103,7 +104,8 @@ is( $list[1],                                           'no_ref',         'new b
 @list = $store->list_shortcuts('basic');
 is( @list,                                                     1,         'can list now one basic shortcut');
 is( $list[0],                                                '#',         'new shortcut of basic type "int" shows up in list');
-is( $store->add_type({name => 'num', help => 'number', code=> 'looks_like_number($value)', default => 0, parent => 'no_ref'}), '', 'could creade and add basic type with stored parent and shortcut');
+is( $store->add_type({name => 'num', help => 'number', code=> 'looks_like_number($value)', default => 0, parent => $store->get_type('no_ref')}),
+                                                              '',         'creaded and added basic type with stored parent and shortcut');
 is( $store->add_shortcut('basic','num','+'),                  '',         'added shortcut to already known basic type "num"');
 is( $store->get_shortcut('basic','num'),                     '+',         'got shortcut of basic type "num"');
 is( $store->resolve_shortcut('basic','+'),                 'num',         'resolved shortcut of basic type "num"');
@@ -141,7 +143,8 @@ is( $store->list_shortcuts('basic'),                       undef,         'no mo
 is( @list,                                                     1,         'can list only one basic type name');
 is( $list[0],                                              'int',         'new basic type "int" shows up in list');
 
-my $Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', default => 0, parent => 'int', 
+
+my $Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', default => 0, parent => $store->get_type('int'), 
                   parameter => {name => 'array', help => 'array reference', code => 'ref $value eq "ARRAY"', default => [1]}};
 is( $store->add_type($Tindex_def, '^'),                       '',         'created and added parametric type with stored parent and shortcut');
 is( ref $store->get_type('index','array'),               $pclass,         'got parametric type "index" of "array" object by getter');
@@ -163,7 +166,7 @@ is( $list[0],                                            'array',         'new b
 @list = $store->list_shortcuts('param');
 is( @list,                                                     1,         'one parametric shortcut is in store');
 is( $list[0],                                                '^',         'it is the shortcut of parametric type "index of array"');
-is( $store->add_type({name => 'int_pos', help => 'positive', code=> '$value >= 0', parent => 'int'}), '', 'crated basic type "pos_int"');
+is( $store->add_type({name => 'int_pos', help => 'positive', code=> '$value >= 0', parent => $store->get_type('int')}), '', 'crated basic type "pos_int"');
 is( ref $store->remove_type('int'),                      $bclass,         'removed basic type "int", parent of index');
 is( $store->check_param_type('index', 'array', 2, [1,2,3]),   '',         'type "index of array" can be checked, correct positive');
 ok( $store->check_param_type('index', 'array', 3, [1,2,3]),               'type "value" can be checked, correct negative');
@@ -172,11 +175,11 @@ is( $store->list_type_names('param'),                      undef,         'no pa
 is( $store->list_type_names('param','index'),              undef,         'no parameters of deleted type can be listed');
 is( $store->list_shortcuts('param'),                       undef,         'no parametric shortcut can be listed');
 is( $store->add_type({name => 'array_ref', help => 'array reference', code => 'ref $value eq "ARRAY"', default => []}), '', 'crated basic type "array_ref"');
-is( $store->add_type({name => 'array',  parent => 'array_ref', default => [1]}), '', 'crated basic type "array"');
+is( $store->add_type({name => 'array',  parent => $store->get_type('array_ref'), default => [1]}), '', 'crated basic type "array"');
 
 
-$Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', parent => 'int_pos', 
-                                parameter => {name => 'array', parent => 'array_ref', default => [1]}};
+$Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', parent => $store->get_type('int_pos'), 
+                                parameter => {name => 'array', parent => $store->get_type('array_ref'), default => [1]}};
 is( $store->add_type($Tindex_def),                            '',         'created and added parametric type "index of array" with stored parent and stored parameter parent');
 ok( $store->add_type($Tindex_def),                                        'can not add same parametric type twice');
 is( $store->add_shortcut('param', 'index', "'"),              '',         'added shortcut to parametric type "index of array"');
@@ -198,12 +201,16 @@ is( $store->list_shortcuts('param'),                       undef,         'no mo
 is( $store->list_shortcuts('basic'),                       undef,         'no basic type shortcut can be listed');
 is( $store->check_param_type('index', 'array', 2, [1,2,3]),   '',         'type "index of array" can be checked, correct positive');
 is( ref $store->remove_type('index', 'array'),           $pclass,         'removed parametric type "index of array"');
-$Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', parent => 'int_pos', parameter => 'array'};
+
+
+$Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', 
+                                parent => $store->get_type('int_pos'), parameter => $store->get_type('array')};
 is( $store->add_type($Tindex_def, ':'),                       '',         'created and added parametric type "index of array" with stored parent and parameter');
 is( $store->check_param_type('index', 'array', 2, [1,2,3]),   '',         'type "index of array" can be checked, correct positive');
 is( $store->add_type({name => 'hash', help => 'hash reference', code => 'ref $value eq "HASH"', default => { '' => 1}}), '', 'crated basic type "hash"');
 is( $store->add_type({name => 'str',  help => 'string', code => 'defined $value and not ref $value', default => '' }), '', 'crated basic type "str"');
-$Tindex_def = {name => 'index', help => 'index of hash', code =>'return "key $value does not exists" if not exists $param->{$value}', parent => 'str', parameter => 'hash'};
+$Tindex_def = {name => 'index', help => 'index of hash', code =>'return "key $value does not exists" if not exists $param->{$value}',
+                                parent => $store->get_type('str'), parameter => $store->get_type('hash')};
 is( $store->add_type($Tindex_def),                            '',         'created and added parametric type "index of hash" with stored parent and parameter');
 @list = $store->list_type_names('param');
 is( @list,                                                     1,         'can list one parametric type');
@@ -262,9 +269,11 @@ is( $old_store->is_open(),                                       0,       'copie
 is( $old_store->is_open(),                                       0,       'copied store was just closed');
 is (Kephra::Base::Data::Type::Store->restate($old_store->state)->is_open(), 0, 'copy stays closed');
 
-$Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', parent => 'int_pos', parameter => 'array'};
+$Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', 
+                                parent => $store->get_type('int_pos'), parameter => $store->get_type('array')};
 is( ref $store->add_type($Tindex_def, '@'),                   '',         'add parametric type "index of array"');
-$Tindex_def = {name => 'index', help => 'index of hash', code =>'return "key $value does not exists" if not exists $param->{$value}', parent => 'str', parameter => 'hash'};
+$Tindex_def = {name => 'index', help => 'index of hash', code =>'return "key $value does not exists" if not exists $param->{$value}',
+                                parent => $store->get_type('str'), parameter => $store->get_type('hash')};
 is( $store->is_open(),                                         1,         'store is open');
 is( $store->close(),                                           1,         'closing store');
 is( $store->is_open(),                                         0,         'store is closed');
@@ -292,7 +301,8 @@ is( $ostore->is_open(),                                   'open',         'store
 is( $ostore->add_type({name => 'any',  help => 'anything', code => '1', default => 1 }), '', 'added basic type "str" to open store');
 is( $ostore->add_type({name => 'str',  help => 'string',   code => 'defined $value and not ref $value', default => '' }), '', 'added basic type "str" to open store');
 ok( $ostore->add_type({name => 'str',  help => 'string',   code => 'defined $value and not ref $value', default => '' }),  'can not add same basic type twice');
-is( $ostore->add_type({name => 'ref',  help => 'reference',code => 'ref $value eq $param', default => '', parent => 'any', parameter => {name => 'name', parent => 'str'} }), '', 'added parametric type "ref" to open store');
+is( $ostore->add_type({name => 'ref',  help => 'reference',code => 'ref $value eq $param', default => '', parent => $ostore->get_type('any'), parameter => {name => 'name', parent => $ostore->get_type('str')} }),
+                                                              '',         'added parametric type "ref" to open store');
 is( $ostore->is_type_known('str'),                             1,         'basic type "str" is now known');
 is( $ostore->is_type_known('ref', 'name'),                     1,         'parametric type "ref of name" is now known');
 is( $ostore->get_shortcut('basic','str'),                  undef,         'basic type "str" has still no shortcut');
@@ -328,34 +338,10 @@ is( $ostore->forbid_shortcuts(qw/-/),                         '',         'forbi
 @list = $ostore->list_forbidden_shortcuts();
 is( @list,                                                     3,         'now 3 forbidden shortcuts listed');
 ok( $ostore->add_type({name => 'int',  help => 'integer', code => 'int $value == $value', default => 0 }, '-'), 'could not add basic type "int" due forbidden shortcut');
-is( $store->is_type_known('int'),                              0,         'basic type "int" is not known yet');
+is( $ostore->is_type_known('int'),                              0,         'basic type "int" is not known yet');
 is( $ostore->add_type({name => 'int',  help => 'integer', code => 'int $value == $value', default => 0 }),'',   'could add basic type "int" without forbidden shortcut');
 is( $ostore->is_type_known('int'),                             1,         'basic type "int" is known');
 ok( $ostore->add_shortcut('int', '-'),                                    'could not add forbidden shortcut to basic type "int"');
 is( $ostore->get_shortcut('basic', 'int'),                 undef,         'basic type "int" has still no shortcut');
-
-$store = Kephra::Base::Data::Type::Store->new();
-is( $store->add_type({name => 'value',  help => 'defined value', code => 'defined $value', default => '' }), '', 'added basic type "value" to new store');
-my $Tint = {name => 'int', help => 'integer', code=> 'int($value) eq $value', default => 0, parent => 'value'};
-$store->substitude_type_names($Tint);
-is( $store->add_type($Tint),                                  '',         'subsitution of basic type name "value" was successful');
-is( $store->add_type({name => 'str',      help => 'string of characters', code => 'not ref $value',        parent => 'value' }), '', 'added basic type "str" to new store');
-is( $store->add_type({name => 'array_ref', help => 'array reference',  code => 'ref $value eq "ARRAY"', parent => 'value' , default => [1]}), '', 'added basic type "array" to new store');
-$Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', parent => 'int', 
-                                parameter => {name => 'array', parent => 'array_ref', default => [1]}};
-$store->substitude_type_names($Tindex_def);
-is( $store->add_type($Tindex_def),                            '',         'subsitution of parametric type "index of array" was successful');
-is( $store->is_type_known('index', 'array'),                   1,         'parametric type "index of array" was added');
-
-# test mthod substitude_type_names
-my $Tpos_index_def = {name => 'index_pos', help => 'index of array', code =>'return "value $value is negative" if $value < 0', parent => ['index','array'],};
-$store->substitude_type_names($Tpos_index_def);
-is( $store->add_type( $Tpos_index_def ),                      '',         'subsitution of parametric type "positive index of array" parent and parameter parent name was successful');
-is( $store->is_type_known('index_pos', 'array'),               1,         'parametric type "positive index of array" was added');
-$Tindex_def = {name => 'index', help => 'index of array', code =>'return "value $value is out of range" if $value >= @$param', parent => 'int', parameter => 'array_ref'};
-$store->substitude_type_names($Tindex_def);
-$store->remove_type('index', 'array');
-is( $store->add_type( $Tindex_def ),                          '',         'subsitution of parametric type "positive index of array" parent and parameter name was successful');
-
 
 exit 0;

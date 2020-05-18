@@ -19,9 +19,7 @@ sub close                    {} # .tstore                            --> ?
 
 sub list_type_names          {} # .tstore - ~kind ~ptype             --> @~btype|@~ptype|@~param
 sub list_shortcuts           {} # .tstore - ~kind                    --> @~shortcut
-sub list_forbidden_shortcuts {} #.tstore                             --> @~shortcut
-                                #         { = %typedef                                  %p = ~btype|.btype|%btype_def
-sub substitude_type_names    {} # .tstore {~name ~help ~code - .parent|~parent $default %parameter}  --> _   _          # void context
+sub list_forbidden_shortcuts {} # .tstore                            --> @~shortcut
 
 sub add_type                 {} # .tstore .type|%typedef - ~shortcut --> ~errormsg
 sub remove_type              {} # .tstore ~type - ~param             --> .type|~errormsg
