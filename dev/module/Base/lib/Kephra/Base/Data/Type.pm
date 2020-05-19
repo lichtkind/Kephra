@@ -16,8 +16,7 @@ our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 ################################################################################
 
-Kephra::Base::Data::Type::Standard::init_store();
-my $standard_types = Kephra::Base::Data::Type::Standard::get_store();
+my $standard_types = Kephra::Base::Data::Type::Standard::init_store();
 my $shared_types = Kephra::Base::Data::Type::Store->new(''); 
 sub standard    { $standard_types }
 sub shared      { $shared_types }
@@ -33,13 +32,7 @@ sub is_type_known {
 ################################################################################
 sub create      { &create_type }
 sub create_type {
-    my ($type_def) = @_;
-    return "need a type definition (hash ref) as argument" unless ref $type_def eq 'HASH';
-    Kephra::Base::Data::Type::Util::substitude_type_names($type_def, $standard_types);
-    (exists $type_def->{'parameter'} or ref $type_def->{'parent'} eq 'Kephra::Base::Data::Type::Parametric')
-        ? Kephra::Base::Data::Type::Parametric->new($type_def)
-        : Kephra::Base::Data::Type::Basic->new($type_def);
-}
+    Kephra::Base::Data::Type::Util::create_type($_[0], $standard_types) }
 
 
 sub check      { &check_type }

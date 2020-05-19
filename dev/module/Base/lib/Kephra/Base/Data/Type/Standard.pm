@@ -5,14 +5,11 @@ use utf8;
 # definitions and store of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
-our $VERSION = 2.3;
+our $VERSION = 2.4;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
 use Kephra::Base::Data::Type::Store;
 use Kephra::Base::Data::Type::Util;
-
-our @type_class_names = qw/Kephra::Base::Data::Type::Basic
-                           Kephra::Base::Data::Type::Parametric/;
 
 our @basic_type_definitions = (
     {name => 'any',       help=> 'anything',             code=> '1',                                                  default=> '' },
@@ -38,7 +35,7 @@ our @basic_type_definitions = (
     {name => 'hash_ref',  help=> 'hash reference',       code=> q/ref $value eq 'HASH'/,                              default=> {}    },
     {name => 'code_ref',  help=> 'code reference',       code=> q/ref $value eq 'CODE'/,                              default=> sub {} },
     {name => 'object',    help=> 'object reference',     code=> q/blessed($value)/,                                   default=> bless {} },
-    {name => 'type',      help=> 'type checker object',  code=> 'ref $value ~~ [@Kephra::Base::Data::Type::Standard::type_class_names]', 
+    {name => 'type',      help=> 'type checker object',  code=> 'ref $value ~~ [@Kephra::Base::Data::Type::Util::type_class_names]', 
                                                                       default=> Kephra::Base::Data::Type::Basic->new('t','test',3,undef,4) },
 #   {name => 'kb_object', help=> 'kephra base object',   code=> q/blessed($value)/,                                 default=> bless {} },
     );
@@ -66,8 +63,9 @@ our %basic_type_shortcut = ( str => '~', bool => '?', num => '+', int => '#', in
 our %parametric_type_shortcut = ( typed_array => '@', typed_hash => '%');
 
 my $store = Kephra::Base::Data::Type::Store->new(); 
-sub store { $store }                              #    -->  .tstore
-sub init_store {                                      #    -->  _          # void context
+sub store      {$store}                                      #    -->  .tstore
+sub init_store {                                             #    -->  .tstore
+    return $store unless $store->is_open();
     $store = Kephra::Base::Data::Type::Store->new();
     $store->forbid_shortcuts(@forbidden_shortcuts);
     for (@basic_type_definitions, @parametric_type_definitions){
@@ -77,6 +75,7 @@ sub init_store {                                      #    -->  _          # voi
     $store->add_shortcut( 'basic', $_, $basic_type_shortcut{$_} )   for keys %basic_type_shortcut;
     $store->add_shortcut( 'param', $_, $parametric_type_shortcut{$_} ) for keys %parametric_type_shortcut;
     $store->close();
+    $store;
 }
 
 6;

@@ -58,7 +58,7 @@ sub state {
 }
 ################################################################################
 sub get_code   { $_[0]->{'code'} }
-sub get_type   { (defined $_[0]->{'std_type'}) ? Kephra::Base::Data::Type::standard->get_type($_[0]->{'std_type'}) : $_[0]->{'type'} }
+sub get_type   { (defined $_[0]->{'std_type'}) ? Kephra::Base::Data::Type::Standard::store->get_type($_[0]->{'std_type'}) : $_[0]->{'type'} }
 sub get_state  { ${$_[0]->{'state'}} }
 sub set_state  {
     my $error = (defined $_[0]->{'type'})     ? $_[0]->{'type'}->check($_[1]) :
