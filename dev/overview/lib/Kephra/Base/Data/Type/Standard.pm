@@ -9,9 +9,9 @@ use Kephra::Base::Data::Type::Basic;
 
 our @basic_type_definitions;
 our @parametric_type_definitions;
-our @forbidden_shortcuts;
 our %basic_type_shortcut;
 our %parametric_type_shortcut;
+our @forbidden_shortcuts;
 
 sub init_store        {}   #    -->  .tstore
 sub store             {}   #    -->  .tstore

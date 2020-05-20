@@ -1,16 +1,16 @@
 use v5.20;
 use warnings;
+use feature "switch";
+no warnings 'experimental::smartmatch';
 
 # data type depending second value (parameter) // example - valid index (type) of an actual array (parameter)
-# { name => 'index', help => 'valid index of array', parent => 'int_pos', code =>'return "value $value is out of range" if $value >= @$param', 
-#   parameter =>{name => 'array reference', type => 'ARRAY', default => []}, default => 0    }   # type is required
-# plans: inheritance?
+# { name => 'index', help => 'valid index of array', parent => 'int_pos', code =>'return "value $value is out of range" if $value >= @$param', default => 0,
+#   parameter =>{name => 'ARRAY', help => 'array reference', code => 'ref $value eq "ARRAY"', default => []}    }   # type is required
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 1.11;
+our $VERSION = 1.31;
 use Scalar::Util qw/blessed looks_like_number/;
-use Kephra::Base::Data::Type::Basic;
-my $stype = 'Kephra::Base::Data::Type::Basic';
+use Kephra::Base::Data::Type::Basic;         my $btype = 'Kephra::Base::Data::Type::Basic';
 
 ################################################################################
 sub _unhash_arg_ {
@@ -19,23 +19,18 @@ sub _unhash_arg_ {
 sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            --> .ptype | ~errormsg 
     my $pkg = shift;
     my ($name, $help, $parameter, $code, $parent, $default) = _unhash_arg_(@_);
-    return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref), 'code' (str) and 'parent' ($stype) to create parametric type object" 
-        unless defined $name and $name and defined $help and $help and defined $parameter and defined $code and $code and defined $parent;
-    return "argument 'parameter' has to be $stype or a hash ref definition that contains at least the key 'type' to create parametric type $name" 
-        if ref $parameter ne $stype and (ref $parameter ne 'HASH' or ref $parameter->{'type'} ne $stype);
-    return "default value '$parameter->{default}' of type $name 's parameter does not match his type $parameter->{type}{name}" 
-        if ref $parameter eq 'HASH' and exists $parameter->{'default'} and $parameter->{'type'}->check($parameter->{'default'});
-    return "parent has to be instance of $stype to create parametric type $name" if ref $parent ne $stype;
-    $default //= $parent->get_default_value;
-    if (ref $parameter eq 'HASH'){
-        if (not exists $parameter->{'name'} and not exists $parameter->{'default'}){ $parameter = $parameter->{'type'} } 
-        else { $parameter = Kephra::Base::Data::Type::Basic->new( {
-                    name => $parameter->{'name'} // $parameter->{'type'}->get_name,
-                    default => $parameter->{'default'} // $parameter->{'type'}->get_default_value,
-                    parent => $parameter->{'type'} } );
-        }
+    return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref), 'code' (str) and 'parent' ($btype) to create parametric type object" 
+        unless defined $name and $name and defined $help and $help and defined $code and $code and defined $parent;
+    return "parent has to be instance of $btype or ".__PACKAGE__." to create parametric type $name" if ref $parent ne $btype and ref $parent ne __PACKAGE__;
+    if (ref $parent eq __PACKAGE__){
+        $parameter //= $parent->get_parameter;
+        $code = $parent->{'code'}.';'.$code;
     }
-    my $checks = $parent->get_check_pairs;
+    return "argument 'parameter' of parametric type $name has to be $btype or a hash ref definition " if ref $parameter ne $btype and ref $parameter ne 'HASH';
+    $parameter = Kephra::Base::Data::Type::Basic->new( $parameter ) if ref $parameter eq 'HASH';
+    return "'parameter' definition of parametric type $name has issue: $parameter " unless ref $parameter;
+    $default //= $parent->get_default_value;
+    my $checks = $parent->{'checks'};
     my $source = _compile_( $name, $checks, $code, $parameter );
     my $coderef = eval $source;
     return "parametric type '$name' checker source code - '$source' - could not eval because: $@ !" if $@;
@@ -72,11 +67,11 @@ sub state {                                          # .ptype                -->
 sub get_name          { $_[0]->{'name'} }            # .ptype                -->  ~name
 sub get_help          { $_[0]->{'help'} }            # .ptype                -->  ~help
 sub get_default_value { $_[0]->{'default'} }         # .ptype                -->  $default
-sub get_parameter     { $_[0]->{'parameter'} }       # .ptype                -->  .type
+sub get_parameter     { $_[0]->{'parameter'} }       # .ptype                -->  .btype
 sub get_checker       { $_[0]->{'coderef'} }         # .ptype                -->  &check
 sub get_trusting_checker { $_[0]->{'trustcoderef'} } # .ptype                -->  &trusting_check  # when parameter is already type checked
 ################################################################################
 sub check     { $_[0]->{'coderef'}->($_[1], $_[2]) } # .ptype $val $param    -->  ~errormsg
 ################################################################################
 
-1;
+2;

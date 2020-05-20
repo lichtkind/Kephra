@@ -15,25 +15,23 @@ our @EXPORT_OK = qw/create_type check_type guess_type is_type_known/;
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 ################################################################################
-
 my $standard_types = Kephra::Base::Data::Type::Standard::init_store();
 my $shared_types = Kephra::Base::Data::Type::Store->new(''); 
+
 sub standard    { $standard_types }
 sub shared      { $shared_types }
 sub class_names { @Kephra::Base::Data::Type::Standard::type_class_names }
-
-
 ################################################################################
 sub is_known      { &is_type_known }
 sub is_type_known {
     my ($type_name, $param_name, $all) = @_;
     $standard_types->is_type_known($type_name, $param_name);
 }
-################################################################################
+
 sub create      { &create_type }
 sub create_type {
-    Kephra::Base::Data::Type::Util::create_type($_[0], $standard_types) }
-
+    Kephra::Base::Data::Type::Util::create_type($_[0], $standard_types);
+}
 
 sub check      { &check_type }
 sub check_type {
@@ -46,8 +44,6 @@ sub guess_type {
     my ($value, $all) = @_;
     $standard_types->guess_basic_type($value);
 }
-
-
 ################################################################################
 
 7;

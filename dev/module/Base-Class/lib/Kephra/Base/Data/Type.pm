@@ -1,19 +1,49 @@
 use v5.20;
 use warnings;
 
-# organize  and foreward type related symbols
+# organize type related symbols
 
 package Kephra::Base::Data::Type;
-our $VERSION = 0.1;
+our $VERSION = 0.7;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
-use Kephra::Base::Data::Type::Standard qw/:all/;;
+use Kephra::Base::Data::Type::Store;
+use Kephra::Base::Data::Type::Util;
+use Kephra::Base::Data::Type::Standard;
 use Exporter 'import';
-our @EXPORT_OK = qw/new_type check_type guess_type is_type_known/;
+our @EXPORT_OK = qw/create_type check_type guess_type is_type_known/;
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 ################################################################################
+my $standard_types = Kephra::Base::Data::Type::Standard::init_store();
+my $shared_types = Kephra::Base::Data::Type::Store->new(''); 
 
-Kephra::Base::Data::Type::Standard::init;
+sub standard    { $standard_types }
+sub shared      { $shared_types }
+sub class_names { @Kephra::Base::Data::Type::Standard::type_class_names }
+################################################################################
+sub is_known      { &is_type_known }
+sub is_type_known {
+    my ($type_name, $param_name, $all) = @_;
+    $standard_types->is_type_known($type_name, $param_name);
+}
 
-1;
+sub create      { &create_type }
+sub create_type {
+    Kephra::Base::Data::Type::Util::create_type($_[0], $standard_types);
+}
+
+sub check      { &check_type }
+sub check_type {
+    my ($type_name, $value, $all) = @_;
+    $standard_types->check_basic_type($type_name, $value);
+}
+
+sub guess      { &guess_type }
+sub guess_type {
+    my ($value, $all) = @_;
+    $standard_types->guess_basic_type($value);
+}
+################################################################################
+
+7;

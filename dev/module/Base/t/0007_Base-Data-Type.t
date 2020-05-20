@@ -22,6 +22,3 @@ is('num' ~~ [guess_type(2.3)], 1, 'sub symbol "guess_type" imported');
 
 
 exit 0;
-
-__END__
-is( 'num' ~~ [guess_type(2.3)],         1, 'sub guess_type got imported');

@@ -9,7 +9,9 @@ use Kephra::Base::Data::Type qw/is_type_known/;
 ################################################################################
 sub new            {        # ~name                     --> .cdef
     return "need only one argument ('name') to create class definition" unless @_ == 2;
-    bless {name => $_[1], complete => 0, type => {basic => {}, param =>{}}, attribute => {}, argument=>{},  method => {state =>{},restate =>{},}, deps => [] }; # dependencies
+    my $store = Kephra::Base::Data::Type::Store->new();
+    $store->forbid_shortcuts( @Kephra::Base::Data::Type::Standard::forbidden_shortcuts );
+    bless {name => $_[1], complete => 0, type => $store,  attribute => {}, argument=>{},  method => {state =>{}, restate =>{},}, deps => [] }; # dependencies
 }
 sub restate        {        # %state                    --> .cdef
     my ($self, $state) = (@_);
