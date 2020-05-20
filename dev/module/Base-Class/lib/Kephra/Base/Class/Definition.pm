@@ -2,6 +2,7 @@ use v5.20;
 use warnings;
 
 # serializable data set to build a KBOS class from
+#Kephra::Base::Data::Type::Util
 
 package Kephra::Base::Class::Definition;
 our $VERSION = 0.2;

@@ -4,19 +4,20 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Kephra::Base::Data::Type::Basic;
-use Kephra::Base::Data::Type::Parametric;
-use Kephra::Base::Data::Type::Store; 
 use Kephra::Base::Data::Type::Util;  
+use Kephra::Base::Package;
 
 package TypeTester; 
-use Test::More tests => 50;
+use Test::More tests => 50 + @Kephra::Base::Data::Type::Util::type_class_names;
 
 sub is_type { &Kephra::Base::Data::Type::Util::is_type  }
 sub can_s   { &Kephra::Base::Data::Type::Util::can_substitude_names }
 sub subst   { &Kephra::Base::Data::Type::Util::substitude_names }
 sub create  { &Kephra::Base::Data::Type::Util::create_type }
 
+for my $package (@Kephra::Base::Data::Type::Util::type_class_names){
+    is (Kephra::Base::Package::package_loaded($package),      1,   "Type class $package is loaded and seems to belong to Types" );
+}
 
 is( can_s({name => 'a', parent => {}}),                       0,   'basic type definition with no type name to substitute');
 is( can_s({name => 'a', parent => ''}),                       1,   'basic type definition with a basic type name to substitute');
@@ -51,33 +52,33 @@ is( subst($type_def, $store),                                     0,   'no type 
 is( ref $type_def->{'parent'},                                   '',   'no type parent name was replaced');
 is( $type_def->{'name'},                                        'a',   'other keys were not changed');
 is( keys %$type_def,                                              2,   'no new keys created by substitution');
-my $type_def = {name => 'a', parent => 'ref'};
+$type_def = {name => 'a', parent => 'ref'};
 is( subst($type_def, $store),                                     1,   'basic type name in definition that can be found in store');
 is( ref $type_def->{'parent'},    'Kephra::Base::Data::Type::Basic',   'type parent name was replaced with basictype object');
 is( $type_def->{'name'},                                        'a',   'other keys were not changed');
 is( keys %$type_def,                                              2,   'no new keys created by substitution');
-my $type_def = {name => 'a', parent => ['ref','name']};
+$type_def = {name => 'a', parent => ['ref','name']};
 is( subst($type_def, $store),                                     1,   'parametric type name in definition that can be found in store');
 is( ref $type_def->{'parent'},'Kephra::Base::Data::Type::Parametric',  'type parnet name was replaced with parametric type object');
 is( $type_def->{'name'},                                        'a',   'other keys were not changed');
 is( keys %$type_def,                                              2,   'no new keys created by substitution');
 is( subst({name => 'a', parameter => '-'}, $store),               0,   'no parameter type definition that can be found in store');
-my $type_def = {name => 'a', parameter => 'ref'};
+$type_def = {name => 'a', parameter => 'ref'};
 is( subst($type_def, $store),                                     1,   'basic type name from store in type parameter definition that be replaced');
 is( ref $type_def->{'parameter'}, 'Kephra::Base::Data::Type::Basic',   'type parmeter name was replaced with basictype object');
 is( $type_def->{'name'},                                        'a',   'other keys were not changed');
 is( keys %$type_def,                                              2,   'no new keys created by substitution');
-my $type_def = {name => 'a', parameter => {parent => 'ref'}};
+$type_def = {name => 'a', parameter => {parent => 'ref'}};
 is( subst($type_def, $store),                                     1,   'basic type name from store in type parameter definition (parent) that be replaced');
 is( ref $type_def->{'parameter'}{'parent'}, 'Kephra::Base::Data::Type::Basic',   'type parameter parent name was replaced with basictype object');
 is( keys %$type_def,                                              2,   'no new keys created by substitution');
 is( keys %{$type_def->{'parameter'}},                             1,   'no new parameter keys created by substitution');
-my $type_def = {name => 'a', parameter=>{parent=>['ref','name']}};
+$type_def = {name => 'a', parameter=>{parent=>['ref','name']}};
 is( subst($type_def, $store),                                     0,   'parameter parent can never be a parametric type itself');
 is( $type_def->{'parameter'}{'parent'}[0],                    'ref',   'parameter type name was not changed');
 is( $type_def->{'parameter'}{'parent'}[1],                   'name',   'parameter type parameter name was not changed');
 is( subst({name => 'a', parameter => ['ref','name']}, $store),    0,   'parameter can never be a parametric type itself');
-my $type_def = {name => 'b', parent=>'str',parameter=>'ref'};
+$type_def = {name => 'b', parent=>'str',parameter=>'ref'};
 is( subst($type_def, $store),                                     2,   'parent and parameter can be replaced at same time');
 is( ref $type_def->{'parent'},    'Kephra::Base::Data::Type::Basic',   'type parent name was replaced with basictype object');
 is( ref $type_def->{'parameter'}, 'Kephra::Base::Data::Type::Basic',   'type parmeter name was replaced with basictype object');
