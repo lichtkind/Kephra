@@ -21,6 +21,8 @@ my $shared_types = Kephra::Base::Data::Type::Store->new('');
 sub standard    { $standard_types }
 sub shared      { $shared_types }
 sub class_names { @Kephra::Base::Data::Type::Standard::type_class_names }
+sub state {}
+sub restate {}
 ################################################################################
 sub is_known      { &is_type_known }
 sub is_type_known {

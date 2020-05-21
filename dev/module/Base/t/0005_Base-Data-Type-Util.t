@@ -19,15 +19,15 @@ for my $package (@Kephra::Base::Data::Type::Util::type_class_names){
     is (Kephra::Base::Package::package_loaded($package),      1,   "Type class $package is loaded and seems to belong to Types" );
 }
 
-is( can_s({name => 'a', parent => {}}),                       0,   'basic type definition with no type name to substitute');
-is( can_s({name => 'a', parent => ''}),                       1,   'basic type definition with a basic type name to substitute');
-is( can_s({name => 'a', parent => []}),                       1,   'type definition with a parametric name to substitute');
-is( can_s({name => 'a', parent => {}, parameter => {}}),      0,   'parametric type definition with no type name to substitute');
-is( can_s({name => 'a', parent => '', parameter => {}}), 1 , 'parametric type definition with one type name of parent to substitute');
-is( can_s({name => 'a', parent => {}, parameter => ''}), 1 , 'parametric type definition with one type name of parameter to substitute');
-is( can_s({name => 'a', parent => '', parameter => ''}), 2 , 'parametric type definition with two type names to substitute');
-is( can_s({name => 'a', parent => '', parameter => {parent => ''}}), 2 , 'two: parameter parent and parent');
-is( can_s({name => 'a', parent => [], parameter => {parent => ''}}), 2 , 'two: parametric parent and parent of parameter');
+is( can_s({name => 'a', parent => {}}),                           0,   'basic type definition with no type name to substitute');
+is( can_s({name => 'a', parent => ''}),                           1,   'basic type definition with a basic type name to substitute');
+is( can_s({name => 'a', parent => []}),                           1,   'type definition with a parametric name to substitute');
+is( can_s({name => 'a', parent => {}, parameter => {}}),          0,   'parametric type definition with no type name to substitute');
+is( can_s({name => 'a', parent => '', parameter => {}}),          1,   'parametric type definition with one type name of parent to substitute');
+is( can_s({name => 'a', parent => {}, parameter => ''}),          1,   'parametric type definition with one type name of parameter to substitute');
+is( can_s({name => 'a', parent => '', parameter => ''}),          2,   'parametric type definition with two type names to substitute');
+is( can_s({name => 'a', parent => '', parameter => {parent => ''}}), 2, 'two: parameter parent and parent');
+is( can_s({name => 'a', parent => [], parameter => {parent => ''}}), 2, 'two: parametric parent and parent of parameter');
 
 
 my $store = Kephra::Base::Data::Type::Store->new();
