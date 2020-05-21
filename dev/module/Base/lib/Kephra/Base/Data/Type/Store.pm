@@ -133,6 +133,7 @@ sub remove_type {                          # ~type - ~param                  -->
 }
 sub get_type {                                 # ~type - ~param              --> ~errormsg
     my ($self, $type_name, $param_name) = @_;
+    ($type_name, $param_name) = @$type_name if ref $type_name eq 'ARRAY';
     if (defined $param_name){ return $self->{'param_type'}{$type_name}{'object'}{$param_name} if exists $self->{'param_type'}{$type_name} }
     else                    { return $self->{'basic_type'}{$type_name}{'object'}              if exists $self->{'basic_type'}{$type_name} }
     undef;

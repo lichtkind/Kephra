@@ -27,24 +27,29 @@ sub restate {}
 sub is_known      { &is_type_known }
 sub is_type_known {
     my ($type_name, $param_name, $all) = @_;
-    $standard_types->is_type_known($type_name, $param_name);
+    $standard_types->is_type_known($type_name, $param_name) 
+    or (defined $all and $shared_types->is_type_known($type_name, $param_name));
 }
 
 sub create      { &create_type }
 sub create_type {
-    Kephra::Base::Data::Type::Util::create_type($_[0], $standard_types);
+    my ($type_def, $all) = @_;
+    Kephra::Base::Data::Type::Util::create_type($_[0], $standard_types, (defined $all ? $shared_types : undef));
 }
 
 sub check      { &check_type }
 sub check_type {
     my ($type_name, $value, $all) = @_;
-    $standard_types->check_basic_type($type_name, $value);
+    return $standard_types->check_basic_type($type_name, $value) if $standard_types->is_type_known($type_name);
+    return $shared_types->check_basic_type($type_name, $value) if defined $all and $shared_types->is_type_known($type_name);
+    "type $type_name is not known";
 }
 
 sub guess      { &guess_type }
 sub guess_type {
     my ($value, $all) = @_;
-    $standard_types->guess_basic_type($value);
+    return $standard_types->guess_basic_type($value) unless defined $all;
+    ($standard_types->guess_basic_type($value), $shared_types->guess_basic_type($value));
 }
 ################################################################################
 

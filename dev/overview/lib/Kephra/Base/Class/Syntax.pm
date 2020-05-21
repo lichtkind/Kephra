@@ -54,8 +54,8 @@ destructor demolish (sig) {@_ = $self, $args, $attr};     # canonical name for d
  private [multi] method name (sig) {$self, $args) = @_}   # private methods are only callable inside the class
                                                           # multi can be public, private, accessor - all of the multis has to be marked as such 
 
-                             (sig) = (type parametername, ~parameter, array of str c, index of attr list i - type parametername  --> return type)
-                                     #  required parameter                                                   optional parameter
+                             (sig) = (type argname, ~arg, array of str arg, @~arg, index of attr list arg - i of arg l argname  --> return type)
+                                     #  required parameter                                                 optional parameter
 
 
 ACCESS RULES: 
