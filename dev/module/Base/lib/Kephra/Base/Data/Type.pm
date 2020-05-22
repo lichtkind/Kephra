@@ -4,7 +4,7 @@ use warnings;
 # organize type related symbols, mostly easy access to stdandard types
 
 package Kephra::Base::Data::Type;
-our $VERSION = 1.1;
+our $VERSION = 1.11;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
 use Kephra::Base::Data::Type::Store;
@@ -23,7 +23,7 @@ sub shared      { $shared_types }
 sub state       { $shared_types->state }
 sub restate     { $shared_types = Kephra::Base::Data::Type::Store->restate($_[0]) }
 
-sub class_names { @Kephra::Base::Data::Type::Standard::type_class_names }
+sub class_names { @Kephra::Base::Data::Type::Util::type_class_names }
 ################################################################################
 sub is_known      { &is_type_known }
 sub is_type_known {
