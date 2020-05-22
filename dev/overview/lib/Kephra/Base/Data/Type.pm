@@ -4,7 +4,7 @@ use warnings;
 # organize type related symbols, mostly easy access to stdandard types
 
 package Kephra::Base::Data::Type;
-our $VERSION = 1.0;
+our $VERSION = 1.1;
 
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;

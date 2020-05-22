@@ -31,7 +31,21 @@ sub is_complete    { $_[0]->{'complete'} }   # .cdef                         -->
 sub get_dependencies { @{ $_[0]->{'deps'}} } # .cdef                         --> @~name
 ################################################################################
 sub add_type       {        # .cdef ~name %properties   --> ~errormsg
-    my ($self, $name, $property) = (@_);
+    my ($self, $type_def) = (@_);
+    return "type definition has to be a hash reference" unless ref $type_def eq 'HASH';
+    return "type definition has to have a 'name'" unless exists $type_def->{'name'};
+    my $type_name = $type_def->{'name'};
+    if (exists $type_def->{'parameter'}) {
+        my $param_name = ($type_def->{'parameter'} eq 'HASH') ? $type_def->{'parameter'}{'name'} 
+                       : not ref $type_def->{'parameter'} ? $type_def->{'parameter'} : undef;
+        return "definition of type $type_name parameter has to have a 'name'" unless defined $param_name and $param_name;
+
+        return "parametric type $type_name of $param_name"  if exists $self->{'type_def'}{'param'}{ $type_def->{'name'} };
+        $self->{'type_def'}{'param'}{ $type_def->{'name'} } = $type_def;
+    } else {
+        return "basic type $type_name is already defined in this class or the standard"  if exists $self->{'type_def'}{'basic'}{ $type_name } or is_type_known($type_name);
+        $self->{'type_def'}{'basic'}{ $type_name } = $type_def;
+    }
     return "type definition in class $self->{name} needs a name as first argument" unless defined $name;
     return "type $name of class $self->{name} got no properties to define itself" unless ref $property eq 'HASH';
     $property->{'name'} = $name;
