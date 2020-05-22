@@ -20,9 +20,10 @@ my $shared_types = Kephra::Base::Data::Type::Store->new('open');
 
 sub standard    { $standard_types }
 sub shared      { $shared_types }
+sub state       { $shared_type->state }
+sub restate     { $shared_type = Kephra::Base::Data::Type::Store->restate($_[0]) }
+
 sub class_names { @Kephra::Base::Data::Type::Standard::type_class_names }
-sub state {}
-sub restate {}
 ################################################################################
 sub is_known      { &is_type_known }
 sub is_type_known {
