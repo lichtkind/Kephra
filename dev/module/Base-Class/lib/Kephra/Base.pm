@@ -1,6 +1,8 @@
 use v5.20;
 use warnings;
 
+# root package of self made language extensions
+
 package Kephra::Base;
 our $VERSION = 0.11;
 use Exporter 'import';
@@ -14,4 +16,4 @@ use Kephra::Base::Class;
 
 sub new_counter { new_closure('$state++', 0) }
 
-'love and light';
+10;

@@ -6,9 +6,6 @@ use utf8;
 
 package Kephra::Base::Data::Type::Standard;
 our $VERSION = 2.5;
-use Kephra::Base::Data::Type::Basic;
-use Kephra::Base::Data::Type::Parametric;
-use Kephra::Base::Data::Type::Store;
 use Kephra::Base::Data::Type::Util;
 
 my $dummy_type = Kephra::Base::Data::Type::Basic->new('dummy','yes',3,undef,5);

@@ -1,10 +1,10 @@
 use v5.20;
 use warnings;
 
-# organize type related symbols
+# organize type related symbols, mostly easy access to stdandard types
 
 package Kephra::Base::Data::Type;
-our $VERSION = 0.7;
+our $VERSION = 1.0;
 
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;

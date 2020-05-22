@@ -1,10 +1,10 @@
 use v5.20;
 use warnings;
 
-# organize type related symbols
+# organize type related symbols, mostly easy access to stdandard types
 
 package Kephra::Base::Data::Type;
-our $VERSION = 0.7;
+our $VERSION = 1.0;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
 use Kephra::Base::Data::Type::Store;
@@ -16,7 +16,7 @@ our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 ################################################################################
 my $standard_types = Kephra::Base::Data::Type::Standard::init_store();
-my $shared_types = Kephra::Base::Data::Type::Store->new(''); 
+my $shared_types = Kephra::Base::Data::Type::Store->new('open'); 
 
 sub standard    { $standard_types }
 sub shared      { $shared_types }
@@ -28,7 +28,7 @@ sub is_known      { &is_type_known }
 sub is_type_known {
     my ($type_name, $param_name, $all) = @_;
     $standard_types->is_type_known($type_name, $param_name) 
-    or (defined $all and $shared_types->is_type_known($type_name, $param_name));
+    or (defined $all and $shared_types->is_type_known($type_name, $param_name)) or 0;
 }
 
 sub create      { &create_type }

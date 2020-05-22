@@ -71,7 +71,7 @@ sub list_forbidden_shortcuts { @{$_[0]->{'forbid_shortcut'}} ? sort(@{$_[0]->{'f
 ################################################################################
 sub add_type {                                 # .type - ~shortcut           --> ~errormsg
     my ($self, $type, $shortcut) = @_;
-    return 'can not add to a closed type store' unless $self->{'open'};
+    return 'can not add to a closed type store '.$self->{'open'} unless $self->{'open'};
     if (ref $type eq 'HASH'){
         if (exists $type->{'parameter'} or ref $type->{'parent'} eq $ptclass){
                  $type = Kephra::Base::Data::Type::Parametric->new($type)

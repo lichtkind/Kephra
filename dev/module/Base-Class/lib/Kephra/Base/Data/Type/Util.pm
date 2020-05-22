@@ -5,8 +5,6 @@ use warnings;
 
 package Kephra::Base::Data::Type::Util;
 our $VERSION = 0.8;
-use Kephra::Base::Data::Type::Basic;
-use Kephra::Base::Data::Type::Parametric;
 use Kephra::Base::Data::Type::Store;
 
 our @type_class_names = qw/Kephra::Base::Data::Type::Basic
