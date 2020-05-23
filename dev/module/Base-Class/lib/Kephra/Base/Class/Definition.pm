@@ -8,30 +8,36 @@ package Kephra::Base::Class::Definition;
 our $VERSION = 0.2;
 use Kephra::Base::Data::Type qw/is_type_known/;
 ################################################################################
-sub new            {        # ~name                     --> .cdef
+sub new            {        # ~name                     --> .class_def
     return "need only one argument ('name') to create class definition" unless @_ == 2;
     my $store = Kephra::Base::Data::Type::Store->new();
     $store->forbid_shortcuts( @Kephra::Base::Data::Type::Standard::forbidden_shortcuts );
-    bless {name => $_[1], complete => 0, type => $store,  method => {state =>{}, restate =>{},}, deps => [] }; # dependencies
+    bless {name => $_[1], types => $store,  method => {state =>{}, restate =>{},}, deps => [] }; # dependencies
 }
-sub restate        {        # %state                    --> .cdef
+sub restate        {        # %state                    --> .class_def
     my ($self, $state) = (@_);
     return "restate needs a state (HASH ref) to create new Base::Class::Definition" unless ref $state eq 'HASH';
 }
-sub state          {        # .cdef                     --> %state
+sub state          {        # .class_def                   --> %state
     my $self = (@_);
     my $state = {};
     $state; 
 }
 ################################################################################
-sub complete       {        # .cdef                     --> ~errormsg
-    my $self = (@_);
+sub complete       {        # .class_def                   --> ~errormsg
+    my ($self) = (@_);
+    return "definition of KBOS class $self->{name} lacks an attribute" unless exists $self->{'attribute'};
+    if (exists $self->{'type_def'}){
+        
+    }
+    $self->{'types'}->close();
 }
-sub is_complete    { $_[0]->{'complete'} }   # .cdef                         --> ?
-sub get_dependencies { @{ $_[0]->{'deps'}} } # .cdef                         --> @~name
+sub is_complete      { not $_[0]->{'types'}->is_open }   # .class_def        --> ?
+sub get_dependencies { @{ $_[0]->{'deps'}} }             # ..class_def       --> @~name
 ################################################################################
-sub add_type       {        # .cdef ~name %properties   --> ~errormsg
+sub add_type       {        # .class_def ~name %properties   --> ~errormsg
     my ($self, $type_name, $type_def) = (@_);
+    return "class $self->{name} is closed, types can be added" if $self->is_complete;
     return "type definition has to be a hash reference" unless ref $type_def eq 'HASH';
     $type_def->{'name'} = $type_name;
     if (exists $type_def->{'parameter'}) {
@@ -47,8 +53,21 @@ sub add_type       {        # .cdef ~name %properties   --> ~errormsg
         $self->{'type_def'}{'basic'}{ $type_name } = $type_def;
     }
 }
+sub add_method     {        # .class_def ~name %properties       --> ~errormsg
+    my ($self, $name, $signature, $code, $keywords) = (@_); # signature code mutli scope type name
+    return "class $self->{name} is closed, methods can be added" if $self->is_complete;
+    return "method $self->{name}::$name siganture definition has to be an array reference" unless ref $signature eq 'ARRAY';
+    return "definition of method $self->{name}::$name need code" unless defined $code;
+
+    return "method $self->{name}::$name is already defined"  if exists $self->{'method'}{$name};
+    my ($scope, $kind, $multi);
+    my $def = {name => $name, signature => $signature, scope => $scope, kind => $kind};
+    if ($multi){ push @{$self->{'method'}{$name}}, $def }  else { $self->{'method'}{$name} = $def }
+    '';
+}
 sub add_attribute  {        # .cdef ~name %properties       --> ~errormsg
     my ($self, $name, $property) = (@_);
+    return "class $self->{name} is closed, attributes can be added" if $self->is_complete;
     return "attribute definition in class $self->{name} needs a name as first argument" unless defined $name;
     return "attribute $name of class $self->{name} got no property hash to define itself" unless ref $property eq 'HASH';
     return "attribute $name needs a descriptive 'help' text" unless exists $property->{'help'};
@@ -56,49 +75,16 @@ sub add_attribute  {        # .cdef ~name %properties       --> ~errormsg
     $property->{'name'} = $name;
     $self->{'attribute'}{$name} = $property;
 }
-sub add_method     {        # .cdef ~name %properties       --> ~errormsg
-    my ($self, $name, $property) = (@_); # signature code mutli scope type name
-    return "method $name of class $self->{name} got no property hash to define itself" unless ref $property eq 'HASH';
-    $property->{'name'} = $name;
-    $self->{'method'}{$name} = $property;
-}
 ################################################################################
-sub get_type                {   # .cdef                                      --> .type
-    my ($self, $name, $parameter) = (@_);
-    return unless defined $name;
-    if (defined $parameter) {
-        return $self->{'type'}{'param'}{$name}{$parameter} if exists $self->{'type'}{'param'}{$name} and exists $self->{'type'}{'param'}{$name}{$parameter};
-        return Kephra::Base::Data::Type::Standard::get($name, $parameter) if is_type_known($name, $parameter);
-    } else {
-        return $self->{'type'}{'basic'}{$name} if exists $self->{'type'}{'basic'}{$name};
-        return Kephra::Base::Data::Type::Standard::get($name) if is_type_known($name);
-    }
-}
-sub get_attribute           {   # .cdef                                      --> %attr_def
+sub get_types  { $_[0]->{'types'} }   # .class_def                           --> .type
+sub get_attribute           {   # .class_def                                 --> %attr_def
     my ($self, $name) = (@_);
 }
-sub get_method              {   # .cdef                                      --> %method_def
+sub get_method              {   # .class_def                                 --> %method_def
     my ($self, $name) = (@_);
 }
 ################################################################################
-sub list_types                  {   # .cdef - ~kind                          --> @~name
-    my ($self, $kind, $name) = (@_);
-    $kind = Kephra::Base::Data::Type::Standard::_key_from_kind_($kind);
-    return keys %{$self->{'type'}{'simple'}} if $kind eq 'simple';
-    if ($kind eq 'param'){
-        return keys %{$self->{'type'}{'param'}} unless defined $name;
-        return unless exists $self->{'type'}{'param'}{$name};
-        return keys %{$self->{'type'}{'param'}{$name}};
-    }
-}
-    
-sub list_attributes         {   # .cdef                 --> @~name
-    my ($self, $kind) = (@_);
-    keys %{$self->{'attribute'}};
-}
-sub list_methods            {   # .cdef                 --> @~name
-    my ($self, $kind, $scope, $multi) = (@_);
-    keys %{$self->{'method'}};
-}
+sub attribute_names { keys %{$_[0]->{'attribute'}} } # .class_def              --> @~name
+sub method_names    { keys %{$_[0]->{'method'}} }    # .class_def            --> @~name
 ################################################################################
 1;
