@@ -8,23 +8,23 @@ package Kephra::Base::Class::Definition;
 our $VERSION = 0.2;
 use Kephra::Base::Data::Type qw/is_type_known/;
 ################################################################################
-sub new            {        # ~name                     --> .class_def
-    return "need only one argument ('name') to create class definition" unless @_ == 2;
+sub new            {        # ~class_name                       --> ._
+    return "need one argument ('class name') to create class definition" unless @_ == 2;
     my $store = Kephra::Base::Data::Type::Store->new();
     $store->forbid_shortcuts( @Kephra::Base::Data::Type::Standard::forbidden_shortcuts );
     bless {name => $_[1], types => $store,  method => {state =>{}, restate =>{},}, deps => [] }; # dependencies
 }
-sub restate        {        # %state                    --> .class_def
+sub restate        {        # %state                      --> ._
     my ($self, $state) = (@_);
     return "restate needs a state (HASH ref) to create new Base::Class::Definition" unless ref $state eq 'HASH';
 }
-sub state          {        # .class_def                   --> %state
+sub state          {        # ._                          --> %state
     my $self = (@_);
     my $state = {};
     $state; 
 }
 ################################################################################
-sub complete       {        # .class_def                   --> ~errormsg
+sub complete       {        # ._                          --> ~errormsg
     my ($self) = (@_);
     return "definition of KBOS class $self->{name} lacks an attribute" unless exists $self->{'attribute'};
     if (exists $self->{'type_def'}){
@@ -32,10 +32,10 @@ sub complete       {        # .class_def                   --> ~errormsg
     }
     $self->{'types'}->close();
 }
-sub is_complete      { not $_[0]->{'types'}->is_open }   # .class_def        --> ?
-sub get_dependencies { @{ $_[0]->{'deps'}} }             # ..class_def       --> @~name
+sub is_complete      { not $_[0]->{'types'}->is_open }   # ._                --> ?
+sub get_dependencies { @{ $_[0]->{'deps'}} }             # ._                --> @~name
 ################################################################################
-sub add_type       {        # .class_def ~name %properties   --> ~errormsg
+sub add_type       {        # ._  ~type_name %type_def                       --> ~errormsg
     my ($self, $type_name, $type_def) = (@_);
     return "class $self->{name} is closed, types can be added" if $self->is_complete;
     return "type definition has to be a hash reference" unless ref $type_def eq 'HASH';
@@ -53,18 +53,6 @@ sub add_type       {        # .class_def ~name %properties   --> ~errormsg
         $self->{'type_def'}{'basic'}{ $type_name } = $type_def;
     }
 }
-sub add_method     {        # .class_def ~name %properties       --> ~errormsg
-    my ($self, $name, $signature, $code, $keywords) = (@_); # signature code mutli scope type name
-    return "class $self->{name} is closed, methods can be added" if $self->is_complete;
-    return "method $self->{name}::$name siganture definition has to be an array reference" unless ref $signature eq 'ARRAY';
-    return "definition of method $self->{name}::$name need code" unless defined $code;
-
-    return "method $self->{name}::$name is already defined"  if exists $self->{'method'}{$name};
-    my ($scope, $kind, $multi);
-    my $def = {name => $name, signature => $signature, scope => $scope, kind => $kind};
-    if ($multi){ push @{$self->{'method'}{$name}}, $def }  else { $self->{'method'}{$name} = $def }
-    '';
-}
 sub add_attribute  {        # .cdef ~name %properties       --> ~errormsg
     my ($self, $name, $property) = (@_);
     return "class $self->{name} is closed, attributes can be added" if $self->is_complete;
@@ -75,16 +63,49 @@ sub add_attribute  {        # .cdef ~name %properties       --> ~errormsg
     $property->{'name'} = $name;
     $self->{'attribute'}{$name} = $property;
 }
-################################################################################
-sub get_types  { $_[0]->{'types'} }   # .class_def                           --> .type
-sub get_attribute           {   # .class_def                                 --> %attr_def
-    my ($self, $name) = (@_);
+sub add_method     {        # ._  ~name @signature ~code %keywords           --> ~errormsg
+    my ($self, $name, $signature, $code, $keyword) = (@_); # signature code mutli scope type name
+    my $full_name = "$self->{name}::$name";
+    return "class $self->{name} is closed, methods can be added" if $self->is_complete;
+    return "siganture definition of method $full_name has to be an array reference - second argument" unless ref $signature eq 'ARRAY';
+    return "keywords for method $full_name need to be in a hash (ref) - fourth argument" if ref $keyword ne 'HASH';
+
+    return "signature definition of method $full_name needs to contain at least two counting integer as element 0 ans 1" if @$signature < 2;
+    return "amount of required arguments has to be at least zero and less or equal than total amount arguments in signature definition of method $full_name"
+        if $signature->[0] < $signature->[1] or $signature->[1] < 0;
+    return "amount of total arguments does not fit provided definition of method $full_name signature" if $signature->[0]+2 != @$signature and $signature->[0]+3 != @$signature;
+    my $kind = exists $keyword->{'getter'} ? 'getter'
+             : exists $keyword->{'setter'} ? 'setter'
+             : exists $keyword->{'wrapper'} ? 'wrapper'
+             : exists $keyword->{'delegator'} ? 'delegator' : 'simple';
+    my $scope = exists $keyword->{'private'} ? 'private'
+              : exists $keyword->{'public'} ? 'public'
+              : $kind eq 'simple' ? 'public' : 'access';
+    my $multi = $keyword->{'multi'};
+    delete @$keyword{$kind, $scope, 'multi'};
+    my @k = keys %$keyword;
+    return "definition of method $full_name contains conflicting keywords @k" if @k;
+    if (ref $self->{'method'}{$name} eq 'HASH'){
+        return "method $full_name already exists" .(defined $multi ? 'and is not a multi' : '');
+    } elsif (ref $self->{'method'}{$name} eq 'ARRAY'){
+        return "can not add a none multi (only) method to definition of multi method $full_name" unless defined $multi;
+    }
+    my $def = {name => $name, signature => $signature, scope => $scope, kind => $kind};
+    if (defined $multi){ push @{$self->{'method'}{$name}}, $def } else { $self->{'method'}{$name} = $def }
+    '';
 }
-sub get_method              {   # .class_def                                 --> %method_def
-    my ($self, $name) = (@_);
+################################################################################
+sub get_types  { $_[0]->{'types'} }   # ._                                   --> .type
+sub get_attribute           {         # ._  ~attribute_name                  --> %attr_def
+    return unless @_ == 2;
+    $_[0]->{'attribute'}{$_[1]};
+}
+sub get_method              {         # ._  ~method_name                     --> %method_def 
+    return unless @_ == 2;
+    $_[0]->{'method'}{$_[1]};
 }
 ################################################################################
-sub attribute_names { keys %{$_[0]->{'attribute'}} } # .class_def              --> @~name
+sub attribute_names { keys %{$_[0]->{'attribute'}} } # .class_def            --> @~name
 sub method_names    { keys %{$_[0]->{'method'}} }    # .class_def            --> @~name
 ################################################################################
 1;
