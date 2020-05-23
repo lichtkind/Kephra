@@ -13,7 +13,7 @@ our %basic_type_shortcut;
 our %parametric_type_shortcut;
 our @forbidden_shortcuts;
 
-sub init_store        {}   #    -->  .tstore
-sub store             {}   #    -->  .tstore
+sub init_store        {}   #    -->  .type_store
+sub store             {}   #    -->  .type_store
 
 6;

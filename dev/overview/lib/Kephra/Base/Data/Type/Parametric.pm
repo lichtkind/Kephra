@@ -8,20 +8,20 @@ package Kephra::Base::Data::Type::Parametric;
 our $VERSION = 1.3;
 use Kephra::Base::Data::Type::Basic;
 
-                           #               %parameter = %btypedef|.btype
-                           #                                 .parent = .btype|.ptype
-sub new                 {} # ~name  ~help  %parameter  ~code .parent - $default --> .ptype | ~errormsg  # optionally as %args
-sub state               {} # .ptype                                             --> %state                serialize
-sub restate             {} # %state                                             --> .ptype                recreate all type checker from data dump
+                           #               %parameter = %btypedef|.basic_type
+                           #                                 .parent = .basic_type|.param_type
+sub new                 {} # ~name  ~help  %parameter  ~code .parent - $default --> .param_type | ~errormsg  # optionally as %args
+sub state               {} # ._                                                 --> %state                     serializei into data
+sub restate             {} # %state                                             --> .param_type                recreate all type checker from data dump
 
-sub get_name            {} # .ptype                                             -->  ~name
-sub get_help            {} # .ptype                                             -->  ~help
-sub get_default_value   {} # .ptype                                             -->  $default
-sub get_parameter       {} # .ptype                                             -->  .type              # KB::Data::Type::Simple
-sub get_checker         {} # .ptype                                             -->  &check
-sub get_trusting_checker{} # .type                                              -->  &trusting_check    # when parameter is already type checked
+sub get_name            {} # ._                                                 -->  ~name
+sub get_help            {} # ._                                                 -->  ~help
+sub get_default_value   {} # ._                                                 -->  $default
+sub get_parameter       {} # ._                                                 -->  .basic_type
+sub get_checker         {} # ._                                                 -->  &check
+sub get_trusting_checker{} # ._                                                 -->  &trusting_check    # when parameter is already type checked
 
-sub check               {} # .ptype $val $param                                 -->  ~errormsg
+sub check               {} # ._  $val $param                                    -->  ~errormsg
 
 
 1;
