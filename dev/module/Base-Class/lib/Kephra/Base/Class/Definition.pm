@@ -2,17 +2,18 @@ use v5.20;
 use warnings;
 
 # serializable data set to build a KBOS class from
-#Kephra::Base::Data::Type::Util
 
 package Kephra::Base::Class::Definition;
-our $VERSION = 0.2;
+our $VERSION = 0.3;
 use Kephra::Base::Data::Type qw/is_type_known/;
+my $default_methods = {state  => {name => 'state', scope => 'build'}, 
+                     restate => {name => 'restate', scope => 'build'}};
 ################################################################################
 sub new            {        # ~class_name                       --> ._
     return "need one argument ('class name') to create class definition" unless @_ == 2;
     my $store = Kephra::Base::Data::Type::Store->new();
     $store->forbid_shortcuts( @Kephra::Base::Data::Type::Standard::forbidden_shortcuts );
-    bless {name => $_[1], types => $store,  method => {state =>{}, restate =>{},}, deps => [] }; # dependencies
+    bless {name => $_[1], types => $store,  method => {%$default_methods}, deps => [] }; # dependencies
 }
 sub restate        {        # %state                      --> ._
     my ($self, $state) = (@_);
@@ -21,7 +22,7 @@ sub restate        {        # %state                      --> ._
 }
 sub state          {        # ._                          --> %state
     my $self = (@_);
-    my $state = {};
+    my $state = {types => $self->{'types'}->state, };
     $state; 
 }
 ################################################################################
@@ -29,8 +30,36 @@ sub complete       {        # ._                          --> ~errormsg
     my ($self) = (@_);
     return "definition of KBOS class $self->{name} lacks an attribute" unless exists $self->{'attribute'};
     if (exists $self->{'type_def'}){
-        
-    }
+        while (exists $self->{'type_def'}{'basic'}){
+            my @type_def = values %{$self->{'type_def'}{'basic'}};
+            for my $type_def (@type_def){
+                Kephra::Base::Data::Type::Util::substitude_names($type_def, $self->{'types'});
+                unless (Kephra::Base::Data::Type::Util::can_substitude_names($type_def)){
+                    my $type = Kephra::Base::Data::Type::Basic->new($type_def);
+                    return "error in definition of the types of class $self->{name}: $type" unless ref $type;
+                    $self->{'types'}->add_type($type, $type_def->{'shortcut'});
+                    delete $self->{'type_def'}{'basic'}{ $type_def->{'name'} };
+            }   }
+            my $count = keys %{$self->{'type_def'}{'basic'}};
+            return "basic type definitions in class $self->{name} have unresolvable dependencies" if $count == @type_def;
+            delete $self->{'type_def'}{'basic'} unless $count; 
+        }
+        while (exists $self->{'type_def'}{'param'}){
+            my $evaled = 0;
+            for my $group_def (values %{$self->{'type_def'}{'param'}}){
+                for my $type_def (values %$group_def){
+                    Kephra::Base::Data::Type::Util::substitude_names($type_def, $self->{'types'});
+                    unless (Kephra::Base::Data::Type::Util::can_substitude_names($type_def)){
+                         my $type = Kephra::Base::Data::Type::Parametric->new($type_def);
+                         return "error in definition of the types of class $self->{name}: $type" unless ref $type;
+                         $self->{'types'}->add_type($type, $type_def->{'shortcut'});
+                         delete $group_def->{ $type_def->{'parameter'}{'name'} };
+                         delete $self->{'type_def'}{'param'}{ $type_def->{'name'} } unless keys %{$self->{'type_def'}{'param'}{ $type_def->{'name'} }};
+                         $evaled++;
+            }   }   }
+            return "parametric type definitions in class $self->{name} have unresolvable dependencies" unless $evaled;
+            delete $self->{'type_def'}{'param'} unless keys %{$self->{'type_def'}{'param'}}; 
+    }   }
     $self->{'types'}->close();
 }
 sub is_complete      { not $_[0]->{'types'}->is_open }   # ._                --> ?
@@ -42,6 +71,7 @@ sub add_type       {        # ._  ~type_name %type_def                       -->
     return "type definition in class $self->{name} needs a name as first argument" unless defined $type_name and $type_name;
     return "type definition has to be a hash reference" unless ref $type_def eq 'HASH';
     $type_def->{'name'} = $type_name;
+    Kephra::Base::Data::Type::Util::substitude_names($type_def, Kephra::Base::Data::Type::standard);
     if (exists $type_def->{'parameter'}) {
         my $param_name = ($type_def->{'parameter'} eq 'HASH') ? $type_def->{'parameter'}{'name'} 
                        : not ref $type_def->{'parameter'} ? $type_def->{'parameter'} : undef;
@@ -84,11 +114,6 @@ sub add_method     {        # ._  ~name @signature ~code %keywords           -->
     return "class $self->{name} is closed, methods can be added" if $self->is_complete;
     return "siganture definition of method $full_name has to be an array reference - second argument" unless ref $signature eq 'ARRAY';
     return "keywords for method $full_name need to be in a hash (ref) - fourth argument" if ref $keyword ne 'HASH';
-
-    return "signature definition of method $full_name needs to contain at least two counting integer as element 0 ans 1" if @$signature < 2;
-    return "amount of required arguments has to be at least zero and less or equal than total amount arguments in signature definition of method $full_name"
-        if $signature->[0] < $signature->[1] or $signature->[1] < 0;
-    return "amount of total arguments does not fit provided definition of method $full_name signature" if $signature->[0]+2 != @$signature and $signature->[0]+3 != @$signature;
     my $kind = exists $keyword->{'getter'} ? 'getter'
              : exists $keyword->{'setter'} ? 'setter'
              : exists $keyword->{'wrapper'} ? 'wrapper'
@@ -110,7 +135,7 @@ sub add_method     {        # ._  ~name @signature ~code %keywords           -->
     '';
 }
 ################################################################################
-sub get_types  { $_[0]->{'types'} }   # ._                                   --> .type
+sub get_types  { $_[0]->{'types'} }   # ._                                   --> .type_store
 sub get_attribute           {         # ._  ~attribute_name                  --> %attr_def
     return unless @_ == 2;
     $_[0]->{'attribute'}{$_[1]};
