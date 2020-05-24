@@ -17,6 +17,7 @@ sub new            {        # ~class_name                       --> ._
 sub restate        {        # %state                      --> ._
     my ($self, $state) = (@_);
     return "restate needs a state (HASH ref) to create new Base::Class::Definition" unless ref $state eq 'HASH';
+    bless {};
 }
 sub state          {        # ._                          --> %state
     my $self = (@_);
@@ -38,6 +39,7 @@ sub get_dependencies { @{ $_[0]->{'deps'}} }             # ._                -->
 sub add_type       {        # ._  ~type_name %type_def                       --> ~errormsg
     my ($self, $type_name, $type_def) = (@_);
     return "class $self->{name} is closed, types can be added" if $self->is_complete;
+    return "type definition in class $self->{name} needs a name as first argument" unless defined $type_name and $type_name;
     return "type definition has to be a hash reference" unless ref $type_def eq 'HASH';
     $type_def->{'name'} = $type_name;
     if (exists $type_def->{'parameter'}) {
@@ -51,17 +53,30 @@ sub add_type       {        # ._  ~type_name %type_def                       -->
     } else {
         return "basic type $type_name is already defined in this class or the standard"  if exists $self->{'type_def'}{'basic'}{ $type_name } or is_type_known($type_name);
         $self->{'type_def'}{'basic'}{ $type_name } = $type_def;
-    }
+    }'';
 }
 sub add_attribute  {        # .cdef ~name %properties       --> ~errormsg
-    my ($self, $name, $property) = (@_);
+    my ($self, $name, $attr_def) = (@_);
     return "class $self->{name} is closed, attributes can be added" if $self->is_complete;
-    return "attribute definition in class $self->{name} needs a name as first argument" unless defined $name;
-    return "attribute $name of class $self->{name} got no property hash to define itself" unless ref $property eq 'HASH';
-    return "attribute $name needs a descriptive 'help' text" unless exists $property->{'help'};
-    return "attribute $name needs a to refer to a 'type' or 'class' name" unless exists $property->{'type'} or $property->{'class'};
-    $property->{'name'} = $name;
-    $self->{'attribute'}{$name} = $property;
+    return "attribute definition in class $self->{name} needs a name as first argument" unless defined $name and $name;
+    my $error_start = "attribute $name of class $self->{name}";
+    return "$error_start got no property hash to define itself" unless ref $attr_def eq 'HASH';
+    return "$error_start needs a descriptive 'help' text" unless exists $attr_def->{'help'};
+    return "$error_start has no associated getter method" if exists $attr_def->{'set'} and not exists $attr_def->{'get'};
+    my $kind = (exists $attr_def->{'get'}) + (exists $attr_def->{'wrap'}) + (exists $attr_def->{'delegate'});
+    my $build = (exists $attr_def->{'build'}) + (exists $attr_def->{'build_lazy'}) + (exists $attr_def->{'init'}) + (exists $attr_def->{'init_lazy'});
+    return "$error_start needs an associated getter, delegator or wrapper method" if $kind == 0;
+    return "$error_start can only have getter or delegator or wrapper" if $kind > 1;
+    if (exists $attr_def->{'get'}){
+        return "$error_start needs a to refer to a data 'type'" unless exists $attr_def->{'type'};
+        return "$error_start can only have one 'init' or 'init_lazy' or 'build' or 'build_lazy' property" if $build > 1;
+    } else {
+        return "$error_start needs a to refer to a 'class'" unless exists $attr_def->{'class'};
+        return "$error_start can only have one 'build' or 'build_lazy' property" if $build > 1;
+    }
+    $attr_def->{'name'} = $name;
+    $self->{'attribute'}{$name} = $attr_def;
+    '';
 }
 sub add_method     {        # ._  ~name @signature ~code %keywords           --> ~errormsg
     my ($self, $name, $signature, $code, $keyword) = (@_); # signature code mutli scope type name
