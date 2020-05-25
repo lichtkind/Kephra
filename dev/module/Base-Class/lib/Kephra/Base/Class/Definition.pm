@@ -5,15 +5,15 @@ use warnings;
 
 package Kephra::Base::Class::Definition;
 our $VERSION = 0.3;
-use Kephra::Base::Data::Type qw/is_type_known/;
+use Kephra::Base::Data qw/clone_data/;
 my $default_methods = {state  => {name => 'state', scope => 'build'}, 
                      restate => {name => 'restate', scope => 'build'}};
 ################################################################################
 sub new            {        # ~class_name                       --> ._
     return "need one argument ('class name') to create class definition" unless @_ == 2;
-    my $store = Kephra::Base::Data::Type::Store->new();
-    $store->forbid_shortcuts( @Kephra::Base::Data::Type::Standard::forbidden_shortcuts );
-    bless {name => $_[1], types => $store,  method => {%$default_methods}, deps => [] }; # dependencies
+    my $type_store = Kephra::Base::Data::Type::Store->new();
+    $type_store->forbid_shortcuts( @Kephra::Base::Data::Type::Standard::forbidden_shortcuts );
+    bless {name => $_[1], types => $type_store,  method => {%$default_methods}, deps => [] }; # dependencies
 }
 sub restate        {        # %state                      --> ._
     my ($self, $state) = (@_);
@@ -22,7 +22,7 @@ sub restate        {        # %state                      --> ._
 }
 sub state          {        # ._                          --> %state
     my $self = (@_);
-    my $state = {types => $self->{'types'}->state, };
+    my $state = {name => $self->{'name'}, types => $self->{'types'}->state, method=> 1, attribute=>1, deps => [@{$self->{'deps'}}]};
     $state; 
 }
 ################################################################################
@@ -59,9 +59,82 @@ sub complete       {        # ._                          --> ~errormsg
             }   }   }
             return "parametric type definitions in class $self->{name} have unresolvable dependencies" unless $evaled;
             delete $self->{'type_def'}{'param'} unless keys %{$self->{'type_def'}{'param'}}; 
-    }   }
+        }
+        delete $self->{'type_def'};
+    }
+    my $std_types = Kephra::Base::Data::Type::standard;
+    for my $method_def (@{$self->{'method'}}){
+        my $sep_count = 0;
+        my %arg_type;
+        for my $i (0 .. $#{$method_def->{'signature'}}){
+            return "signature definition of method $self->{name}::$method_def->{name} has too many separators" if $sep_count > 2;
+            my $arg = $method_def->{'signature'}[$i];
+            $sep_count++, next unless defined $arg;
+            unless (ref $arg){
+                if ($sep_count == 2){
+                    my $sigil = substr($arg,0,1);
+
+                    next;
+                }
+                my $sigil = substr($arg,0,1);
+                next if $sigil =~ /[a-z]/;
+                return "$i st argument in signature definition of method $self->{name}::$method_def->{name} has no name" if length $arg < 2;
+                my $twigil = substr($arg, 1, 1);
+                if ($twigil =~ /[a-z]/) {
+                    my $base_type = $std_types->resolve_shortcut('basic', $sigil);
+                    $base_type = $self->{'types'}->resolve_shortcut('basic', $sigil) unless defined $base_type;
+                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type sigil '$sigil'" unless defined $base_type;
+                    $method_def->{'signature'}[$i] = $arg = [$base_type, substr( $arg,1)];
+                } else {
+                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} has no name" if length $arg == 2;
+                    my $base_type = $std_types->resolve_shortcut('param', $sigil);
+                    $base_type = $self->{'types'}->resolve_shortcut('param', $sigil) unless defined $base_type;
+                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type sigil '$sigil'" unless defined $base_type;
+                    my $param_type = $std_types->resolve_shortcut('basic', $twigil);
+                    $param_type = $self->{'types'}->resolve_shortcut('basic', $twigil) unless defined $param_type;
+                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type twigil '$twigil'" unless defined $param_type;
+                    $method_def->{'signature'}[$i] = $arg = [$base_type, $param_type, substr($arg, 2)];
+                }
+            }
+            return "malformed data of $i st argument in definition of method $self->{name}::$method_def->{name}, it has to be a string or an array reference" if ref $arg ne 'ARRAY';
+            if (@$arg == 2){
+                my $type_name = $arg->[0];
+                my $sigil = substr($type_name, 0, 1);
+                if ($sigil =~ /[a-z]/) {
+                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type '$type_name'"
+                        unless $std_types->is_type_known($type_name) or $self->{'types'}->is_type_known($type_name);
+                    $arg_type{$arg->[1]} = $arg->[0];
+                } else {
+                    my $base_type = $std_types->resolve_shortcut('basic', $sigil);
+                    $base_type = $self->{'types'}->resolve_shortcut('basic', $sigil) unless defined $base_type;
+                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type twigil '$sigil'" unless defined $base_type;
+                    $method_def->{'signature'}[$i] = $arg = [$base_type, substr($type_name, 1), $arg->[1]];
+                }
+            }
+            if (@$arg == 3){
+                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type '$arg->[0]' of '$arg->[1]'"
+                        unless $std_types->is_type_known($arg->[0], $arg->[1]) or $self->{'types'}->is_type_known($arg->[0], $arg->[1]);
+            } elsif (@$arg == 4){
+                my $param_name;
+                if (substr( $arg->[1],0,4) eq 'attr'){
+                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} refers not existing attribute '$arg->[2]'" unless exists $self->{'attribute'}{$arg->[2]};
+                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} refers typeless attribute '$arg->[2]'"unless exists $self->{'attribute'}{$arg->[2]}{'type'};
+                    $param_name = $self->{'attribute'}{$arg->[2]}{'type'};
+                } elsif (substr( $arg->[1],0,3) eq 'arg'){
+                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} refers not existing basic typed argument '$arg->[2]'" unless exists $arg_type{$arg->[2]};
+                    $param_name = $arg_type{$arg->[2]};
+                } else {return "$i st argument in signature definition of method $self->{name}::$method_def->{name} relates to something else than an attribute or argument"}
+                return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type '$arg->[0]' of '$param_name'"
+                    unless $std_types->is_type_known($arg->[0], $param_name) or $self->{'types'}->is_type_known($arg->[0], $arg->[1]);
+                
+            } else {return "malformed data of $i st argument in definition of method $self->{name}::$method_def->{name} - too many entries (max. is 4)" if ref $arg ne 'ARRAY' }
+        }
+    }
+    for my $attr_def (@{$self->{'attribute'}}){
+    }
     $self->{'types'}->close();
 }
+################################################################################
 sub is_complete      { not $_[0]->{'types'}->is_open }   # ._                --> ?
 sub get_dependencies { @{ $_[0]->{'deps'}} }             # ._                --> @~name
 ################################################################################
@@ -71,17 +144,22 @@ sub add_type       {        # ._  ~type_name %type_def                       -->
     return "type definition in class $self->{name} needs a name as first argument" unless defined $type_name and $type_name;
     return "type definition has to be a hash reference" unless ref $type_def eq 'HASH';
     $type_def->{'name'} = $type_name;
-    Kephra::Base::Data::Type::Util::substitude_names($type_def, Kephra::Base::Data::Type::standard);
+    my $std_types = Kephra::Base::Data::Type::standard;
+    Kephra::Base::Data::Type::Util::substitude_names($type_def, $std_types);
     if (exists $type_def->{'parameter'}) {
         my $param_name = ($type_def->{'parameter'} eq 'HASH') ? $type_def->{'parameter'}{'name'} 
                        : not ref $type_def->{'parameter'} ? $type_def->{'parameter'} : undef;
         return "definition of type $type_name parameter has to have a 'name'" unless defined $param_name and $param_name;
 
         return "parametric type '$type_name of $param_name' is already defined by this class or standard" 
-            if exists $self->{'type_def'}{'param'}{ $type_name }{ $param_name } or is_type_known($type_name, $param_name );
+            if exists $self->{'type_def'}{'param'}{ $type_name }{ $param_name } or $std_types->is_type_known($type_name, $param_name );
+        return "sigil $type_def->{shortcut} of parametric type $type_name is not allowed to overwrite standard type sigil "
+            if exists $type_def->{'shortcut'} and defined $std_types->resolve_shortcut('param', $type_def->{'shortcut'});
         $self->{'type_def'}{'param'}{ $type_name }{ $param_name } = $type_def;
     } else {
-        return "basic type $type_name is already defined in this class or the standard"  if exists $self->{'type_def'}{'basic'}{ $type_name } or is_type_known($type_name);
+        return "basic type $type_name is already defined in this class or the standard"  if exists $self->{'type_def'}{'basic'}{ $type_name } or $std_types->is_type_known($type_name);
+        return "sigil $type_def->{shortcut} of basic type $type_name is not allowed to overwrite standard type sigil "
+            if exists $type_def->{'shortcut'} and defined $std_types->resolve_shortcut('basic', $type_def->{'shortcut'});
         $self->{'type_def'}{'basic'}{ $type_name } = $type_def;
     }'';
 }
@@ -145,7 +223,7 @@ sub get_method              {         # ._  ~method_name                     -->
     $_[0]->{'method'}{$_[1]};
 }
 ################################################################################
-sub attribute_names { keys %{$_[0]->{'attribute'}} } # .class_def            --> @~name
-sub method_names    { keys %{$_[0]->{'method'}} }    # .class_def            --> @~name
+sub attribute_names { keys %{$_[0]->{'attribute_def'}} } # .class_def            --> @~name
+sub method_names    { keys %{$_[0]->{'method_def'}} }    # .class_def            --> @~name
 ################################################################################
 1;

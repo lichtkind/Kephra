@@ -5,7 +5,7 @@ use warnings;
 
 package Kephra::Base::Class::Definition;
 our $VERSION = 0.3;
-use Kephra::Base::Data::Type;
+use Kephra::Base::Data;
 
 sub new               {}  # ~class_name                                      --> ._|~errormsg
 sub restate           {}  # %state                                           --> ._|~errormsg
