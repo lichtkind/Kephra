@@ -65,69 +65,70 @@ sub complete       {        # ._                          --> ~errormsg
     my $std_types = Kephra::Base::Data::Type::standard;
     for my $method_def (@{$self->{'method'}}){
         my $sep_count = 0;
+        my $ret_start = 0;
         my %arg_type;
         for my $i (0 .. $#{$method_def->{'signature'}}){
             return "signature definition of method $self->{name}::$method_def->{name} has too many separators" if $sep_count > 2;
             my $arg = $method_def->{'signature'}[$i];
+            $ret_start = $i if $sep_count == 1 and not defined $arg;
             $sep_count++, next unless defined $arg;
+            my $error_stem = ($sep_count == 2) ? ($i-$ret_start)."st return value in signature definition of method $self->{name}::$method_def->{name}" 
+                                               : "$i st argument in signature definition of method $self->{name}::$method_def->{name}";
+            if ($sep_count == 2){
+                my $name = 'return_value_'.($i-$ret_start);
+                push @$arg, $name if ref $arg eq 'ARRAY';
+                $method_def->{'signature'}[$i] = $arg = [$arg, $name] unless ref $arg;
+            }
             unless (ref $arg){
-                if ($sep_count == 2){
-                    my $sigil = substr($arg,0,1);
-
-                    next;
-                }
-                my $sigil = substr($arg,0,1);
+                my $sigil = substr($arg, 0, 1);
                 next if $sigil =~ /[a-z]/;
-                return "$i st argument in signature definition of method $self->{name}::$method_def->{name} has no name" if length $arg < 2;
+                return "$error_stem has no name" if length $arg < 2;
                 my $twigil = substr($arg, 1, 1);
-                if ($twigil =~ /[a-z]/) {
-                    my $base_type = $std_types->resolve_shortcut('basic', $sigil);
-                    $base_type = $self->{'types'}->resolve_shortcut('basic', $sigil) unless defined $base_type;
-                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type sigil '$sigil'" unless defined $base_type;
-                    $method_def->{'signature'}[$i] = $arg = [$base_type, substr( $arg,1)];
-                } else {
-                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} has no name" if length $arg == 2;
-                    my $base_type = $std_types->resolve_shortcut('param', $sigil);
-                    $base_type = $self->{'types'}->resolve_shortcut('param', $sigil) unless defined $base_type;
-                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type sigil '$sigil'" unless defined $base_type;
-                    my $param_type = $std_types->resolve_shortcut('basic', $twigil);
-                    $param_type = $self->{'types'}->resolve_shortcut('basic', $twigil) unless defined $param_type;
-                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type twigil '$twigil'" unless defined $param_type;
-                    $method_def->{'signature'}[$i] = $arg = [$base_type, $param_type, substr($arg, 2)];
+                if ($twigil =~ /[a-z]/)  { $method_def->{'signature'}[$i] = $arg = [$sigil, substr( $arg,1)] }
+                else {                     $method_def->{'signature'}[$i] = $arg = [$sigil, $twigil, substr($arg, 2)];
+                    return "$error_stem has no name" if length $arg == 2;
                 }
             }
-            return "malformed data of $i st argument in definition of method $self->{name}::$method_def->{name}, it has to be a string or an array reference" if ref $arg ne 'ARRAY';
+            return "malformed data of $error_stem, it has to be a string or an array reference" if ref $arg ne 'ARRAY';
             if (@$arg == 2){
                 my $type_name = $arg->[0];
+                return "$error_stem, has zero length type name" unless defined $type_name and $type_name;
                 my $sigil = substr($type_name, 0, 1);
-                if ($sigil =~ /[a-z]/) {
-                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type '$type_name'"
-                        unless $std_types->is_type_known($type_name) or $self->{'types'}->is_type_known($type_name);
-                    $arg_type{$arg->[1]} = $arg->[0];
-                } else {
-                    my $base_type = $std_types->resolve_shortcut('basic', $sigil);
-                    $base_type = $self->{'types'}->resolve_shortcut('basic', $sigil) unless defined $base_type;
-                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type twigil '$sigil'" unless defined $base_type;
-                    $method_def->{'signature'}[$i] = $arg = [$base_type, substr($type_name, 1), $arg->[1]];
+                if ($sigil !~ /[a-z]/) {
+                    if (length $type_name > 1){
+                        $method_def->{'signature'}[$i] = $arg = [$sigil, substr( $type_name, 1 )]
+                    } else {
+                        $arg->[0] = $std_types->resolve_shortcut('basic', $sigil) // $self->{'types'}->resolve_shortcut('basic', $sigil);
+                        return "$error_stem contains the unknown type sigil '$sigil'" unless defined $arg->[0];
+            }   }   }
+            if (@$arg == 2){
+                my $type_name = $arg->[0];
+                return "$error_stem contains the unknown type '$type_name'" unless $std_types->is_type_known($type_name) or $self->{'types'}->is_type_known($type_name);
+                $arg_type{$arg->[1]} = $arg->[0] if $sep_count < 2;
+            } elsif (@$arg == 3){
+                my ($sigil, $twigil) = @$arg;
+                if (length $sigil == 1 and $sigil !~ /[a-z]/){
+                    $arg->[0] = $std_types->resolve_shortcut('param', $sigil) // $self->{'types'}->resolve_shortcut('param', $sigil);
+                    return "$error_stem contains the unknown parametric type sigil '$sigil'" unless defined $arg->[0];
                 }
-            }
-            if (@$arg == 3){
-                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type '$arg->[0]' of '$arg->[1]'"
-                        unless $std_types->is_type_known($arg->[0], $arg->[1]) or $self->{'types'}->is_type_known($arg->[0], $arg->[1]);
+                if (length $twigil == 1 and $twigil !~ /[a-z]/){
+                    $arg->[1] = $std_types->resolve_shortcut('basic', $twigil) // $self->{'types'}->resolve_shortcut('basic', $twigil);
+                    return "$error_stem contains the unknown basic type twigil '$twigil'" unless defined $arg->[1];
+                }
+                return "$error_stem contains the unknown type '$arg->[0]' of '$arg->[1]'" unless $std_types->is_type_known(@$arg) or $self->{'types'}->is_type_known(@$arg);
             } elsif (@$arg == 4){
-                my $param_name;
-                if (substr( $arg->[1],0,4) eq 'attr'){
-                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} refers not existing attribute '$arg->[2]'" unless exists $self->{'attribute'}{$arg->[2]};
-                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} refers typeless attribute '$arg->[2]'"unless exists $self->{'attribute'}{$arg->[2]}{'type'};
+                my ($type_name, $kind, $relator_name, $param_name) = @$arg;
+                if (substr( $kind, 0, 4) eq 'attr'){
+                    return "$error_stem refers not existing attribute '$arg->[2]'" unless exists $self->{'attribute'}{$arg->[2]};
+                    return "$error_stem refers typeless attribute '$arg->[2]'"unless exists $self->{'attribute'}{$arg->[2]}{'type'};
                     $param_name = $self->{'attribute'}{$arg->[2]}{'type'};
-                } elsif (substr( $arg->[1],0,3) eq 'arg'){
-                    return "$i st argument in signature definition of method $self->{name}::$method_def->{name} refers not existing basic typed argument '$arg->[2]'" unless exists $arg_type{$arg->[2]};
+                } elsif (substr( $kind, 0, 3) eq 'arg'){
+                    return "$error_stem refers not existing basic typed argument '$arg->[2]'" unless exists $arg_type{$arg->[2]};
                     $param_name = $arg_type{$arg->[2]};
-                } else {return "$i st argument in signature definition of method $self->{name}::$method_def->{name} relates to something else than an attribute or argument"}
-                return "$i st argument in signature definition of method $self->{name}::$method_def->{name} contains the unknown type '$arg->[0]' of '$param_name'"
+                } else {return "$error_stem relates to something else than an attribute or argument"}
+                return "$error_stem contains the unknown type '$arg->[0] of $arg->[1] $arg->[2], which is of type $param_name, but there is not type '$arg->[0] of $param_name'"
                     unless $std_types->is_type_known($arg->[0], $param_name) or $self->{'types'}->is_type_known($arg->[0], $arg->[1]);
-                
-            } else {return "malformed data of $i st argument in definition of method $self->{name}::$method_def->{name} - too many entries (max. is 4)" if ref $arg ne 'ARRAY' }
+            } else {return "malformed $error_stem - no or too many entries (max. is 4)" if ref $arg ne 'ARRAY' }
         }
     }
     for my $attr_def (@{$self->{'attribute'}}){
