@@ -120,10 +120,10 @@ sub complete       {        # ._                          --> ~errormsg
                 my ($type_name, $kind, $relator_name, $param_name) = @$arg;
                 if (substr( $kind, 0, 4) eq 'attr'){
                     return "$error_stem refers not existing attribute '$arg->[2]'" unless exists $self->{'attribute'}{$arg->[2]};
-                    return "$error_stem refers typeless attribute '$arg->[2]'"unless exists $self->{'attribute'}{$arg->[2]}{'type'};
+                    return "$error_stem refers to a typeless attribute '$arg->[2]'"unless exists $self->{'attribute'}{$arg->[2]}{'type'};
                     $param_name = $self->{'attribute'}{$arg->[2]}{'type'};
                 } elsif (substr( $kind, 0, 3) eq 'arg'){
-                    return "$error_stem refers not existing basic typed argument '$arg->[2]'" unless exists $arg_type{$arg->[2]};
+                    return "$error_stem does not refer to an existing basic typed argument '$arg->[2]'" unless exists $arg_type{$arg->[2]};
                     $param_name = $arg_type{$arg->[2]};
                 } else {return "$error_stem relates to something else than an attribute or argument"}
                 return "$error_stem contains the unknown type '$arg->[0] of $arg->[1] $arg->[2], which is of type $param_name, but there is not type '$arg->[0] of $param_name'"
@@ -132,7 +132,12 @@ sub complete       {        # ._                          --> ~errormsg
         }
     }
     for my $attr_def (@{$self->{'attribute'}}){
+        return "data attribute $attr_def->{name} of class $self->{name} has an unknown type" if exists $attr_def->{'type'} and
+            not $std_types->is_type_known( $attr_def->{'type'} ) and $self->{'types'}->is_type_known( $attr_def->{'type'} );
     }
+# check deps
+#checkmethods
+# check init vals
     $self->{'types'}->close();
 }
 ################################################################################

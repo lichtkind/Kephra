@@ -3,6 +3,7 @@ use warnings;
 
 package Kephra::Base::Class;
 
+use Kephra::Base::Class::Registry;
 use Kephra::Base::Class::Syntax;
 
 
