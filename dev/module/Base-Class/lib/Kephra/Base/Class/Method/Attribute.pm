@@ -3,7 +3,7 @@ use warnings;
 
 # central kv storage for all data stored in attributes and creation of direct data accessors
 
-package Kephra::Base::Class::Build::Attribute;
+package Kephra::Base::Class::Method::Attribute;
 our $VERSION = 0.1;
 use Kephra::Base::Package qw/set_sub has_sub/;
 use Kephra::Base::Class::Scope qw/cat_scope_path/;
