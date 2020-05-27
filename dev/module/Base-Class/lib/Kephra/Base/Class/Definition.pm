@@ -4,30 +4,46 @@ use warnings;
 # serializable data set to build a KBOS class from
 
 package Kephra::Base::Class::Definition;
-our $VERSION = 0.3;
+our $VERSION = 0.7;
 use Kephra::Base::Data qw/clone_data/;
+
 my $default_methods = {state  => {name => 'state', scope => 'build'}, 
                      restate => {name => 'restate', scope => 'build'}};
 ################################################################################
 sub new            {        # ~class_name                       --> ._
     return "need one argument ('class name') to create class definition" unless @_ == 2;
+    return "class name has to start with an upper case letter" unless $_[1] =~ /^[A-Z]/;
     my $type_store = Kephra::Base::Data::Type::Store->new();
     $type_store->forbid_shortcuts( @Kephra::Base::Data::Type::Standard::forbidden_shortcuts );
-    bless {name => $_[1], types => $type_store,  method => {%$default_methods}, deps => [] }; # dependencies
+    bless {name => $_[1], types => $type_store,  method => {%$default_methods}, dependencies => {}, requirements => {} };
 }
 sub restate        {        # %state                      --> ._
     my ($self, $state) = (@_);
-    return "restate needs a state (HASH ref) to create new Base::Class::Definition" unless ref $state eq 'HASH';
-    bless {};
+    return "restate needs a state (HASH ref with types, attribtutes and methods) to create new Base::Class::Definition" 
+        unless ref $state eq 'HASH' and exists $state->{'types'} and exists $state->{'method'} and exists $state->{'attribute'};
+    $state->{'types'} = Kephra::Base::Data::Type::Store->restate($state->{'types'});
+    bless $state;
 }
 sub state          {        # ._                          --> %state
     my $self = (@_);
-    my $state = {name => $self->{'name'}, types => $self->{'types'}->state, method=> 1, attribute=>1, deps => [@{$self->{'deps'}}]};
-    $state; 
+    { name => $self->{'name'}, types => $self->{'types'}->state,
+      dependencies => {%{$self->{'dependencies'}}}, requirements => {%{$self->{'requirements'}}},
+      method=> clone_data($self->{'method'}), attribute=> clone_data($self->{'attribute'}),   };
 }
+################################################################################
+sub get_attribute { $_[0]->{'attribute'}{$_[1]}; } # ._  ~attribute_name     --> %attr_def
+sub get_method   {  $_[0]->{'method'}{$_[1]}; }    # ._  ~method_name        --> %method_def 
+################################################################################
+sub get_types        { $_[0]->{'types'} }                      # ._          --> .type_store
+sub attribute_names { keys %{$_[0]->{'attribute'}} }     # .class_def        --> @~name
+sub method_names    { keys %{$_[0]->{'method'}} }        # .class_def        --> @~name
+sub get_dependencies { sort keys %{ $_[0]->{'dependencies'}} } # ._          --> @~pkg
+sub get_requirements { sort keys %{ $_[0]->{'requirements'}} } # ._          --> @~pkg
+sub is_complete      { not $_[0]->{'types'}->is_open }         # ._          --> ?
 ################################################################################
 sub complete       {        # ._                          --> ~errormsg
     my ($self) = (@_);
+    return "class $self->{name} is completed" if $self->is_complete;
     return "definition of KBOS class $self->{name} lacks an attribute" unless exists $self->{'attribute'};
     if (exists $self->{'type_def'}){
         while (exists $self->{'type_def'}{'basic'}){
@@ -132,21 +148,57 @@ sub complete       {        # ._                          --> ~errormsg
         }
     }
     for my $attr_def (@{$self->{'attribute'}}){
-        return "data attribute $attr_def->{name} of class $self->{name} has an unknown type" if exists $attr_def->{'type'} and
-            not $std_types->is_type_known( $attr_def->{'type'} ) and $self->{'types'}->is_type_known( $attr_def->{'type'} );
+        if (exists $attr_def->{'type'}){
+            my $type = $std_types->get_type( $attr_def->{'type'} ) // $self->{'types'}->get_type( $attr_def->{'type'} );
+            return "data attribute $attr_def->{name} of class $self->{name} has an unknown type" unless ref $type;
+            return "data attribute $attr_def->{name} of class $self->{name} has the initial value '$attr_def->{init}' that does not fit its type ".$type->get_name
+                if exists $attr_def->{'init'} and $type->check( $attr_def->{'init'} );
+            return "data attribute $attr_def->{name} of class $self->{name} has the initial value '$attr_def->{v}' that does not fit its type ".$type->get_name
+                if exists $attr_def->{'init_lazy'} and $type->check( $attr_def->{'init_lazy'} );
+            my $error = $self->_missing_method_($attr_def->{'get'}) or $self->_missing_method_($attr_def->{'set'});
+            return "definition of data attribute $attr_def->{name} of class $self->{name} has issue: $error" if $error;
+        } elsif (exists $attr_def->{'delegate'}){
+            my $error = $self->_missing_method_($attr_def->{'delegate'});
+            return "definition of delegating attribute $attr_def->{name} of class $self->{name} has issue: $error" if $error;
+            $self->{'dependencies'}{ $attr_def->{'class'} }++;
+        } else {
+            my $error = $self->_missing_method_($attr_def->{'wrap'});
+            return "definition of wrapping attribute $attr_def->{name} of class $self->{name} has issue: $error" if $error;
+            $self->{'requirements'}{ ($attr_def->{'require'} eq 1 ? $attr_def->{'class'} : $attr_def->{'require'}) }++;
+        }
     }
-# check deps
-#checkmethods
-# check init vals
     $self->{'types'}->close();
 }
-################################################################################
-sub is_complete      { not $_[0]->{'types'}->is_open }   # ._                --> ?
-sub get_dependencies { @{ $_[0]->{'deps'}} }             # ._                --> @~name
+sub _missing_method_ {
+    my ($self, $attr_methods) = (@_);
+    return '' unless defined $attr_methods;
+    return 'no methods defined' unless $attr_methods;
+    my $ref = ref $attr_methods;
+    return $self->_check_method_name_($attr_methods) unless $ref;
+    if ($ref eq 'ARRAY'){     for (@$attr_methods){      my $error = $self->_check_method_name_($_);  return $error if $error; } }
+    elsif ($ref eq 'HASH'){   for (keys %$attr_methods){ my $error = $self->_check_method_name_($_);  return $error if $error; } }
+    else {return 'malformed property, methods can only be provided in string, array or hash'}
+    '';
+}
+sub _check_method_name_{
+    my ($self, $name) = (@_);
+    if (substr($name, 0, 1) eq '-'){
+        $name = substr($name, 1);
+        return "method $name is not an identifier (beginning with lower case letter + digits + _)" unless _is_identifier_($name);
+        return "method $name already exists and can not be generated" if exists $self->{'method'}{$name};
+    } else { return "method $name was not defined" unless exists $self->{'method'}{$name} }
+    '';
+}
+sub _is_identifier_ {
+    return 0 unless $_[0];
+    return 0 if $_[0] =~ /[^a-z_0-9]/;
+    ($_[0] =~ /^[a-z]/) ? 1 : 0;
+}
+
 ################################################################################
 sub add_type       {        # ._  ~type_name %type_def                       --> ~errormsg
     my ($self, $type_name, $type_def) = (@_);
-    return "class $self->{name} is closed, types can be added" if $self->is_complete;
+    return "class $self->{name} is completed, types can be added" if $self->is_complete;
     return "type definition in class $self->{name} needs a name as first argument" unless defined $type_name and $type_name;
     return "type definition has to be a hash reference" unless ref $type_def eq 'HASH';
     $type_def->{'name'} = $type_name;
@@ -171,8 +223,9 @@ sub add_type       {        # ._  ~type_name %type_def                       -->
 }
 sub add_attribute  {        # .cdef ~name %properties       --> ~errormsg
     my ($self, $name, $attr_def) = (@_);
-    return "class $self->{name} is closed, attributes can be added" if $self->is_complete;
+    return "class $self->{name} is completed, attributes can be added" if $self->is_complete;
     return "attribute definition in class $self->{name} needs a name as first argument" unless defined $name and $name;
+    return "attribute name $name is not an identifier (beginning with lower case letter + digits + _)" unless _is_identifier_($name);
     my $error_start = "attribute $name of class $self->{name}";
     return "$error_start got no property hash to define itself" unless ref $attr_def eq 'HASH';
     return "$error_start needs a descriptive 'help' text" unless exists $attr_def->{'help'};
@@ -187,6 +240,10 @@ sub add_attribute  {        # .cdef ~name %properties       --> ~errormsg
     } else {
         return "$error_start needs a to refer to a 'class'" unless exists $attr_def->{'class'};
         return "$error_start can only have one 'build' or 'build_lazy' property" if $build > 1;
+        if (exists $attr_def->{'wrap'}){
+            return "$error_start need to have a 'require' property" unless exists $attr_def->{'require'};
+            return "$error_start wraps a none KBOS class and can not an init property " if exists $attr_def->{'init'} or exists $attr_def->{'init_lazy'} ;
+        }
     }
     $attr_def->{'name'} = $name;
     $self->{'attribute'}{$name} = $attr_def;
@@ -194,8 +251,10 @@ sub add_attribute  {        # .cdef ~name %properties       --> ~errormsg
 }
 sub add_method     {        # ._  ~name @signature ~code %keywords           --> ~errormsg
     my ($self, $name, $signature, $code, $keyword) = (@_); # signature code mutli scope type name
+    return "class $self->{name} is completed, methods can be added" if $self->is_complete;
+    return "method definition in class $self->{name} needs a name as first argument" unless defined $name and $name;
+    return "method name $name is not an identifier (beginning with lower case letter + digits + _)" unless _is_identifier_($name);
     my $full_name = "$self->{name}::$name";
-    return "class $self->{name} is closed, methods can be added" if $self->is_complete;
     return "siganture definition of method $full_name has to be an array reference - second argument" unless ref $signature eq 'ARRAY';
     return "keywords for method $full_name need to be in a hash (ref) - fourth argument" if ref $keyword ne 'HASH';
     my $kind = exists $keyword->{'getter'} ? 'getter'
@@ -218,18 +277,5 @@ sub add_method     {        # ._  ~name @signature ~code %keywords           -->
     if (defined $multi){ push @{$self->{'method'}{$name}}, $def } else { $self->{'method'}{$name} = $def }
     '';
 }
-################################################################################
-sub get_types  { $_[0]->{'types'} }   # ._                                   --> .type_store
-sub get_attribute           {         # ._  ~attribute_name                  --> %attr_def
-    return unless @_ == 2;
-    $_[0]->{'attribute'}{$_[1]};
-}
-sub get_method              {         # ._  ~method_name                     --> %method_def 
-    return unless @_ == 2;
-    $_[0]->{'method'}{$_[1]};
-}
-################################################################################
-sub attribute_names { keys %{$_[0]->{'attribute_def'}} } # .class_def            --> @~name
-sub method_names    { keys %{$_[0]->{'method_def'}} }    # .class_def            --> @~name
 ################################################################################
 1;
