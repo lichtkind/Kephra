@@ -34,12 +34,15 @@ sub state          {        # ._                          --> %state
 sub get_attribute { $_[0]->{'attribute'}{$_[1]}; } # ._  ~attribute_name     --> %attr_def
 sub get_method   {  $_[0]->{'method'}{$_[1]}; }    # ._  ~method_name        --> %method_def 
 ################################################################################
-sub get_types        { $_[0]->{'types'} }                      # ._          --> .type_store
-sub attribute_names { keys %{$_[0]->{'attribute'}} }     # .class_def        --> @~name
-sub method_names    { keys %{$_[0]->{'method'}} }        # .class_def        --> @~name
-sub get_dependencies { sort keys %{ $_[0]->{'dependencies'}} } # ._          --> @~pkg
-sub get_requirements { sort keys %{ $_[0]->{'requirements'}} } # ._          --> @~pkg
-sub is_complete      { not $_[0]->{'types'}->is_open }         # ._          --> ?
+sub get_type         {                             # ._                      --> .type 
+    my $self = shift;
+    Kephra::Base::Data::Type::standard->get_type(@_) // $self->{'types'}->get_type(@_);
+}
+sub method_names    { keys %{$_[0]->{'method'}} }       # ._          --> @~method_def.~name
+sub attribute_names { sort keys (%{$_[0]->{'attribute'}})  }   # ._          --> @~attr_def.~name
+sub get_dependencies { sort keys %{ $_[0]->{'dependencies'}} } # ._          --> @~attr_def.~class
+sub get_requirements { sort keys (%{ $_[0]->{'requirements'}}) } # ._        --> @~attr_def.~class
+sub is_complete      { $_[0]->{'types'}->is_open ? 0 : 1 }     # ._          --> ?
 ################################################################################
 sub complete       {        # ._                          --> ~errormsg
     my ($self) = (@_);
@@ -79,74 +82,84 @@ sub complete       {        # ._                          --> ~errormsg
         delete $self->{'type_def'};
     }
     my $std_types = Kephra::Base::Data::Type::standard;
-    for my $method_def (@{$self->{'method'}}){
-        my $sep_count = 0;
-        my $ret_start = 0;
-        my %arg_type;
-        for my $i (0 .. $#{$method_def->{'signature'}}){
-            return "signature definition of method $self->{name}::$method_def->{name} has too many separators" if $sep_count > 2;
-            my $arg = $method_def->{'signature'}[$i];
-            $ret_start = $i if $sep_count == 1 and not defined $arg;
-            $sep_count++, next unless defined $arg;
-            my $error_stem = ($sep_count == 2) ? ($i-$ret_start)."st return value in signature definition of method $self->{name}::$method_def->{name}" 
+    my %special = {};
+    for my $method (values %{$self->{'method'}}){
+        for my $method_def ((ref $method eq 'ARRAY') ? @$method : $method){
+            my $sep_count = 0;
+            my $ret_start = 0;
+            my %arg_type;
+            $special{'constructor'}++ if $method_def->{'kind'} eq 'constructor';
+            $special{'destructor'}++ if $method_def->{'kind'} eq 'destructor';
+            for my $i (0 .. $#{$method_def->{'signature'}}){
+                return "signature definition of method $self->{name}::$method_def->{name} has too many separators" if $sep_count > 2;
+                my $arg = $method_def->{'signature'}[$i];
+                $ret_start = $i if $sep_count == 1 and not defined $arg;
+                $sep_count++, next unless defined $arg;
+                my $error_stem = ($sep_count == 2) ? ($i-$ret_start)."st return value in signature definition of method $self->{name}::$method_def->{name}" 
                                                : "$i st argument in signature definition of method $self->{name}::$method_def->{name}";
-            if ($sep_count == 2){
-                my $name = 'return_value_'.($i-$ret_start);
-                push @$arg, $name if ref $arg eq 'ARRAY';
-                $method_def->{'signature'}[$i] = $arg = [$arg, $name] unless ref $arg;
+                if ($sep_count == 2){
+                    my $name = 'return_value_'.($i-$ret_start);
+                    push @$arg, $name if ref $arg eq 'ARRAY';
+                    $method_def->{'signature'}[$i] = $arg = [$arg, $name] unless ref $arg;
+                }
+                unless (ref $arg){
+                    my $sigil = substr($arg, 0, 1);
+                    next if $sigil =~ /[a-z]/;
+                    return "$error_stem has no name" if length $arg < 2;
+                    my $twigil = substr($arg, 1, 1);
+                    if ($twigil =~ /[a-z]/)  { $method_def->{'signature'}[$i] = $arg = [$sigil, substr( $arg,1)] }
+                    else {                     $method_def->{'signature'}[$i] = $arg = [$sigil, $twigil, substr($arg, 2)];
+                        return "$error_stem has no name" if length $arg == 2;
+                    }
+                }
+                return "malformed data of $error_stem, it has to be a string or an array reference" if ref $arg ne 'ARRAY';
+                if (@$arg == 2){
+                    my $type_name = $arg->[0];
+                    return "$error_stem, has zero length type name" unless defined $type_name and $type_name;
+                    my $sigil = substr($type_name, 0, 1);
+                    if ($sigil !~ /[a-z]/) {
+                        if (length $type_name > 1){
+                            $method_def->{'signature'}[$i] = $arg = [$sigil, substr( $type_name, 1 )]
+                        } else {
+                            $arg->[0] = $std_types->resolve_shortcut('basic', $sigil) // $self->{'types'}->resolve_shortcut('basic', $sigil);
+                            return "$error_stem contains the unknown type sigil '$sigil'" unless defined $arg->[0];
+                }   }   }
+                if (@$arg == 2){
+                    my $type_name = $arg->[0];
+                    return "$error_stem contains the unknown type '$type_name'" unless $std_types->is_type_known($type_name) or $self->{'types'}->is_type_known($type_name);
+                    $arg_type{$arg->[1]} = $arg->[0] if $sep_count < 2;
+                } elsif (@$arg == 3){
+                    my ($sigil, $twigil) = @$arg;
+                    if (length $sigil == 1 and $sigil !~ /[a-z]/){
+                        $arg->[0] = $std_types->resolve_shortcut('param', $sigil) // $self->{'types'}->resolve_shortcut('param', $sigil);
+                        return "$error_stem contains the unknown parametric type sigil '$sigil'" unless defined $arg->[0];
+                    }
+                    if (length $twigil == 1 and $twigil !~ /[a-z]/){
+                        $arg->[1] = $std_types->resolve_shortcut('basic', $twigil) // $self->{'types'}->resolve_shortcut('basic', $twigil);
+                        return "$error_stem contains the unknown basic type twigil '$twigil'" unless defined $arg->[1];
+                    }
+                    return "$error_stem contains the unknown type '$arg->[0]' of '$arg->[1]'" unless $std_types->is_type_known(@$arg) or $self->{'types'}->is_type_known(@$arg);
+                } elsif (@$arg == 4){
+                    my ($type_name, $kind, $relator_name, $param_name) = @$arg;
+                    if (substr( $kind, 0, 4) eq 'attr'){
+                        return "$error_stem refers not existing attribute '$arg->[2]'" unless exists $self->{'attribute'}{$arg->[2]};
+                        return "$error_stem refers to a typeless attribute '$arg->[2]'"unless exists $self->{'attribute'}{$arg->[2]}{'type'};
+                        $param_name = $self->{'attribute'}{$arg->[2]}{'type'};
+                    } elsif (substr( $kind, 0, 3) eq 'arg'){
+                        return "$error_stem does not refer to an existing basic typed argument '$arg->[2]'" unless exists $arg_type{$arg->[2]};
+                        $param_name = $arg_type{$arg->[2]};
+                    } else {return "$error_stem relates to something else than an attribute or argument"}
+                    return "$error_stem contains the unknown type '$arg->[0] of $arg->[1] $arg->[2], which is of type $param_name, but there is not type '$arg->[0] of $param_name'"
+                        unless $std_types->is_type_known($arg->[0], $param_name) or $self->{'types'}->is_type_known($arg->[0], $arg->[1]);
+                } else {return "malformed $error_stem - no or too many entries (max. is 4)" if ref $arg ne 'ARRAY' }
             }
-            unless (ref $arg){
-                my $sigil = substr($arg, 0, 1);
-                next if $sigil =~ /[a-z]/;
-                return "$error_stem has no name" if length $arg < 2;
-                my $twigil = substr($arg, 1, 1);
-                if ($twigil =~ /[a-z]/)  { $method_def->{'signature'}[$i] = $arg = [$sigil, substr( $arg,1)] }
-                else {                     $method_def->{'signature'}[$i] = $arg = [$sigil, $twigil, substr($arg, 2)];
-                    return "$error_stem has no name" if length $arg == 2;
-                }
-            }
-            return "malformed data of $error_stem, it has to be a string or an array reference" if ref $arg ne 'ARRAY';
-            if (@$arg == 2){
-                my $type_name = $arg->[0];
-                return "$error_stem, has zero length type name" unless defined $type_name and $type_name;
-                my $sigil = substr($type_name, 0, 1);
-                if ($sigil !~ /[a-z]/) {
-                    if (length $type_name > 1){
-                        $method_def->{'signature'}[$i] = $arg = [$sigil, substr( $type_name, 1 )]
-                    } else {
-                        $arg->[0] = $std_types->resolve_shortcut('basic', $sigil) // $self->{'types'}->resolve_shortcut('basic', $sigil);
-                        return "$error_stem contains the unknown type sigil '$sigil'" unless defined $arg->[0];
-            }   }   }
-            if (@$arg == 2){
-                my $type_name = $arg->[0];
-                return "$error_stem contains the unknown type '$type_name'" unless $std_types->is_type_known($type_name) or $self->{'types'}->is_type_known($type_name);
-                $arg_type{$arg->[1]} = $arg->[0] if $sep_count < 2;
-            } elsif (@$arg == 3){
-                my ($sigil, $twigil) = @$arg;
-                if (length $sigil == 1 and $sigil !~ /[a-z]/){
-                    $arg->[0] = $std_types->resolve_shortcut('param', $sigil) // $self->{'types'}->resolve_shortcut('param', $sigil);
-                    return "$error_stem contains the unknown parametric type sigil '$sigil'" unless defined $arg->[0];
-                }
-                if (length $twigil == 1 and $twigil !~ /[a-z]/){
-                    $arg->[1] = $std_types->resolve_shortcut('basic', $twigil) // $self->{'types'}->resolve_shortcut('basic', $twigil);
-                    return "$error_stem contains the unknown basic type twigil '$twigil'" unless defined $arg->[1];
-                }
-                return "$error_stem contains the unknown type '$arg->[0]' of '$arg->[1]'" unless $std_types->is_type_known(@$arg) or $self->{'types'}->is_type_known(@$arg);
-            } elsif (@$arg == 4){
-                my ($type_name, $kind, $relator_name, $param_name) = @$arg;
-                if (substr( $kind, 0, 4) eq 'attr'){
-                    return "$error_stem refers not existing attribute '$arg->[2]'" unless exists $self->{'attribute'}{$arg->[2]};
-                    return "$error_stem refers to a typeless attribute '$arg->[2]'"unless exists $self->{'attribute'}{$arg->[2]}{'type'};
-                    $param_name = $self->{'attribute'}{$arg->[2]}{'type'};
-                } elsif (substr( $kind, 0, 3) eq 'arg'){
-                    return "$error_stem does not refer to an existing basic typed argument '$arg->[2]'" unless exists $arg_type{$arg->[2]};
-                    $param_name = $arg_type{$arg->[2]};
-                } else {return "$error_stem relates to something else than an attribute or argument"}
-                return "$error_stem contains the unknown type '$arg->[0] of $arg->[1] $arg->[2], which is of type $param_name, but there is not type '$arg->[0] of $param_name'"
-                    unless $std_types->is_type_known($arg->[0], $param_name) or $self->{'types'}->is_type_known($arg->[0], $arg->[1]);
-            } else {return "malformed $error_stem - no or too many entries (max. is 4)" if ref $arg ne 'ARRAY' }
         }
     }
+    return "class $self->{name} has no constructor but uses 'new' as method name" if exists $self->{'method'}{'new'} and not exists $special{'constructor'};
+    return "class $self->{name} has no destructor but uses 'demolish' as method name" if exists $self->{'method'}{'demolish'} and not exists $special{'destructor'};
+    $self->{'method'}{'new'}      = {name=>'new',     kind=>'constructor', scope => 'public'} unless exists $special{'constructor'};
+    $self->{'method'}{'demolish'} = {name=>'demolish', kind=>'destructor', scope => 'public'} unless exists $special{'destructor'};
+
     for my $attr_def (@{$self->{'attribute'}}){
         if (exists $attr_def->{'type'}){
             my $type = $std_types->get_type( $attr_def->{'type'} ) // $self->{'types'}->get_type( $attr_def->{'type'} );
@@ -257,13 +270,15 @@ sub add_method     {        # ._  ~name @signature ~code %keywords           -->
     my $full_name = "$self->{name}::$name";
     return "siganture definition of method $full_name has to be an array reference - second argument" unless ref $signature eq 'ARRAY';
     return "keywords for method $full_name need to be in a hash (ref) - fourth argument" if ref $keyword ne 'HASH';
-    my $kind = exists $keyword->{'getter'} ? 'getter'
+    my $kind = exists $keyword->{'constructor'} ? 'constructor'
+             : exists $keyword->{'destructor'} ? 'destructor'
+             : exists $keyword->{'getter'} ? 'getter'
              : exists $keyword->{'setter'} ? 'setter'
              : exists $keyword->{'wrapper'} ? 'wrapper'
-             : exists $keyword->{'delegator'} ? 'delegator' : 'simple';
+             : exists $keyword->{'delegator'} ? 'delegator' : 'regular';
     my $scope = exists $keyword->{'private'} ? 'private'
               : exists $keyword->{'public'} ? 'public'
-              : $kind eq 'simple' ? 'public' : 'access';
+              : ($kind eq 'regular' or $kind eq 'constructor'  or $kind eq 'destructor' ) ? 'public' : 'access';
     my $multi = $keyword->{'multi'};
     delete @$keyword{$kind, $scope, 'multi'};
     my @k = keys %$keyword;
