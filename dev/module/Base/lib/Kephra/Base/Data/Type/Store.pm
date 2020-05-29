@@ -11,7 +11,7 @@ package Kephra::Base::Data::Type::Store;
 our $VERSION = 1.2;
 use Kephra::Base::Data::Type::Basic;             my $btclass = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;        my $ptclass = 'Kephra::Base::Data::Type::Parametric';
-##############################################################################
+################################################################################
 sub new {      # - 'open'   --> .tstore
     my ($pkg) = @_;
     bless {basic_type => {}, param_type => {}, basic_name_by_shortcut => {}, param_name_by_shortcut => {}, forbid_shortcut => [], open => $_[1]//1};
