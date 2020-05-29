@@ -3,7 +3,7 @@ use warnings;
 
 # delegate calls for class creation; phases: types -> methods -> attributs -> new
 
-package Kephra::Base::Class::Builder;
+package Kephra::Base::Class::Build;
 our $VERSION = 0.02;
 my (%raw_def); # class kind name [parameter]
 use Kephra::Base::Package;

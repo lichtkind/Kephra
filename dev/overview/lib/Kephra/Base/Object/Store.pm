@@ -4,7 +4,7 @@ use warnings;
 package Kephra::Base::Object::Store;
 use parent qw(Kephra::Base::Object);
 use Kephra::API qw/:log/;
-use Kephra::Base::Class::Method::Hook;
+use Kephra::Base::Class::Build::Method::Hook;
 use Kephra::Base::Object::Queue;
 
 sub new {} # pkg class {getter => setter}? hsize? factory? --> obj

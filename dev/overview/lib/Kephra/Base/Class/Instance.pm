@@ -5,6 +5,7 @@ package Kephra::Base::Class::Instance;
 our $VERSION = 0.02;
 
 use Kephra::Base::Class::Instance::Attribute;
+use Kephra::Base::Class::Instance::Arguments;
 use Kephra::Base::Class::Scope;
 
 sub create {}            # str class --> bool 

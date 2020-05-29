@@ -27,19 +27,19 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::Closure                      C         1.1    serializable closure (code and date)
  - K::Base                            C         0.11   root package of self made language extensions
 --------------------------------------------------------------------------------
-   K::B::C::Definition                 PS       0.7    serializable data set to build a KBOS class from
+   K::B::C::Definition                 PSU      0.7    serializable data set to build a KBOS class from
    K::B::C::Scope                     C         1.5    namespace constants, paths & priority logic
    K::B::C::Instance::Attribute            B N         central store for attribute values
    K::B::C::Instance::Arguments            B N         central store for arguments values
    K::B::C::Instance                       B N         central store 4 KBOS object ref (self + attr ref)
    K::B::C::Registry                         N
-   K::B::C::Method::Attribute              B
-   K::B::C::Method::Hook                   B
-   K::B::C::Method::Accessor               B
-   K::B::C::Method::Constructor            B
-   K::B::C::Method::Simple                 B
-   K::B::C::Method::Multi                  B
-   K::B::C::Builder                        B
+   K::B::C::Build::Attribute               B
+   K::B::C::Build::Arguments               B
+   K::B::C::Build::Method::Hook            B
+   K::B::C::Build::Method                  B
+   K::B::C::Build::Accessor                B
+   K::B::C::Build::Constructor             B
+   K::B::C::Build                          B
    K::B::C::Syntax::Parser                   N
    K::B::C::Syntax::Signature                N
    K::B::C::Syntax                           N

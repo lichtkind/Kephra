@@ -1,12 +1,11 @@
 use v5.20;
 use warnings;
 
-package Kephra::Base::Class::Instance::Attribute;
+package Kephra::Base::Class::Instance::Arguments;
 our $VERSION = 0.05;
 use Kephra::Base::Package;
 use Kephra::Base::Class::Scope;
 use Kephra::Base::Data;
-
 
 sub create         {} # ~class ~attribute .class_types ~type --> .attr
 sub add_getter     {} # .attr  ~path  .self                  --> ?

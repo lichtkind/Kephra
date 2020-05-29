@@ -3,7 +3,9 @@ use warnings;
 
 package Kephra::Base::Class::Syntax;
 
-use Kephra::Base::Class::Builder;
+use Kephra::Base::Class::Syntax::Signature;
+use Kephra::Base::Class::Syntax::Parser;
+use Kephra::Base::Class::Build;
 
 sub import    {} # establish new keywords
 sub unimport  {} # remove them
