@@ -4,7 +4,7 @@ use warnings;
 # definitions and store of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
-our $VERSION = 2.5;
+our $VERSION = 2.6;
 use Kephra::Base::Data::Type::Basic;
 
 our @basic_type_definitions;

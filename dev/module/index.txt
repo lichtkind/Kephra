@@ -21,13 +21,13 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::Data::Type::Parametric  .......  C  .....  1.31   checks the relation between two values
    K::B::Data::Type::Store  ............  C  .....  1.2    collection of type objects
    K::B::Data::Type::Util  .............  C  .....  0.8    helper functions for type creation
-   K::B::Data::Type::Standard  .........  C  .....  2.5    definition of standard types
+   K::B::Data::Type::Standard  .........  C  .....  2.6    definition of standard types
    K::B::Data::Type  ...................  CP .....  1.11   manage type related symbols
    K::B::Data  .........................  C  .....  0.2    root of none OO data handling
    K::B::Closure  ......................  C  .....  1.1    serializable closure (code and date)
  - K::Base  ............................  C  .....  0.11   root package of self made language extensions
 --------------------------------------------------------------------------------
-   K::B::C::Definition::Attr.::Data          U      0.0    define attribute with raw data
+   K::B::C::Definition::Attr.::Data  ...     U      0.1    define attribute with raw data
    K::B::C::Definition::Attr.::Delegating    U      0.0    define attribute, which is KBOS object
    K::B::C::Definition::Attr.::Wrapping      U      0.0    define attribute, which is none KBOS object
    K::B::C::Definition::Attribute            U      0.0    validate and serialize attribute definition

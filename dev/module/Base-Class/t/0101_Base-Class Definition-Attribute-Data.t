@@ -5,9 +5,10 @@ use experimental qw/switch/;
 use Test::More tests => 22;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
-use Kephra::Base::Class::Definition;    my $class = 'Kephra::Base::Class::Definition';
+require Kephra::Base::Class::Definition::Attribute::Data;
+my $class = 'Kephra::Base::Class::Definition::Attribute::Data';
 
-my $def = Kephra::Base::Class::Definition->new('C');
+my $def = Kephra::Base::Class::Definition::Attribute::Data->new();
 is( ref $def,                                 $class,        'created class definition object');
 ok( not (ref Kephra::Base::Class::Definition->new()),        'need a name to create class definition');
 ok( not (ref Kephra::Base::Class::Definition->new('a')),     'need a ucfirst name to create class definition');

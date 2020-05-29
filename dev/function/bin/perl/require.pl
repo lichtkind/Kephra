@@ -6,6 +6,7 @@ BEGIN { unshift @INC, 'bin/perl', '.'}
 my $r = 'Require.pm';
 
 require $r;
+#use Require;
 
 say  Require::test();
 say 'there shoult only be a t above this text';

@@ -2,52 +2,25 @@ use v5.20;
 use warnings;
 
 package Kephra::Base::Class::Definition::Attribute;
+our $VERSION = 0.5;
 
+use Kephra::Base::Data::Type;
 use Kephra::Base::Class::Definition::Attribute::Data;
-use Kephra::Base::Class::Definition::Attribute::Delegator;
+use Kephra::Base::Class::Definition::Attribute::Delegating;
 use Kephra::Base::Class::Definition::Attribute::Wrapping;
 
-sub new {        # .cdef ~name %properties       --> ~errormsg
-    my ($pkg, $name, $attr_def) = (@_);
-    return "class $self->{name} is completed, attributes can be added" if $self->is_complete;
-    return "attribute definition in class $self->{name} needs a name as first argument" unless defined $name and $name;
-    return "attribute name $name is not an identifier (beginning with lower case letter + digits + _)" unless _is_identifier_($name);
-    my $error_start = "attribute $name of class $self->{name}";
-    return "$error_start got no property hash to define itself" unless ref $attr_def eq 'HASH';
-    return "$error_start needs a descriptive 'help' text" unless exists $attr_def->{'help'};
-    return "$error_start has no associated getter method" if exists $attr_def->{'set'} and not exists $attr_def->{'get'};
-    my $kind = (exists $attr_def->{'get'}) + (exists $attr_def->{'wrap'}) + (exists $attr_def->{'delegate'});
-    my $build = (exists $attr_def->{'build'}) + (exists $attr_def->{'build_lazy'}) + (exists $attr_def->{'init'}) + (exists $attr_def->{'init_lazy'});
-    return "$error_start needs an associated getter, delegator or wrapper method" if $kind == 0;
-    return "$error_start can only have getter or delegator or wrapper" if $kind > 1;
-    if (exists $attr_def->{'get'}){
-        return "$error_start needs a to refer to a data 'type'" unless exists $attr_def->{'type'};
-        return "$error_start can only have one 'init' or 'init_lazy' or 'build' or 'build_lazy' property" if $build > 1;
-    } else {
-        return "$error_start needs a to refer to a 'class'" unless exists $attr_def->{'class'};
-        return "$error_start can only have one 'build' or 'build_lazy' property" if $build > 1;
-        if (exists $attr_def->{'wrap'}){
-            return "$error_start need to have a 'require' property" unless exists $attr_def->{'require'};
-            return "$error_start wraps a none KBOS class and can not an init property " if exists $attr_def->{'init'} or exists $attr_def->{'init_lazy'} ;
-        }
-    }
-    $attr_def->{'name'} = $name;
-    $self->{'attribute'}{$name} = $attr_def;
-    '';
+sub new {        # ~pkg ~name %properties       --> ._| ~errormsg
+    my ($pkg, $name, $attr_def_data) = (@_);
+    return "attribute definition needs an identifier (a-z,a-z0-9_) as first argument" if Kephra::Base::Data::Type::standard->check_type('identifier', $name);
+    my ($error_start, $type_def) = ("attribute $name");
+    return "$error_start got no property hash to define itself" unless ref $attr_def_data eq 'HASH';
+    return "$error_start needs a descriptive 'help' text of more than 5 character" unless exists $attr_def_data->{'help'} and length $attr_def_data->{'help'} > 5;
+    $attr_def_data->{'name'} = $name;
+    if    (exists $attr_def->{'get'})      {Kephra::Base::Class::Definition::Attribute::Data->new($attr_def_data)}
+    elsif (exists $attr_def->{'delegate'}) {Kephra::Base::Class::Definition::Attribute::Delegating->new($attr_def_data)}
+    elsif (exists $attr_def->{'wrap'})     {Kephra::Base::Class::Definition::Attribute::Wrapping->new($attr_def_data)}
+    else {return "definition of attribute $name lacks accessor name in get, delegate or wrap property (one only!)"}
 }
-
-
-sub get_kind {}
-sub get_help {}
-sub get_type {}
-sub get_init {}
-sub get_build {}
-sub is_lazy {}
-sub accessor_names {}
-sub auto_accessors {} # name => scope | [getscope, setscope]
-sub get_dependency {}
-sub get_requirement {}
-
 
 1;
 __DATA__
