@@ -7,51 +7,50 @@ relation between different types of protos: dev/roadmap.txt
 our development model in more details: doc/CompleteProgramming.pod
 
 --------------------------------------------------------------------------------
-   K ~~ Kephra                        C = Complete
-   B ~~ Base                           P = Partially there, nothing missing now (or only tests)
-   C ~~ Class                           S = Small feature missing
-                                         U = Usable
-                                          M = Major feature missing
-                                           B = Buggy/old Deprecated code
-                                            I = In Progress (currently worked on)
-                                             N = Not yet (planned)
+   K ~~ Kephra                            C = Complete
+      B ~~ Base                           .P = Partially there, nothing missing now (or only tests)
+        C ~~ Class                        . S = Small feature missing
+                                          .  U = Usable
+                                          .   M = Major feature missing
+                                          .    B = Buggy/old Deprecated code
+                                          .     I = In Progress (currently worked on)
+                                          .      N = Not yet (planned)
 --------------------------------------------------------------------------------
-   K::B::Package                      C         1.1    low level symbol manipulation
-   K::B::Data::Type::Basic            C         1.4    inheritable single value checker
-   K::B::Data::Type::Parametric       C         1.31   checks the relation between two values
-   K::B::Data::Type::Store            C         1.2    collection of type objects
-   K::B::Data::Type::Util             C         0.8    helper functions for type creation
-   K::B::Data::Type::Standard         C         2.5    definition of standard types
-   K::B::Data::Type                   C         1.11   manage type related symbols
-   K::B::Data                         C         0.2    root of none OO data handling
-   K::B::Closure                      C         1.1    serializable closure (code and date)
- - K::Base                            C         0.11   root package of self made language extensions
+   K::B::Package  ......................  C  .....  1.1    low level symbol manipulation
+   K::B::Data::Type::Basic  ............  C  .....  1.4    inheritable single value checker
+   K::B::Data::Type::Parametric  .......  C  .....  1.31   checks the relation between two values
+   K::B::Data::Type::Store  ............  C  .....  1.2    collection of type objects
+   K::B::Data::Type::Util  .............  C  .....  0.8    helper functions for type creation
+   K::B::Data::Type::Standard  .........  C  .....  2.5    definition of standard types
+   K::B::Data::Type  ...................  CP .....  1.11   manage type related symbols
+   K::B::Data  .........................  C  .....  0.2    root of none OO data handling
+   K::B::Closure  ......................  C  .....  1.1    serializable closure (code and date)
+ - K::Base  ............................  C  .....  0.11   root package of self made language extensions
 --------------------------------------------------------------------------------
-   K::B::C::Definition::Attribute        U      0.0    serializable attribute definition
-   K::B::C::Definition::Method           U      0.0    serializable method definition
-   K::B::C::Definition                 PSU      0.7    serializable data set to build a KBOS class from
-   K::B::C::Scope                     C         1.5    namespace constants, paths & priority logic
-   K::B::C::Instance::Attribute            B N         central store for attribute values
-   K::B::C::Instance::Arguments            B N         central store for arguments values
-   K::B::C::Instance                       B N         central store 4 KBOS object ref (self + attr ref)
-   K::B::C::Registry                         N
-   K::B::C::Build::Attribute               B
-   K::B::C::Build::Method::Arguments       B
-   K::B::C::Build::Method::Hook            B
-   K::B::C::Build::Method                  B
-   K::B::C::Build::Accessor                B
-   K::B::C::Build::Constructor             B
-   K::B::C::Build                          B
-   K::B::C::Syntax::Parser                   N
-   K::B::C::Syntax::Signature                N
-   K::B::C::Syntax                           N
- - K::B::Class                         P
+   K::B::C::Definition::Attr.::Data          U      0.0    define attribute with raw data
+   K::B::C::Definition::Attr.::Delegating    U      0.0    define attribute, which is KBOS object
+   K::B::C::Definition::Attr.::Wrapping      U      0.0    define attribute, which is none KBOS object
+   K::B::C::Definition::Attribute            U      0.0    validate and serialize attribute definition
+   K::B::C::Definition::Method::Signature    U      0.0    validate and serialize signature definition
+   K::B::C::Definition::Method               U      0.0    validate and serialize method definition
+   K::B::C::Definition                     PSU      0.7    serializable data set to build a KBOS class from
+   K::B::C::Scope                         C         1.5    namespace constants, paths & priority logic
+   K::B::C::Instance::Attribute                B N         central store for attribute values
+   K::B::C::Instance::Arguments                B N         central store for arguments values
+   K::B::C::Instance                           B N         central store 4 KBOS object ref (self + attr ref)
+   K::B::C::Registry                             N
+   K::B::C::Builder::Attribute                 B
+   K::B::C::Builder::Method::Arguments         B
+   K::B::C::Builder::Method::Hook              B
+   K::B::C::Builder::Method                    B
+   K::B::C::Builder::Accessor                  B
+   K::B::C::Builder::Constructor               B
+   K::B::C::Builder                            B
+   K::B::C::Syntax::Parser                       N
+   K::B::C::Syntax::Signature                  N
+   K::B::C::Syntax                             N
+ - K::B::Class                           P
 --------------------------------------------------------------------------------
-   K::B::C::Attribute                 C
-   K::B::C::Syntax                         B
-   K::B::C::Method::Signature              B
-   K::B::C::Method::Argument               B
-   K::B::C::Attribute::Type            P
 ================================================================================
  - Kephra::Base::Object
    Kephra::Base::Object::CodeSnippet

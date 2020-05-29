@@ -4,8 +4,8 @@ use warnings;
 package Kephra::Base::Class::Build;
 
 use Kephra::Base::Package;
-use Kephra::Base::Class::Build::Attribute;
-use Kephra::Base::Class::Build::Method;
+use Kephra::Base::Class::Builder::Attribute;
+use Kephra::Base::Class::Builder::Method;
 use Kephra::Base::Class::Definition;
 use Kephra::Base::Class::Instance;
 use Kephra::Base::Class::Syntax;
