@@ -8,50 +8,69 @@ sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
     my ($pkg, $attr_def) = (@_);
     return "need a property hash to create a data attribute definition" unless ref $attr_def eq 'HASH';
     my $error_start = ("data attribute $attr_def->{name}");
-    for (qw/delegate wrap class/){ return "$error_start has illegal property '$_'" if exists $attr_def->{$_} }
+    my $self = {methods => [], auto => {}};
+    for (qw/type name/) {
+        return "$error_start lacks property '$_'" unless exists $attr_def->{$_};
+        $self->{$_} = delete $attr_def->{$_};
+    }
+    $self->{'lazy'} = 0;
+    if    (exists $attr_def->{'init'})      {$self->{'init'}  = delete $attr_def->{'init'} }
+    elsif (exists $attr_def->{'lazy_init'}) {$self->{'init'}  = delete $attr_def->{'lazy_init'}; $self->{'lazy'} = 1; }
+    elsif (exists $attr_def->{'build'})     {$self->{'build'} = delete $attr_def->{'build'} }
+    elsif (exists $attr_def->{'lazy_build'}){$self->{'build'} = delete $attr_def->{'lazy_build'}; $self->{'lazy'} = 1; }
 
+    return "$error_start lacks property 'get' or 'auto_get'" unless exists $attr_def->{'get'} or exists $attr_def->{'auto_get'};
+    push @{$self->{'methods'}}, @{delete $attr_def->{'get'}} if ref $attr_def->{'get'} eq 'ARRAY';
+    push @{$self->{'methods'}},   delete $attr_def->{'get'}  if not ref $attr_def->{'get'} and exists $attr_def->{'get'};
+    push @{$self->{'methods'}}, @{delete $attr_def->{'set'}} if ref $attr_def->{'set'} eq 'ARRAY';
+    push @{$self->{'methods'}},   delete $attr_def->{'set'}  if not ref $attr_def->{'set'} and exists $attr_def->{'set'};
 
-#    if (exists $attr_def->{'get'}) {$type_def = }
-    return "$error_start has no associated getter method" if exists $attr_def->{'set'} and not exists $attr_def->{'get'};
-    my $kind = (exists $attr_def->{'get'}) + (exists $attr_def->{'wrap'}) + (exists $attr_def->{'delegate'});
-    my $build = (exists $attr_def->{'build'}) + (exists $attr_def->{'build_lazy'}) + (exists $attr_def->{'init'}) + (exists $attr_def->{'init_lazy'});
-    return "$error_start needs an associated getter, delegator or wrapper method" if $kind == 0;
-    return "$error_start can only have getter or delegator or wrapper" if $kind > 1;
-    if (exists $attr_def->{'get'}){
-        return "$error_start needs a to refer to a data 'type'" unless exists $attr_def->{'type'};
-        return "$error_start can only have one 'init' or 'init_lazy' or 'build' or 'build_lazy' property" if $build > 1;
-    } else {
-        return "$error_start needs a to refer to a 'class'" unless exists $attr_def->{'class'};
-        return "$error_start can only have one 'build' or 'build_lazy' property" if $build > 1;
-        if (exists $attr_def->{'wrap'}){
-            return "$error_start need to have a 'require' property" unless exists $attr_def->{'require'};
-            return "$error_start wraps a none KBOS class and can not an init property " if exists $attr_def->{'init'} or exists $attr_def->{'init_lazy'} ;
+    $self->{'auto'} = {%{ delete $attr_def->{'auto_get'}}} if ref $attr_def->{'auto_get'} eq 'HASH';
+    if (ref $attr_def->{'auto_set'} eq 'HASH'){
+        $self->{'auto'}{$_} = [$self->{'auto'}{$_} , $attr_def->{'auto_set'}{$_}] for keys %{$attr_def->{'auto_set'}};
+        delete $attr_def->{'auto_set'};
+    }
+    for (keys %$attr_def){ return "$error_start has the illegal, malformed or effectless property '$_'"  }
+    bless $self;
+}
+
+sub check_type {    # ._       --> ~errormsg
+    my $self = shift;
+    for my $store (@_){
+        next unless ref $store eq 'Kephra::Base::Data::Type::Store';
+        if ($store->is_type_known( $self->{'type'} )){
+            if (not exists $self->{'init'} and not exists $self->{'build'}){
+                $self->{'init'} = $store->get_type( $self->{'type'} )->get_default_value();
+            }
+            return '';
         }
     }
-    bless $attr_def;
+    return "data attribute $attr_def->{name} has an unknown type: '$self->{'type'}'";
 }
 ################################################################################
-
+sub state   { $_[0] }
+sub restate {bless shift }
+################################################################################
 sub get_kind  {'data'}
 sub get_help  {$_[0]->{'help'}}
 sub get_type  {$_[0]->{'type'}}
 sub get_init  {$_[0]->{'init'}}
 sub get_build {$_[0]->{'build'}}
 sub is_lazy   {$_[0]->{'lazy'}}
-sub accessor_names  {}
-sub auto_accessors  {} # name => scope | [getscope, setscope]
+sub accessor_names  {@{ $_[0]->{'methods'}} }
+sub auto_accessors  {$_[0]->{'auto'}} # name => scope | [getscope, setscope]
 sub get_dependency  { undef }
 sub get_requirement { undef }
 
 
 1;
-
 __DATA__
 
-attribute name => {help => '',                           # help = long name/description for help messages
-                   type => 'name',                       # normal data type or class type, whis is not a class itself
-                   get  => setter_name|[setter_name,..], # method setter_name gets access to attribute # -name = autogenerated getter/setter name
-         ?         set  => getter_name|[getter_name,..]; # method getter_name gets access to attribute # -name = autogenerated getter/setter name
-         ?  init[_lazy] => $val                          # initial value when its different from the type ones
-         ? build[_lazy] => 'code'                        # code to build default value (optionally lazy) (none lazy can also be done in constructor)
-
+attribute name => {help => '',                            # help = long name/description for help messages
+                   type => 'name',                        # normal data type or class type, whis is not a class itself
+         |          get => getter_name|[getter_name,..],  # method setter_name gets access to attribute
+         |     auto_get => {name => scope};               # autogenerated getter name
+         ?          set => setter_name|[setter_name,..];  # method setter_name gets access to attribute 
+         ?     auto_set => {name => scope};               # autogenerated setter name
+         ?  [lazy_]init => $val                           # initial value when its different from the type ones
+         ? [lazy_]build => 'code'                         # code to build default value (optionally lazy) (none lazy can also be done in constructor)

@@ -168,7 +168,7 @@ sub complete       {        # ._                          --> ~errormsg
             return "data attribute $attr_def->{name} of class $self->{name} has an unknown type" unless ref $type;
             return "data attribute $attr_def->{name} of class $self->{name} has the initial value '$attr_def->{init}' that does not fit its type ".$type->get_name
                 if exists $attr_def->{'init'} and $type->check( $attr_def->{'init'} );
-            return "data attribute $attr_def->{name} of class $self->{name} has the initial value '$attr_def->{v}' that does not fit its type ".$type->get_name
+            return "data attribute $attr_def->{name} of class $self->{name} has the initial value '$attr_def->{init}' that does not fit its type ".$type->get_name
                 if exists $attr_def->{'init_lazy'} and $type->check( $attr_def->{'init_lazy'} );
             my $error = $self->_missing_method_($attr_def->{'get'}) or $self->_missing_method_($attr_def->{'set'});
             return "definition of data attribute $attr_def->{name} of class $self->{name} has issue: $error" if $error;
