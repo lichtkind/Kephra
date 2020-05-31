@@ -8,7 +8,6 @@ sub new     {}         # ~pkg %attr_def           --> ._ | ~errormsg
 sub state   {}         # $_                       --> %state
 sub restate {}         # ~pkg %state              --> ._
 
-
 sub get_kind  {}       # ._    --> 'data'
 sub get_help  {}       # ._    --> ~help
 sub get_type  {}       # ._    --> ~type

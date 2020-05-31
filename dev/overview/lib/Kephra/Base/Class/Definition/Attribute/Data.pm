@@ -2,14 +2,13 @@ use v5.20;
 use warnings;
 
 package Kephra::Base::Class::Definition::Attribute::Data;
-our $VERSION = 0.1;
+our $VERSION = 1.0;
 
 sub new     {}         # ~pkg %attr_def           --> ._ | ~errormsg
 sub state   {}         # $_                       --> %state
 sub restate {}         # ~pkg %state              --> ._
 
 sub check_type {}      # ._    --> ~errormsg
-
 
 sub get_kind  {}       # ._    --> 'data'
 sub get_help  {}       # ._    --> ~help

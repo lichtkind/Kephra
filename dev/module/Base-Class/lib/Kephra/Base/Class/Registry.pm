@@ -1,7 +1,7 @@
 use v5.20;
 use warnings;
 
-# central storage for all classes and their instances
+# central storage for all class definitions and their instances
 
 package Kephra::Base::Class::Registry;
 our $VERSION = 0.00;
