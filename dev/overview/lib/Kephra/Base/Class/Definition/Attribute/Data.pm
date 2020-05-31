@@ -22,5 +22,4 @@ sub auto_accessors  {} # ._    --> %def = {name => get_scope | [get_scope, set_s
 sub get_dependency  {} # ._    --> undef
 sub get_requirement {} # ._    --> undef
 
-
 1;

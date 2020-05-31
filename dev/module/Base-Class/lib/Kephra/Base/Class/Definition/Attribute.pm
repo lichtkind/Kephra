@@ -38,7 +38,9 @@ delegating attribute name  => {help => '',                # help = long name/des
                               class => 'Kephra::...',     # class of attribute (has to be a KBOS class)
                  |         delegate => del_name|[name,..];# delegator method that get access to the attribute
                  |    auto_delegate => {dname => 'orig'}  # auto generate method 'self->dname' which maps to 'attr->orig'
-               ?|       init[_lazy] => []|{},             # args to construct attribute object (positional [] or named {}, first is method name)
+                                       {dname => { to => 'orig', scope => 'public'}}
+               ?|       init[_lazy] => [$val]|{attr=>$val}# args to construct attribute object (positional [] or named {}, first is method name)
+               ?|      built[_lazy] => ['code']|{a=>'cod'}# eval to build args values
 
 wrapping attribute name => { help  => '',                 # short explaining text for better ~errormsg
                             class  => 'Kephra::...',      # class of attribute (can be any)
