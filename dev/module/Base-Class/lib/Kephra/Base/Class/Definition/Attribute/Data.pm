@@ -6,24 +6,29 @@ our $VERSION = 0.1;
 ################################################################################
 sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
     my ($pkg, $attr_def) = (@_);
+    my $self = {methods => [], auto => {}, lazy => 0};
     return "need a property hash to create a data attribute definition" unless ref $attr_def eq 'HASH';
-    my $error_start = ("data attribute $attr_def->{name}");
-    my $self = {methods => [], auto => {}};
+    my $error_start = 'data attribute ';
+    $error_start .= $attr_def->{name} if exists $attr_def->{name};
     for (qw/name help type/) {
         return "$error_start lacks property '$_'" unless exists $attr_def->{$_};
         $self->{$_} = delete $attr_def->{$_};
     }
-    $self->{'lazy'} = 0;
     if    (exists $attr_def->{'init'})      {$self->{'init'}  = delete $attr_def->{'init'} }
     elsif (exists $attr_def->{'build'})     {$self->{'build'} = delete $attr_def->{'build'} }
     elsif (exists $attr_def->{'lazy_build'}){$self->{'build'} = delete $attr_def->{'lazy_build'}; $self->{'lazy'} = 1; }
 
     return "$error_start lacks property 'get' or 'auto_get'" unless exists $attr_def->{'get'} or exists $attr_def->{'auto_get'};
+    return "$error_start property 'get' has to be string with valid getter method name or an arry of such names"
+        if exists $attr_def->{'get'} and ref $attr_def->{'get'} and ref $attr_def->{'get'} ne 'ARRAY';
+    return "$error_start property 'set' has to be string with valid setter method name or an arry of such names"
+        if exists $attr_def->{'set'} and ref $attr_def->{'set'} and ref $attr_def->{'set'} ne 'ARRAY';
     push @{$self->{'methods'}}, @{delete $attr_def->{'get'}} if ref $attr_def->{'get'} eq 'ARRAY';
     push @{$self->{'methods'}},   delete $attr_def->{'get'}  if not ref $attr_def->{'get'} and exists $attr_def->{'get'};
     push @{$self->{'methods'}}, @{delete $attr_def->{'set'}} if ref $attr_def->{'set'} eq 'ARRAY';
     push @{$self->{'methods'}},   delete $attr_def->{'set'}  if not ref $attr_def->{'set'} and exists $attr_def->{'set'};
 
+    return "$error_start property 'auto_get' has to be defined by an hash: {method => scope}" if exists $attr_def->{'auto_get'} and ref $attr_def->{'auto_get'} ne 'HASH';
     $self->{'auto'} = {%{ delete $attr_def->{'auto_get'}}} if ref $attr_def->{'auto_get'} eq 'HASH';
     if (ref $attr_def->{'auto_set'} eq 'HASH'){
         $self->{'auto'}{$_} = [$self->{'auto'}{$_} , $attr_def->{'auto_set'}{$_}] for keys %{$attr_def->{'auto_set'}};
