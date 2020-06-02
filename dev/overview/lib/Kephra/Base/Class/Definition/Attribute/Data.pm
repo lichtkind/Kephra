@@ -2,7 +2,7 @@ use v5.20;
 use warnings;
 
 package Kephra::Base::Class::Definition::Attribute::Data;
-our $VERSION = 1.0;
+our $VERSION = 1.2;
 
 sub new     {}         # ~pkg %attr_def           --> ._ | ~errormsg
 sub state   {}         # $_                       --> %state
@@ -17,7 +17,7 @@ sub get_init  {}       # ._    --> $val|undef
 sub get_build {}       # ._    --> ~code|undef
 sub is_lazy   {}       # ._    --> ?
 sub accessor_names  {} # ._    --> @~method_name
-sub auto_accessors  {} # ._    --> %def = {name => get_scope | [get_scope, set_scope]}
+sub auto_accessors  {} # ._    --> %def = {accessor_name => {get => get_scope &| set => set_scope }
 sub get_dependency  {} # ._    --> undef
 sub get_requirement {} # ._    --> undef
 

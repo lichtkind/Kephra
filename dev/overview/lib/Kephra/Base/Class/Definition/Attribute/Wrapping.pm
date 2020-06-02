@@ -3,7 +3,7 @@ use warnings;
 
 package Kephra::Base::Class::Definition::Attribute::Wrapping;
 
-our $VERSION = 0.1;
+our $VERSION = 1.0;
 
 sub new     {}         # ~pkg %attr_def           --> ._ | ~errormsg
 sub state   {}         # $_                       --> %state
