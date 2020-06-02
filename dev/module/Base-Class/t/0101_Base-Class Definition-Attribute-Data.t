@@ -5,13 +5,12 @@ use experimental qw/switch/;
 use Test::More tests => 80;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
-require Kephra::Base::Class::Definition::Attribute::Data;
+
 require Kephra::Base::Data::Type;
-
+require Kephra::Base::Class::Definition::Attribute::Data;
 my $class = 'Kephra::Base::Class::Definition::Attribute::Data';
-my $req_properies = {name => 'name', help => 'help', type => 'int'};
 sub mk_attr_def {Kephra::Base::Class::Definition::Attribute::Data->new(@_)}
-
+my $req_properies = {name => 'name', help => 'help', type => 'int'};
 
 my $def = mk_attr_def({%$req_properies, get => 'get'});
 is( ref $def,                                               $class,        'created first data attribute definition object with minimal properties');
@@ -119,6 +118,6 @@ ok(not (ref mk_attr_def({%$req_properies, get => {get => 1}})),            '"get
 ok(not (ref mk_attr_def({%$req_properies, get => 'a', set => {get => 1}})),'"set" property has to be an ARRAY');
 $req_properies = {name => 'name', help => 'help', type => 'int', get => 'get'};
 ok(not (ref mk_attr_def({%$req_properies, init => 1, build => 1})),        'only one init method is allowed');
-ok(not (ref mk_attr_def({%$req_properies, laty_build => 1, build => 1})),  'build attribute lazily or not, not both');
+ok(not (ref mk_attr_def({%$req_properies, lazy_build => 1, build => 1})),  'build attribute lazily or not, not both');
 
 exit 0;

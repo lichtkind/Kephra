@@ -2,7 +2,7 @@ use v5.20;
 use warnings;
 
 package Kephra::Base::Class::Definition::Attribute::Data;
-our $VERSION = 1.2;
+our $VERSION = 1.21;
 ################################################################################
 sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
     my ($pkg, $attr_def) = (@_);
@@ -12,6 +12,8 @@ sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
     $error_start .= $attr_def->{name} if exists $attr_def->{name};
     for (qw/name help type/) {
         return "$error_start lacks property '$_'" unless exists $attr_def->{$_};
+        return "$error_start property '$_' can not be a reference"  if ref $attr_def->{$_};
+        return "$error_start property '$_' can not be empty"  unless $attr_def->{$_};
         $self->{$_} = delete $attr_def->{$_};
     }
     if    (exists $attr_def->{'init'})      {$self->{'init'}  = delete $attr_def->{'init'} }

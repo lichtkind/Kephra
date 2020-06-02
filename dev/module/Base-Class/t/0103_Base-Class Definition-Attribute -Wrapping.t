@@ -7,6 +7,8 @@ use Test::More tests => 22;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 require Kephra::Base::Class::Definition::Attribute::Wrapping;
 my $class = 'Kephra::Base::Class::Definition::Attribute::Wrapping';
+sub mk_attr_def {Kephra::Base::Class::Definition::Attribute::Wrapping->new(@_)}
+my $req_properies = {name => 'name', help => 'help', class => 'K::B::C', delegate => 'method'};
 
 my $def = Kephra::Base::Class::Definition::Attribute::Wrapping->new('C');
 is( ref $def,                                 $class,        'created class definition object');
