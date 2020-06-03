@@ -4,7 +4,8 @@ use warnings;
 package Kephra::Base::Class::Definition::Method::Signature;
 
 
-sub make      {} # cmd pkg id .. params
+sub new   {
+}
 
 
 1;

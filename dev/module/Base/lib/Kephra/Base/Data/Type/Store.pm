@@ -195,6 +195,7 @@ sub _validate_type_name_ {
     my $self = shift;
     return "type name is not defined" unless defined $_[0];
     return "type name $_[0] contains none id character" if  $_[0] =~ /[^a-z0-9_]/;
+    return "type name $_[0] has to start with a letter" unless $_[0] =~ /^[a-z]/;
     return "type name $_[0] is too long" if  length $_[0] > 12;
     return "type name $_[0] is not long enough" if  length $_[0] < 3;
     '';
