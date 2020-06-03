@@ -8,7 +8,7 @@ no warnings 'experimental::smartmatch';
 #       multiple parametric types with same name and different parameters must have same owner and shortcut (basic type shortcuts have own name space)
 
 package Kephra::Base::Data::Type::Store;
-our $VERSION = 1.2;
+our $VERSION = 1.21;
 use Kephra::Base::Data::Type::Basic;             my $btclass = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;        my $ptclass = 'Kephra::Base::Data::Type::Parametric';
 ################################################################################
@@ -194,8 +194,7 @@ sub forbid_shortcuts  {                        # .tstore @~shortcut          -->
 sub _validate_type_name_ {
     my $self = shift;
     return "type name is not defined" unless defined $_[0];
-    return "type name $_[0] contains none id character" if  $_[0] !~ /[a-zA-Z0-9_]/;
-    return "type name $_[0] contains upper chase character" if  lc $_[0] ne $_[0];
+    return "type name $_[0] contains none id character" if  $_[0] =~ /[^a-z0-9_]/;
     return "type name $_[0] is too long" if  length $_[0] > 12;
     return "type name $_[0] is not long enough" if  length $_[0] < 3;
     '';
@@ -203,7 +202,7 @@ sub _validate_type_name_ {
 sub _validate_shortcut_ {
     my $self = shift;
     return "type shortcut is undefined" unless defined $_[0];
-    return "type shortcut $_[0] contains id character" if  $_[0] =~ /[a-zA-Z0-9_]/;
+    return "type shortcut $_[0] contains id character" if  $_[0] =~ /[a-z0-9_]/;
     return "type shortcut $_[0] is too long" if length $_[0] > 1;
     return "type shortcut $_[0] is not allowed" if $_[0] ~~ $self->{'forbid_shortcut'};
     '';

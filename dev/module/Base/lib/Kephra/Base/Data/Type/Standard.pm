@@ -55,9 +55,9 @@ our @parametric_type_definitions =  (
                                                                                                           parameter => {   name => 'ref_name',  parent=> 'str',       default=> 'ARRAY'}, },
 );
 our @forbidden_shortcuts = (qw/{ } ( ) < > -/, ",");
-our %basic_type_shortcut = ( str => '~', bool => '?', num => '+', int => '#', int_pos => '=', #  ^ ' " ! . /  §;
+our %basic_type_shortcut = ( str => '~', bool => '?', num => '+', int_pos => '=', #  ^ ' " ! . /  §;
                            value => '$', array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', 
-                            type => '|', identifier => ':',  object => '!');
+                            type => 'T', object => '!');
 our %parametric_type_shortcut = ( typed_array => '@', typed_hash => '%');
 
 my $store = Kephra::Base::Data::Type::Store->new(); 

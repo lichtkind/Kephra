@@ -19,7 +19,7 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::Package  ......................  C  .....  1.1    low level symbol manipulation
    K::B::Data::Type::Basic  ............  C  .....  1.4    inheritable single value checker
    K::B::Data::Type::Parametric  .......  C  .....  1.31   checks the relation between two values
-   K::B::Data::Type::Store  ............  C  .....  1.2    collection of type objects
+   K::B::Data::Type::Store  ............  C  .....  1.21   collection of type objects
    K::B::Data::Type::Util  .............  C  .....  0.8    helper functions for type creation
    K::B::Data::Type::Standard  .........  C  .....  2.6    definition of standard types
    K::B::Data::Type  ...................  CP .....  1.11   manage type related symbols

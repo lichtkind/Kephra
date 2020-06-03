@@ -5,7 +5,7 @@ use warnings;
 # multiple parametric types with same name and different parameters must have same owner and shortcut (basic type shortcuts have own name space)
 
 package Kephra::Base::Data::Type::Store;
-our $VERSION = 1.2;
+our $VERSION = 1.21;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
 
@@ -17,8 +17,8 @@ sub restate                  {} # %state                             --> ._     
 sub is_open                  {} # ._                                 --> ?
 sub close                    {} # ._                                 --> ?
 
-sub list_type_names          {} # ._  - ~kind ~param_type            --> @~btype|@~ptype|@~param
-sub list_shortcuts           {} # ._  - ~kind                        --> @~shortcut
+sub list_type_names          {} # ._  - ~kind ~param_type            --> @~btype|@~ptype|@~param   # ~name     == a-z,(a-z0-9_)*
+sub list_shortcuts           {} # ._  - ~kind                        --> @~shortcut                # ~shortcut == [^a-z0-9_]
 sub list_forbidden_shortcuts {} # ._                                 --> @~shortcut
 
 sub add_type                 {} # ._  .type|%typedef - ~shortcut     --> ~errormsg
