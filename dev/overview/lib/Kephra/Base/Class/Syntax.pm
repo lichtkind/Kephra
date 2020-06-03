@@ -47,8 +47,8 @@ delegating attribute name  => {help => '',                # help = long name/des
 wrapping attribute name => { help  => '',                 # short explaining text for better ~errormsg
                             class  => 'Kephra::...',      # class of attribute (can be any)
                 ?          require => 'Module'            # 1 if require class
-                            wrap   => [wrapper_name,]     # claim this to be implemented wrapper method as belonging to this attribute
-                 |    [lazy_]build => ['code']|{name=>''} # code snippets to run (lazily) create $attr object
+                             wrap  => [wrapper_name]|name # claim this to be implemented wrapper method as belonging to this attribute
+                 |    [lazy_]built => 'code'              # code snippets to run (lazily) create $attr object and bring it into init state
 
 
 

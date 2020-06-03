@@ -2,14 +2,13 @@ use v5.20;
 use warnings;
 
 package Kephra::Base::Class::Definition::Attribute::Delegating;
-our $VERSION = 1.1;
+our $VERSION = 1.2;
 my $kind = 'delegating';
 ################################################################################
 sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
     my ($pkg, $attr_def) = (@_);
     return "need a property hash to create a delegating attribute definition" unless ref $attr_def eq 'HASH';
-    my $error_start = "$kind attribute ";
-    $error_start .= $attr_def->{name} if exists $attr_def->{name};
+    my $error_start = "$kind attribute ".(exists $attr_def->{name} ? $attr_def->{name} : '');
     my $self = {methods => [], auto => {}, lazy => 0};
     for (qw/name help class/) {
         return "$error_start lacks property '$_'" unless exists $attr_def->{$_};
@@ -25,7 +24,7 @@ sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
 
     return "constructor arguments of $error_start have to be in an array or (preferably) an hash"
         if exists $self->{'init'} and ref $self->{'init'} ne 'ARRAY' and ref $self->{'init'} ne 'HASH';
-    return "build code for the constructor argument values of $error_start have to be in an array or (preferably) an hash"
+    return "build code for the constructor argument values of $error_start has to be in an array or (preferably) an hash"
         if exists $self->{'build'} and ref $self->{'build'} ne 'ARRAY' and ref $self->{'build'} ne 'HASH';
 
     return "$error_start lacks property 'delegate' or 'auto_delegate'" unless exists $attr_def->{'delegate'} or exists $attr_def->{'auto_delegate'};

@@ -47,5 +47,5 @@ delegating attribute name  => {help => '',                # help = long name/des
 wrapping attribute name => { help  => '',                 # short explaining text for better ~errormsg
                             class  => 'Wx::...',          # class of attribute (can be any perl none KBOS class)
                 ?          require => 'Module'            # only if requires different module than ~class
-                            wrap   => [wrapper_name,]     # claim this to be implemented wrapper method as belonging to this attribute
-                 |    build[_lazy] => ['code']|{name=>''} # code snippets to run (lazily) create $attr object
+                             wrap  => [wrapper_name,]     # claim this to be implemented wrapper method as belonging to this attribute
+                 |    [lazy_]built => 'code'              # code snippets to run (lazily) create $attr object and bring it into init state

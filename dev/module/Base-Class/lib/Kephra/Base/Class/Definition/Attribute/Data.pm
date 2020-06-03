@@ -2,14 +2,14 @@ use v5.20;
 use warnings;
 
 package Kephra::Base::Class::Definition::Attribute::Data;
-our $VERSION = 1.21;
+our $VERSION = 1.22;
+my $kind = 'data';
 ################################################################################
 sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
     my ($pkg, $attr_def) = (@_);
     my $self = {methods => [], auto => {}, lazy => 0};
     return "need a property hash to create a data attribute definition" unless ref $attr_def eq 'HASH';
-    my $error_start = 'data attribute ';
-    $error_start .= $attr_def->{name} if exists $attr_def->{name};
+    my $error_start = "$kind attribute ".(exists $attr_def->{name} ? $attr_def->{name} : '');
     for (qw/name help type/) {
         return "$error_start lacks property '$_'" unless exists $attr_def->{$_};
         return "$error_start property '$_' can not be a reference"  if ref $attr_def->{$_};
@@ -65,7 +65,7 @@ sub check_type {    # ._       --> ~errormsg
 sub state   { {%{$_[0]}} }
 sub restate { bless shift}
 ################################################################################
-sub get_kind  {'data'}
+sub get_kind  {$kind}
 sub get_help  {$_[0]->{'help'}}
 sub get_type  {$_[0]->{'type'}}
 sub get_init  {$_[0]->{'init'}}

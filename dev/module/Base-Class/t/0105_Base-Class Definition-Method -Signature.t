@@ -5,7 +5,9 @@ use experimental qw/switch/;
 use Test::More tests => 22;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
-use Kephra::Base::Class::Definition;    my $class = 'Kephra::Base::Class::Definition';
+use Kephra::Base::Class::Definition::Method::Signature;    
+my $class = 'Kephra::Base::Class::Definition::Method::Signature';
+sub mk_sig_def {Kephra::Base::Class::Definition::Method::Signature->new(@_)}
 
 my $def = Kephra::Base::Class::Definition->new('C');
 is( ref $def,                                 $class,        'created class definition object');

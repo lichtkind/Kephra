@@ -22,14 +22,14 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::Data::Type::Store  ............  C  .....  1.21   collection of type objects
    K::B::Data::Type::Util  .............  C  .....  0.8    helper functions for type creation
    K::B::Data::Type::Standard  .........  C  .....  2.7    definition of standard types
-   K::B::Data::Type  ...................  CP .....  1.11   manage type related symbols
+   K::B::Data::Type  ...................  C  .....  1.11   manage type related symbols
    K::B::Data  .........................  C  .....  0.2    root of none OO data handling
    K::B::Closure  ......................  C  .....  1.1    serializable closure (code and date)
  - K::Base  ............................  C  .....  0.11   root package of self made language extensions
 --------------------------------------------------------------------------------
-   K::B::C::Definition::Attr.::Data  ...  C  .....  1.21   validate and serialize definition of attribute holding raw data
-   K::B::C::Definition::Attr.::Delegating C  .....  1.1    validate and serialize definition of attribute, which is KBOS object
-   K::B::C::Definition::Attr.::Wrapping   CP .....  1.0    validate and serialize definition of attribute, which is a none KBOS object
+   K::B::C::Definition::Attr.::Data  ...  C  .....  1.22   validate and serialize definition of attribute holding raw data
+   K::B::C::Definition::Attr.::Delegating C  .....  1.2    validate and serialize definition of attribute, which is KBOS object
+   K::B::C::Definition::Attr.::Wrapping   C  .....  1.1    validate and serialize definition of attribute, which is a none KBOS object
    K::B::C::Definition::Attribute  .....  CP .....  1.0    validate and serialize attribute definition
    K::B::C::Definition::Method::Signature    U      0.0    validate and serialize signature definition
    K::B::C::Definition::Method  ........     U      0.0    validate and serialize method definition

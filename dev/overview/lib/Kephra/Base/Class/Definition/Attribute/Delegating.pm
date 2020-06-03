@@ -2,7 +2,7 @@ use v5.20;
 use warnings;
 
 package Kephra::Base::Class::Definition::Attribute::Delegating;
-our $VERSION = 1.1;
+our $VERSION = 1.2;
 
 sub new     {}         # ~pkg %attr_def           --> ._ | ~errormsg
 sub state   {}         # $_                       --> %state
