@@ -30,7 +30,7 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::C::Definition::Attr.::Data  ...  C  .....  1.22   validate and serialize definition of attribute holding raw data
    K::B::C::Definition::Attr.::Delegating C  .....  1.2    validate and serialize definition of attribute, which is KBOS object
    K::B::C::Definition::Attr.::Wrapping   C  .....  1.1    validate and serialize definition of attribute, which is a none KBOS object
-   K::B::C::Definition::Attribute  .....  CP .....  1.0    validate and serialize attribute definition
+   K::B::C::Definition::Attribute  .....  C  .....  1.0    validate and serialize attribute definition
    K::B::C::Definition::Method::Signature    U      0.0    validate and serialize signature definition
    K::B::C::Definition::Method  ........     U      0.0    validate and serialize method definition
    K::B::C::Definition  ................   PSU      0.7    serializable data set to build a KBOS class from

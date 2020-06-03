@@ -10,6 +10,7 @@ my $class = 'Kephra::Base::Class::Definition::Method::Signature';
 sub mk_sig_def {Kephra::Base::Class::Definition::Method::Signature->new(@_)}
 
 my $def = Kephra::Base::Class::Definition->new('C');
+
 is( ref $def,                                 $class,        'created class definition object');
 ok( not (ref Kephra::Base::Class::Definition->new()),        'need a name to create class definition');
 ok( not (ref Kephra::Base::Class::Definition->new('a')),     'need a ucfirst name to create class definition');

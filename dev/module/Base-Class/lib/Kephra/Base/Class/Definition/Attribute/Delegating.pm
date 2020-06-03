@@ -22,9 +22,9 @@ sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
     elsif (exists $attr_def->{'lazy_build'}){$self->{'build'} = delete $attr_def->{'lazy_build'}; $self->{'lazy'} = 1; }
     else  {return "constructor arguments of $error_start are missing. Use property 'init' or 'lazy_init' or '[lazy_]build'."}
 
-    return "constructor arguments of $error_start have to be in an array or (preferably) an hash"
+    return "constructor arguments of $error_start have to be in an array or (preferably) an hash."
         if exists $self->{'init'} and ref $self->{'init'} ne 'ARRAY' and ref $self->{'init'} ne 'HASH';
-    return "build code for the constructor argument values of $error_start has to be in an array or (preferably) an hash"
+    return "build code for the constructor argument values of $error_start has to be in an array or (preferably) an hash."
         if exists $self->{'build'} and ref $self->{'build'} ne 'ARRAY' and ref $self->{'build'} ne 'HASH';
 
     return "$error_start lacks property 'delegate' or 'auto_delegate'" unless exists $attr_def->{'delegate'} or exists $attr_def->{'auto_delegate'};
