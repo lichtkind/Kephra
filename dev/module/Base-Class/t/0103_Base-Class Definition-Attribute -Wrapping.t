@@ -8,9 +8,10 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 require Kephra::Base::Class::Definition::Attribute::Wrapping;
 my $class = 'Kephra::Base::Class::Definition::Attribute::Wrapping';
 sub mk_attr_def {Kephra::Base::Class::Definition::Attribute::Wrapping->new(@_)}
-my $req_properies = {name => 'name', help => 'help', class => 'K::B::C', delegate => 'method'};
+my $req_properies = {name => 'name', help => 'help', class => 'Wx', wrap => 'method'};
 
-my $def = Kephra::Base::Class::Definition::Attribute::Wrapping->new('C');
+my $def = mk_attr_def( {%$req_properies } );
+say $def;
 is( ref $def,                                 $class,        'created class definition object');
 ok( not (ref Kephra::Base::Class::Definition->new()),        'need a name to create class definition');
 ok( not (ref Kephra::Base::Class::Definition->new('a')),     'need a ucfirst name to create class definition');

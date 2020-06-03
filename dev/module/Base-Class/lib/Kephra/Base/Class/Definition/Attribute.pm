@@ -19,11 +19,12 @@ sub new {        # ~pkg ~name %properties       --> ._| ~errormsg
     if    (exists $attr_def->{'get'} or exists $attr_def->{'auto_get'})           {Kephra::Base::Class::Definition::Attribute::Data->new($attr_def_data)}
     elsif (exists $attr_def->{'delegate'} or exists $attr_def->{'auto_delegate'}) {Kephra::Base::Class::Definition::Attribute::Delegating->new($attr_def_data)}
     elsif (exists $attr_def->{'wrap'})                                            {Kephra::Base::Class::Definition::Attribute::Wrapping->new($attr_def_data)}
-    else {return "definition of attribute $name lacks accessor name in get, delegate or wrap property (one only!)"}
+    else  {return "definition of attribute $name lacks accessor name in get, delegate or wrap property (one only!)"}
 }
 
 1;
-__DATA__
+
+__END__
 
 attribute name => {help => '',                            # help = long name/description for help messages
                    type => 'name',                        # normal data type or class type, whis is not a class itself

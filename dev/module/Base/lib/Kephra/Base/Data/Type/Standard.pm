@@ -5,7 +5,7 @@ use utf8;
 # definitions and store of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
-our $VERSION = 2.6;
+our $VERSION = 2.7;
 use Kephra::Base::Data::Type::Util;
 
 my $dummy_type = Kephra::Base::Data::Type::Basic->new('dummy','yes',3,undef,5);
@@ -25,9 +25,10 @@ our @basic_type_definitions = (
     {name => 'str_ne',    help=> 'none empty string',    code=> '$value or ~$value',          parent=> 'no_ref',         default=> ' '},
     {name => 'str_lc',    help=> 'lower case string',    code=> 'lc $value eq $value',        parent=> 'str_ne',         default=> 'a'},
     {name => 'str_uc',    help=> 'upper case string',    code=> 'uc $value eq $value',        parent=> 'str_ne',         default=> 'A'},
-    {name => 'word',      help=> 'word character',       code=> '$value !~ /[^a-zA-Z0-9_]/',  parent=> 'str_ne',         default=> 'a'},
+    {name => 'word',      help=> 'word character',       code=> '$value !~ /[^a-zA-Z0-9_]/',  parent=> 'str_ne',         default=> 'A'},
     {name => 'name',      help=> 'lower case name',      code=> '$value !~ /[^a-z0-9_]/',     parent=> 'str_ne',         default=> 'a'},
     {name => 'identifier',help=> 'begin with char',      code=> '$value =~ /^[a-z]/',         parent=> 'name',                        },
+    {name => 'pkg_name',  help=> 'package name',         code=> '$value =~ /^[A-Z]/',         parent=> 'word',                        },
     {name => 'type_name', help=> 'simple type name',     code=> __PACKAGE__.'::store->is_type_known($value)',parent=>'identifier', default=> 'any', },
     {name => 'any_ref',   help=> 'reference of any sort',code=> q/ref $value/,                                           default=> [] }, 
     {name => 'scalar_ref',help=> 'array reference',      code=> q/ref $value eq 'SCALAR'/,                               default=> \1  },
@@ -54,11 +55,11 @@ our @parametric_type_definitions =  (
     {name => 'typed_ref', help=> 'reference of given type',  code=> 'return "value $value is not a $param reference" if ref $value ne $param',  parent=> 'value',     default=> [], 
                                                                                                           parameter => {   name => 'ref_name',  parent=> 'str',       default=> 'ARRAY'}, },
 );
-our @forbidden_shortcuts = (qw/{ } ( ) < > -/, ",");
-our %basic_type_shortcut = ( str => '~', bool => '?', num => '+', int_pos => '=', #  ^ ' " ! . /  §;
-                           value => '$', array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', 
+our @forbidden_shortcuts = (qw/{ } ( ) < > - . */, ","); # §
+our %basic_type_shortcut = (  value => '$', str => '~', bool => '?', num => '+', int_pos => '=', #  ^ ' " ! /  ;
+                          array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', 
                             type => 'T', object => '!');
-our %parametric_type_shortcut = ( typed_array => '@', typed_hash => '%');
+our %parametric_type_shortcut = ( index => 'I', typed_array => '@', typed_hash => '%');
 
 my $store = Kephra::Base::Data::Type::Store->new(); 
 sub store      {$store}                                      #    -->  .tstore
