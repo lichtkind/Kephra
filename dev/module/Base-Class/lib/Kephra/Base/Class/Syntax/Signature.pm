@@ -7,6 +7,43 @@ package Kephra::Base::Class::Syntax::Signature;
 
 sub parse {
     my $sig = shift;
+    my ($req, $opt, $ret, $/) = ([],[],[], ' ');
+
+    my $pos = rindex($sig, '-->');
+    if ($pos > -1) { 
+        $ret = split_to_args(substr $sig, $pos+3);
+        $sig = substr($sig, 0, $pos);
+    }
+    $pos = index($sig, '-');
+    if ($pos > -1) {
+        $opt = split_to_args(substr $sig, $pos+1);
+        $sig = substr($sig, 0, $pos);
+    }
+    $req = split_to_args($sig);
+    [int @$req, int @$opt, int @$ret,  @$req, @$opt, @$ret];
+}
+
+sub split_to_args {
+    return [] unless defined $_[0];
+    my $args = [];
+    for (split ',', shift){
+        my $arg = split_arg_parts($_);
+        push @$args, $arg if defined $arg;
+    }
+    $args;
+}
+
+sub split_arg_parts {
+    my $arg = shift;
+    1 while chomp($arg);
+    my @parts = split ' ', $arg;
+    return $arg if @parts == 1;
+    [@parts];
+}
+
+# int a-
+sub parse {
+    my $sig = shift;
     return 'need a signature' unless defined $sig;
     my %params = (required_nr => 0, input => [], output => '');
     return \%params unless $sig;

@@ -46,8 +46,8 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::C::Builder::Accessor                  B           create accessor method 
    K::B::C::Builder::Constructor               B           create constructor and destructor methods
    K::B::C::Builder                            B           API to class construction
+   K::B::C::Syntax::Signature  .........         N           convert signature string into KBC::Def.::Method::Signature object
    K::B::C::Syntax::Parser                       N         define class syntax, API to Keyword::Simple
-   K::B::C::Syntax::Signature                  N           convert signature string into KBC::Def.::Method::Signature object
    K::B::C::Syntax                             N           
  - K::B::Class                           P
 --------------------------------------------------------------------------------
