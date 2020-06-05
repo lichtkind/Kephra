@@ -1,6 +1,8 @@
 use v5.20;
 use warnings;
 
+# validate and serialize attribute definition
+
 package Kephra::Base::Class::Definition::Attribute;
 our $VERSION = 0.5;
 
