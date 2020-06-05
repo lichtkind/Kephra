@@ -4,11 +4,10 @@ use warnings;
 # parsing signatures into data structure to build definition object from
 
 package Kephra::Base::Class::Syntax::Signature;
-our $VERSION = 0.2;
-
+our $VERSION = 1.0;
 
 sub parse {
-    my $sig = shift;
+    my $sig = shift // '';
     my ($req, $opt, $ret) = ([],[],[]);
     $/ = ' ';
     my $pos = rindex($sig, '-->');
@@ -58,8 +57,8 @@ sub eval_special_syntax {
             splice (@$arg, 1, 0, $sigil.$twigil);
         } else {
             $arg->[0] = substr $arg->[0], 1;
-            if ($sigil eq '.'){ splice (@$arg, 1, 0, '', 'attr')}
-            else              { splice (@$arg, 1, 0, $sigil)    }
+            if ($sigil eq '.'){ splice (@$arg, 1, 0, '', 'attr') }
+            else              { splice (@$arg, 1, 0, $sigil)     }
         }
     }
     if (@$arg == 2){
@@ -68,22 +67,27 @@ sub eval_special_syntax {
             my $sigil = substr($arg->[1], 0, 1);
             if (ord $sigil < 97 or ord $sigil > 122){
                 $arg->[1] = substr $arg->[1], 1;
-                splice (@$arg, 2, 0, $sigil);
+                if ($sigil eq '.'){ splice (@$arg, 2, 0, 'attr') }
+                else              { splice (@$arg, 2, 0, $sigil) }
             }
         }  
     }
-    splice (@$arg, 2, 0, 'type') if @$arg == 3;
+    if (@$arg == 4){
+        $arg->[2] = 'arg' if $arg->[2] eq 'argument';
+        $arg->[2] = 'attr' if $arg->[2] eq 'attribute';
+    }
+    splice (@$arg, 2, 0, 'type') if @$arg == 3 and $arg->[1];
     $arg;
 }
 
 1;
 __END__
 
- [~]                 1
- [~ T]               2
- [~ T? slurp]        3    # >@
- [~ T? pass]         3    # -->' '
- [~ T? attr]         3    # constructor arg
- [~ T  type   T]     4 
- [~ T  arg    ~  'T] 5
- [~ T  attr   ~  'T] 5
+ [~]                   1    # ~ means argument name
+ [~ T]                 2    # T means argument main type
+ [~ T? 'slurp']        3    # a.k.a. >@ ; T? means most of time its empty = ''
+ [~ T? 'pass']         3    # a.k.a. -->' '
+ [~ T? 'attr']         3    # constructor arg thats forewards to attribute
+ [~ T  'type'   T]     4 
+ [~ T  'arg'    ~  T!] 5    # T! means Type of argument (parameter type of main type) will be added later by Definition::Method::Signature
+ [~ T  'attr'   ~  T!] 5    # T! means Type of attribute (parameter type of main type) will be added later by Definition::Method::Signature

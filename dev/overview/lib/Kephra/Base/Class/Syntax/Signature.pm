@@ -1,14 +1,14 @@
 use v5.16;
 use warnings;
 
-# handling everything about method signatures
-# sig: type required_parameter_name - type optional_parameter_name --> ret_type
+# parsing signatures into data structure to build definition object from
 
 package Kephra::Base::Class::Syntax::Signature;
+our $VERSION = 1.0;
 
-sub parse                    {} #     sig  --> %params
-sub types_needed             {} # %params  --> @types
-sub create_type_check        {} # %params  --> &incheck, &outcheck
-
+sub parse              {} #   ~sig  --> @params  = [=req, =opt, =ret, @@par] @par = [~name T 'kind' ~name? T]
+sub split_args         {} #
+sub split_arg_parts    {} #
+sub eval_special_syntax{} #
 
 1;
