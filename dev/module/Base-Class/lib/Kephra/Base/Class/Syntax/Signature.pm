@@ -13,8 +13,8 @@ sub parse {
     my $pos = rindex($sig, '-->');
     if ($pos > -1) { 
         $ret = split_args(substr($sig, $pos+3));
-        push @$ret, ['', 'pass'] unless @$ret;
-        unshift @{$ret->[$_]}, 'return_value_'.($_+1) for 0..$#$ret;
+        push @{$ret->[$_]}, 'return_value_'.($_+1) for 0..$#$ret;
+        push @$ret, ['', 'pass', 'return_value_all'] unless @$ret;
         $sig = substr($sig, 0, $pos);
     }
     $pos = index($sig, '-');
@@ -33,7 +33,6 @@ sub split_args {
     for (split ',', shift){
         my $arg = split_arg_parts($_);
         next unless @$arg;
-        unshift @$arg, (pop @$arg);
         push @$args, $arg;
     }
     $args;
@@ -48,35 +47,40 @@ sub split_arg_parts {
 
 sub eval_special_syntax {
     my $arg = shift;
+    $" = ':';
+#say "before:@$arg:";
+    unshift @$arg, (pop @$arg);
     splice (@$arg, 2, 1) if @$arg > 3 and $arg->[2] eq 'of';    # remove of
     my $sigil = substr($arg->[0], 0, 1);
-    if (ord $sigil < 97 or ord $sigil > 122){
+    my $ord = ord $sigil;
+    if ($ord > 122 or ($ord < 97 and $ord)){
         my $twigil = substr($arg->[0], 1, 1);
         if (ord $twigil < 97 or ord $twigil > 122){
             $arg->[0] = substr $arg->[0], 2;
             splice (@$arg, 1, 0, $sigil.$twigil);
         } else {
-            $arg->[0] = substr $arg->[0], 1;
+            $arg->[0] = substr($arg->[0], 1);
             if ($sigil eq '.'){ splice (@$arg, 1, 0, '', 'attr') }
             else              { splice (@$arg, 1, 0, $sigil)     }
         }
     }
+#say "mid:@$arg:";
     if (@$arg == 2){
         if ($arg->[1] eq '>@') { splice (@$arg, 1, 1, '', 'slurp') }
         else {
             my $sigil = substr($arg->[1], 0, 1);
-            if (ord $sigil < 97 or ord $sigil > 122){
-                $arg->[1] = substr $arg->[1], 1;
-                if ($sigil eq '.'){ splice (@$arg, 2, 0, 'attr') }
-                else              { splice (@$arg, 2, 0, $sigil) }
-            }
+            my $ord = ord $sigil;
+            my $rest = substr($arg->[1], 1);
+            splice (@$arg, 1, 1, $sigil, $rest) if ($ord > 122 or $ord < 97) and $rest;
         }  
-    }
-    if (@$arg == 4){
+    } elsif (@$arg == 3 and substr($arg->[2], 0, 1) eq '.'){
+        splice (@$arg, 2, 1, 'attr', substr($arg->[2], 1)  ) 
+    } elsif (@$arg == 4){
         $arg->[2] = 'arg' if $arg->[2] eq 'argument';
         $arg->[2] = 'attr' if $arg->[2] eq 'attribute';
     }
     splice (@$arg, 2, 0, 'type') if @$arg == 3 and $arg->[1];
+#say "after:@$arg:";
     $arg;
 }
 
