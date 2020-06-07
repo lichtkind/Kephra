@@ -29,26 +29,11 @@ sub parse {
 
 sub split_args {
     return [] unless defined $_[0];
-    my $args = [];
-    for (split ',', shift){
-        my $arg = split_arg_parts($_);
-        next unless @$arg;
-        push @$args, $arg;
-    }
-    $args;
-}
-
-sub split_arg_parts {
-    return [] unless $_[0];
-    my $arg = shift;
-    1 while chomp($arg);
-    [split ' ', $arg];
+    [ map {[split ' ', $_]} grep {$_} map {1 while chomp($_);$_} split ',', $_[0] ];
 }
 
 sub eval_special_syntax {
-    my $arg = shift;
-    $" = ':';
-#say "before:@$arg:";
+    my $arg = shift;  #$" = ':';#say "before:@$arg:";
     unshift @$arg, (pop @$arg);
     splice (@$arg, 2, 1) if @$arg > 3 and $arg->[2] eq 'of';    # remove of
     my $sigil = substr($arg->[0], 0, 1);
@@ -63,8 +48,7 @@ sub eval_special_syntax {
             if ($sigil eq '.'){ splice (@$arg, 1, 0, '', 'attr') }
             else              { splice (@$arg, 1, 0, $sigil)     }
         }
-    }
-#say "mid:@$arg:";
+    } #say "mid:@$arg:";
     if (@$arg == 2){
         if ($arg->[1] eq '>@') { splice (@$arg, 1, 1, '', 'slurp') }
         else {
@@ -79,8 +63,7 @@ sub eval_special_syntax {
         $arg->[2] = 'arg' if $arg->[2] eq 'argument';
         $arg->[2] = 'attr' if $arg->[2] eq 'attribute';
     }
-    splice (@$arg, 2, 0, 'type') if @$arg == 3 and $arg->[1];
-#say "after:@$arg:";
+    splice (@$arg, 2, 0, 'type') if @$arg == 3 and $arg->[1]; #say "after:@$arg:";
     $arg;
 }
 

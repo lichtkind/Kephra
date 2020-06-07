@@ -2,7 +2,7 @@
 use v5.20;
 use warnings;
 use experimental qw/switch/;
-use Test::More tests => 91;
+use Test::More tests => 120;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 use Kephra::Base::Class::Syntax::Signature;
@@ -60,22 +60,22 @@ is($data->[3][1],     'int',       'type of first argument');
 is(@{$data->[4]},         1,       'optional argument definition has one part');
 is($data->[4][0],     'bet',       'name of second argument');
 
-$data = parse(' index of array arg , str b - ~ text --> ?');
-is(ref $data,       'ARRAY',       'parse sig: index of array arg , str b - ~ text --> ? ');
+$data = parse('-index of array arg , str b, ~ text --> ?');
+is(ref $data,       'ARRAY',       'parse sig:  - index of array arg , str b ~ text --> ?');
 is(@$data,                7,       'has 4 arguments');
-is($data->[0],            2,       '2 required arguments');
-is($data->[1],            1,       '1 optional argument');
+is($data->[0],            0,       'no  required arguments');
+is($data->[1],            3,       '3 optional arguments');
 is($data->[2],            1,       'one return value');
-is(@{$data->[3]},         4,       'required argument definition has four parts');
+is(@{$data->[3]},         4,       'first optional argument definition has four parts');
 is($data->[3][0],     'arg',       'name of first argument');
 is($data->[3][1],   'index',       'main type of first argument');
 is($data->[3][2],    'type',       'first argument has parametric type');
 is($data->[3][3],   'array',       'parametric type of first argument');
-is(@{$data->[4]},         2,       'optional argument definition has one part');
+is(@{$data->[4]},         2,       'second optional argument definition has one part');
 is($data->[4][0],       'b',       'name of second argument');
 is($data->[4][1],     'str',       'type of second argument');
-is(@{$data->[5]},         2,       'return value definition has two parts');
-is($data->[5][0],    'text',       'name of first optional argument');
+is(@{$data->[5]},         2,       'third optional argument definition has two parts');
+is($data->[5][0],    'text',       'name of third optional argument');
 is($data->[5][1],       '~',       'type of first optional argument');
 is(@{$data->[6]},         2,       'return value definition has two parts');
 is($data->[6][0],'return_value_1', 'name of first return value');
@@ -117,6 +117,40 @@ is(@{$data->[4]},         3,       'second argument definition has three parts')
 is($data->[4][0],    'rest',       'name of second argument');
 is($data->[4][1],        '',       'second required argument has no type');
 is($data->[4][2],   'slurp',       'second argument is slurpy');
+
+$data = parse('index of attribute bit a,Inum , Zint dat-->ref of arg a');
+is(ref $data,       'ARRAY',       'parse sig: index of attribute bit a --> ref of arg a');
+is(@$data,                7,       'has 4 arguments');
+is($data->[0],            3,       'three required arguments');
+is($data->[1],            0,       'no optional argument');
+is($data->[2],            1,       'one return value');
+is(@{$data->[3]},         4,       'first required argument definition has four parts');
+is($data->[3][0],       'a',       'name of first argument');
+is($data->[3][1],   'index',       'main type of first required argumen');
+is($data->[3][2],    'attr',       'first argument to attribute of same name');
+is($data->[3][3],     'bit',       'first argument to attribute of same name');
+is(@{$data->[4]},         2,       'second required argument definition has two parts');
+is($data->[4][0],     'num',       'name of second argument');
+is($data->[4][1],       'I',       'type of second argument');
+is(@{$data->[5]},         4,       'third required argument definition has four parts');
+is($data->[5][0],     'dat',       'name of third argument');
+is($data->[5][1],       'Z',       'main type of third argument');
+is($data->[5][2],    'type',       'source or parameter type of third argument');
+is($data->[5][3],     'int',       'parameter type of third argument');
+is(@{$data->[6]},         4,       'return value definition has four parts');
+is($data->[6][0],'return_value_1', 'name of return value');
+is($data->[6][1],     'ref',       'main type of return value');
+is($data->[6][2],     'arg',       'parameter value source for return value');
+is($data->[6][3],       'a',       'parameter name for return value');
+
+$data = parse(')a');
+is(ref $data,       'ARRAY',       'parse sig: )a');
+is(@$data,                4,       'has 1 arguments');
+is($data->[0],            1,       'one required argument');
+is($data->[1],            0,       'no optional argument');
+is($data->[2],            0,       'no return value');
+is(@{$data->[3]},         2,       'first required argument definition has two parts');
+
 
 
 exit 0;

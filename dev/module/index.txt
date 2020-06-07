@@ -21,7 +21,7 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::Data::Type::Parametric  .......  C  .....  1.31   checks the relation between two values
    K::B::Data::Type::Store  ............  C  .....  1.21   collection of type objects
    K::B::Data::Type::Util  .............  C  .....  0.8    helper functions for type creation
-   K::B::Data::Type::Standard  .........  C  .....  2.7    definition of standard types
+   K::B::Data::Type::Standard  .........  C  .....  2.71   definition of standard types
    K::B::Data::Type  ...................  C  .....  1.11   manage type related symbols
    K::B::Data  .........................  C  .....  0.2    root of none OO data handling
    K::B::Closure  ......................  C  .....  1.1    serializable closure (code and date)
@@ -46,7 +46,7 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::C::Builder::Accessor                  B           create accessor method 
    K::B::C::Builder::Constructor               B           create constructor and destructor methods
    K::B::C::Builder                            B           API to class construction
-   K::B::C::Syntax::Signature  .........  CP        1.0    convert signature string into KBC::Def.::Method::Signature object
+   K::B::C::Syntax::Signature  .........  C         1.0    convert signature string into data for KBC::Def.::Method::Signature object
    K::B::C::Syntax::Parser                       N         define class syntax, API to Keyword::Simple
    K::B::C::Syntax                             N           
  - K::B::Class                           P

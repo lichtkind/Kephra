@@ -5,7 +5,7 @@ use utf8;
 # definitions and store of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
-our $VERSION = 2.7;
+our $VERSION = 2.71;
 use Kephra::Base::Data::Type::Util;
 
 my $dummy_type = Kephra::Base::Data::Type::Basic->new('dummy','yes',3,undef,5);
@@ -55,7 +55,7 @@ our @parametric_type_definitions =  (
     {name => 'typed_ref', help=> 'reference of given type',  code=> 'return "value $value is not a $param reference" if ref $value ne $param',  parent=> 'value',     default=> [], 
                                                                                                           parameter => {   name => 'ref_name',  parent=> 'str',       default=> 'ARRAY'}, },
 );
-our @forbidden_shortcuts = (qw/{ } ( ) < > - . */, ","); # §
+our @forbidden_shortcuts = (qw/{ } ( ) < > - . ,/,); # §
 our %basic_type_shortcut = (  value => '$', str => '~', bool => '?', num => '+', int_pos => '=', #  ^ ' " ! /  ;
                           array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', 
                             type => 'T', object => '!');

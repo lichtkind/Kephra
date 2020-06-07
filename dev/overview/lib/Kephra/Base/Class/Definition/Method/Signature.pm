@@ -1,13 +1,15 @@
-use v5.16;
+use v5.20;
 use warnings;
 
 package Kephra::Base::Class::Definition::Method::Signature;
+our $VERSION = 0.1;
 
 
-sub new         {}
-sub split       {}
+sub new         {} # %def     --> _
+sub state       {} # $_       --> %state
+sub restate     {} # %state   --> _
 
-sub check_types {}
+sub check_types {} # {~attr => ~type}, >@.store
 
 
 
