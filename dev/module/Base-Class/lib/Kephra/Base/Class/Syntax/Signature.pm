@@ -45,7 +45,7 @@ sub eval_special_syntax {
             splice (@$arg, 1, 0, $sigil.$twigil);
         } else {
             $arg->[0] = substr($arg->[0], 1);
-            if ($sigil eq '.'){ splice (@$arg, 1, 0, '', 'attr') }
+            if ($sigil eq '.'){ splice (@$arg, 1, 0, '', 'foreward') }
             else              { splice (@$arg, 1, 0, $sigil)     }
         }
     } #say "mid:@$arg:";
@@ -72,9 +72,9 @@ __END__
 
  [~]                   1    # ~ means argument name
  [~ T]                 2    # T means argument main type
+ [~ T? 'foreward']     3    # constructor arg thats forewards to attribute
  [~ T? 'slurp']        3    # a.k.a. >@ ; T? means most of time its empty = ''
  [~ T? 'pass']         3    # a.k.a. -->' '
- [~ T? 'attr']         3    # constructor arg thats forewards to attribute
  [~ T  'type'   T]     4 
  [~ T  'arg'    ~  T!] 5    # T! means Type of argument (parameter type of main type) will be added later by Definition::Method::Signature
  [~ T  'attr'   ~  T!] 5    # T! means Type of attribute (parameter type of main type) will be added later by Definition::Method::Signature

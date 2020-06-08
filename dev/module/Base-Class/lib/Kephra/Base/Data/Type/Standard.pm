@@ -55,7 +55,7 @@ our @parametric_type_definitions =  (
     {name => 'typed_ref', help=> 'reference of given type',  code=> 'return "value $value is not a $param reference" if ref $value ne $param',  parent=> 'value',     default=> [], 
                                                                                                           parameter => {   name => 'ref_name',  parent=> 'str',       default=> 'ARRAY'}, },
 );
-our @forbidden_shortcuts = (qw/{ } ( ) < > - . ,/,); # §
+our @forbidden_shortcuts = (qw/{ } ( ) < > - ./,','); # §
 our %basic_type_shortcut = (  value => '$', str => '~', bool => '?', num => '+', int_pos => '=', #  ^ ' " ! /  ;
                           array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', 
                             type => 'T', object => '!');

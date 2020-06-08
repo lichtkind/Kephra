@@ -112,7 +112,7 @@ is($data->[2],            0,       'no return values');
 is(@{$data->[3]},         3,       'first required argument definition has three parts');
 is($data->[3][0],    'name',       'name of first argument');
 is($data->[3][1],        '',       'first required argument has no own type');
-is($data->[3][2],    'attr',       'first argument to attribute of same name');
+is($data->[3][2],'foreward',       'first argument gets forewarded to attribute of same name');
 is(@{$data->[4]},         3,       'second argument definition has three parts');
 is($data->[4][0],    'rest',       'name of second argument');
 is($data->[4][1],        '',       'second required argument has no type');
