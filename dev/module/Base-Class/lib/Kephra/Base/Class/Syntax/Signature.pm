@@ -8,22 +8,25 @@ our $VERSION = 1.0;
 
 sub parse {
     my $sig = shift // '';
-    my ($req, $opt, $ret) = ([],[],[]);
+    my ($opt, $ret) = ('','');
     $/ = ' ';
     my $pos = rindex($sig, '-->');
     if ($pos > -1) { 
         $ret = split_args(substr($sig, $pos+3));
         push @{$ret->[$_]}, 'return_value_'.($_+1) for 0..$#$ret;
-        push @$ret, ['', 'pass', 'return_value_all'] unless @$ret;
         $sig = substr($sig, 0, $pos);
     }
     $pos = index($sig, '-');
     if ($pos > -1) {
         $opt = split_args(substr $sig, $pos+1);
+        $opt = '' unless @$opt;
         $sig = substr($sig, 0, $pos);
     }
-    $req = split_args($sig);
-    [int @$req, int @$opt, int @$ret,  map {eval_special_syntax($_)} @$req, @$opt, @$ret];
+    my $req = split_args($sig);
+    {req => (   @$req ? [map {eval_special_syntax($_)} @$req] : ''),
+     opt => (ref $opt ? [map {eval_special_syntax($_)} @$opt] : ''),
+     ret => (ref $ret ? [map {eval_special_syntax($_)} @$ret] : ''),
+    };
 }
 
 
@@ -64,6 +67,7 @@ sub eval_special_syntax {
         $arg->[2] = 'attr' if $arg->[2] eq 'attribute';
     }
     splice (@$arg, 2, 0, 'type') if @$arg == 3 and $arg->[1]; #say "after:@$arg:";
+    return $arg->[0] if @$arg == 1;
     $arg;
 }
 
@@ -74,7 +78,8 @@ __END__
  [~ T]                 2    # T means argument main type
  [~ T? 'foreward']     3    # constructor arg thats forewards to attribute
  [~ T? 'slurp']        3    # a.k.a. >@ ; T? means most of time its empty = ''
- [~ T? 'pass']         3    # a.k.a. -->' '
  [~ T  'type'   T]     4 
  [~ T  'arg'    ~  T!] 5    # T! means Type of argument (parameter type of main type) will be added later by Definition::Method::Signature
  [~ T  'attr'   ~  T!] 5    # T! means Type of attribute (parameter type of main type) will be added later by Definition::Method::Signature
+
+# [~ T? 'pass']         3    # a.k.a. -->' '
