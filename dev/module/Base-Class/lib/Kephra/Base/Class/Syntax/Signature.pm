@@ -23,18 +23,15 @@ sub parse {
         $sig = substr($sig, 0, $pos);
     }
     my $req = split_args($sig);
-    {req => (   @$req ? [map {eval_special_syntax($_)} @$req] : ''),
-     opt => (ref $opt ? [map {eval_special_syntax($_)} @$opt] : ''),
-     ret => (ref $ret ? [map {eval_special_syntax($_)} @$ret] : ''),
+    {required => (   @$req ? [map {eval_special_syntax($_)} @$req] : ''),
+     optional => (ref $opt ? [map {eval_special_syntax($_)} @$opt] : ''),
+     return   => (ref $ret ? [map {eval_special_syntax($_)} @$ret] : ''),
     };
 }
-
-
 sub split_args {
     return [] unless defined $_[0];
     [ map {[split ' ', $_]} grep {$_} map {1 while chomp($_);$_} split ',', $_[0] ];
 }
-
 sub eval_special_syntax {
     my $arg = shift;  #$" = ':';#say "before:@$arg:";
     unshift @$arg, (pop @$arg);

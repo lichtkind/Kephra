@@ -4,15 +4,36 @@ use warnings;
 package Kephra::Base::Class::Definition::Method::Signature;
 our $VERSION = 0.1;
 use Kephra::Base::Data::Type;
-my %arg_kind = (arg => 4, attr => 4, foreward => 3, pass => 3, slurp => 3, type => 4);
+my %arg_kind = (arg => 4, attr => 4, foreward => 3, slurp => 3, type => 4);
 ################################################################################
 sub new  { # %def     --> _
     my ($pkg, $sig_def) = (@_);
-    return "need an array reference with at least three values (argument count of required, optional and return part)" unless ref $sig_def eq 'ARRAY' and @$sig_def > 2;
-    return "argument count of required, optional and return part do not match signature length" unless @$sig_def == $sig_def->[0] + $sig_def->[1] + $sig_def->[2] + 3;
-    for my $i (3..$#$sig_def){
-        my $arg = $sig_def->[$i];
-        return "$i'th argument is not defined by as array" if ref $arg ne 'ARRAY';
+    $name = {};
+    return "need a hash reference to create signature object ".__PACKAGE__ unless ref $sig_def eq 'HASH';
+    for my $k (qw/req opt ret/){
+        return "signature definition has no hash key $k" unless exists $sig_def->{$k};
+        next unless ref $sig_def->{$k};
+        return "signature definition part $k has to have string or array content" if ref $sig_def->{$k} ne 'ARRAY'
+        for my $i (0 .. $#{$sig_def->{$k}}){
+            my $arg = $sig_def->{$k}[$i];
+            my $elem_help = "$i'th element of signature definition part $k";
+            unless (ref $arg){
+                return "$elem_help is empty" unless defined $arg and $arg;
+                return "$elem_help has the already take name $arg" if $name{$arg};
+                $name{$arg}++;
+                next;
+            }
+            #;
+             unless ref $arg;
+             return "$elem_help has to have string or array content" if ref $arg ne 'ARRAY';
+             if (@$arg == 1){ $sig_def->{$k}[$i] = $arg->[0];
+             } elsif (@$arg == 2){
+             } else {
+             }
+             $sig_def->{$k}
+        }
+
+        
         next if @$arg < 3;
         return "$i'th argument is of unknown type kind $arg->[2]" unless defined $arg_kind{$arg->[2]};
         return "$i'th argument is kind $arg->[2] and should be defined by $arg_kind{$arg->[2]} values" unless $arg_kind{$arg->[2]} == @$arg;
