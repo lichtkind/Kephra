@@ -27,10 +27,12 @@ sub new  { # %def     --> _
                 push @{$sig_def->{'shortcut'}{'basic'}}, $arg if length $arg->[1] == 1;
             } else {
                 return "$elem_help is of unknown type kind $arg->[2]" unless defined $arg_kind{$arg->[2]};
-                return "$elem_help is a $arg->[2] and should be defined by $arg_kind{$arg->[2]} values" unless $arg_kind{$arg->[2]} == @$arg;
-                if (@$arg > 3){
+                return "$elem_help is a $arg->[2] and should be defined by ".$arg_kind{ $arg->[2] }.' values' unless $arg_kind{$arg->[2]} == @$arg;
+                push @{$sig_def->{'category'}{$arg->[2]}}, $arg;
+                if ($arg->[2] eq 'slurp'){
+                    return "the slurpy argument $arg->[0] has to be the last argument" if $i != $#{$sig_def->{$k}} or ($k eq 'required' and ref $sig_def->{'optional'} eq 'ARRAY');
+                } elsif (@$arg > 3){
                     push @{$sig_def->{'type'}{'param'}}, $arg;
-                    push @{$sig_def->{'shortcut'}{'basic_para'}}, $arg if length $arg->[3] == 1 and $arg->[3] eq 'type';
                     push @{$sig_def->{'shortcut'}{'param'}}, $arg if length $arg->[1] == 1;
                 }
             }
@@ -39,8 +41,13 @@ sub new  { # %def     --> _
     bless $sig_def;
 }
 
-sub check_types { # {~attr => ~type}, >@.store --> ~errormsg
-    my ($self, $attr, @store) = (@_);
+sub adapt_to_class { # ~class {~attr => ~type}, >@.store --> ~errormsg
+    my ($self, $class, $attr, @store) = (@_);
+# resolve type shortcuts
+# insert parameter type
+# insert foreward type
+# insert self type
+# check types existance
 #    for my $i (3..$#$self){
 #        next if @{$self->[$i]} == 1;
 #        $arg->{$self->[$_][0]} = $self->[$_][1] if @{$self->[$_]} == 2;
@@ -49,6 +56,13 @@ sub check_types { # {~attr => ~type}, >@.store --> ~errormsg
 #    for (3..$#$self){
 #        $arg->{$self->[$_][0]} = $self->[$_][1] if @{$self->[$_]} == 2;
 #    }
+    if (ref $self->{'category'}{'arg'} eq 'ARRAY'){
+        for my $arg (@{$self->{'category'}{'arg'}}){
+            return "argument $arg->[0] does reference an unknown argument" unless exists $self->{'name'}{$arg->[3]};
+            return "argument $arg->[0] does reference an argument with parametric or special type (only basic typed allowed)" if $self->{'name'}{$arg->[3]} eq 1;
+            push @$arg, $self->{'name'}{$arg->[3]};
+        }
+    }
 #    my $arg = {};
 #    for my $i (3..$#$self){
 #        if (@{$self->[$i]} == 4){
@@ -74,6 +88,7 @@ __END__
  [~ T]                 2    # T means argument main type
  [~ T? 'foreward']     3    # constructor arg thats forewards to attribute
  [~ T? 'slurp']        3    # a.k.a. >@ ; T? means most of time its empty = ''
+ [~ T? 'self']         3    # a.k.a. _  ; typed_ref class
  [~ T  'type'   T]     4 
  [~ T  'arg'    ~  T!] 5    # T! means Type of argument (parameter type of main type) will be added later by Definition::Method::Signature
  [~ T  'attr'   ~  T!] 5    # T! means Type of attribute (parameter type of main type) will be added later by Definition::Method::Signature
