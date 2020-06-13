@@ -45,12 +45,13 @@ sub eval_special_syntax {
             splice (@$arg, 1, 0, $sigil.$twigil);
         } else {
             $arg->[0] = substr($arg->[0], 1);
-            if ($sigil eq '.'){ splice (@$arg, 1, 0, '', 'foreward') }
-            else              { splice (@$arg, 1, 0, $sigil)     }
+            if    ($sigil eq '.'){ splice (@$arg, 1, 0, '', 'foreward') }
+            else                 { splice (@$arg, 1, 0, $sigil)         }
         }
     } #say "mid:@$arg:";
     if (@$arg == 2){
-        if ($arg->[1] eq '>@') { splice (@$arg, 1, 1, '', 'slurp') }
+        if    ($arg->[1] eq '>@'){ splice (@$arg, 1, 1, '', 'slurp') }
+        elsif ($arg->[1] eq '_') { splice (@$arg, 1, 1, '', 'self')     }
         else {
             my $sigil = substr($arg->[1], 0, 1);
             my $ord = ord $sigil;
@@ -75,8 +76,9 @@ __END__
  [~ T]                 2    # T means argument main type
  [~ T? 'foreward']     3    # constructor arg thats forewards to attribute
  [~ T? 'slurp']        3    # a.k.a. >@ ; T? means most of time its empty = ''
+ [~ T? 'self']         3    # a.k.a. _  ; typed_ref class
  [~ T  'type'   T]     4 
  [~ T  'arg'    ~  T!] 5    # T! means Type of argument (parameter type of main type) will be added later by Definition::Method::Signature
  [~ T  'attr'   ~  T!] 5    # T! means Type of attribute (parameter type of main type) will be added later by Definition::Method::Signature
 
-# [~ T? 'pass']         3    # a.k.a. -->' '
+# [~ T? 'pass']         3    # a.k.a. -->' ', now return => []

@@ -2,7 +2,7 @@
 use v5.20;
 use warnings;
 use experimental qw/switch/;
-use Test::More tests => 150;
+use Test::More tests => 160;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 use Kephra::Base::Class::Syntax::Signature;
@@ -101,20 +101,24 @@ is(@{$data->{'return'}[0]},        2,       'return value def has 2 parts');
 is($data->{'return'}[0][0],'return_value_1','name of first return value');
 is($data->{'return'}[0][1],      '?',       'type of first return value');
 
-$data = parse('  -@~text--> index of .wide, index of argument went');
+$data = parse('  -@~text,_das--> index of .wide, index of argument went ,_ ');
 is(ref $data,                 'HASH',       'parse sig:  -@~text--> index of .wide, index of argument went');
 is(keys %{$data},                  3,       'signature definition has to have only three parts');
 is(exists $data->{'required'},     1,       'signature definition has slot for required arguments');
 is($data->{'required'},           '',       'has no required argument');
 is(exists $data->{'optional'},     1,       'signature definition has slot for optional arguments');
-is(@{$data->{'optional'}},         1,       'has 1 optional argument');
+is(@{$data->{'optional'}},         2,       'has 2 optional argument');
 is(@{$data->{'optional'}[0]},      4,       'first argument def has 4 parts');
 is($data->{'optional'}[0][0], 'text',       'name of first optional argument');
 is($data->{'optional'}[0][1],    '@',       'main type of first, optional argument');
 is($data->{'optional'}[0][2], 'type',       'first, optional argument has type as parameter');
 is($data->{'optional'}[0][3],    '~',       'parameter type of first, optional argument');
+is(@{$data->{'optional'}[1]},      3,       'second argument def has 3 parts');
+is($data->{'optional'}[1][0],  'das',       'name of second optional argument');
+is($data->{'optional'}[1][1],     '',       'type of second, optional argument');
+is($data->{'optional'}[1][2], 'self',       'special kind of third argument');
 is(exists $data->{'return'},       1,       'signature definition has slot for required arguments');
-is(@{$data->{'return'}},           2,       'has 2 return values');
+is(@{$data->{'return'}},           3,       'has 2 return values');
 is(@{$data->{'return'}[0]},        4,       'first return value def has 4 parts');
 is($data->{'return'}[0][0],'return_value_1','name of first return value');
 is($data->{'return'}[0][1],  'index',       'main type of first return value');
@@ -125,6 +129,10 @@ is($data->{'return'}[1][0],'return_value_2','name of second return value');
 is($data->{'return'}[1][1],  'index',       'main type of second return value');
 is($data->{'return'}[1][2],    'arg',       'second return parameter is an argument');
 is($data->{'return'}[1][3],   'went',       'argument name');
+is(@{$data->{'return'}[2]},        3,       'third return value def has three parts');
+is($data->{'return'}[2][0],'return_value_3','name of third return value');
+is($data->{'return'}[2][1],       '',       'type of third return value');
+is($data->{'return'}[2][2],   'self',       'third return value used the special self sigil');
 
 $data = parse('.name,>@rest');
 is(ref $data,                 'HASH',       'parse sig: .name,>@');
@@ -174,6 +182,8 @@ is($data->{'return'}[0][3],      'a',       'name of the argument');
 
 $data = parse(')a,-,');
 is(ref $data,                 'HASH',       'parse sig: )a,-,');
+is(keys %{$data},                  3,       'signature definition has to have only three parts');
+is(exists $data->{'required'},     1,       'signature definition has slot for required arguments');
 is(@{$data->{'required'}},         1,       'has 1 required argument');
 is(@{$data->{'required'}[0]},      2,       'first argument def has 2 parts');
 is($data->{'required'}[0][0],    'a',       'name of first argument');

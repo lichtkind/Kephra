@@ -9,7 +9,7 @@ use Kephra::Base::Class::Definition::Method::Signature;
 my $class = 'Kephra::Base::Class::Definition::Method::Signature';
 sub mk_sig_def {Kephra::Base::Class::Definition::Method::Signature->new(@_)}
 
-my $def = mk_sig_def([0,0,0]);
+my $def = mk_sig_def({required =>[], optional =>[], return =>[]});
 say $def;
 
 is( ref $def,                                 $class,        'created class definition object');
