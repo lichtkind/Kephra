@@ -20,7 +20,7 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::Data::Type::Basic  ............  C  .....  1.4    inheritable single value checker
    K::B::Data::Type::Parametric  .......  C  .....  1.31   checks the relation between two values
    K::B::Data::Type::Store  ............  C  .....  1.21   collection of type objects
-   K::B::Data::Type::Util  .............  C  .....  0.8    helper functions for type creation
+   K::B::Data::Type::Util  .............  C  .....  1.0    helper functions for type creation
    K::B::Data::Type::Standard  .........  C  .....  2.71   definition of standard types
    K::B::Data::Type  ...................  C  .....  1.11   manage type related symbols
    K::B::Data  .........................  C  .....  0.2    root of none OO data handling

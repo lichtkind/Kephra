@@ -31,7 +31,7 @@ sub is_type_owned            {} # ._  ~type - ~param                 --> ?
 sub add_shortcut             {} # ._  ~kind ~type ~shortcut          --> ~errormsg
 sub remove_shortcut          {} # ._  ~kind ~shortcut                --> ~errormsg
 sub get_shortcut             {} # ._  ~kind ~type                    --> ~errormsg    ~kind = 'simple'|'para[meter]'
-sub resolve_shortcut         {} # ._  ~kind ~shortcut                --> ~type
+sub resolve_shortcut         {} # ._  ~kind ~shortcut                --> ~type|undef
 sub forbid_shortcuts         {} # ._ @~shortcut                      --> ~errormsg    can not forbid forbidden or shortcuts currently in use
 
 sub check_basic_type         {} # ._  ~type $val                     -->  ~errormsg   = "reason $val"

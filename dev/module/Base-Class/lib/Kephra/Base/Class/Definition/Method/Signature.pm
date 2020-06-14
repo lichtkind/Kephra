@@ -9,6 +9,9 @@ my %arg_kind = (arg => 4, attr => 4, foreward => 3, slurp => 3, type => 4);
 sub new  { # %def     --> _
     my ($pkg, $sig_def) = (@_);
     return "need a hash reference to create signature object ".__PACKAGE__ unless ref $sig_def eq 'HASH';
+    return "hash ref can only contain 3 keys: required optional return" if keys %$sig_def != 3;
+    $sig_def->{'type'}     = {basic => [], param => []};
+    $sig_def->{'shortcut'} = {basic => [], param => [], bparam => []};
     for my $k (qw/required optional return/){
         return "signature definition has no hash key $k" unless exists $sig_def->{$k};
         next unless ref $sig_def->{$k};
@@ -33,7 +36,8 @@ sub new  { # %def     --> _
                     return "the slurpy argument $arg->[0] has to be the last argument" if $i != $#{$sig_def->{$k}} or ($k eq 'required' and ref $sig_def->{'optional'} eq 'ARRAY');
                 } elsif (@$arg > 3){
                     push @{$sig_def->{'type'}{'param'}}, $arg;
-                    push @{$sig_def->{'shortcut'}{'param'}}, $arg if length $arg->[1] == 1;
+                    push @{$sig_def->{'shortcut'}{'param'}}, $arg if length $arg->[1] == 1 and $arg->[2] eq 'type';
+                    push @{$sig_def->{'shortcut'}{'bparam'}}, $arg if length $arg->[3] == 1 and $arg->[2] eq 'type';
                 }
             }
         }
@@ -43,11 +47,32 @@ sub new  { # %def     --> _
 
 sub adapt_to_class { # ~class {~attr => ~type}, >@.store --> ~errormsg
     my ($self, $class, $attr, @store) = (@_);
-# resolve type shortcuts
-# insert parameter type
-# insert foreward type
+    return "this signature was already adapted to a class" unless exists $self->{'type'};
+    return "need a hash as second argument to adapt signature to a class" if ref $attr ne 'HASH';
+    for (@store){ return "value $_ is not a type store to adapt a signature to a class" if ref $_ ne 'Kephra::Base::Data::Type::Store' }
+    for my $arg (@{$self->{'shortcut'}{'basic'}}){
+        ($arg->[1] = Kephra::Base::Data::Type::Util::resolve_type_shortcut('basic', $arg->[1], @store)) or return "could not resolve basic type shortcut $arg->[1] of argument $arg->[0]";
+    }
+    for my $arg (@{$self->{'shortcut'}{'bparam'}}){
+        ($arg->[3] = Kephra::Base::Data::Type::Util::resolve_type_shortcut('basic', $arg->[1], @store)) or return "could not resolve (basic) parameter type shortcut $arg->[3] of argument $arg->[0]";
+    }
+    for my $arg (@{$self->{'shortcut'}{'param'}}){
+        ($arg->[1] = Kephra::Base::Data::Type::Util::resolve_type_shortcut('param', $arg->[1], @store)) or return "could not resolve parametric type shortcut $arg->[1] of argument $arg->[0]";
+    }
+    delete $self->{'shortcut'};
+    delete $self->{'type'};
+
+    for my $arg (@{$self->{'type'}{'basic'}}){
+        
+    }
+
 # insert self type
-# check types existance
+# insert attr type
+# insert foreward type
+# insert parameter type
+# insert arg type
+# check basic types existance
+# check param types existance
 #    for my $i (3..$#$self){
 #        next if @{$self->[$i]} == 1;
 #        $arg->{$self->[$_][0]} = $self->[$_][1] if @{$self->[$_]} == 2;

@@ -179,7 +179,7 @@ sub get_shortcut {                             # ~kind ~type                 -->
     ($kind = _key_from_kind_($kind)) or return;
     (exists $self->{$kind.'_type'}{$type_name}) ? $self->{$kind.'_type'}{$type_name}{'shortcut'} : undef;
 }
-sub resolve_shortcut  {                        # ~kind ~shortcut             --> ~type
+sub resolve_shortcut  {                        # ~kind ~shortcut             --> ~type|undef
     my ($self, $kind, $shortcut) = @_;
     ($kind = _key_from_kind_($kind)) or return;
     $self->{$kind.'_name_by_shortcut'}{$shortcut};
