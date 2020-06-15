@@ -4,7 +4,7 @@ use warnings;
 # helper functions for type creation
 
 package Kephra::Base::Data::Type::Util;
-our $VERSION = 1.0;
+our $VERSION = 1.01;
 use Kephra::Base::Data::Type::Store;
 
 our @type_class_names = qw/Kephra::Base::Data::Type::Basic
@@ -50,14 +50,6 @@ sub create_type {        # %type_def @.type_store      --> .type
 sub is_type {
     my $ref = shift;
     for (@type_class_names){ next if ref $ref ne $_; return 1 } 0;
-}
-sub resolve_type_shortcut { # ~kind ~shortcut @.type_store                   --> ~type|undef
-    my ($kind, $shortcut, @store) = (@_);
-    for (@store){
-        next if ref $_ ne 'Kephra::Base::Data::Type::Store';
-        my $type = $store->resolve_shortcut($kind, $shortcut);
-        return $type if defined $type;
-    }
 }
 
 ################################################################################

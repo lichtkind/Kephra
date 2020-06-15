@@ -3,7 +3,7 @@ use warnings;
 
 package Kephra::Base::Class::Definition::Method::Signature;
 our $VERSION = 0.1;
-use Kephra::Base::Data::Type;
+use Kephra::Base::Data::Type qw/is_type_known resolve_type_shortcut/;
 my %arg_kind = (arg => 4, attr => 4, foreward => 3, slurp => 3, type => 4);
 ################################################################################
 sub new  { # %def     --> _
@@ -51,19 +51,19 @@ sub adapt_to_class { # ~class {~attr => ~type}, >@.store --> ~errormsg
     return "need a hash as second argument to adapt signature to a class" if ref $attr ne 'HASH';
     for (@store){ return "value $_ is not a type store to adapt a signature to a class" if ref $_ ne 'Kephra::Base::Data::Type::Store' }
     for my $arg (@{$self->{'shortcut'}{'basic'}}){
-        ($arg->[1] = Kephra::Base::Data::Type::Util::resolve_type_shortcut('basic', $arg->[1], @store)) or return "could not resolve basic type shortcut $arg->[1] of argument $arg->[0]";
+        ($arg->[1] = Kephra::Base::Data::Type::resolve_shortcut('basic', '', $arg->[1], @store)) or return "could not resolve basic type shortcut $arg->[1] of argument $arg->[0]";
     }
     for my $arg (@{$self->{'shortcut'}{'bparam'}}){
-        ($arg->[3] = Kephra::Base::Data::Type::Util::resolve_type_shortcut('basic', $arg->[1], @store)) or return "could not resolve (basic) parameter type shortcut $arg->[3] of argument $arg->[0]";
+        ($arg->[3] = Kephra::Base::Data::Type::resolve_shortcut('basic', '', $arg->[1], @store)) or return "could not resolve (basic) parameter type shortcut $arg->[3] of argument $arg->[0]";
     }
     for my $arg (@{$self->{'shortcut'}{'param'}}){
-        ($arg->[1] = Kephra::Base::Data::Type::Util::resolve_type_shortcut('param', $arg->[1], @store)) or return "could not resolve parametric type shortcut $arg->[1] of argument $arg->[0]";
+        ($arg->[1] = Kephra::Base::Data::Type::resolve_shortcut('param', '', $arg->[1], @store)) or return "could not resolve parametric type shortcut $arg->[1] of argument $arg->[0]";
     }
     delete $self->{'shortcut'};
     delete $self->{'type'};
 
     for my $arg (@{$self->{'type'}{'basic'}}){
-        
+        return "argument $arg->[0] has the unknown basic type $arg->[1]" if ;
     }
 
 # insert self type

@@ -8,10 +8,10 @@ no warnings 'experimental::smartmatch';
 #       multiple parametric types with same name and different parameters must have same owner and shortcut (basic type shortcuts have own name space)
 
 package Kephra::Base::Data::Type::Store;
-our $VERSION = 1.2;
+our $VERSION = 1.21;
 use Kephra::Base::Data::Type::Basic;             my $btclass = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;        my $ptclass = 'Kephra::Base::Data::Type::Parametric';
-##############################################################################
+################################################################################
 sub new {      # - 'open'   --> .tstore
     my ($pkg) = @_;
     bless {basic_type => {}, param_type => {}, basic_name_by_shortcut => {}, param_name_by_shortcut => {}, forbid_shortcut => [], open => $_[1]//1};
@@ -179,7 +179,7 @@ sub get_shortcut {                             # ~kind ~type                 -->
     ($kind = _key_from_kind_($kind)) or return;
     (exists $self->{$kind.'_type'}{$type_name}) ? $self->{$kind.'_type'}{$type_name}{'shortcut'} : undef;
 }
-sub resolve_shortcut  {                        # ~kind ~shortcut             --> ~type
+sub resolve_shortcut  {                        # ~kind ~shortcut             --> ~type|undef
     my ($self, $kind, $shortcut) = @_;
     ($kind = _key_from_kind_($kind)) or return;
     $self->{$kind.'_name_by_shortcut'}{$shortcut};
@@ -194,8 +194,8 @@ sub forbid_shortcuts  {                        # .tstore @~shortcut          -->
 sub _validate_type_name_ {
     my $self = shift;
     return "type name is not defined" unless defined $_[0];
-    return "type name $_[0] contains none id character" if  $_[0] !~ /[a-zA-Z0-9_]/;
-    return "type name $_[0] contains upper chase character" if  lc $_[0] ne $_[0];
+    return "type name $_[0] contains none id character" if  $_[0] =~ /[^a-z0-9_]/;
+    return "type name $_[0] has to start with a letter" unless $_[0] =~ /^[a-z]/;
     return "type name $_[0] is too long" if  length $_[0] > 12;
     return "type name $_[0] is not long enough" if  length $_[0] < 3;
     '';
@@ -203,7 +203,7 @@ sub _validate_type_name_ {
 sub _validate_shortcut_ {
     my $self = shift;
     return "type shortcut is undefined" unless defined $_[0];
-    return "type shortcut $_[0] contains id character" if  $_[0] =~ /[a-zA-Z0-9_]/;
+    return "type shortcut $_[0] contains id character" if  $_[0] =~ /[a-z0-9_]/;
     return "type shortcut $_[0] is too long" if length $_[0] > 1;
     return "type shortcut $_[0] is not allowed" if $_[0] ~~ $self->{'forbid_shortcut'};
     '';
