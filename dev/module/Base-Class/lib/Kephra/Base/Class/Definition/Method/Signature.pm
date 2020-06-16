@@ -11,7 +11,7 @@ sub new  { # %def     --> _
     return "need a hash reference to create signature object ".__PACKAGE__ unless ref $sig_def eq 'HASH';
     return "hash ref can only contain 3 keys: required optional return" if keys %$sig_def != 3;
     $sig_def->{'type'}     = {basic => [], param => []};
-    $sig_def->{'shortcut'} = {basic => [], param => [], bparam => []};
+    $sig_def->{'shortcut'} = {basic => [], param => []};
     for my $k (qw/required optional return/){
         return "signature definition has no hash key $k" unless exists $sig_def->{$k};
         next unless ref $sig_def->{$k};
@@ -56,16 +56,16 @@ sub adapt_to_class { # ~class {~attr => ~type}, >@.store --> ~errormsg
     for my $arg (@{$self->{'shortcut'}{'param'}}){
         ($arg->[1] = resolve_type_shortcut('param', $arg->[1], '', @store)) or return "could not resolve parametric type shortcut $arg->[1] of argument $arg->[0]";
     }
-    for my $arg (@{$self->{'shortcut'}{'type'}}){
+    for my $arg (@{$self->{'category'}{'type'}}){
         ($arg->[3] = resolve_type_shortcut('basic', $arg->[3], '', @store)) or return "could not resolve (basic) parameter type shortcut $arg->[3] of argument $arg->[0]";
         is_type_known([$arg->[1],'element_type'], '', @store) or return "argument $arg->[0] refers to the unknown meta type $arg->[1]";
     }
+    for my $arg (@{$self->{'type'}{'basic'}}){
+        return "argument $arg->[0] has the unknown basic type $arg->[1]" unless is_type_known($arg->[1], '', @store);
+    }
+    delete $self->{'category'};
     delete $self->{'shortcut'};
     delete $self->{'type'};
-
-    for my $arg (@{$self->{'type'}{'basic'}}){
-        return "argument $arg->[0] has the unknown basic type $arg->[1]" if ;
-    }
 
 # insert self type
 # insert attr type

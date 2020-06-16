@@ -45,13 +45,13 @@ sub eval_special_syntax {
             splice (@$arg, 1, 0, $sigil.$twigil);
         } else {
             $arg->[0] = substr($arg->[0], 1);
-            if    ($sigil eq '.'){ splice (@$arg, 1, 0, '', 'foreward') }
+            if    ($sigil eq '.'){ splice (@$arg, 1, 0, '', 'Foreward') }
             else                 { splice (@$arg, 1, 0, $sigil)         }
         }
     } #say "mid:@$arg:";
     if (@$arg == 2){
-        if    ($arg->[1] eq '>@'){ splice (@$arg, 1, 1, '', 'slurp') }
-        elsif ($arg->[1] eq '_') { splice (@$arg, 1, 1, '', 'self')     }
+        if    ($arg->[1] eq '>@'){ splice (@$arg, 1, 1, '', 'Slurp') }
+        elsif ($arg->[1] eq '_') { splice (@$arg, 1, 1, '', 'Self')     }
         else {
             my $sigil = substr($arg->[1], 0, 1);
             my $ord = ord $sigil;
@@ -59,12 +59,12 @@ sub eval_special_syntax {
             splice (@$arg, 1, 1, $sigil, $rest) if ($ord > 122 or $ord < 97) and $rest;
         }  
     } elsif (@$arg == 3 and substr($arg->[2], 0, 1) eq '.'){
-        splice (@$arg, 2, 1, 'attr', substr($arg->[2], 1)  ) 
+        splice (@$arg, 2, 1, 'Attr', substr($arg->[2], 1)  ) 
     } elsif (@$arg == 4){
-        $arg->[2] = 'arg' if $arg->[2] eq 'argument';
-        $arg->[2] = 'attr' if $arg->[2] eq 'attribute';
+        $arg->[2] = 'Arg' if $arg->[2] eq 'Argument';
+        $arg->[2] = 'Attr' if $arg->[2] eq 'Attribute';
     }
-    splice (@$arg, 2, 0, 'type') if @$arg == 3 and $arg->[1]; #say "after:@$arg:";
+    splice (@$arg, 2, 0, 'Type') if @$arg == 3 and $arg->[1]; #say "after:@$arg:";
     return $arg->[0] if @$arg == 1;
     $arg;
 }
