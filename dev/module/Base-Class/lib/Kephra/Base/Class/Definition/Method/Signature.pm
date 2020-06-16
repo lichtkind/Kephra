@@ -35,9 +35,9 @@ sub new  { # %def     --> _
                 if ($arg->[2] eq 'slurp'){
                     return "the slurpy argument $arg->[0] has to be the last argument" if $i != $#{$sig_def->{$k}} or ($k eq 'required' and ref $sig_def->{'optional'} eq 'ARRAY');
                 } elsif (@$arg > 3){
+                    next if $arg->[2] eq 'type';
                     push @{$sig_def->{'type'}{'param'}}, $arg;
-                    push @{$sig_def->{'shortcut'}{'param'}}, $arg if length $arg->[1] == 1 and $arg->[2] eq 'type';
-                    push @{$sig_def->{'shortcut'}{'bparam'}}, $arg if length $arg->[3] == 1 and $arg->[2] eq 'type';
+                    push @{$sig_def->{'shortcut'}{'param'}}, $arg if length $arg->[1] == 1;
                 }
             }
         }
@@ -51,13 +51,14 @@ sub adapt_to_class { # ~class {~attr => ~type}, >@.store --> ~errormsg
     return "need a hash as second argument to adapt signature to a class" if ref $attr ne 'HASH';
     for (@store){ return "value $_ is not a type store to adapt a signature to a class" if ref $_ ne 'Kephra::Base::Data::Type::Store' }
     for my $arg (@{$self->{'shortcut'}{'basic'}}){
-        ($arg->[1] = Kephra::Base::Data::Type::resolve_shortcut('basic', '', $arg->[1], @store)) or return "could not resolve basic type shortcut $arg->[1] of argument $arg->[0]";
-    }
-    for my $arg (@{$self->{'shortcut'}{'bparam'}}){
-        ($arg->[3] = Kephra::Base::Data::Type::resolve_shortcut('basic', '', $arg->[1], @store)) or return "could not resolve (basic) parameter type shortcut $arg->[3] of argument $arg->[0]";
+        ($arg->[1] = resolve_type_shortcut('basic', $arg->[1], '', @store)) or return "could not resolve basic type shortcut $arg->[1] of argument $arg->[0]";
     }
     for my $arg (@{$self->{'shortcut'}{'param'}}){
-        ($arg->[1] = Kephra::Base::Data::Type::resolve_shortcut('param', '', $arg->[1], @store)) or return "could not resolve parametric type shortcut $arg->[1] of argument $arg->[0]";
+        ($arg->[1] = resolve_type_shortcut('param', $arg->[1], '', @store)) or return "could not resolve parametric type shortcut $arg->[1] of argument $arg->[0]";
+    }
+    for my $arg (@{$self->{'shortcut'}{'type'}}){
+        ($arg->[3] = resolve_type_shortcut('basic', $arg->[3], '', @store)) or return "could not resolve (basic) parameter type shortcut $arg->[3] of argument $arg->[0]";
+        is_type_known([$arg->[1],'element_type'], '', @store) or return "argument $arg->[0] refers to the unknown meta type $arg->[1]";
     }
     delete $self->{'shortcut'};
     delete $self->{'type'};
