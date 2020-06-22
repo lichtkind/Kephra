@@ -2,7 +2,7 @@ use v5.20;
 use warnings;
 
 package Kephra::Base::Class::Definition::Method;
-our $VERSION = 0.1;
+our $VERSION = 0.2;
 use Kephra::Base::Class::Definition::Method::Signature;
 
 sub new           {} # ~name %sig_def ~code >@keywords     --> _
