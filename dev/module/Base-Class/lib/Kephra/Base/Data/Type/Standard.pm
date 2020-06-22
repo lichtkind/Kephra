@@ -56,7 +56,7 @@ our @parametric_type_definitions =  (
                                                                                                           parameter => {   name => 'ref_name',  parent=> 'str',       default=> 'ARRAY'}, },
 );
 our @forbidden_shortcuts = (qw/{ } ( ) < > - ./,','); # §
-our %basic_type_shortcut = (  value => '$', str => '~', bool => '?', num => '+', int_pos => '=', #  ^ ' " ! /  ;
+our %basic_type_shortcut = (  value => '$', str => '~', bool => '?', num => '+', int_pos => 'N', int => 'Z', #  ^ ' " ! /  ;
                           array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', 
                             type => 'T', object => '!');
 our %parametric_type_shortcut = ( index => 'I', typed_array => '@', typed_hash => '%');
