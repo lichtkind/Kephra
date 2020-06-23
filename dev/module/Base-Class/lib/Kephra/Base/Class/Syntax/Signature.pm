@@ -23,9 +23,10 @@ sub parse {
         $sig = substr($sig, 0, $pos);
     }
     my $req = split_args($sig);
-    {required => (   @$req ? [map {eval_special_syntax($_)} @$req] : ''),
-     optional => (ref $opt ? [map {eval_special_syntax($_)} @$opt] : ''),
-     return   => (ref $ret ? [map {eval_special_syntax($_)} @$ret] : ''),
+    {in_required => (   @$req ? [map {eval_special_syntax($_)} @$req] : ''),
+     in_optional => (ref $opt ? [map {eval_special_syntax($_)} @$opt] : ''),
+     out_required => (ref $ret ? [map {eval_special_syntax($_)} @$ret] : ''),
+     out_optional => (),
     };
 }
 sub split_args {
@@ -50,7 +51,7 @@ sub eval_special_syntax {
         }
     } #say "mid:@$arg:";
     if (@$arg == 2){
-        if    ($arg->[1] eq '>@'){ splice (@$arg, 1, 1, '', 'Slurp') }
+        if    ($arg->[1] eq '>@'){ splice (@$arg, 1, 1, '', 'Slurpy') }
         elsif ($arg->[1] eq '_') { splice (@$arg, 1, 1, '', 'Self')     }
         else {
             my $sigil = substr($arg->[1], 0, 1);
@@ -72,13 +73,13 @@ sub eval_special_syntax {
 1;
 __END__
 
- [~]                   1    # ~ means argument name
- [~ T]                 2    # T means argument main type
- [~ T? 'foreward']     3    # constructor arg thats forewards to attribute
- [~ T? 'slurp']        3    # a.k.a. >@ ; T? means most of time its empty = ''
- [~ T? 'self']         3    # a.k.a. _  ; typed_ref class
- [~ T  'type'   T]     4 
- [~ T  'arg'    ~  T!] 5    # T! means Type of argument (parameter type of main type) will be added later by Definition::Method::Signature
- [~ T  'attr'   ~  T!] 5    # T! means Type of attribute (parameter type of main type) will be added later by Definition::Method::Signature
+ [~]   'named'                 1    # ~ means argument name
+ [~ T] 'typed'                 2    # T means argument main type
+ [~ T? 'foreward']             3    # constructor arg thats forewards to attribute
+ [~ T? 'slurpy']               3    # a.k.a. >@ ; T? means most of time its empty = ''
+ [~ T? 'self']                 3    # a.k.a. _  ; typed_ref class
+ [~ T  'complex' T  $def ]     4-5 
+ [~ T  'arg'     ~  T!   $def] 5-6  # T! means Type of argument (parameter type of main type) will be added later by Definition::Method::Signature
+ [~ T  'attr'    ~  T!   $def] 5-6  # T! means Type of attribute (parameter type of main type) will be added later by Definition::Method::Signature
 
 # [~ T? 'pass']         3    # a.k.a. -->' ', now return => []
