@@ -4,12 +4,16 @@ use warnings;
 # parsing signatures into data structure to build definition object from
 
 package Kephra::Base::Class::Syntax::Signature;
-our $VERSION = 1.0;
+our $VERSION = 1.2;
 
 sub parse {
     my $sig = shift // '';
     my ($opt, $ret) = ('','');
     $/ = ' ';
+    if (rindex($sig, '=') > -1) {
+        
+    } else {
+    }
     my $pos = rindex($sig, '-->');
     if ($pos > -1) { 
         $ret = split_args(substr($sig, $pos+3));
@@ -23,11 +27,14 @@ sub parse {
         $sig = substr($sig, 0, $pos);
     }
     my $req = split_args($sig);
-    {in_required => (   @$req ? [map {eval_special_syntax($_)} @$req] : ''),
-     in_optional => (ref $opt ? [map {eval_special_syntax($_)} @$opt] : ''),
+    {in_required  => (   @$req ? [map {eval_special_syntax($_)} @$req] : ''),
+     in_optional  => (ref $opt ? [map {eval_special_syntax($_)} @$opt] : ''),
      out_required => (ref $ret ? [map {eval_special_syntax($_)} @$ret] : ''),
      out_optional => (),
     };
+}
+sub parse_args {
+    my $args = shift;
 }
 sub split_args {
     return [] unless defined $_[0];
