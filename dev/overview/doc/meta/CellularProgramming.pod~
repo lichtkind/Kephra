@@ -1,0 +1,419 @@
+
+=head1 Cellular Programming
+
+    This document describes a set of workflows inside a peculiar directory
+    structure, that evolved from and for the development of the Kephra editor.
+    Please stick to these guidelines if you want to join the team.
+
+=head2 DISCLAIMER
+
+    Take the rules with a grain of salt and adapt them to be most useful.
+
+=head2 Overview
+
+
+=head3 Fundamental Ideas
+
+
+    1) We look for a careful balance between
+       form (realistic planning and commensurability of progress) and
+       flow (flexibility and creative joy) which allows much of both.
+       In fact they are interdependent
+       because dabbling in an unstructured environment or even a mess is no fun
+       and people without fun are not very productive.
+
+    2) One ingredient to achieve that is to obey and not and not sabotage
+       the natural order and and logic behind the progression of a flittering idea
+       to a solid well rounded product. 
+       Important part of the planning is to know who needs when which information.
+     
+    3) There are 5 views we have to care about simultaneously:
+       a) the libs/API we use/ program against
+       b) the API our libs provide
+       c) features from the users perspective
+       d) fully usable and deployable stages through which our program evolves
+       e) the overall architecture and documentation of the program/project
+       This list has an inherent bottom up order, can be also found in our planning/roadmap.
+       To have this full 360 view is one reason why its clled complete programming.
+
+    4) Once the issues are sorted into these 5 boxes, they can be than even 
+       easier decoupled into smaller pieces, that are easier to prioritize,
+       rearrange and to solve. Work becomes more fun, less of a burden,
+       because you only have to care about one of these 5 levels at once.
+
+    5) Each "parcel" in one of these "boxes" is a fully functional,
+       testable and tested unit.
+       This makes it not only more manageable and measurable (and it can be
+       parallelized more often), but it's also much more fun for two reasons.
+       First: you can try out a lot without being able to brake something.
+       Secondly: each little work provides an immediate productive benefit
+       to the project, even writing documentation.
+
+    6) Actually we consider documentation so important,
+       that we start to write it even before coding anything.
+
+    7) Writing Tests (except unit tests) is the last thing we do,
+       to close a parcel so to speak.
+
+    8) All aspects of a feature (docs, code, comments, tests, artwork) are
+       developed together and by same (group of) people. 
+       This is another meaning of "complete".
+    
+    9) The repository (codebase) is the primary means of communication.
+       Decentral VCS like hg or git play a vital role in CP.
+
+
+
+=head3 Basic Steps
+
+
+    1) Sketch your goal by writing high level documentation.
+       Use such docs also in meetings and when reporting to the boss.
+
+    2) Envision stages in which the program can be released.
+       Particular features or requirements will be then be assigned to stages.
+
+    3) Check technical requirements by writing functional prototypes.
+
+    4) Toy around with features by writing use case prototypes.
+
+    5) As soon as you know there will be a variable/method/class or file with
+       a certain name or function, put it in the actual codebase as dummy code.
+       Add comments where supposed to be what.
+
+    6) Through branches do features land in blead, which always compiles,
+       runs, passes all tests, has complete docs, configs, artwork.
+
+    7) Write tests after a prototype/feature/lib is done.
+
+
+=head2 Details
+
+=head3 Observations
+
+
+    1) The awesome powers of prototypes are known but still not systematically used.
+
+    2) Software tests are no silver bullet. They are used for several competing
+       purposes and are often not even realistically doable.
+       That's why a lot of programers hate seriously don't like it.
+
+    3) New tools like hg or git allow new workflows which solve pending problems.
+
+
+=head3 Completeness
+
+ Lets start with a small meditation, because Complete Programming (CP) relies on
+embodying a mindset that is still a bit alien to some. In one word it is holistic -
+meaning seeing the full (complete) picture. That includes the views of the user,
+the programmer, the designer, tester and project manager.
+That sounds demanding, but you do it already when you really care about something.
+
+ As a consequence we count an ugly icon, missing documentation or an badly
+designed internal API equally as a bug as a crashing function. CP is designed
+to deliver that high standard, without packing too much burden on the programmer.
+ Firstly: all aspects of a feature are planned at once - so they're in tune with
+each other. And they are also get imlepemented together - when details are fresh
+in your memory. And since that also includes comments and documentation, you will
+later know what you have done and why, saving a lot of guesswork.
+ Secondly: we reduce duplicate work and duplicate data where possible. CP will
+compel you to think about a problem several times, to ensure you understood its
+implications. But every time you will produce a useful part of the project.
+Every vital information goes into one well structured repository (again holistic!).
+Your highten clarity and the low duplication also improve the quality of the
+communication, that will mainly take place through your common work (repository).
+ And thirdly: as hinted, the development model knows several decoupled, well
+defined stages that correlate with the natural flow of ideas into materialisation.
+Any stage has only one goal that is set according to its possibilities and with
+respect to its unavoidable limits. That's one reason why work gets less heavy.
+(Joyful labour is important to get the deeper focus we need to achieve quality.)
+The other reason: some stages allow free minded hacking and bring back the fun
+you missed for so long. (Play and work balanced - that is holistic too).
+
+The next chapter describe each stage in detail.
+
+
+=head3 Planning
+
+Initial planning in CP is mostly metaplanning. Of course you have to think about
+the classic five questions:
+
+   * general vision of the program with use cases
+   * approx. feature list
+   * small roadmap (what feature into what stage)
+   * on which technology to rely (with fallback alternatives)
+   * what team we need (especially in a corporate setting)
+
+Take your time and write down answers in a structured and well readable manner,
+because this gets already shipped into the repository as user docs. In a sense -
+development has already started. Of course these docs will be presented to your
+boss as the project proposal - better they are convincing and well formulated.
+
+Please don't overdo your first plan, since most information you will gather along
+the way.  CP means that new information will get stored quickly in the appropriate
+places - not that work targets change every week. CP knows well defined workflows
+which spare the team from some agreements people call planning. Some planning will
+be replaced by asynchronous interactions with results that are immediately visible
+to all project member. But still there are meetings, a boss and something similar
+as sprints.
+
+=head4 Metaplanning
+
+After the rough goal is set and before any "real" coding begins - its time for
+the announced metaplanning. Outline the abstraction layers of the program and
+plan when to introduce them during developement. This is most critical, because
+changes on these cause the most growth pain. Write some placesholder now into the
+code base for all eyes to see and all devs to remember. The compiler will tell
+you, if it's coherent.  It also helps you to find the right names for important
+details, so later they will be used consistantly in the docs, code and all the rest.
+
+Second part of metaplanning is: Adapt this document, which is part of the programers
+documentation, to the needs of the project. Maybe your team is smaller and several
+roles will be played by one person or maybe your program has no GUI and you have
+to redefine completeness of a feature. Maybe you want to tweak the role of tests -
+by all means these are not the ten commandments.
+And please give us a feedback when your tweaks seem to work well.
+
+=head4 Roadmap
+
+After the metaplanning do a small roadmap. In CP thats basically a list of several
+planned stages of growth. Assign the features you already know about to a stage,
+where it can be developed with least effort and all needed abstractions and support
+libs exist. Try to group related features in one stage - so changes become more
+managable. If your understanding is clear enough - assign the features to
+substages that will be handled similar to a sprint.
+
+Savor the magic of a new beginning and avoid the trap of doing things as usual.
+
+
+=head3 Documentation
+
+As you saw, CP starts always by writing documentation, forwhy its usually better
+to think before doing anything. Putting it down also helps to reflect on it.
+And knowing that others will rely on it, should motivate you toward precision.
+
+The first thoughts about anything are too vague to build a good program from.
+Trial and error and even more thinking have to follow, before it gets useful.
+So why not take what you get in the first minutes, put it in a  readable form,
+(which helps you to understand it deeper) and minimize with the result the effort
+to write the docs after you did coding. Practically that is one trick in CP to
+do more and better quality with less work. As your clairvoyance is most probably
+not fully developed, you need to readjust the doc safter implementation.
+Read details about that in chapter L<Main Program> and L<Itersations>.
+
+Some devs feel writing docs is unproductive, a waste of time or should be done
+by people more talented to do that. Even if good UI design is "self-explanatory",
+missing docs are crippling the usability and not findable features are not
+distinguishable from not existing ones. Thatswhy only documented features, libs
+and API's are quality work. And since you wrote them, you should document them.
+It would take more time to explain it anyway, especially to a none-techie. And
+switching to the users perspective - that's what you need to do for writing good
+docs - you also need to develope good software.
+
+The reason why docs are considered in the "agile" field as less important,
+(agile manifesto says: "Working software over comprehensive documentation")
+is because they confuse it with overhead. In CP we only document software parts as
+a first step toward their implementation. Planned ones are just noted in a roadmap.
+Meetings get more productive, when everybody gets all information and there is
+arguing about now to be made changes in the docs that will go online instantly.
+Managers as well as customers will get high level user docs. They are the basis
+of most communication. That's because the struggle for satisfying agreements,
+a common language and a good product are the same thing. Unifying them makes just
+sense, improves transparency, demands honesty and reduces overhead.
+
+User docs, developer docs and comments, as well as the code itslef are means of
+communication between people. They have to cooperate. All these parts should have
+a common language and define key words and phrases in the exactly same way.
+Less friction here is an enormous productivity boost - a further reason,
+why they gotta be written altogether and by the same people.
+
+
+=head3 Overview
+
+=head3 Prototypes
+
+One of the things Steve Jobs got right was: "Start with envisioning the user
+experience and then work your way through the technicalities.". CP does that by
+beginning with a bit of user documentation - followed by an explorative phase,
+where developers find out how to realize it by writing prototypes.
+These are small, quickly written programs that are test beds for very few things.
+Usually do programer enjoy building them, because they demand less restrictions
+than huge programs and allow much more fast changes and creativity.
+This way ideas get stable without harming the "real code" and coders have more fun.
+And if a prototype turns out to be a blind alley, it can be deleted without remorse.
+
+Some may now intervene: "Why not just fork an experimental/feature branch,
+if we using hg, git or arch anyway? Afterwards it can be just merged back by the
+software and we don't have to write that code again in the main program.".
+Well, like said - dealing with a huge program is much more hairy and distracting -
+compared with that fresh clean start prototypes provide. And beside that -
+the code that will flow back is not as much compared with the
+many trials and errors that might pollute the history of the main project branch
+if you merge it there. There is still rebase, that cleans it up, but you might
+preserve that history in the right place, since there you learned your lessons.
+
+Prototypes also serve an educational purpose. Programmers often look up how they
+did something in their own programs. That is much easier with nicely commented,
+sorted and indexed prototypes that sit and wait unchanged in their own branch -
+presenting just the essence how to solve one particular problem. Its a kind of
+documentation from programmer to programmer. But this works only if a solution
+is also tidied up after its found. When you later want to test another idea just
+clone or copy a similar prototype and you already got the needed minimal framework
+supporting that kind of function.
+
+A completed prototype has also a role similar to a test. It demonstrates that a
+chunk of code works that way. You can't practically achieve that while have having
+a lot dependencies that can introduce a failure into an otherwise working piece
+of code. And even besides that - in CP we have a way to write prototypes,
+where you can do heart transplant to the production stream without greater trouble.
+
+CP knows two types of prototypes that are living in two seperate branches.
+That's because the main program has to bridge two endpoints which are too different
+to think about and optimize for at once. Theset are the hardware or the near
+hardware software layer and the user. For the one side we have functional
+prototypes and for the second use case prototypes.
+
+=head4 Functional Prototypes
+
+After starting with a users wish, we go to the opposite end of the spectrum,
+to the building blocks of a program like computing a formula or writing a file.
+Because it doesn't make sense to plan on details if we don't know if it can be
+built or how. I mean experienced programmer know a lot, but there are far too
+many fast changing libraries, techniques and domains to know them all. And even
+if you use other peoples work - code can be buggy and docs might be unclear,
+missing, lying or simply out of date. So only when you built it and it's running
+you can be sure it runs. Therefor we do functional prototypes (FP).
+
+A FP has only one file and should be as short as possible. It can be used to
+check out how third party libraries work, but none of the projects libs should
+be used if possible. FP need no exceptions, no logging and alike.
+Just solve a core problem that is needed to implement a feature.
+If there are two ways to implement, try both. Usually that's not much more work
+and you can later make wiser decisions. Especially in discussion with the lead
+programmer that knows the whole structure and maybe sees more implications of
+these alternatives. That became only possible, because well commented FP are
+easier to grok than main program code.
+
+=head4 Use Case Prototypes
+
+Back to the users perspective. Same basic rules apply, except now you may use
+libs from the main project or some altered/simplified derivatives. Without these
+you can't write this kind of programs quickly because they are far more complex
+then functional prototypes. And it will be a good stress test for the libs too.
+
+Since this will be a program with only one feature or a set of related ones,
+you are free to model it to an ideal state, that maybe wouldn't fit to main branch.
+That enables a realstic decision making process, how to wrench it into the whole,
+or maybe even to alter the main thing to get it shipped this way.
+
+This creative phase is also the perfct time to make the artwork (UI and icons)
+and to figure out the key and mouse controls and possible options.
+
+=head3 Main Program
+
+Before the now prepackaged feature gets integrated - lets back up for a while,
+to see how we construct the sceleton of the program.
+
+=head4 Dry Programming
+
+CP doesn't distinguishes between writing documentation or building the program.
+User docs are a first step of programming and we write code to document ideas.
+That might include comments, that mark and explain what is expected to happen
+at that place, before the actual code can be written. But I mean also creating
+files, inserting empty classes, methods, attributes - even variables, that have
+a name and purpose we already could agree upon.
+
+At first: our thoughts get concrete - fast. If you see your ideas like that,
+you get a much better sense how the program will be look like. Spotting design
+flaws or misleading names becomes easier - plus the compiler tells, if the plan
+is even doable. Don't underestimate the power of names. They are equally important
+as the logic, helping to communicate the inner workings and the intentions of the
+architect. In CP we spend some time just writing dummy code and contemplate about
+it, to find the right hierarchies and names. 
+Maybe other people don't call that programming, but we certainly do.
+
+Secondly: having this dummy code in place (just do it for the current roadmap stage),
+team member will comprehend the current goals and where to put their work into
+much clearer than from text desctiptions or boring UML-diagrams. Sources will tell
+the current state of planning and also its changes in a not ignoreable manner.
+This also means: if the architect changes his mind - (ideally) he has to clean up
+the mess, created by his changes - including adjusting the tests.
+Of course nobody is allowed to check in code that breaks tests.
+
+=head4 Introducing a feature
+
+When a use case prototype is completed in all details and cleaned up,
+the architect has to decide in when and in which form it will be introduced,
+to prevent experience rot (L<http://www.uie.com/articles/experience_rot/>).
+It will happen during one sprint and via a feature branch that will introduce
+all changes in program, libs, docs and tests as one commit. So even if the history
+of the branch will be preserved - the merge happens with a rebase. As a first
+step the libs with theirs tests will be expanded. After that the caller follow.
+
+If there is an config dialog or config files - all switches for the new function
+are there and do work. Make sure you only rely on included libs or modules that
+are listed in the installer. Please mention also in the comments, which prototypes
+were the basis of this feature.
+
+=head4 Libraries
+
+
+
+
+=head3 Tests
+
+The rise of Extreme Programming (XP) gave also rise to Test Driven Development (TDD),
+where you start the implementation by building tests. The rationale behind this:
+You have to think about your goal by defining it with a small program. After that
+it's easier to write the code and the new failing test motivates you to do so.
+And as soon you brake a function or specification, the testing suite will yell
+at you and you are spared of a very time consuming bug search 10 month later,
+when angry user yell at you, because the program deleted their data but you already
+forgot half the details of the program.
+
+Problem with this theory: its so hard to write tests out of the blue, because your
+notion of this task might be very vague at first. But even if you have a billiant
+idea, there are still a lot of details to be added and altered while you grok
+the algorithm, its use cases and its role in the larger scheme fully. And having
+to rewrite the code and the tests several times is frustrating. Besides - TDD
+is not even doable for GUI and other areas where the supporting structure has to
+be built first to even run a test. A startling read about even more prescribed
+madness in software testing is Elisabeth Hendricksons paper: "better testing — 
+worse quality?" at L<http://testobsessed.com/wp-content/uploads/2011/04/btwq.pdf>
+But the other benefits of testing are still as worthwhile as describes by TDD people.
+
+That's why in CP we write the tests hopefully once, after the dust is settled.
+Because tests are so precise, writing them down will give us a precious opportunity
+to rethink the code one last time from a logical and technical perspective.
+All the other issues were already solved and we are now free to give special
+attention to the corner cases we may have overlooked so far. Yet another case of
+getting better results with less effort in CP. Test are written the last phase
+of writing a functional/use case prototype and feature branch.
+
+One point that is still experimental, but worth considering - putting the tests
+into the code in the same file as the code it tests. The test suite will then be
+just a different "starter" for all this code, but no seperate dir tree of code.
+That would be really holistic. Writing tests would be easier, even if good editors
+can display several files beside each other and test would functions as an
+additional comment, explaining what we we want to achieve here. In fact to the
+parser of the main program test will appear as comments. This might be hard to
+realize in some languages, but not problem in Perl 6 and even Perl 5 should have
+at least one way to do that.
+
+
+=head3 Iterations
+
+Now we know the stages of development - lets descibe how to switch between them.
+
+Only in an ideal
+
+=head3 Releases
+
+
+See more in L<lib/Kephra/Versioning.pod>
+
+
+=head3 Glossary
+
+
+=cut

@@ -1,0 +1,201 @@
+=head1 Kephra::Internals
+
+If you want to touch the Kephra sources -
+this document explains where to find what and roughly how it works.
+The terminology is explained in the glossary at the end.
+In case you learn better by looking at the good documented code - start at Kephra::API.
+
+=head2 NAMESPACES
+
+In each file is only one package with exactly the same name as the file.
+
+With every directory you go deeper into the tree the modules will get more
+specific. Thats why the directory "lib/Kephra" has only the most common
+tools and libraries. Other dir (a good first approximation is the main menu):
+
+=over 4
+
+=item * API - API (proxy) for most cross module calls and plugins to access central data structures
+
+=item * App - visuals
+
+=over 4
+
+=item * Bar - container widgets (menu bar, toolbar, tab bar, status bar, etc.)
+
+=item * Editor - editor widget helper
+
+=item * Panel - with sizer assembled visual units (snippet lib, io unit, etc.)
+
+=item * Part - functional units (main part, side panel, etc,)
+
+=back
+
+=item * Config - data
+
+=over 4
+
+=item * Default - built in fall back configs when certain files are in trouble
+
+=back
+
+=item * Document - document properties
+
+=item * Edit - text manipulation functions
+
+=item * Files - all sorts of IO
+
+=item * Plugins - namespace of users extentions
+
+=back
+
+
+
+=head2 MODULES
+
+=over 4
+
+=item * Kephra
+
+global vars like version number and the init process:
+finding configs, setting dirs, forking to the worker, loading libs, starting app
+
+
+=item * Kephra::API
+
+- interface to most important functions all modules and plugins should use
+- provides also simplified aliases to Kephra::API::* namespaces
+- as long as the first version number (see L<Versioning>) does not change,
+  no call will be renamed or removed
+
+=item * Kephra::API::Command
+
+- Every function the user is able to trigger has an CommandID
+  and gets called over this API.
+- In head of every module after package and use and vars are the definitions
+  which rgister these commands in this data structure.
+- Its for monitoring, triggers, macros and other introspection.
+- Also helps to make simple menu and toolbar definitions (are lists of CommandIDs).
+
+=item * Kephra::API::DocumentStash
+
+- Find docs by any attribute or categories.
+
+=item * Kephra::API::Event
+
+- trigger, freeze, thaw, add and remove events or calls attached to them
+- covers also internal calls
+
+=item * Kephra::API::GuiBuilder
+
+- transform wiki syntax => data structure => GUI and back
+
+=item * Kephra::API::KeyMap
+
+- managing the widgets mappings of key combo => CommandID
+
+=item * Kephra::API::Macro
+
+- record, play, store and load macros
+
+=item * Kephra::API::Plugin
+
+- load, reload and unsubscribe plugins
+
+=item * Kephra::API::Sandrum
+
+- vi like shortcut language for triggering commands from the IO Unit by typing
+
+=item * Kephra::App
+
+- root object of all GUI
+- handles GUI related boot and shutdown sequence
+- derived from Wx::App
+
+=item * Kephra::App::Bar::Tab
+
+- base TabBar, previous DocBar
+
+=item * Kephra::App::Dialog
+
+- all dialogs are called from here
+
+=item * Kephra::App::Editor
+
+- main class of the editing widgets
+
+=item * Kephra::App::Focus
+
+- keeps track in which widget got to make save way back if needed
+
+=item * Kephra::App::Menu
+
+- compiles menu definitions to data structures and them into menus
+
+=item * Kephra::App::PaintBar
+=item * Kephra::App::Panel  - wrapper for Wx::Panel, uses K::App::Sizer
+=item * Kephra::App::Sizer
+=item * Kephra::App::Splitter
+=item * Kephra::App::Toolbar
+=item * Kephra::App::Util  -  GUI helper
+=item * Kephra::App::Window  -  main window with all layout
+
+=item * Kephra::Config  -  config menu function (internal data handling)
+
+=item * Kephra::Document  -  document menu (doc properties)
+
+=item * Kephra::Edit  -  basics functions for the edit menu
+
+=item * Kephra::File  -  most file menu functions
+
+=item * Kephra::Help  -  display documentation
+
+=item * Kephra::Log  -  logger
+
+=item * Kephra::Worker  -  does heavy lifting work in the background, so app stays reactive 
+
+=back
+
+=head1 Glossary
+
+=head2 App
+
+everything visible and GUI (Wx) related
+
+=head2 App::Part
+
+visual area dedicated for one purpose, editor is the most prominent,
+but ther are also FileBrowser, IOUnit and more
+
+=head2 Editor
+
+one widget for editing text
+
+=head2 Edit
+
+namespace for the actual editing operations
+
+=head2 Panel
+
+area to place widget on, can be under anything, even under each editor
+a Kephra::App::Panel is a helper class that manages its sizer
+(visibility and ordering of elements)
+
+=head1 Document
+
+=head2  Interdependency Of Core Modules
+
+=head2  Modules vs Objects
+
+=head2  Boot Stages
+
+Just using the fact that when modules are loded (after the fork)
+there main code (outside the sub) is run. At this time we create the
+basic command list and the definition which module gets which part of
+the global config (actual loading happens later).
+
+=head2  Worker Fork
+
+
+=cut
+
