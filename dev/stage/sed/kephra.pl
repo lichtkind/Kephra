@@ -5,6 +5,7 @@ BEGIN { unshift @INC, '.' }
 use Wx;
 use Kephra::App::Window;
 
+
 SingleEdit->new->MainLoop;
 
 package SingleEdit;

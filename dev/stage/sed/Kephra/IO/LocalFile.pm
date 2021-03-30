@@ -3,7 +3,6 @@ use warnings;
 use Encode;
 use Encode::Guess;
 use File::Spec;
-use Kephra::API;
 
 package Kephra::IO::LocalFile;
 

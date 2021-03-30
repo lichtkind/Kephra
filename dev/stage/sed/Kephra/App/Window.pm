@@ -6,7 +6,9 @@ use base qw(Wx::Frame);
 
 use Kephra::App::Dialog;
 use Kephra::App::Editor;
+BEGIN { say "--"; }
 use Kephra::IO::LocalFile;
+BEGIN { say "--"; }
 our ($file, $encoding, $content, $ed);
 
 sub new {
