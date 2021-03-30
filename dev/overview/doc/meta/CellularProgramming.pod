@@ -15,31 +15,60 @@ All development takes place in the /dev subfolder of a project. That dir has
 itself the following subfolder, sorted by the granularity of their content:
 
 =over 4
-=item /dev/overview
-=item /dev/stage
-=item /dev/feature
-=item /dev/module
-=item /dev/function
+=item /dev/overview - targeted end state of project
+=item /dev/stage - envisiond and part milestones / major releases
+=item /dev/feature - prototypes to develop one feature
+=item /dev/module - environment to develop libraries/packages
+=item /dev/function - tiny prototypes to test one language/thrid party lib feature
 =back
 
-But the order operation is :
+But the recommended order of usage is :
 
 =over 4
-=item /dev/overview
+=item /dev/overview/doc
+=item /dev/overview/bin
 =item /dev/stage
-=item /dev/feature
-=item /dev/module
 =item /dev/function
+=item /dev/module
+=item /dev/feature
+=item /dev/stage
 =back
 
-There is dedicated a chapter below to each of these 5 subdir there is dedicated a chapter below
-
-/dev/stage
-/dev/feature
-/dev/module
-/dev/function
+=head3 Basic Steps
 
 
+    1) Sketch your goal by writing high level documentation.
+       Use such docs early for sharing with coprogrammer, and audience/boss.
+       Keep it always updated when plan changes.
+
+    2) Create dummy/empty classes, with dummy methods and comments where important.
+       Find names of components and where to place what functionality (roughly).
+       Keep it always updated when plan changes.
+
+    3) Envision stages in which the program can be released in equal sized steps 
+       without much rewrite. Particular features and their requirements are 
+       assigned to the stages.
+
+    4) Check technical requirements of current stage (risky features used from 
+       language and third party libraries) by writing functional prototypes.
+
+    5) Write own libraries of the project in packages as independent projects,
+       to match requirements of the current stage. Write first docs, than code
+       tests last.
+
+    6) Write one prototype for each set of user features, to experiment with
+       alternatives. Update libraries, stage plan and overview when necessary.
+
+    7) Combine code from feature prototypes and release stage (major release).
+       Move code of current stage to projects lib and bin dir.
+       Keep stage directory for further bug fixes. 
+
+    8) Proceed with next stage until project is completed.
+
+
+=head2 Each Step In Detail
+
+=head3 Global Docs
 
 
 =head3 Fundamental Ideas
@@ -94,30 +123,6 @@ There is dedicated a chapter below to each of these 5 subdir there is dedicated 
 
 
 
-=head3 Basic Steps
-
-
-    1) Sketch your goal by writing high level documentation.
-       Use such docs also in meetings and when reporting to the boss.
-
-    2) Envision stages in which the program can be released.
-       Particular features or requirements will be then be assigned to stages.
-
-    3) Check technical requirements by writing functional prototypes.
-
-    4) Toy around with features by writing use case prototypes.
-
-    5) As soon as you know there will be a variable/method/class or file with
-       a certain name or function, put it in the actual codebase as dummy code.
-       Add comments where supposed to be what.
-
-    6) Through branches do features land in blead, which always compiles,
-       runs, passes all tests, has complete docs, configs, artwork.
-
-    7) Write tests after a prototype/feature/lib is done.
-
-
-=head2 Details
 
 =head3 Observations
 
