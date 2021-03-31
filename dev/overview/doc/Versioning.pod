@@ -14,7 +14,7 @@
 
 =head2 General Pattern
 
-  Revision . Stable . Testing . Development
+  Revision . Stable (stage) . Fix . Development
 
 If one number is raised, all to the left get a reset to zero.
 Trailing zeros can be omited - 0.5 is the same as 0.5.0.0
@@ -25,30 +25,18 @@ Some similar idea is known as semantic versioning L<http://semver.org>.
 
 Development number is changed after every important commit.
 Normally after every day of development.
-
 Development releases come with no warranty whatsoever.
 
-=head3 Testing
+Official releases have no fourth digit (dev number == 0).
 
-Testing number is raised if a new feature or change/set has to attract
-the attention of the testers.
+=head3 Fix
 
-Testing releases come with all known bugs disabled (if possible).
-Interfaces glitches may occur.
+Fix number is raised if a new bug fix of a stable release had to be released.
+Development releases have a fix number == 0.
 
 =head3 Stable
 
-Stable number goes up if several greater new features are in
-and all known bugs are out.
-If there are still bugs,
-they have to be disabled with the feature there are sitting on.
-
-Stable releases should have a polished interface and no bugs.
-If one appears in 0.3 it will be fixed ASAP with 0.3.0.1 a.s.o.
-
-During a time window before releasing a stable version,
-all new features will go into a new branch, which will become 0.3.1.
-The next testing should be released soon after the stable is out.
+Stable number increases with every new stage (major release).
 
 =head3 Revision
 
@@ -56,8 +44,10 @@ Has the word vision in it. When I got my initial vision we are at 1.0.
 If I have a new one after that or we change a fundamental technology
 there is gonna be a 2.0.
 
-Or in case we just want to break backward compatibility of the Kephra::API,
-it is a signal to all Plugin authors, they have to adapt.
+Independent of the programs version is the version of the Kephra::API.
+If we break that there will be for a time be two parallel API modules for
+Plugin authors to program against.
+
 
 =head2 What Changed?
 

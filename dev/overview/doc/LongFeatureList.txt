@@ -1,13 +1,12 @@
 
 File:
-	new/open/save/reload/exit
-
-Encodings
-	Utf/Latin1/ASCII
+	new/open/reload/save/save as/save copy as/save on server/exit
+    Poperties:
+        encoding eol tab indention
 
 Syntaxmodes:
-	are files that contain information perl language
-	fileendings to recognize it
+	are files that contain information per language
+	file endings to recognize it
 	file content to recognize it
 	keywords
 	colors for the syntaxhiglighting
@@ -15,3 +14,6 @@ Syntaxmodes:
 	compiler/interpreter/lint command
 
 Search:
+   find next, all, mark
+   replace, and find, all
+   goto line, last edit

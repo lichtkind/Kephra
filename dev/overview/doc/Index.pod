@@ -1,14 +1,21 @@
 =head1 Index of Kephra User Documentation
 
 
-CompleteProgramming	set of rules that organizes our development
+=head2 Meta : Documentation for programmer
+
+CellularProgramming   set of rules that organizes our development
+StyleGuide            programming style, where belongs what in a file
+Internals             basic structure of the sources
+
+=head2 Meta : Documentation for user
+
+
+
+LongFeatureList  
 Components		visual components and their layout
 EndGoal			technical details of the vision we lean toward
-Internals		
-LongFeatureList		
 Overview		
 Philosophy		
 Sanddrum		a vi like command language
-StyleGuide		
-Versioning		about our version numbers and releases
+Versioning            versioning schema of releases
 
