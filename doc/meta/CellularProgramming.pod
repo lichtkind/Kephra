@@ -3,13 +3,44 @@
 
     This document describes a set of workflows inside a peculiar directory
     structure, that evolved from and for the development of the Kephra editor.
-    Please stick to these guidelines if you want to join the team.
+    Please stick to these guidelines if you want to join the team,
+    but please take them with a grain of salt and adapt them to be most useful.
 
-=head2 DISCLAIMER
-
-    Take the rules with a grain of salt and adapt them to be most useful.
 
 =head2 Overview
+
+=head3 Directory Structure
+
+All development takes place in the /dev subfolder of a project. That dir has 
+itself the following subfolder, sorted by the granularity of their content:
+
+=over 4
+=item /dev/overview
+=item /dev/stage
+=item /dev/feature
+=item /dev/module
+=item /dev/function
+=back
+
+But the order operation is :
+
+=over 4
+=item /dev/overview/doc
+=item /dev/overview/bin
+=item /dev/stage
+=item /dev/feature
+=item /dev/module
+=item /dev/function
+=back
+
+There is dedicated a chapter below to each of these 5 subdir there is dedicated a chapter below
+
+/dev/stage
+/dev/feature
+/dev/module
+/dev/function
+
+
 
 
 =head3 Fundamental Ideas

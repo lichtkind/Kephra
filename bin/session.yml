@@ -1,87 +1,141 @@
 ---
-current: '7'
+current: '22'
 docs:
   -
     change_pos: 0
-    cursor_pos: 1022
+    cursor_pos: 4365
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/roadmap.txt
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/index.txt
     syntaxmode: no
   -
     change_pos: 0
-    cursor_pos: 2984
+    cursor_pos: 913
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/function/index.txt
-    syntaxmode: no
-  -
-    change_pos: 0
-    cursor_pos: 207
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/lib/Kephra/Base/Class/Syntax.pm
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Data/Type.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 0
+    cursor_pos: 283
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/lib/Kephra/Base/Class/Attribute.pm
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/lib/Kephra/Base/Data/Type.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 672
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/lib/Kephra/Base/Class/Method.pm
+    cursor_pos: 6660
+    encoding: utf-8
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/lib/Kephra/Base/Data/Type/Standard.pm
     syntaxmode: perl
   -
-    change_pos: 715
-    cursor_pos: 575
+    change_pos: 0
+    cursor_pos: 642
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/lib/Kephra/Base/Class/Scope.pm
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/lib/Kephra/Base/Data/Type/Parametric.pm
     syntaxmode: perl
   -
-    change_pos: 25
+    change_pos: 0
+    cursor_pos: 242
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/t/0006_Base-Data-Type-Standard.t
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 295
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Data/Type/Store.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 8365
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/lib/Kephra/Base/Data/Type/Store.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 54
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Class.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 121
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/lib/Kephra/Base/Class.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
     cursor_pos: 25
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/lib/Kephra/Base/Class/Instance.pm
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Class/Definition.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 0
+    cursor_pos: 60
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/lib/Kephra/Base/Class/Definition.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 2399
+    cursor_pos: 69
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Class/Definition/Attribute.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 521
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/lib/Kephra/Base/Class/Definition/Attribute.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 93
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Class/Definition/Method.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 93
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/lib/Kephra/Base/Class/Definition/Method.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 104
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Class/Definition/Method/Signature.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 84
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/lib/Kephra/Base/Class/Definition/Method/Signature.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 377
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/t/0105_Base-Class-Definition-Method-Signature.t
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 147
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Class/Syntax/Signature.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 168
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/lib/Kephra/Base/Class/Syntax/Signature.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 9833
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/t/0120_Base-Class-Syntax-Signature.t
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 4683
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Class/Syntax.pm
-    syntaxmode: perl
-  -
-    change_pos: 0
-    cursor_pos: 558
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/function/bin/oo/build_method.pl
-    syntaxmode: perl
-  -
-    change_pos: 0
-    cursor_pos: 454
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/function/bin/oo/new_syntax.pl
-    syntaxmode: perl
-  -
-    change_pos: 0
-    cursor_pos: 373
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/function/bin/oo/OOKeyWords.pm
-    syntaxmode: perl
-  -
-    change_pos: 0
-    cursor_pos: 593
-    encoding: utf-8
-    file_path: /home/herbert/code/raku/modules/Perl6-Math-Matrix/lib/Math/Matrix.pm6
-    syntaxmode: perl
-  -
-    change_pos: 0
-    cursor_pos: 11
-    encoding: ascii
-    file_path: /home/herbert/code/raku/modules/Perl6-Math-Matrix/lib/Math/Matrix/Type.pm6
     syntaxmode: perl

@@ -1,8 +1,0 @@
-Gedi  Gregs Editor
-pico
-getit
-scite
-Komodo
-Emacs
-Vim
-

@@ -1,4 +1,0 @@
-=head1 GUI Composition Language
-
-
-
