@@ -1,7 +1,9 @@
 =head1 Kephra Overview
 
-Welcome to the root document of the Kephra dev documentation.
+Welcome to the root document of the Kephra documentation.
 If you are new, it is the best point to start from.
+The Index.pod is the root of the developer centric documentation.
+
 
 =head2 Index
 

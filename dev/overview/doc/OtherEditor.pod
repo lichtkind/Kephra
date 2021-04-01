@@ -6,3 +6,4 @@ Komodo
 Emacs
 Vim
 
+Nedit, Kommodo, Vim, Emacs, Geany, Gedit, LightTable, Tincta, Proton, Phase 5

@@ -1,9 +1,0 @@
----
-current: '0'
-docs:
-  -
-    change_pos: 172
-    cursor_pos: 172
-    encoding: utf-8
-    file_path: /home/lichtkind/code/perl/project/editor/branch/default/kephra/doc/CompleteProgramming.pod
-    syntaxmode: perl
