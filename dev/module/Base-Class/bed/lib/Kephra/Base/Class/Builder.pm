@@ -1,4 +1,4 @@
-use v5.16;
+use v5.18;
 use warnings;
 
 # delegate calls for class creation; phases: types -> methods -> attributs -> new
@@ -12,6 +12,7 @@ use Kephra::Base::Class::Definition;
 use Kephra::Base::Class::Scope;
 use Kephra::Base::Class::Method;
 use Kephra::Base::Class::Instance;
+use Kephra::Base::Class::Interface;
 
 sub make {
     return unless $_[1]; # min 2 params

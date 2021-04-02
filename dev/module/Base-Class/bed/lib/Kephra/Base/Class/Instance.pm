@@ -1,4 +1,4 @@
-use v5.16;
+use v5.18;
 use warnings;
 
 # central storage for all object refs (class instances, created by KBOS)
