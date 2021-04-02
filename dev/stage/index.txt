@@ -18,12 +18,12 @@ sate of the project with relation between protos types: dev/roadmap.txt
 --------------------------------------------------------------------------------
 sed    C         single file editor: read, writes files, utf safe, perl highlighting (simplest)
 ded    C         doc ed: stashed doc obj with file_path &more attr., docbar, central API.pm
-bed         P    base ed: own object, event and msg system
+bed         P    base ed: own object, log, event system, search bar
 
-aed        MP    abstract layer: events, message queue, UI command list, keymaps
+--------------------------------------------------------------------------------
+
+ged        MP    gui edit: UI command list, keymaps, toolbar, menus, statusbar defined by regist. commands
 ved      UBMP    view: several tab bars, filebrowser, notes, direct io, EventTable.pm, LogBook.pm
-
-ged          N   gui edit: toolbar, menus, statusbar defined by regist. commands, 
 ked          N   keylog: every key calls a call, own edit history
 ned          N   nav edit: own find&replace, searchbar, marker, bookmarks, last edit
 ced          N   comfort editing: brace&block navigation, selection, goto last edit ....

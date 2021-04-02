@@ -30,6 +30,7 @@ sub create_type   {} # %type_def ?shared @.type_store          -->  .type
 
 sub check         {} #                                          alias:
 sub check_type    {} # ~type $value  ?shared  @.type_store     -->  ~errormsg
+
 sub guess         {} #                                          alias:
 sub guess_type    {} #       $value  ?shared  @.type_store     --> @~type
 

@@ -62,7 +62,7 @@ sub check_type {
         next if ref $_ ne $STORE;
         return $_->check_basic_type($type_name, $value) if $_->is_type_known($type_name);
     } 
-    "KBOTS type $type_name is not known";
+    "KBOS type $type_name is not known";
 }
 
 sub guess      { &guess_type }
