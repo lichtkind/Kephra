@@ -1,30 +1,17 @@
 =head1 Kephra Overview
 
-Welcome to the root document of the Kephra documentation.
-If you are new, it is the best point to start from.
-The Index.pod is the root of the developer centric documentation.
+Welcome to the root document of the Kephra user documentation, as L<Index.pod>
+is the root of the developer centric documentation.
 
+=head2 Mission
 
-=head2 Index
+Kephra is a tendentially fast and lightweight graphical programmers editor.
+The main emphasis however lies on intelligent automation of complex tasks,
+integration of your favorite tools and a wide range of configuration.
+In one sentence: to make your work easier without getting in your way.
 
-CompleteProgramming	set of rules that organizes our development
-Components		visual components and their layout
-EndGoal			technical details of the vision we lean toward
-Internals		structure of the sources, meaning of terms and names
-LongFeatureList		
-Philosophy		theoretical goal and rationale for our technical decisions
-Sanddrum		a vi like command language
-StyleGuide		formating and other rules for writing Kephra sources
-Versioning		about our version numbers and releases
+=head2 Usage
 
-=head3 Inspirations
-
-  Nedit, Kommodo, Vim, Emacs, Geany, Gedit, LightTable, Tincta, Proton, Phase 5
-
-=head3 Design Decisions
-
-=head2 Techology
-
-=head2 Main Features
-
+While being graphical user interface centered, Kephra tries to bring the best of
+both or more worlds (aka usage like vi or emacs) [mouse, commands and key kombos].
 

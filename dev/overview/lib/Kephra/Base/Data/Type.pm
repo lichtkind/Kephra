@@ -23,7 +23,7 @@ sub is_known      {} #                                          alias:
 sub is_type_known {} # ~type|[~type ~param] ?shared @.type_store    --> ?
 
 sub resolve_shortcut {} #                                       alias:
-sub resolve_type_shortcut() # ~kind ~shortcut ?shared @.type_store      --> ~type
+sub resolve_type_shortcut{} # ~kind ~shortcut ?shared @.type_store      --> ~type
 
 sub create        {} #                                          alias:
 sub create_type   {} # %type_def ?shared @.type_store          -->  .type

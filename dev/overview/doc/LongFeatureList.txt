@@ -1,19 +1,27 @@
 
 File:
-	new/open/reload/save/save as/save copy as/save on server/exit
+    new/open/reload/save/save as/save copy as/save on server/exit
     Poperties:
         encoding eol tab indention
 
-Syntaxmodes:
-	are files that contain information per language
-	file endings to recognize it
-	file content to recognize it
-	keywords
-	colors for the syntaxhiglighting
-	comment character
-	compiler/interpreter/lint command
+Edit:
+   
+   undo, redo, batch un-re, pos, marshalling undo tree 
 
-Search:
    find next, all, mark
    replace, and find, all
-   goto line, last edit
+   goto line, goto doc, last edit
+
+
+project
+
+
+Syntaxmodes:
+    are files that contain information per language
+    file endings to recognize it
+    file content to recognize it
+    keywords
+    colors for the syntaxhiglighting
+    comment character
+    compiler/interpreter/lint command
+

@@ -8,6 +8,7 @@ use Kephra::Base::Class::Builder::Attribute;
 use Kephra::Base::Class::Builder::Method;
 use Kephra::Base::Class::Definition;
 use Kephra::Base::Class::Instance;
+use Kephra::Base::Class::Interface;
 use Kephra::Base::Class::Syntax;
 use Kephra::Base::Class::Scope;
 
