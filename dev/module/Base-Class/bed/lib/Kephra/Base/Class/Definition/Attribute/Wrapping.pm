@@ -53,7 +53,8 @@ sub get_requirement { $_[0]->{'require'} // $_[0]->{'class'} }
 __END__
 
 wrapping attribute name => { help  => '',                 # short explaining text for better ~errormsg
-                            class  => 'Wx::...',          # class of attribute (can be any perl none KBOS class)
-                ?          require => 'Module'            # only if requires different module than ~class
-                             wrap  => [wrapper_name,]|name# claim this to be implemented wrapper method as belonging to this attribute
-                 |    build[_lazy] => 'code'              # code snippets to run (lazily) create $attr object
+                            class  => 'Kephra::...',      # class of attribute (can be any)
+                  ?        require => 'Module'            # 1 if require class
+                             wrap  => [wrapper_name]|name # claim this to be implemented wrapper method as belonging to this attribute
+                  ?|       default => $val                # default value when its different from the type ones
+                   |  [lazy_]build => 'code'              # code snippets to run (lazily) create $attr object and bring it into init state

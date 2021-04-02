@@ -11,15 +11,15 @@ sub mk_attr_def {Kephra::Base::Class::Definition::Attribute::Delegating->new(@_)
 my $req_properies = {name => 'name', help => 'help', class => 'K::B::C', delegate => 'method'};
 
 
-my $def = mk_attr_def({%$req_properies, init => ['C']});
+my $def = mk_attr_def({%$req_properies, default_args => ['C']});
 is( ref $def,                                               $class,        'created first delegating attribute definition object');
 is( $def->get_kind,                                   'delegating',        'check getter of "kind" property');
 is( $def->get_help,                                         'help',        'check getter of "help" property');
 is( $def->get_type,                                          undef,        'check getter of "type" property');
-is( ref $def->get_init,                                    'ARRAY',        'check getter of "init" property');
-is( @{$def->get_init},                                           1,        'got right amount of init values');
-is( $def->get_init->[0],                                       'C',        'got constructor init value');
-is( $def->get_build,                                         undef,        'check getter of "build" property');
+is( ref $def->get_default_args,                            'ARRAY',        'check getter of "init" property');
+is( @{$def->get_default_args},                                   1,        'got right amount of init values');
+is( $def->get_default_args->[0],                               'C',        'got constructor init value');
+is( $def->get_build_args,                                    undef,        'check getter of "build" property');
 is( $def->is_lazy,                                               0,        'check getter of "lazy" property');
 is( $def->accessor_names,                                        1,        'attribute has only one getter');
 is( ($def->accessor_names)[0],                            'method',        'got the right delegator name');
@@ -28,54 +28,54 @@ is( keys %{$def->auto_accessors},                                0,        'data
 is( $def->get_dependency,                                'K::B::C',        'check getter of "dependency" property');
 is( $def->get_requirement,                                   undef,        'check getter of "requirement" property');
 
-$def = mk_attr_def({%$req_properies, init => {a => 'b'}});
+$def = mk_attr_def({%$req_properies, default_args => {a => 'b'}});
 is( ref $def,                                               $class,        'created delegating attribute with hash of init args');
-is( ref $def->get_init,                                     'HASH',        'init args are HASH');
-is( keys %{$def->get_init},                                      1,        'HASH was has right amount of key');
-is( $def->get_init->{'a'},                                     'b',        'HASH contained right value');
+is( ref $def->get_default_args,                             'HASH',        'init args are HASH');
+is( keys %{$def->get_default_args},                              1,        'HASH was has right amount of key');
+is( $def->get_default_args->{'a'},                             'b',        'HASH contained right value');
 is( $def->is_lazy,                                               0,        'attribute will be created eagerly');
-is( $def->get_build,                                         undef,        'no code to build args');
+is( $def->get_build_args,                                    undef,        'no code to build args');
 
-$def = mk_attr_def({%$req_properies, lazy_init => {a => 'b'}});
+$def = mk_attr_def({%$req_properies, lazy_args => {a => 'b'}});
 is( ref $def,                                               $class,        'created delegating attribute with hash of init args');
-is( ref $def->get_init,                                     'HASH',        'init args are HASH');
-is( keys %{$def->get_init},                                      1,        'HASH was has right amount of key');
-is( $def->get_init->{'a'},                                     'b',        'HASH contained right value');
+is( ref $def->get_default_args,                             'HASH',        'init args are HASH');
+is( keys %{$def->get_default_args},                              1,        'HASH was has right amount of key');
+is( $def->get_default_args->{'a'},                             'b',        'HASH contained right value');
 is( $def->is_lazy,                                               1,        'attribute will be created lazily');
-is( $def->get_build,                                         undef,        'no code to build args');
+is( $def->get_build_args,                                    undef,        'no code to build args');
 
-$def = mk_attr_def({%$req_properies, build => ['C']});
+$def = mk_attr_def({%$req_properies, build_args => ['C']});
 is( ref $def,                                               $class,        'created delegating attribute with array of code to build args');
-is( ref $def->get_build,                                   'ARRAY',        'ARRAY of code snippets to build constructor args');
-is( @{$def->get_build},                                          1,        'ARRAY had right amout of elements');
-is( $def->get_build->[0],                                      'C',        'ARRAY element contained right value');
+is( ref $def->get_build_args,                              'ARRAY',        'ARRAY of code snippets to build constructor args');
+is( @{$def->get_build_args},                                     1,        'ARRAY had right amout of elements');
+is( $def->get_build_args->[0],                                 'C',        'ARRAY element contained right value');
 is( $def->is_lazy,                                               0,        'attribute will be created eagerly');
-is( $def->get_init,                                          undef,        'no init values for constructor args');
+is( $def->get_default_args,                                  undef,        'no init values for constructor args');
 
-$def = mk_attr_def({%$req_properies, build => {a => 'b'}});
+$def = mk_attr_def({%$req_properies, build_args => {a => 'b'}});
 is( ref $def,                                               $class,        'created delegating attribute with hash of code to build constructor args');
-is( ref $def->get_build,                                    'HASH',        'HASH of code snippets to build constructor args');
-is( keys %{$def->get_build},                                     1,        'HASH had right amout of elements');
-is( $def->get_build->{'a'},                                    'b',        'HASH element contained right value');
+is( ref $def->get_build_args,                               'HASH',        'HASH of code snippets to build constructor args');
+is( keys %{$def->get_build_args},                                1,        'HASH had right amout of elements');
+is( $def->get_build_args->{'a'},                               'b',        'HASH element contained right value');
 is( $def->is_lazy,                                               0,        'attribute will be created eagerly');
-is( $def->get_init,                                          undef,        'no init values for constructor args');
+is( $def->get_default_args,                                  undef,        'no init values for constructor args');
 
-$def = mk_attr_def({%$req_properies, lazy_build => {a => 'b'}});
+$def = mk_attr_def({%$req_properies, lazy_build_args => {a => 'b'}});
 is( ref $def,                                               $class,        'created delegating attribute with hash of code to build constructor args');
-is( ref $def->get_build,                                    'HASH',        'HASH of code snippets to build constructor args');
-is( keys %{$def->get_build},                                     1,        'HASH had right amout of elements');
-is( $def->get_build->{'a'},                                    'b',        'HASH element contained right value');
+is( ref $def->get_build_args,                               'HASH',        'HASH of code snippets to build constructor args');
+is( keys %{$def->get_build_args},                                1,        'HASH had right amout of elements');
+is( $def->get_build_args->{'a'},                               'b',        'HASH element contained right value');
 is( $def->is_lazy,                                               1,        'attribute will be created lazily');
-is( $def->get_init,                                          undef,        'no init values for constructor args');
+is( $def->get_default_args,                                  undef,        'no init values for constructor args');
 
-$def = mk_attr_def({%$req_properies, init => ['C'], delegate => [qw/a b/]});
+$def = mk_attr_def({%$req_properies, default_args => ['C'], delegate => [qw/a b/]});
 is( ref $def,                                               $class,        'created delegating attribute definition with multiple delegators');
 is( $def->accessor_names,                                        2,        'attribute has now two delegators');
 is( ($def->accessor_names)[0],                                 'a',        'first delegator name is right');
 is( ($def->accessor_names)[1],                                 'b',        'second delegator name is right');
 is( keys %{$def->auto_accessors},                                0,        'no autogenerated methods');
 
-$def = mk_attr_def({name => 'name', help => 'help', class => 'K::B::C', init => ['C'], auto_delegate => 'deleg', auto_get => 'getter'});
+$def = mk_attr_def({name => 'name', help => 'help', class => 'K::B::C', default_args => ['C'], auto_delegate => 'deleg', auto_get => 'getter'});
 is( ref $def,                                               $class,        'created delegating attribute definition with with just one autogenerated delegator');
 is( $def->accessor_names,                                        0,        'no hand written delegators');
 is( keys %{$def->auto_accessors},                                2,        'and one auto generated');
@@ -85,7 +85,7 @@ is( $def->auto_accessors->{'deleg'}{'scope'},             'access',        'acce
 is( ref $def->auto_accessors->{'getter'},                   'HASH',        'auto getter definition found');
 is( $def->auto_accessors->{'getter'}{'get'},              'access',        'auto gettere defined by scalar name defaults to access scope');
 
-$def = mk_attr_def({name => 'name', help => 'help', class => 'K::B::C', init => ['C'], delegate => [qw/a b/],
+$def = mk_attr_def({name => 'name', help => 'help', class => 'K::B::C', default_args => ['C'], delegate => [qw/a b/],
                     auto_delegate => {deleg => 'public', method => {scope => 'private', to => 'ation'}}, auto_get => {deleg => 'public'}});
 is( ref $def,                                               $class,        'delegating attr def with with two autogenerated delegators with complex definition');
 is( $def->get_kind,                                   'delegating',        '"kind" property is constant');
@@ -103,22 +103,22 @@ is( $def->auto_accessors->{'method'}{'scope'},           'private',        'scop
 
 ok(not (ref mk_attr_def([])),                                              'new needs an hash ref to create delegating attribute definition');
 ok(not (ref mk_attr_def({name => 'name', help => 'help', class => 'class', delegate => 'd'})),  'constructor args missing in attr definition');
-ok(not (ref mk_attr_def({name => 'name', help => 'help', class => 'class', init => []})),       'delegator names are missing in attr definition');
-ok(not (ref mk_attr_def({name => 'name', help => 'help', delegate => 'd',  init => []})),       'class name is missing in attr definition');
-ok(not (ref mk_attr_def({name => 'name', class=> 'class',delegate => 'd',  init => []})),       'help string is missing in attr definition');
-ok(not (ref mk_attr_def({help => 'help', class=> 'class',delegate => 'd',  init => []})),       'name string is missing in attr definition');
-ok(not (ref mk_attr_def({%$req_properies, require => 'a', build => []})),  'added unspecced propery');
-ok(not (ref mk_attr_def({%$req_properies, name => [], build => []})),      'attribute name can not be a reference');
-ok(not (ref mk_attr_def({%$req_properies, name => '', build => []})),      'attribute name can not be a empty');
-ok(not (ref mk_attr_def({%$req_properies, help => [], build => []})),      'attribute help string can not be a reference');
-ok(not (ref mk_attr_def({%$req_properies, help => '', build => []})),      'attribute help string can not be a empty');
-ok(not (ref mk_attr_def({%$req_properies, class => [], build => []})),     'attribute class can not be a reference');
-ok(not (ref mk_attr_def({%$req_properies, class => '', build => []})),     'attribute class can not be a empty');
-ok(not (ref mk_attr_def({%$req_properies, build => sub{}})),               'build code can not be already evaled');
-ok(not (ref mk_attr_def({%$req_properies, init => qr//  })),               'init constructor args have to be in ARRAY or HASH');
-ok(not (ref mk_attr_def({%$req_properies, init => [], build=>[] })),       'constructor args were delivered in two ways');
-ok(not (ref mk_attr_def({%$req_properies, init => [], lazy_init=>[] })),   'constructor args were delivered in two other ways');
-ok(not (ref mk_attr_def({%$req_properies, lazy_build =>[],lazy_init=>[]})),'too many constructor args were delivered in yet different way');
-ok(not (ref mk_attr_def({%$req_properies, lazy_build =>[], build =>[]} )), 'too many constructor args were delivered in fouth different way');
+ok(not (ref mk_attr_def({name => 'name', help => 'help', class => 'class', default_args => []})),       'delegator names are missing in attr definition');
+ok(not (ref mk_attr_def({name => 'name', help => 'help', delegate => 'd',  default_args => []})),       'class name is missing in attr definition');
+ok(not (ref mk_attr_def({name => 'name', class=> 'class',delegate => 'd',  default_args => []})),       'help string is missing in attr definition');
+ok(not (ref mk_attr_def({help => 'help', class=> 'class',delegate => 'd',  default_args => []})),       'name string is missing in attr definition');
+ok(not (ref mk_attr_def({%$req_properies, require => 'a', build_args => []})),  'added unspecced propery');
+ok(not (ref mk_attr_def({%$req_properies, name => [], build_args => []})),      'attribute name can not be a reference');
+ok(not (ref mk_attr_def({%$req_properies, name => '', build_args => []})),      'attribute name can not be a empty');
+ok(not (ref mk_attr_def({%$req_properies, help => [], build_args => []})),      'attribute help string can not be a reference');
+ok(not (ref mk_attr_def({%$req_properies, help => '', build_args => []})),      'attribute help string can not be a empty');
+ok(not (ref mk_attr_def({%$req_properies, class => [], build_args => []})),     'attribute class can not be a reference');
+ok(not (ref mk_attr_def({%$req_properies, class => '', build_args => []})),     'attribute class can not be a empty');
+ok(not (ref mk_attr_def({%$req_properies, build_args => sub{}})),               'build code can not be already evaled');
+ok(not (ref mk_attr_def({%$req_properies, default_args => qr//  })),            'init constructor args have to be in ARRAY or HASH');
+ok(not (ref mk_attr_def({%$req_properies, default_args => [], build_args=>[] })),'constructor args were delivered in two ways');
+ok(not (ref mk_attr_def({%$req_properies, default_args => [], lazy_args=>[] })), 'constructor args were delivered in two other ways');
+ok(not (ref mk_attr_def({%$req_properies, lazy_build_args=>[],lazy_args=>[]})),  'too many constructor args were delivered in yet different way');
+ok(not (ref mk_attr_def({%$req_properies, lazy_build_args=>[], build_args=>[]})),'too many constructor args were delivered in fouth different way');
 
 exit 0;

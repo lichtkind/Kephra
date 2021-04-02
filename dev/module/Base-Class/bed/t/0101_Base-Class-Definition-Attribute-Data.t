@@ -17,7 +17,7 @@ is( ref $def,                                               $class,        'crea
 is( $def->get_kind,                                         'data',        'check getter of "kind" property');
 is( $def->get_help,                                         'help',        'check getter of "help" property');
 is( $def->get_type,                                          'int',        'check getter of "type" property');
-is( $def->get_init,                                          undef,        'check getter of "init" property');
+is( $def->get_default,                                       undef,        'check getter of "init" property');
 is( $def->get_build,                                         undef,        'check getter of "build" property');
 is( $def->is_lazy,                                               0,        'check getter of "lazy" property');
 is( $def->accessor_names,                                        1,        'attribute has only one getter');
@@ -27,7 +27,7 @@ is( keys %{$def->auto_accessors},                                0,        'data
 is( $def->get_dependency,                                    undef,        'check getter of "dependency" property');
 is( $def->get_requirement,                                   undef,        'check getter of "requirement" property');
 is( $def->check_type(Kephra::Base::Data::Type::standard()),     '',        'call check_type to ensure existance of type and default value');
-is( $def->get_init,                                              0,        'default value of data type ws inserted');
+is( $def->get_default,                                           0,        'default value of data type was inserted');
 
 $def = mk_attr_def({%$req_properies, get => 'get', set => 'set'});
 is( $def->accessor_names,                                        2,        'attribute has now two accessors');
@@ -86,27 +86,27 @@ is( ref $def->auto_accessors->{'gset'},                     'HASH',        'defi
 is( $def->auto_accessors->{'gset'}{'get'},                'public',        'getter part has right scope');
 is( $def->auto_accessors->{'gset'}{'set'},                'access',        'setter part has right scope');
 
-$def = mk_attr_def({%$req_properies, get => 'get', init => 1});
+$def = mk_attr_def({%$req_properies, get => 'get', default => 1});
 is( ref $def,                                               $class,        'created data attribute definition with initial value');
-is( $def->get_init,                                              1,        'got "init" value');
+is( $def->get_default,                                           1,        'got "init" value');
 is( $def->get_build,                                         undef,        'no "build" property');
 is( $def->check_type(Kephra::Base::Data::Type::standard()),     '',        'call check_type to ensure existance of type and default value');
-is( $def->get_init,                                              1,        'original "init" value was not changed');
+is( $def->get_default,                                           1,        'original "init" value was not changed');
 
 $def = mk_attr_def({%$req_properies, get => 'get', build => 'das'});
 is( ref $def,                                               $class,        'created data attribute definition with code to "build" initial value');
-is( $def->get_init,                                          undef,        'no "init" value');
+is( $def->get_default,                                       undef,        'no "init" value');
 is( $def->get_build,                                         'das',        'got "build" code');
 is( $def->check_type(Kephra::Base::Data::Type::standard()),     '',        'call check_type to ensure existance of type and default value');
-is( $def->get_init,                                          undef,        'no "init" value inserted whe there is build code');
+is( $def->get_default,                                       undef,        'no "init" value inserted whe there is build code');
 is( $def->is_lazy,                                               0,        'build was not "lazy"');
 
 $def = mk_attr_def({%$req_properies, get => 'get', lazy_build => 'das'});
 is( ref $def,                                               $class,        'created data attribute definition with lazily evaluated code to "build" initial value');
-is( $def->get_init,                                          undef,        'no "init" value');
+is( $def->get_default,                                       undef,        'no "init" value');
 is( $def->get_build,                                         'das',        'got "build" code');
 is( $def->check_type(Kephra::Base::Data::Type::standard()),     '',        'call check_type to ensure existance of type and default value');
-is( $def->get_init,                                          undef,        'no "init" value inserted whe there is build code');
+is( $def->get_default,                                       undef,        'no "init" value inserted whe there is build code');
 is( $def->is_lazy,                                               1,        'build is "lazy"');
 
 ok(not (ref mk_attr_def([])),                                              'new needs an hash ref');
@@ -117,7 +117,7 @@ ok(not (ref mk_attr_def({%$req_properies, get => 'get', boink =>1})),      '"fan
 ok(not (ref mk_attr_def({%$req_properies, get => {get => 1}})),            '"get" property has to be an ARRAY');
 ok(not (ref mk_attr_def({%$req_properies, get => 'a', set => {get => 1}})),'"set" property has to be an ARRAY');
 $req_properies = {name => 'name', help => 'help', type => 'int', get => 'get'};
-ok(not (ref mk_attr_def({%$req_properies, init => 1, build => 1})),        'only one init method is allowed');
+ok(not (ref mk_attr_def({%$req_properies, default => 1, build => 1})),     'only one init method is allowed');
 ok(not (ref mk_attr_def({%$req_properies, lazy_build => 1, build => 1})),  'build attribute lazily or not, not both');
 
 exit 0;
