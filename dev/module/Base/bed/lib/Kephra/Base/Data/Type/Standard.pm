@@ -5,7 +5,7 @@ use utf8;
 # definitions and store of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
-our $VERSION = 2.71;
+our $VERSION = 2.72;
 use Kephra::Base::Data::Type::Util;
 
 my $dummy_type = Kephra::Base::Data::Type::Basic->new('dummy','yes',3,undef,5);
@@ -21,15 +21,15 @@ our @basic_type_definitions = (
     {name=> 'int',        help=> 'integer',              code=> 'int($value) eq $value',      parent=> 'no_ref',         default=> 0  },
     {name=> 'int_pos',    help=> 'greater equal zero',   code=> '$value >= 0',                parent=> 'int'                          },
     {name=> 'int_spos',   help=> 'strictly positive',    code=> '$value > 0',                 parent=> 'int',            default=> 1  },
-    {name=> 'str',                                                                           parent=> 'no_ref',                      },
+    {name=> 'str',                                                                            parent=> 'no_ref',                      },
     {name=> 'str_ne',     help=> 'none empty string',    code=> '$value or ~$value',          parent=> 'no_ref',         default=> ' '},
     {name=> 'str_lc',     help=> 'lower case string',    code=> 'lc $value eq $value',        parent=> 'str_ne',         default=> 'a'},
     {name=> 'str_uc',     help=> 'upper case string',    code=> 'uc $value eq $value',        parent=> 'str_ne',         default=> 'A'},
-    {name=> 'word',       help=> 'word character',       code=> '$value !~ /[^a-zA-Z0-9_]/',  parent=> 'str_ne',         default=> 'A'},
-    {name=> 'name',       help=> 'lower case name',      code=> '$value !~ /[^a-z0-9_]/',     parent=> 'str_ne',         default=> 'a'},
-    {name=> 'identifier', help=> 'begin with char',      code=> '$value =~ /^[a-z]/',         parent=> 'name',                        },
+    {name=> 'word',       help=> 'word character',       code=> '$value =~ /^\w+$/',          parent=> 'str_ne',         default=> 'A'},
+    {name=> 'identifier', help=> 'lower case name',      code=> '$value eq lc $value',        parent=> 'word',           default=> 'a'},
+    {name=> 'var_name',   help=> 'begin with char',      code=> '$value =~ /^[a-z]/',         parent=> 'identifier',                  },
     {name=> 'pkg_name',   help=> 'package name',         code=> '$value =~ /^[A-Z]/',         parent=> 'word',                        },
-    {name=> 'type_name',  help=> 'simple type name',     code=> __PACKAGE__.'::store->is_type_known($value)',parent=>'identifier', default=> 'any', },
+    {name=> 'type_name',  help=> 'simple type name',     code=> __PACKAGE__.'::store->is_type_known($value)',parent=>'var_name', default=> 'any', },
     {name=> 'any_ref',    help=> 'reference of any sort',code=> q/ref $value/,                                           default=> [] }, 
     {name=> 'scalar_ref', help=> 'array reference',      code=> q/ref $value eq 'SCALAR'/,                               default=> \1  },
     {name=> 'array_ref',  help=> 'array reference',      code=> q/ref $value eq 'ARRAY'/,                                default=> []   },

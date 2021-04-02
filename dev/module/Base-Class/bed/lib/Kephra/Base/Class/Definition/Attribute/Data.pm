@@ -2,9 +2,8 @@ use v5.20;
 use warnings;
 
 # data structure holding a definition of a raw data holding KBOTS attribute
+# init => default
 
-
-# init default
 package Kephra::Base::Class::Definition::Attribute::Data;
 our $VERSION = 1.22;
 my $kind = 'data';

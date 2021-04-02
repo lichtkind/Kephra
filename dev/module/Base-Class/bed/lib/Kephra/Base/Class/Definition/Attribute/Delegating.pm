@@ -2,6 +2,7 @@ use v5.20;
 use warnings;
 
 # data structure holding a definition of a KBOTS attribute that holds a KBOTS object
+# init => default
 
 package Kephra::Base::Class::Definition::Attribute::Delegating;
 our $VERSION = 1.2;

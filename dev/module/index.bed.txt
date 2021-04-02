@@ -18,13 +18,13 @@ our development model in more details: doc/CompleteProgramming.pod
 --------------------------------------------------------------------------------
    K::B::Package  ......................  C  .....  1.1    low level symbol manipulation
    K::B::Data::Type::Basic  ............  C  .....  1.4    inheritable single value checker
-   K::B::Data::Type::Parametric  .......  C  .....  1.31   checks the relation between two values
-   K::B::Data::Type::Store  ............  C  .....  1.21   collection of type objects
+   K::B::Data::Type::Parametric  .......  C  .....  1.31   checks relation between two values
+   K::B::Data::Type::Store  ............  C  .....  1.21   collection of type objects (namespace)
    K::B::Data::Type::Util  .............  C  .....  1.01   helper functions for type creation
-   K::B::Data::Type::Standard  .........  C  .....  2.71   definition of standard types
-   K::B::Data::Type  ...................  C  .....  1.5    manage type related symbols
+   K::B::Data::Type::Standard  .........  C  .....  2.72   definition of standard types
+   K::B::Data::Type  ...................  C  .....  1.51   manage type related symbols
    K::B::Data  .........................  C  .....  0.2    root of none OO data handling
-   K::B::Closure  ......................  C  .....  1.1    serializable closure (code and date)
+   K::B::Closure  ......................  C  .....  1.1    serializable closure (code and data)
  - K::Base  ............................  C  .....  0.11   root package of self made language extensions
 --------------------------------------------------------------------------------
    K::B::C::Definition::Attr.::Data  ...  C  .....  1.22   validate and serialize definition of attribute holding raw data
@@ -49,7 +49,8 @@ our development model in more details: doc/CompleteProgramming.pod
    K::B::C::Syntax::Signature  .........  C         1.0    convert signature string into data for KBC::Def.::Method::Signature object
    K::B::C::Syntax::Parser  ............         N         define class syntax, API to Keyword::Simple
    K::B::C::Syntax  ....................         N         -
- - K::B::Class  ........................   P               -
+   K::B::Class  ........................   P               root pkg of Kephra OO system (KBOS)
+ - K::Base  ............................                   root package of self made language extensions
 --------------------------------------------------------------------------------
 ================================================================================
  - Kephra::Base::Object
