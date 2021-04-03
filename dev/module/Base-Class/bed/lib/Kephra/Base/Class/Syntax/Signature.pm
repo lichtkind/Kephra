@@ -82,8 +82,8 @@ __END__
 
  [~]   'named'                 1    # ~ means argument name
  [~ T] 'typed'                 2    # T means argument main type
- [~ T? 'foreward']             3    # constructor arg thats forewards to attribute
- [~ T? 'slurpy']               3    # a.k.a. >@ ; T? means most of time its empty = ''
+ [~ T? 'foreward']             3    # = constructor arg thats forewards to attribute
+ [~ T? 'slurpy']               3    # a.k.a. *@ or *%; T? means most of time its empty = ''
  [~ T? 'self']                 3    # a.k.a. _  ; typed_ref class
  [~ T  'complex' T  $def ]     4-5 
  [~ T  'arg'     ~  T!   $def] 5-6  # T! means Type of argument (parameter type of main type) will be added later by Definition::Method::Signature

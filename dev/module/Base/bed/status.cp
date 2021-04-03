@@ -19,7 +19,7 @@ See connections between stages and module protos under /dev/module/status.cp
    K::B::Data::Type::Parametric  .......  C  .....  1.31   checks relation between two values
    K::B::Data::Type::Store  ............  C  .....  1.21   collection of type objects (namespace)
    K::B::Data::Type::Util  .............  C  .....  1.01   helper functions for type creation
-   K::B::Data::Type::Standard  .........  C  .....  2.72   definition of standard types
+   K::B::Data::Type::Standard  .........  C  .....  2.8    definition of standard types
    K::B::Data::Type  ...................  C  .....  1.51   manage type related symbols
    K::B::Data  .........................  C  .....  0.2    root of none OO data handling
    K::B::Closure  ......................  C  .....  1.1    serializable closure (code and data)

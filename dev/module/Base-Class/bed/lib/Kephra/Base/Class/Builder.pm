@@ -13,6 +13,7 @@ use Kephra::Base::Class::Scope;
 use Kephra::Base::Class::Method;
 use Kephra::Base::Class::Instance;
 use Kephra::Base::Class::Interface;
+use Kephra::Base::Class::Type;
 
 sub make {
     return unless $_[1]; # min 2 params

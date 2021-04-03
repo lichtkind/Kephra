@@ -18,8 +18,8 @@ depends on:
                                           .     I = In Progress (currently worked on)
                                           .      N = Not yet (planned)
 --------------------------------------------------------------------------------
-   K::B::C::Definition::Attr.::Data  ...  C  .....  1.23   validate and serialize definition of attribute holding raw data
-   K::B::C::Definition::Attr.::Delegating C  .....  1.21   validate and serialize definition of attribute, which is KBOS object
+   K::B::C::Definition::Attr.::Data  ...  C  .....  1.3    validate and serialize definition of attribute holding raw data
+   K::B::C::Definition::Attr.::Delegating C  .....  1.4    validate and serialize definition of attribute, which is KBOS object
    K::B::C::Definition::Attr.::Wrapping   C  .....  1.1    validate and serialize definition of attribute, which is a none KBOS object
    K::B::C::Definition::Attribute  .....  C  .....  1.0    validate and serialize attribute definition
    K::B::C::Definition::Method::Signature     M...  0.0    validate and serialize signature definition

@@ -2,7 +2,6 @@ use v5.20;
 use warnings;
 
 # data structure holding a definition of a KBOTS attribute that holds a none KBOS object
-# init => default
 
 package Kephra::Base::Class::Definition::Attribute::Wrapping;
 our $VERSION = 1.1;

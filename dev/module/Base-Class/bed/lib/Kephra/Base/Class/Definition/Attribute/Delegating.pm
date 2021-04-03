@@ -2,10 +2,9 @@ use v5.20;
 use warnings;
 
 # data structure holding a definition of a KBOS attribute that holds a KBOTS object
-# init => default
 
 package Kephra::Base::Class::Definition::Attribute::Delegating;
-our $VERSION = 1.2;
+our $VERSION = 1.4;
 my $kind = 'delegating';
 ################################################################################
 sub new {        # ~pkg %attr_def            --> ._ | ~errormsg

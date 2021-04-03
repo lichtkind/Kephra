@@ -4,7 +4,7 @@ use warnings;
 # data structure holding a definition of a raw data holding KBOS attribute
 
 package Kephra::Base::Class::Definition::Attribute::Data;
-our $VERSION = 1.23;
+our $VERSION = 1.3;
 my $kind = 'data';
 ################################################################################
 sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
