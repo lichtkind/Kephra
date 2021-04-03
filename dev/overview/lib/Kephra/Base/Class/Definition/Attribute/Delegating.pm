@@ -10,13 +10,11 @@ sub restate {}         # ~pkg %state              --> ._
 
 sub get_kind  {}       # ._    --> 'data'
 sub get_help  {}       # ._    --> ~help
-sub get_type  {}       # ._    --> ~type
-sub get_init  {}       # ._    --> $val|undef
-sub get_build {}       # ._    --> ~code|undef
+sub get_class {}       # ._    --> ~class
+sub get_default_args{} # ._    --> $val|undef
+sub get_build_args {}  # ._    --> ~code|undef
 sub is_lazy   {}       # ._    --> ?
 sub accessor_names  {} # ._    --> @~method_name
 sub auto_accessors  {} # ._    --> %def = { accessor_name => { delegate_to => method &| scope => 'scope' &| get => 'scope'} }
-sub get_dependency  {} # ._    --> undef
-sub get_requirement {} # ._    --> undef
 
 1;

@@ -102,7 +102,7 @@ sub delete   { # autodelete translations?
     delete $data{int $attr_ref};
 }
 
-sub remove_class {}
+# sub remove_class {}
 ################################################################################
 sub is_known { (ref $_[0] and exists $data{int $_[0]}) ? 1 : 0 }
 sub get      { $data{int $_[0]}         if exists $data{int $_[0]}) }

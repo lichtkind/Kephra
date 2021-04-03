@@ -75,8 +75,6 @@ sub get_build    {$_[0]->{'build'}}
 sub is_lazy      {$_[0]->{'lazy'}}
 sub accessor_names {@{ $_[0]->{'methods'}} }
 sub auto_accessors {$_[0]->{'auto'}} # name => scope | [getscope, setscope]
-sub get_dependency  { undef }
-sub get_requirement { undef }
 
 1;
 __END__

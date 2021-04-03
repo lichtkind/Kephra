@@ -27,9 +27,9 @@ our @basic_type_definitions = (
     {name=> 'str_uc',     help=> 'upper case string',    code=> 'uc $value eq $value',        parent=> 'str_ne',         default=> 'A'},
     {name=> 'word',       help=> 'word character',       code=> '$value =~ /^\w+$/',          parent=> 'str_ne',         default=> 'A'},
     {name=> 'word_lc',    help=> 'lower case name',      code=> 'lc $value eq $value',        parent=> 'word',           default=> 'a'},
-    {name=> 'var_name',   help=> 'begin with char',      code=> '$value =~ /^[a-z]/',         parent=> 'word_lc',                     },
+    {name=> 'identifier', help=> 'begin with char',      code=> '$value =~ /^[a-z]/',         parent=> 'word_lc',                     },
     {name=> 'pkg_name',   help=> 'package name',         code=> '$value =~ /^[A-Z][\w:]*$/',  parent=> 'str_ne',         default=> 'Pkg'},
-    {name=> 'type_name',  help=> 'simple type name',     code=> __PACKAGE__.'::store->is_type_known($value)',parent=>'var_name', default=> 'any', },
+    {name=> 'type_name',  help=> 'simple type name',     code=> __PACKAGE__.'::store->is_type_known($value)',parent=>'identifier', default=> 'any', },
     {name=> 'any_ref',    help=> 'reference of any sort',code=> q/ref $value/,                                           default=> [] }, 
     {name=> 'scalar_ref', help=> 'array reference',      code=> q/ref $value eq 'SCALAR'/,                               default=> \1  },
     {name=> 'array_ref',  help=> 'array reference',      code=> q/ref $value eq 'ARRAY'/,                                default=> []   },
@@ -54,7 +54,7 @@ our @parametric_type_definitions =  (
     {name => 'named_ref', help=> 'reference of given type',  code=> 'return "value $value is not a $param reference" if ref $value ne $param',  parent=> 'value',     default=> [], 
                                                                                                           parameter => {   name => 'ref_name',  parent=> 'str',       default=> 'ARRAY'}, },
 );
-our @forbidden_shortcuts = (qw/{ } ( ) < > - _ | =  ' "/,','); # §
+our @forbidden_shortcuts = (qw/{ } ( ) < > - _ | = * ' "/,','); # §
 our %basic_type_shortcut = (  value => '$', str => '~', bool => '?', num => '+', int_pos => 'N', int => 'Z', #  ^ ' " ! /  ;
                           array_ref => '@', hash_ref => '%', code_ref => '&', any_ref => '\\', 
                             type => 'T', object => '!');

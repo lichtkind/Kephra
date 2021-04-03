@@ -2,7 +2,7 @@
 use v5.16;
 use warnings;
 use experimental qw/switch/;
-use Test::More tests => 40;
+use Test::More tests => 35;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 require Kephra::Base::Class::Definition::Attribute::Wrapping;
@@ -14,14 +14,10 @@ my $def = mk_attr_def( {%$req_properies, build => 'code' } );
 is( ref $def,                                               $class,        'created wrapping attribute definition object');
 is( $def->get_kind,                                     'wrapping',        'check getter of "kind" property');
 is( $def->get_help,                                         'help',        'check getter of "help" property');
-is( $def->get_type,                                          undef,        'check getter of "type" property');
-is( $def->get_init,                                          undef,        'check getter of "init" property');
 is( $def->get_build,                                        'code',        'check getter of "build" property');
 is( $def->is_lazy,                                               0,        'check getter of "lazy" property');
 is( $def->accessor_names,                                        1,        'attribute has only one getter');
 is( ($def->accessor_names)[0],                            'method',        'got the right wrapper method name');
-is( $def->auto_accessors,                                    undef,        'no "auto methods"');
-is( $def->get_dependency,                                    undef,        'check getter of "dependency" property');
 is( $def->get_requirement,                              'Splitter',        'check getter of "requirement" property');
 
 $def = mk_attr_def( {%$req_properies, build => 'code', require => 'Wx', wrap => [qw/a b/] } );
@@ -34,7 +30,6 @@ is( ($def->accessor_names)[1],                                 'b',        'got 
 $def = mk_attr_def( {%$req_properies, lazy_build => 'code' } );
 is( ref $def,                                               $class,        'created wrapping attribute definition with lazy constructor');
 is( $def->get_build,                                        'code',        'getting the "code" sources');
-is( $def->get_init,                                          undef,        'check getter of "init" property');
 is( $def->is_lazy,                                               1,        'this property is lazily constructed');
 
 ok(not (ref mk_attr_def([])),                                              'new needs an hash ref to create delegating attribute definition');

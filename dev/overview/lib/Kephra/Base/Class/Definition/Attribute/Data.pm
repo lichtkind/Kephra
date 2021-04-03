@@ -13,12 +13,10 @@ sub check_type {}      # ._    --> ~errormsg
 sub get_kind  {}       # ._    --> 'data'
 sub get_help  {}       # ._    --> ~help
 sub get_type  {}       # ._    --> ~type
-sub get_init  {}       # ._    --> $val|undef
+sub get_default {}     # ._    --> $val|undef
 sub get_build {}       # ._    --> ~code|undef
 sub is_lazy   {}       # ._    --> ?
 sub accessor_names  {} # ._    --> @~method_name
 sub auto_accessors  {} # ._    --> %def = {accessor_name => {get => get_scope &| set => set_scope }
-sub get_dependency  {} # ._    --> undef
-sub get_requirement {} # ._    --> undef
 
 1;

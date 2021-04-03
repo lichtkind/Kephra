@@ -11,6 +11,7 @@ use Kephra::Base::Class::Instance;
 use Kephra::Base::Class::Interface;
 use Kephra::Base::Class::Syntax;
 use Kephra::Base::Class::Scope;
+use Kephra::Base::Class::Type;
 
 sub make      {} # cmd pkg id .. params
 

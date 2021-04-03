@@ -6,9 +6,9 @@ use warnings;
 
 package Kephra::Base::Class::Syntax::Parser;
 
-sub parse                    {} #     sig  --> %params
-sub types_needed             {} # %params  --> @types
-sub create_type_check        {} # %params  --> &incheck, &outcheck
+sub import    {} # establish new keywords
+sub unimport  {} # remove them
 
+sub closing_brace_pos {}
 
 1;

@@ -1,21 +1,81 @@
 ---
-current: 0
+current: 2
 docs:
   -
-    change_pos: 0
-    cursor_pos: 1605
+    change_pos: 348
+    cursor_pos: 349
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/stage/index.txt
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/status.cp
+    syntaxmode: no
+  -
+    change_pos: 1246
+    cursor_pos: 1247
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/status.cp
+    syntaxmode: no
+  -
+    change_pos: 1547
+    cursor_pos: 1539
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute.pm
+    syntaxmode: perl
+  -
+    change_pos: 177
+    cursor_pos: 177
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute/Data.pm
+    syntaxmode: perl
+  -
+    change_pos: 2280
+    cursor_pos: 568
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/t/0101_Base-Class-Definition-Attribute-Data.t
+    syntaxmode: perl
+  -
+    change_pos: 192
+    cursor_pos: 193
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute/Delegating.pm
+    syntaxmode: perl
+  -
+    change_pos: 115
+    cursor_pos: 115
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute/Wrapping.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 1654
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Method/Signature.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 720
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/t/0105_Base-Class-Definition-Method-Signature.t
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 3306
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Syntax/Parser.pm
     syntaxmode: no
   -
     change_pos: 0
-    cursor_pos: 0
+    cursor_pos: 736
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/index.bed.txt
-    syntaxmode: no
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Syntax/Signature.pm
+    syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 255
+    cursor_pos: 4124
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Data/Type/Store.pm
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/t/0120_Base-Class-Syntax-Signature.t
+    syntaxmode: perl
+  -
+    change_pos: 2218
+    cursor_pos: 3194
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Class/Syntax.pm
     syntaxmode: perl

@@ -63,14 +63,12 @@ sub restate     { bless shift }
 ################################################################################
 sub get_kind        {$kind}
 sub get_help        {$_[0]->{'help'}}
-sub get_type        {undef}
+sub get_class       {$_[0]->{'class'}}
 sub get_default_args{$_[0]->{'default'}}
 sub get_build_args  {$_[0]->{'build'}}
 sub is_lazy         {$_[0]->{'lazy'}}
-sub accessor_names  { @{ $_[0]->{'methods'}} }
+sub accessor_names  {@{ $_[0]->{'methods'}} }
 sub auto_accessors  {$_[0]->{'auto'}}              # name => scope | [getscope, original_name]
-sub get_dependency  { $_[0]->{'class'} }
-sub get_requirement { undef }
 
 1;
 __END__

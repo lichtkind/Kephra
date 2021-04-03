@@ -5,6 +5,7 @@ package  Kephra::Base::Closure;
 our $VERSION = 1.1;
 use Kephra::Base::Data;
 
+sub new_closure {} #                                                           # symbol to call constructor without package name  
 sub new        {} # ~code - $state .basic_type |~basic_type --> ._|~errormsg   # create call object with own source and state
 sub clone      {} # ._                                      --> ._             # create call object with same source and types and same (or different) state
 sub restate    {} # %state                                  --> ._|~errormsg   # create call object from state

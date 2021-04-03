@@ -37,15 +37,11 @@ sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
 sub state   { $_[0] }
 sub restate { bless shift }
 ################################################################################
-sub get_kind  { $kind }
-sub get_help  {$_[0]->{'help'}}
-sub get_type  { undef }
-sub get_init  { undef }
-sub get_build {$_[0]->{'build'}}
-sub is_lazy   {$_[0]->{'lazy'}}
+sub get_kind    { $kind }
+sub get_help    {$_[0]->{'help'}}
+sub get_build   {$_[0]->{'build'}}
+sub is_lazy     {$_[0]->{'lazy'}}
 sub accessor_names  {@{ $_[0]->{'methods'}} }
-sub auto_accessors  { undef }
-sub get_dependency  { undef }
 sub get_requirement { $_[0]->{'require'} // $_[0]->{'class'} }
 
 1;
