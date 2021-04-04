@@ -39,10 +39,11 @@ sub restate { bless shift }
 ################################################################################
 sub get_kind    { $kind }
 sub get_help    {$_[0]->{'help'}}
+sub get_class   { $_[0]->{'class'} }
 sub get_build   {$_[0]->{'build'}}
 sub is_lazy     {$_[0]->{'lazy'}}
-sub accessor_names  {@{ $_[0]->{'methods'}} }
-sub get_requirement { $_[0]->{'require'} // $_[0]->{'class'} }
+sub accessor_names  { @{ $_[0]->{'methods'}} }
+sub auto_accessors  {$_[0]->{'auto'}} 
 
 1;
 __END__

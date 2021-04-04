@@ -112,13 +112,14 @@ sub restate     { # %state   --> _
 
 __END__
 
- [~]                   1    # ~ means argument name
- [~ T]                 2    # T means argument main type
- [~ T? 'foreward']     3    # constructor arg thats forewards to attribute
- [~ T? 'slurp']        3    # a.k.a. >@ ; T? means most of time its empty = ''
- [~ T? 'self']         3    # a.k.a. _  ; typed_ref class
- [~ T  'type'   T]     4 
- [~ T  'arg'    ~  T!] 5    # T! means Type of argument (parameter type of main type) will be added later by Definition::Method::Signature
- [~ T  'attr'   ~  T!] 5    # T! means Type of attribute (parameter type of main type) will be added later by Definition::Method::Signature
+[req arg, opt arg, ret val]
 
-# [~ T? 'pass']         3    # a.k.a. -->' ', now return => []
+  index    bedeutung
+ 
+    0  ~    arg name
+    1  *    slurpy property
+    2  =    foreward (pass) property
+    3  Tb   type name
+    4  Tp   parameter type name  
+    5  ~_   attr parameter   
+    6  ~|   arg parameter   

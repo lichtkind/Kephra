@@ -79,7 +79,7 @@ is( $def->accessor_names,                                        0,        'no h
 is( keys %{$def->auto_accessors},                                2,        'and one auto generated');
 is( ref $def->auto_accessors->{'deleg'},                    'HASH',        'its definition is a HASH');
 is( $def->auto_accessors->{'deleg'}{'delegate_to'},        'deleg',        'auto delegator does not rename method');
-is( $def->auto_accessors->{'deleg'}{'scope'},             'access',        'access scope is default for delegators');
+is( $def->auto_accessors->{'deleg'}{'scope'},            'private',        'access scope is default for delegators');
 is( ref $def->auto_accessors->{'getter'},                   'HASH',        'auto getter definition found');
 is( $def->auto_accessors->{'getter'}{'get'},              'access',        'auto gettere defined by scalar name defaults to access scope');
 
