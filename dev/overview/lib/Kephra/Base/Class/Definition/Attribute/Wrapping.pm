@@ -11,13 +11,10 @@ sub restate {}         # ~pkg %state              --> ._
 
 sub get_kind  {}       # ._    --> 'data'
 sub get_help  {}       # ._    --> ~help
-sub get_type  {}       # ._    --> ~type
-sub get_default  {}    # ._    --> $val|undef
+sub get_class       {} # ._    --> ~class
 sub get_build {}       # ._    --> ~code|undef
 sub is_lazy   {}       # ._    --> ?
 sub accessor_names  {} # ._    --> @~method_name
 sub auto_accessors  {} # ._    --> %def = {name => get_scope | [get_scope, set_scope]}
-sub get_dependency  {} # ._    --> undef
-sub get_requirement {} # ._    --> undef
 
 1;

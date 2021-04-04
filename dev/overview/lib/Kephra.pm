@@ -1,5 +1,9 @@
-use v5.16;
+use v5.18;
 use warnings;
+use YAML;           # dependencies
+use Wx;
+use Sereal;
+use Digest::MD5;
 
 # central starter
 # name, version, important dir retrieval or setting
@@ -7,7 +11,7 @@ use warnings;
 package Kephra;
 
 our $NAME = 'Kephra outline';
-our $VERSION = '0.4.1';
+our $VERSION = '0.4.1.1';
 
 # create pipes
 # fork;
