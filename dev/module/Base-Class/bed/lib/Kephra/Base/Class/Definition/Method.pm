@@ -24,7 +24,7 @@ sub new           { # ~name %sig_def ~code >@keywords               --> _
     $category{'code'} = $code;
     bless $category;
 }
-sub state         {} # _                          --> %state
+sub state         { # _                          --> %state
 }
 sub restate       { # %state                      --> _
 }

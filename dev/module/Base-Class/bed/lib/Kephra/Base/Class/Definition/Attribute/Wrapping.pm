@@ -1,7 +1,7 @@
 use v5.20;
 use warnings;
 
-# data structure holding a definition of a KBOTS attribute that holds a none KBOS object
+# data structure holding a definition of a KBOS attribute that holds a none KBOS object
 
 package Kephra::Base::Class::Definition::Attribute::Wrapping;
 our $VERSION = 1.1;
@@ -11,13 +11,17 @@ sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
     my ($pkg, $attr_def) = (@_);
     return "need a property hash to create a wrapping attribute definition" unless ref $attr_def eq 'HASH';
     my $error_start = "$kind attribute ".(exists $attr_def->{name} ? $attr_def->{name} : '');
-    my $self = {methods => [], auto => {}, lazy => 0};
+    my $self = {methods => [], auto => {}, lazy => 0, require => 0};
     for (qw/name help class/) {
         return "$error_start lacks property '$_'" unless exists $attr_def->{$_};
         return "$error_start property '$_' can not be a reference"  if ref $attr_def->{$_};
         return "$error_start property '$_' can not be empty"  unless $attr_def->{$_};
         $self->{$_} = delete $attr_def->{$_};
     }
+    if   (exists $attr_def->{'use'})     {$self->{'load'} = delete $attr_def->{'use'} }
+    elsif(exists $attr_def->{'require'}) {$self->{'load'} = delete $attr_def->{'require'}; $self->{'require'} = 1; }
+    else                                 {$self->{'load'} = $self->{'class'}}
+
     return "$error_start lacks property 'wrap'" unless exists $attr_def->{'wrap'};
     if (ref $attr_def->{'wrap'} eq 'ARRAY') { $self->{'methods'} =  delete $attr_def->{'wrap'}  }
     elsif (not ref $attr_def->{'wrap'})     { $self->{'methods'} = [delete $attr_def->{'wrap'}] }
@@ -37,20 +41,21 @@ sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
 sub state   { $_[0] }
 sub restate { bless shift }
 ################################################################################
-sub get_kind    { $kind }
-sub get_help    {$_[0]->{'help'}}
-sub get_class   { $_[0]->{'class'} }
-sub get_build   {$_[0]->{'build'}}
-sub is_lazy     {$_[0]->{'lazy'}}
-sub accessor_names  { @{ $_[0]->{'methods'}} }
-sub auto_accessors  {$_[0]->{'auto'}} 
+sub get_kind       { $kind }
+sub get_help       {$_[0]->{'help'}}
+sub get_class      {$_[0]->{'class'}}
+sub get_build      {$_[0]->{'build'}}
+sub is_lazy        {$_[0]->{'lazy'}}
+sub load_package   {$_[0]->{'load'}}
+sub require_package{$_[0]->{'require'}}
+sub accessor_names {@{ $_[0]->{'methods'}}}
 
 1;
 __END__
 
 wrapping attribute name => { help  => '',                 # short explaining text for better ~errormsg
                             class  => 'Kephra::...',      # class of attribute (can be any)
-                  ?        require => 'Module'            # 1 if require class
-                             wrap  => [wrapper_name]|name # claim this to be implemented wrapper method as belonging to this attribute
-                  ?|       default => $val                # default value when its different from the type ones
+                  ?|          use  => 'Module qw/symbol/' # package you actually have to use/import, defaults to ~class
+                  ?|      require  => 'Module'            # package you actually have to require , defaults to use
+                             wrap  => [wrapper_name]|name # accessor methods
                    |  [lazy_]build => 'code'              # code snippets to run (lazily) create $attr object and bring it into init state
