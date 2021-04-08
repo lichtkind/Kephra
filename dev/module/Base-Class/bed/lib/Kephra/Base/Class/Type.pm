@@ -6,4 +6,13 @@ use warnings;
 package Kephra::Base::Class::Type;
 our $VERSION = 0.01;
 
+
+
+
 1;
+
+__END__
+
+! any object
+. KBOS object
+: KBOS interface

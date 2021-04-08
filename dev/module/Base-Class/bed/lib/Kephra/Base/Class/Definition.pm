@@ -8,6 +8,7 @@ our $VERSION = 0.7;
 use Kephra::Base::Data qw/clone_data/;
 use Kephra::Base::Class::Definition::Attribute;
 use Kephra::Base::Class::Definition::Method;
+use Kephra::Base::Class::Definition::Scope
 
 my $default_methods = {state  => {name => 'state', scope => 'build'}, 
                      restate => {name => 'restate', scope => 'build'}};

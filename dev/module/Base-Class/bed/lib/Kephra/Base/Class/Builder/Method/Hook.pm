@@ -1,4 +1,4 @@
-use v5.16;
+use v5.18;
 use warnings;
 
 # code snippets that run before and after a method is called
@@ -6,7 +6,7 @@ use warnings;
 package Kephra::Base::Class::Builder::Method::Hook;
 our $VERSION = 0.01;
 use Kephra::Base::Package;
-use Kephra::Base::Class::Scope;
+use Kephra::Base::Class::Definition::Scope;
 my %type = (BEFORE => 1, AFTER => 1, BEFORE_AND => 1, AND_AFTER => 1);
 my %name = (BEFORE => 1, AFTER => 1, BEFORE_AND_AFTER => 1);
 ################################################################################

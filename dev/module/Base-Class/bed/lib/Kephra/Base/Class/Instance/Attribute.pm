@@ -6,7 +6,7 @@ use warnings;
 package Kephra::Base::Class::Instance::Attribute;
 our $VERSION = 0.1;
 use Kephra::Base::Package qw/set_sub has_sub/;
-use Kephra::Base::Class::Scope;
+use Kephra::Base::Class::Definition::Scope;
 use Kephra::Base::Data::Type;
 
 my (%data, %attr_name, %setter, %resetter, %attr_ref_getter, %attr_ref_setter, %attr_ref_getsetter, %self_ref);

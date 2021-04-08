@@ -18,6 +18,7 @@ depends on:
                                           .     I = In Progress (currently worked on)
                                           .      N = Not yet (planned)
 --------------------------------------------------------------------------------
+   K::B::C::Definition::Scope  .........  C  .....  1.6    namespace constants, paths & priority logic
    K::B::C::Definition::Attr.::Data  ...  C  .....  1.3    validate and serialize definition of attribute holding raw data
    K::B::C::Definition::Attr.::Delegating C  .....  1.41   validate and serialize definition of attribute, which is KBOS object
    K::B::C::Definition::Attr.::Wrapping   C  .....  1.1    validate and serialize definition of attribute, which is a none KBOS object
@@ -25,7 +26,6 @@ depends on:
    K::B::C::Definition::Method::Signature     M...  0.0    validate and serialize signature definition
    K::B::C::Definition::Method  ........        I.  0.0    validate and serialize method definition
    K::B::C::Definition  ................     UM...  0.7    serializable data set to build a KBOS class from
-   K::B::C::Scope  .....................  C         1.5    namespace constants, paths & priority logic
    K::B::C::Instance::Attribute  .......       B N         central store for attribute values
    K::B::C::Instance::Arguments  .......       B N         central store for arguments values
    K::B::C::Instance  ..................       B N         central store 4 object ref (4x self + attr ref)
