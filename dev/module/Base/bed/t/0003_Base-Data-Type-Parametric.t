@@ -7,7 +7,7 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 package Very::Long::Package; sub new {bless {}} 
 
 use Kephra::Base::Data::Type::Parametric;
-use Test::More tests => 170;
+use Test::More tests => 175;
 
 sub simple_type { Kephra::Base::Data::Type::Basic->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }
@@ -19,6 +19,7 @@ my $Tval   = simple_type('value', 'not a reference', 'not ref $value', undef, ''
 my $Tstr   = simple_type('str', undef, undef, $Tval );
 my $Tint   = simple_type('int', 'integer number', 'int $value eq $value', $Tval, 0);
 my $Tpint  = simple_type('pos_int', 'positive integer', '$value >= 0', $Tint);
+say $Tpint->{'code'};
 my $Tarray = simple_type('ARRAY', 'array reference', 'ref $value eq "ARRAY"', undef, $crefdef);
 my $Ttype  = simple_type('ARRAY', 'array reference', 'ref $value eq "ARRAY"', $Tstr, 'ANY');
 my $btclass = 'Kephra::Base::Data::Type::Basic';
@@ -35,6 +36,12 @@ is ( ref $Tindex, $ptclass,                    'created first prametric type obj
 is ( $Tindex->get_name, 'index',               'got attribute "name" from getter of "index"');
 is ( $Tindex->get_help, 'valid index of array','got attribute "help" from getter of "index"');
 is ( $Tindex->get_default_value, 0,            'got attribute "default" value from getter of "index"');
+is( ref $Tindex->get_parents, 'ARRAY',         'got parents in array ref');
+is( int @{$Tindex->get_parents}, 3,            'has three parents');
+ok( 'value' ~~ $Tindex->get_parents,           'Type "value" is parent');
+ok( 'int' ~~ $Tindex->get_parents,             'Type "int" is parent');
+ok( 'pos_int' ~~ $Tindex->get_parents,         'Type "pos_int" is parent');
+
 my $param = $Tindex->get_parameter();
 is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "index"');
 is ( $param->get_name, 'array',                'got attribute "name" from "index" parameter');

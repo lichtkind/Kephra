@@ -6,11 +6,11 @@ no warnings 'experimental::smartmatch';
 # serializable data type object that compiles name str, help msg, check code - optional parent name and default value
 #                     => coderef (checker) that return error msg or nothing on input
 # example      : {name => bool, help=> '0 or 1', code=> '$_[0] eq 0 or $_[0] eq 1', parent=> 'value',  default =>0}
-# compiled to  : {check => ['not a reference', 'not ref $_[0]', '0 or 1', '$_[0] eq 0 or $_[0] eq 1'], 
+# compiled to  : {check => ['not a reference', 'not ref $_[0]', '0 or 1', '$_[0] eq 0 or $_[0] eq 1'], parents => ['value']
 #                 coderef => eval{ sub{ return $_[0] 'failed not a reference' unless not ref $_[0]; ...; 0} } }
 
 package Kephra::Base::Data::Type::Basic;
-our $VERSION = 1.4;
+our $VERSION = 1.5;
 use Scalar::Util qw/blessed looks_like_number/;
 ################################################################################
 sub _unhash_arg_ {
@@ -25,12 +25,14 @@ sub new {        # ~name ~help ~code - .parent $default --> .type | ~errormsg
     return "'parent' of basic type '$name' has to be a hash definition or an instance of ".__PACKAGE__ if defined $parent and ref $parent ne __PACKAGE__ and ref $parent ne 'HASH';
     return "basic type '$name' definition misses 'help' text and 'code' or a 'parent' type object" if $code xor $help or (not $code and not defined $parent);
     my $checks = [];
+    my $parents = [];
     push @$checks, $help, $code if $code;
     if (defined $parent){
         $parent = Kephra::Base::Data::Type::Basic->new($parent) if ref $parent eq 'HASH';
         return "can not create type $name, because definition of parent has issue: $parent" unless ref $parent;
         unshift @$checks, @{$parent->get_check_pairs};
         $default //= $parent->get_default_value;
+        push @$parents, $parent->get_name, @{$parent->get_parents}; 
     }
     return "basic type '$name' misses 'default' value or a 'parent' type" unless defined $default;
     my $source = _compile_( $name, $checks );
@@ -38,7 +40,7 @@ sub new {        # ~name ~help ~code - .parent $default --> .type | ~errormsg
     return "basic type '$name' checker source 'code' - '$source' - could not eval because: $@ !" if $@;
     my $error = $coderef->( $default );
     return "type '$name' default value '$default' does not pass check - '$source' - because: $error!" if $error;
-    bless { name => $name, coderef => $coderef, checks => $checks, default => $default };
+    bless { name => $name, coderef => $coderef, checks => $checks, default => $default, parents => $parents};
 }
 sub restate {    # %state                               --> .type | ~errormsg
     my ($pkg, $state) = @_;
@@ -57,13 +59,14 @@ sub _asm_ {
 }
 sub assemble_code { _asm_($_[0]->get_name, $_[0]->get_check_pairs) }
 ################################################################################
-sub state             { {name => $_[0]->{'name'}, checks => [@{$_[0]->{'checks'}}], default => $_[0]->{'default'} }}  # .type  -->  %state
-sub get_name          { $_[0]->{'name'} }            # .type                 -->  ~name
-sub get_check_pairs   { $_[0]->{'checks'} }          # .type                 -->  @checks
-sub get_default_value { $_[0]->{'default'} }         # .type                 -->  $default
-sub get_checker       { $_[0]->{'coderef'} }         # .type                 -->  &checker
+sub state             { {name => $_[0]->{'name'}, parents => [@{$_[0]->{'parents'}}], checks => [@{$_[0]->{'checks'}}], default => $_[0]->{'default'} }}  # ._  -->  %state
+sub get_name          { $_[0]->{'name'} }            # ._                 -->  ~name
+sub get_parents       { $_[0]->{'parents'} }         # ._                 -->  @~parent.name
+sub get_check_pairs   { $_[0]->{'checks'} }          # ._                 -->  @checks
+sub get_default_value { $_[0]->{'default'} }         # ._                 -->  $default
+sub get_checker       { $_[0]->{'coderef'} }         # ._                 -->  &checker
 ################################################################################
-sub check             { $_[0]->{'coderef'}->($_[1]) }# .type $val            -->  ~errormsg
+sub check             { $_[0]->{'coderef'}->($_[1]) }# ._ $val            -->  ~errormsg
 ################################################################################
 
 2;

@@ -2,7 +2,7 @@ use v5.20;
 use warnings;
 use utf8;
 
-# definitions and store of standard data type checker objects
+# definition and store of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
 our $VERSION = 2.8;

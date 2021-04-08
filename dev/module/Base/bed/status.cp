@@ -15,8 +15,8 @@ See connections between stages and module protos under /dev/module/status.cp
                                           .      N = Not yet (planned)
 --------------------------------------------------------------------------------
    K::B::Package  ......................  C  .....  1.1    low level symbol manipulation
-   K::B::Data::Type::Basic  ............  C  .....  1.4    inheritable single value checker
-   K::B::Data::Type::Parametric  .......  C  .....  1.31   checks relation between two values
+   K::B::Data::Type::Basic  ............  C  .....  1.5    inheritable single value checker
+   K::B::Data::Type::Parametric  .......  C  .....  1.4   checks relation between two values
    K::B::Data::Type::Store  ............  C  .....  1.21   collection of type objects (namespace)
    K::B::Data::Type::Util  .............  C  .....  1.01   helper functions for type creation
    K::B::Data::Type::Standard  .........  C  .....  2.8    definition of standard types
