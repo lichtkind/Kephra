@@ -8,6 +8,7 @@ our $VERSION = 0.7;
 use Kephra::Base::Data;
 use Kephra::Base::Class::Definition::Attribute;
 use Kephra::Base::Class::Definition::Method;
+use Kephra::Base::Class::Definition::Scope;
 
 sub new               {}  # ~class_name                                      --> ._|~errormsg
 sub restate           {}  # %state                                           --> ._|~errormsg

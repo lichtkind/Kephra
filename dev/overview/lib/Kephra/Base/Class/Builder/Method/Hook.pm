@@ -5,7 +5,7 @@ package Kephra::Base::Class::Builder::Method::Hook;
 use Kephra::API qw/:log/;
 
 use Kephra::Base::Package;
-use Kephra::Base::Class::Scope;
+use Kephra::Base::Class::Definition::Scope;
 
 sub create_anchor {} # class method                       --> %&anchors|err
 sub has_anchor    {} # class method                       --> bool

@@ -4,7 +4,7 @@ use warnings;
 package Kephra::Base::Class::Instance::Attribute;
 our $VERSION = 0.05;
 use Kephra::Base::Package;
-use Kephra::Base::Class::Scope;
+use Kephra::Base::Class::Definition::Scope;
 use Kephra::Base::Data;
 
 
