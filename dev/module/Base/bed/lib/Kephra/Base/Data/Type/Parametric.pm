@@ -10,7 +10,7 @@ no warnings 'experimental::smartmatch';
 #           parameter =>{name => 'ARRAY', help => 'array reference', code => 'ref $value eq "ARRAY"', default => []}    }   # type is required
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 1.4;
+our $VERSION = 1.5;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type::Basic;         my $btype = 'Kephra::Base::Data::Type::Basic';
 
@@ -25,11 +25,17 @@ sub new {   # ~name  ~help  %parameter  ~code  .parent - $default            -->
         unless defined $name and $name and defined $help and $help and defined $code and $code;
     return "parent has to be instance of $btype or ".__PACKAGE__." to create parametric type $name" if defined $parent and ref $parent ne $btype and ref $parent ne __PACKAGE__;
 
-    my $parents = ref $parent ? [$parent->get_name, @{$parent->get_parents}] : [];
+    my $parents = {};
     if (ref $parent eq __PACKAGE__){
         $code = $parent->{'code'}.';'.$code;
-        $parameter //= $parent->get_parameter 
-     }
+        $parameter //= $parent->get_parameter;
+        return "parent has to to have the same or derived parameter type" unless $parent->get_parameter->get_name eq $parameter->get_name
+                                                                              or $parent->get_parameter->get_name ~~ $parameter->get_parents;
+        %$parents = %{$parent->get_parents};
+        $parents->{ $parent->get_name } = $parent->get_parameter->get_name;
+    } elsif (ref $parent eq $btype){
+        $parents->{$_} = '' for @{$parent->get_parents}, $parent->get_name;
+    }
     return "argument 'parameter' of parametric type $name has to be $btype or a hash ref definition " if ref $parameter ne $btype and ref $parameter ne 'HASH';
     $parameter = Kephra::Base::Data::Type::Basic->new( $parameter ) if ref $parameter eq 'HASH';
     return "'parameter' definition of parametric type $name has issue: $parameter " unless ref $parameter;
@@ -64,19 +70,25 @@ sub _compile_with_safe_param_ {
     . Kephra::Base::Data::Type::Basic::_asm_($name, $check) . $code . ";return ''}"
 }
 ################################################################################
-sub state {                                          # ._                    -->  %state
-    { name => $_[0]->{'name'}, help => $_[0]->{'help'}, code => $_[0]->{'code'}, checks => [@{$_[0]->{'checks'}}], parents => [@{$_[0]->{'parents'}}],
+sub state {                                          # _                     -->  %state
+    { name => $_[0]->{'name'}, help => $_[0]->{'help'}, code => $_[0]->{'code'}, checks => [@{$_[0]->{'checks'}}], parents => {%{$_[0]->{'parents'}}},
      default => $_[0]->{'default'}, parameter => $_[0]->{'parameter'}->state() }
 }
-sub get_name          { $_[0]->{'name'} }            # ._                    -->  ~name
-sub get_parents       { $_[0]->{'parents'} }         # ._                    -->  @~parent.name
-sub get_help          { $_[0]->{'help'} }            # ._                    -->  ~help
-sub get_default_value { $_[0]->{'default'} }         # ._                    -->  $default
-sub get_parameter     { $_[0]->{'parameter'} }       # ._                    -->  .btype
-sub get_checker       { $_[0]->{'coderef'} }         # ._                    -->  &check
-sub get_trusting_checker { $_[0]->{'trustcoderef'} } # ._                    -->  &trusting_check  # when parameter is already type checked
+sub get_name          { $_[0]->{'name'} }            # _                     -->  ~PTname
+sub get_parents       { $_[0]->{'parents'} }         # _                     -->  %_parent.name -> :parent:parameter:name
+sub get_help          { $_[0]->{'help'} }            # _                     -->  ~help
+sub get_default_value { $_[0]->{'default'} }         # _                     -->  $default
+sub get_parameter     { $_[0]->{'parameter'} }       # _                     -->  .btype
+sub get_checker       { $_[0]->{'coderef'} }         # _                     -->  &check
+sub get_trusting_checker { $_[0]->{'trustcoderef'} } # _                     -->  &trusting_check  # when parameter is already type checked
 ################################################################################
-sub check     { $_[0]->{'coderef'}->($_[1], $_[2]) } # .ptype $val $param    -->  ~errormsg
+sub has_parent        {                       # _ ~BTname|[~PTname ~BTname]  -->  ?
+    my ($self, $typename) = @_;
+    return (exists $self->{'parents'}{$typename} and ! $self->{'parents'}{$typename}) unless ref $typename;
+    return unless ref $typename eq 'ARRAY' and @$typename == 2;
+    exists $self->{'parents'}{$typename->[0]} and $self->{'parents'}{$typename->[0]} eq $typename->[1];
+}
+sub check     { $_[0]->{'coderef'}->($_[1], $_[2]) } # _ $val $param    -->  ~errormsg
 ################################################################################
 
 2;

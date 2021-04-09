@@ -7,7 +7,7 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 package Very::Long::Package; sub new {bless {}} 
 
 use Kephra::Base::Data::Type::Parametric;
-use Test::More tests => 175;
+use Test::More tests => 185;
 
 sub simple_type { Kephra::Base::Data::Type::Basic->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }
@@ -19,7 +19,6 @@ my $Tval   = simple_type('value', 'not a reference', 'not ref $value', undef, ''
 my $Tstr   = simple_type('str', undef, undef, $Tval );
 my $Tint   = simple_type('int', 'integer number', 'int $value eq $value', $Tval, 0);
 my $Tpint  = simple_type('pos_int', 'positive integer', '$value >= 0', $Tint);
-say $Tpint->{'code'};
 my $Tarray = simple_type('ARRAY', 'array reference', 'ref $value eq "ARRAY"', undef, $crefdef);
 my $Ttype  = simple_type('ARRAY', 'array reference', 'ref $value eq "ARRAY"', $Tstr, 'ANY');
 my $btclass = 'Kephra::Base::Data::Type::Basic';
@@ -36,11 +35,14 @@ is ( ref $Tindex, $ptclass,                    'created first prametric type obj
 is ( $Tindex->get_name, 'index',               'got attribute "name" from getter of "index"');
 is ( $Tindex->get_help, 'valid index of array','got attribute "help" from getter of "index"');
 is ( $Tindex->get_default_value, 0,            'got attribute "default" value from getter of "index"');
-is( ref $Tindex->get_parents, 'ARRAY',         'got parents in array ref');
-is( int @{$Tindex->get_parents}, 3,            'has three parents');
+is( ref $Tindex->get_parents, 'HASH',          'got parents in HASH ref');
+is( keys %{$Tindex->get_parents}, 3,           'has three parents');
 ok( 'value' ~~ $Tindex->get_parents,           'Type "value" is parent');
 ok( 'int' ~~ $Tindex->get_parents,             'Type "int" is parent');
 ok( 'pos_int' ~~ $Tindex->get_parents,         'Type "pos_int" is parent');
+ok( $Tindex->has_parent('value'),              'Type "value" is parent, by direct method');
+ok( $Tindex->has_parent('int'),                'Type "int" is parent, by direct method');
+ok( $Tindex->has_parent('pos_int'),            'Type "pos_int" is parent, by direct method');
 
 my $param = $Tindex->get_parameter();
 is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "index"');
@@ -79,6 +81,8 @@ is ( $state->{'parameter'}{'name'}, 'array',   'parameter "name" in type "index"
 my $Ticlone = Kephra::Base::Data::Type::Parametric->restate($state);
 is ( ref $Ticlone, $ptclass,                   'recreated first prametric type object, type "index" by restate from dumped state');
 is ( $Ticlone->get_name, 'index',              'got attribute "name" from getter of "index" clone');
+ok( $Ticlone->has_parent('pos_int'),           'Type "pos_int" is parent');
+ok( $Ticlone->has_parent('int'),               'Type "int" is parent');
 is ( $Ticlone->get_help,'valid index of array','got attribute "help" from getter of "index" clone');
 is ( $Ticlone->get_default_value, 0,           'got attribute "default" value from getter of "index" clone');
 $param = $Ticlone->get_parameter();
@@ -114,6 +118,7 @@ is ( ref $Tindex, $ptclass,                    'created first prametric type "in
 is ( $Tindex->get_name, 'index',               'got attribute "name" from getter of "index"');
 is ( $Tindex->get_help, 'valid index of array','got attribute "help" from getter of "index"');
 is ( $Tindex->get_default_value, 0,            'got attribute "default" value from getter of "index"');
+ok( $Tindex->has_parent('pos_int'),            'Type "pos_int" is parent');
 $param = $Tindex->get_parameter();
 is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "index"');
 is ( $param->get_name, 'ARRAY',                'got attribute "name" from "index" parameter');
@@ -130,12 +135,11 @@ is ( $tchecker->(2,[1,2,3]), '',               'trusting checker of type "index"
 ok ( $tchecker->(-1,[1,2,3]),                  'trusting checker of type "index" clone denies with error correctly negative index');
 ok ( $tchecker->(3,[1,2,3]),                   'trusting checker of type "index" clone denies with error correctly too large index');
 
-
-
 is ( ref $Tref, $ptclass,                      'created second prametric type object, type "ref" with named arguments');
 is ( $Tref->get_name, 'reference',             'got attribute "name" from getter of type "ref"');
 is ( $Tref->get_help,'reference of given type','got attribute "help" from getter of type "ref"');
 is ( $Tref->get_default_value, $erefdef,       'got attribute "default" value from getter of "ref"');
+ok( $Tref->has_parent('ANY'),                  'Type "ANY" is parent');
 $param = $Tref->get_parameter();
 is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "ref"');
 is ( $param->get_name, 'refname',              'got attribute "name" from "ref" parameter');
@@ -172,6 +176,7 @@ is ( ref $Trefclone, $ptclass,                 'recreated prametric type object,
 is ( $Trefclone->get_name, 'reference',        'got attribute "name" from getter of "ref" clone');
 is ( $Trefclone->get_help, 'reference of given type','got attribute "help" from getter of "ref" clone');
 is ( $Trefclone->get_default_value, $erefdef,  'got attribute "default" value from getter of "ref"');
+ok( $Trefclone->has_parent('ANY'),             'Type "ANY" is parent');
 $param = $Trefclone->get_parameter();
 is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "ref" clone');
 is ( $param->get_name, 'refname',              'got attribute "name" from "ref" clone parameter');
@@ -202,6 +207,8 @@ is ( ref $Tshortref, $ptclass,                      'created prametric type that
 is ( $Tshortref->get_name, 'short_ref',             'got attribute "name" from getter of type "short_ref"');
 is ( $Tshortref->get_help,'reference with short, given name', 'got attribute "help" from getter of type "short_ref"');
 is ( $Tshortref->get_default_value, $erefdef,       'got attribute "default" value from getter of "short_ref" (was inherited properly)');
+ok( $Tshortref->has_parent('ANY'),                  'Type "ANY" is parent');
+ok( $Tshortref->has_parent(['reference','refname']),'Type "reference" of "refname" is parent');
 $param = $Tshortref->get_parameter();
 is ( ref $param, $btclass,                          'got attribute "parameter" object from getter of "short_ref" (was inherited properly)');
 is ( $param->get_name, 'refname',                   'got attribute "name" from "short_ref" parameter');

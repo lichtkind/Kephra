@@ -4,7 +4,7 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Test::More tests => 138;
+use Test::More tests => 140;
 
 use Kephra::Base::Data::Type::Basic;
 sub create_type { Kephra::Base::Data::Type::Basic->new(@_) }
@@ -15,8 +15,9 @@ my $vc = 'not ref $value'; # type value code
 my $Tvalue = create_type('value', $vh, $vc, undef, '');
 is( ref $Tvalue, $pkg,                'created first type object "value"');
 is( $Tvalue->get_name, 'value',       'got attribute "name" from getter of value type object');
-is( ref $Tvalue->get_parents, 'ARRAY','got parents in array ref');
-is( int @{$Tvalue->get_parents}, 0,   'has no parents');
+is( $Tvalue->has_parent(undef), '',   'has no parents');
+ok( $Tvalue->has_parent('') == 0,     'has no parents, (with empty string too)');
+is( $Tvalue->has_parent('value'), '', 'self is not a parent');
 is( $Tvalue->get_default_value, '',   'got attribute "default" value from getter');
 my $checks = $Tvalue->get_check_pairs;
 is( ref $checks, 'ARRAY',             'check pairs are stored in an ARRAY');
@@ -38,49 +39,49 @@ is( $Tvalue->check($val),
     $checker->($val),                 'got same error message when running checker explicitly or implicitly');
 
 my $state = $Tvalue->state;
-is( ref $state, 'HASH',              'state dump is hash ref');
+is( ref $state, 'HASH',               'state dump is hash ref');
 my $Tvclone = Kephra::Base::Data::Type::Basic->restate($state);
-is( ref $Tvclone, $pkg,              'recreated object for type "value" from serialized state');
-is( $Tvclone->get_name, 'value',     'got attribute "name" from getter');
-is( ref $Tvclone->get_parents, 'ARRAY','got parents in array ref');
-is( int @{$Tvclone->get_parents}, 0, 'has no parents');
-is( $Tvclone->get_default_value, '', 'got attribute "default" value from getter');
-is( $Tvclone->check(3), '',          'check method of type "value" clone accepts correctly value 3');
-ok( $Tvclone->check([]),             'check method of type "value" clone denies correctly with error an ARRAY ref');
-is( $Tvclone->assemble_code(), $code,'clone still has same code as original');
+is( ref $Tvclone, $pkg,               'recreated object for type "value" from serialized state');
+is( $Tvclone->get_name, 'value',      'got attribute "name" from getter');
+
+is( int @{$Tvclone->get_parents}, 0,  'has no parents');
+is( $Tvclone->get_default_value, '',  'got attribute "default" value from getter');
+is( $Tvclone->check(3), '',           'check method of type "value" clone accepts correctly value 3');
+ok( $Tvclone->check([]),              'check method of type "value" clone denies correctly with error an ARRAY ref');
+is( $Tvclone->assemble_code(), $code, 'clone still has same code as original');
 $checks = $Tvclone->get_check_pairs;
-is( ref $checks, 'ARRAY',            'check pairs are stored in an ARRAY');
-is( @$checks, 2,                     'type value has only one check pair ');
-is( $checks->[0], $vh,               'check pair key is help string');
-is( $checks->[1], 'not ref $value',  'check pair value is code string');
+is( ref $checks, 'ARRAY',             'check pairs are stored in an ARRAY');
+is( @$checks, 2,                      'type value has only one check pair ');
+is( $checks->[0], $vh,                'check pair key is help string');
+is( $checks->[1], 'not ref $value',   'check pair value is code string');
 
 my $bc = '$value eq 0 or $value eq 1'; # type bool code
 my $Tbool = create_type('bool','0 or 1', $bc, $Tvalue, 0);
-is( ref $Tbool, $pkg,                'created child type object bool');
-is( $Tbool->get_name, 'bool',        'got attribute "name" from getter of type bool');
-is( int @{$Tbool->get_parents}, 1,   'has one parent');
-ok( 'value' ~~ $Tbool->get_parents,  'Type "value" is parent');
+is( ref $Tbool, $pkg,                 'created child type object bool');
+is( $Tbool->get_name, 'bool',         'got attribute "name" from getter of type bool');
+is( $Tvalue->has_parent(undef), '',   'has no parents');
+ok( 'value' ~~ $Tbool->get_parents,   'Type "value" is parent');
 
-is( $Tbool->get_default_value, 0,    'got attribute "default" value from getter');
+is( $Tbool->get_default_value, 0,     'got attribute "default" value from getter');
 $checks = $Tbool->get_check_pairs;
-is( ref $checks, 'ARRAY',            'check pairs are stored in an ARRAY');
-is( @$checks, 4,                     'type bool has two check pair ');
-is( $checks->[0], $vh,               'first check pair key is inherited help string');
-is( $checks->[1], $vc,               'first pair pair value is inherited code string');
-is( $checks->[2], '0 or 1',          'second check pair key is help string');
-is( $checks->[3], $bc,               'second check pair value is code string');
+is( ref $checks, 'ARRAY',             'check pairs are stored in an ARRAY');
+is( @$checks, 4,                      'type bool has two check pair ');
+is( $checks->[0], $vh,                'first check pair key is inherited help string');
+is( $checks->[1], $vc,                'first pair pair value is inherited code string');
+is( $checks->[2], '0 or 1',           'second check pair key is help string');
+is( $checks->[3], $bc,                'second check pair value is code string');
 $checker = $Tbool->get_checker;
-is( ref $checker, 'CODE',            'checker of type "bool" is a CODE ref');
-is( $checker->(0), '',               'checker of type "bool" accepts correctly 0');
-is( $checker->(1), '',               'checker of type "bool" accepts correctly 1');
-ok( $checker->([]),                  'checker of type "bool" denies with error correctly value ARRAY ref');
-ok( $checker->(5),                   'checker of type "bool" denies with error correctly value 5');
-ok( $checker->('--'),                'checker of type "bool" denies with error correctly string value --');
-is( $Tbool->check(0), '',            'check method of type "bool" accepts correctly 0');
-is( $Tbool->check(1), '',            'check method of type "bool" accepts correctly 1');
-ok( $Tbool->check([]),               'check method of type "bool" denies with error correctly value ARRAY ref');
-ok( $Tbool->check(5),                'check method of type "bool" denies with error correctly value 5');
-ok( $Tbool->check('--'),             'check method of type "bool" denies with error correctly string value --');
+is( ref $checker, 'CODE',             'checker of type "bool" is a CODE ref');
+is( $checker->(0), '',                'checker of type "bool" accepts correctly 0');
+is( $checker->(1), '',                'checker of type "bool" accepts correctly 1');
+ok( $checker->([]),                   'checker of type "bool" denies with error correctly value ARRAY ref');
+ok( $checker->(5),                    'checker of type "bool" denies with error correctly value 5');
+ok( $checker->('--'),                 'checker of type "bool" denies with error correctly string value --');
+is( $Tbool->check(0), '',             'check method of type "bool" accepts correctly 0');
+is( $Tbool->check(1), '',             'check method of type "bool" accepts correctly 1');
+ok( $Tbool->check([]),                'check method of type "bool" denies with error correctly value ARRAY ref');
+ok( $Tbool->check(5),                 'check method of type "bool" denies with error correctly value 5');
+ok( $Tbool->check('--'),              'check method of type "bool" denies with error correctly string value --');
 
 
 my $Tbclone = Kephra::Base::Data::Type::Basic->restate( $Tbool->state );
@@ -146,7 +147,8 @@ is( ref $Tbool, $pkg,                'created type "bool", with hash definition 
 is( $Tbool->get_name, 'bool',        'got attribute "name" from getter of type bool');
 is( ref $Tbool->get_parents, 'ARRAY','got parents in array ref');
 is( int @{$Tbool->get_parents}, 1,   'has one parent');
-ok( 'value' ~~ $Tbool->get_parents,'Type "value" is parent');
+ok( 'value' ~~ $Tbool->get_parents,  'Type "value" is parent');
+ok( $Tbool->has_parent('value'),     'Type "value" is parent (by direct method)');
 is( $Tbool->get_default_value, 0,    'got attribute "default" value from getter');
 is( $Tbool->check(1), '',            'check method of type "bool" accepts correctly 1');
 ok( $Tbool->check([]),               'check method of type "bool" denies with error correctly value ARRAY ref');
@@ -173,9 +175,9 @@ my $Tint = create_type({name => 'int', help => 'integer', code => 'int $value ==
 my $Tpint = create_type({name => 'int_pos', help => 'positive', code => '$value >= 0', parent => $Tint});
 is( ref $Tpint->get_parents, 'ARRAY','got parents in array ref');
 is( int @{$Tpint->get_parents}, 2,   'has two parents');
-ok( 'value' ~~ $Tpint->get_parents,  'Type "value" is parent');
+ok( $Tpint->has_parent('value'),     'Type "value" is parent (by direct method)');
+ok( $Tpint->has_parent('int'),     'Type "int" is parent (by direct method)');
 ok( 'int' ~~ $Tpint->get_parents,    'Type "int" is parent');
-
 
 
 ok( not (ref create_type()),                        'can not create type without any argument');

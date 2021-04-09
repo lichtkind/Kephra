@@ -3,7 +3,7 @@ use warnings;
 
 # central storage for all class definitions and their instances
 
-package Kephra::Base::Class::Registry;
+package Kephra::Base::Class::Definition::Store;
 our $VERSION = 0.00;
 
 
