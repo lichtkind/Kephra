@@ -1,6 +1,6 @@
 use v5.20;
 use warnings;
-
+# signature defintition object - req, opt  x in, out
 package Kephra::Base::Class::Definition::Method::Signature;
 our $VERSION = 0.2;
 use Kephra::Base::Data::Type qw/is_type_known resolve_type_shortcut/;
@@ -42,6 +42,14 @@ sub new  { # %def     --> _
         }
     }
     bless $sig_def;
+}
+
+sub check_argument{
+    my ($def) = (@_);
+}
+
+sub check_return_type{
+    my ($def) = (@_);
 }
 
 sub adapt_to_class { # ~class {~attr => ~type}, >@.store --> ~errormsg
@@ -112,7 +120,8 @@ sub restate     { # %state   --> _
 
 __END__
 
-[req arg, opt arg, ret val]
+[req arg, opt arg, req ret val, opt ret val]
+  ,    --   ,    -->     ,     --   ,
 
   index    bedeutung
  
@@ -121,5 +130,11 @@ __END__
     2  =    foreward (pass) property
     3  Tb   type name
     4  Tp   parameter type name  
-    5  ~_   attr parameter   
+    5  ~:   attr parameter   
     6  ~|   arg parameter   
+
+    0  *    slurpy property
+    1  Tb   type name
+    2  Tp   parameter type name  
+    3  ~:   attr parameter   
+    4  ~|   arg parameter   
