@@ -12,3 +12,33 @@ sub eval_special_syntax{} #   @arg_parts --> @arg_parts_|~type_name
 
 1;
 
+__END__
+
+Syntax Schema:
+
+ (req arg -- opt arg --> req ret val -- opt ret val)
+
+   
+Sig features:
+
+    required/optional args         ,sep by --
+    required/optional return val   ,right of -->
+                                   
+    arg names (required)           ,symboled by '...'
+    optional arg/val types         ,before name, vals have just types 
+    default value (optional only)  ,assign with =, after name
+    foreward args (copy to attr)   ,name start with sigil =, same name as attr
+    slurpy args   (zip into array) ,start with *, last arg
+
+Type Names:
+            
+            simple    parametric      param is attr
+-----------------------------------------------------            
+    name      ...    array of str    index of attr
+    symbol     T         @~            I.attr
+
+
+Calling Syntax:
+
+   ->method(pos arg, pos arg)
+   ->method({name => arg})

@@ -14,3 +14,4 @@ sub adapt_to_class {} # ~class {~attr => ~type}, >@.store --> ~errormsg
 
 
 1;
+
