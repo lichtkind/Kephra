@@ -1,0 +1,15 @@
+edit: cut copy paste swap (slots)
+
+goto: char, word, brace - left right 
+      row - up down
+      
+      bookmarks ((un)set)
+      last edit pos, goto pos
+        
+
+
+bar: goto bookmark/marker classs, find, replace
+
+stripe:
+
+history: edit search replace goto

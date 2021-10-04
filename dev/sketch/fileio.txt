@@ -1,0 +1,7 @@
+neu + template + encoding
+(neu) laden (mit allen einstellungen) (server)
+speichern unter (server)
+
+datei filter
+
+automatisieren (at load/save/chahged hooks)
