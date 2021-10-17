@@ -4,4 +4,4 @@ speichern unter (server)
 
 datei filter
 
-automatisieren (at load/save/chahged hooks)
+automatisieren (at load/save/changed hooks)

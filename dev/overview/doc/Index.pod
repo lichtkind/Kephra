@@ -10,12 +10,12 @@ Internals             basic structure of the sources
 =head2 Meta : Documentation for user
 
 
+MainGoal     psychological side of our main goal 
 
 LongFeatureList  
-Components		visual components and their layout
-EndGoal			technical details of the vision we lean toward
-Overview		
-Philosophy		
-Sanddrum		a vi like command language
-Versioning            versioning schema of releases
+Components   visual components and their layout
+Overview 
+Philosophy 
+Sanddrum     a vi like command language
+Versioning   versioning schema of releases
 

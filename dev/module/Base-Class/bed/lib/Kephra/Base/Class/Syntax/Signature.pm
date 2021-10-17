@@ -8,30 +8,39 @@ our $VERSION = 1.2;
 
 sub parse {
     my $sig = shift // '';
-    my ($opt, $ret) = ('','');
+    my ($parsed, $in_sig, $out_sig, $req_in_sig, $req_out_sig, $opt_in_sig, $opt_out_sig) = ([[],[],[],[]],'','','','','','');
     $/ = ' ';
-    if (rindex($sig, '=') > -1) {
-        
-    } else {
-    }
-    my $pos = rindex($sig, '-->');
-    if ($pos > -1) { 
-        $ret = split_args(substr($sig, $pos+3));
-        push @{$ret->[$_]}, 'return_value_'.($_+1) for 0..$#$ret;
-        $sig = substr($sig, 0, $pos);
-    }
-    $pos = index($sig, '-');
+
+    my $pos = index($sig, '-->');
     if ($pos > -1) {
-        $opt = split_args(substr $sig, $pos+1);
-        $opt = '' unless @$opt;
-        $sig = substr($sig, 0, $pos);
+        $in_sig = substr($sig, 0, $pos);
+        $out_sig = substr($sig, $pos+3);
+    } else { $in_sig = $sig }
+    
+    if ($in_sig){
+        return "signature ''$sig'' contains too many ''-->''" if index($in_sig, '-->') > -1;
+        $pos = index($in_sig, '--');
+        if ($pos > -1) {
+            $req_in_sig = substr($in_sig, 0, $pos);
+            $opt_in_sig = substr($in_sig, $pos+2);
+        } else { $req_in_sig = $in_sig }
     }
-    my $req = split_args($sig);
-    {in_required  => (   @$req ? [map {eval_special_syntax($_)} @$req] : ''),
-     in_optional  => (ref $opt ? [map {eval_special_syntax($_)} @$opt] : ''),
-     out_required => (ref $ret ? [map {eval_special_syntax($_)} @$ret] : ''),
-     out_optional => (),
-    };
+    if ($out_sig){
+        return "signature ''$sig'' contains too many ''-->''" if index($out_sig, '-->') > -1;
+        $pos = index($out_sig, '--');
+        if ($pos > -1) {
+            $req_out_sig = substr($out_sig, 0, $pos);
+            $opt_out_sig = substr($out_sig, $pos+2);
+        } else { $req_out_sig = $out_sig }
+    }
+    for my $sig_part ($req_in_sig, $req_out_sig, $opt_in_sig, $opt_out_sig){
+        return "signature ''$sig'' contains too many ''--''" if index($sig_part, '--') > -1;
+    }
+    @{$parsed->[0]} = map {return $_ unless ref $_} map {parse_required_argument($_)} split ',', $req_in_sig;
+    @{$parsed->[1]} = map {return $_ unless ref $_} map {parse_optional_argument($_)} split ',', $opt_in_sig;
+    @{$parsed->[2]} = map {return $_ unless ref $_} map {parse_value($_)            } split ',', $req_out_sig;
+    @{$parsed->[3]} = map {return $_ unless ref $_} map {parse_value($_)            } split ',', $opt_out_sig;
+    $parsed;
 }
 sub parse_args {
     my $args = shift;
@@ -77,8 +86,26 @@ sub eval_special_syntax {
     $arg;
 }
 
+sub parse_required_argument {
+    my $str = shift;
+}
+
+sub parse_optional_argument {
+    my $str = shift;
+}
+
+sub parse_value {
+    my $str = shift;
+}
+
+sub parse_type {
+    my $str = shift;
+}
+
 1;
 __END__
+
+split /\s+/, $d'
 
  [~]   'name'                  1    # ~ means argument name
  [~ T? 'foreward']             3    # = constructor arg thats forewards to attribute
@@ -90,3 +117,20 @@ __END__
  [~ T  'attr'    ~  T!   $def] 5-6  # T! means Type of attribute (parameter type of main type) will be added later by Definition::Method::Signature
 
 # [~ T? 'pass']         3    # a.k.a. -->' ', now return => []
+
+
+        $ret = split_args(substr($sig, $pos+3));
+        push @{$ret->[$_]}, 'return_value_'.($_+1) for 0..$#$ret;
+
+    $pos = index($sig, '-');
+    if ($pos > -1) {
+        $opt = split_args(substr $sig, $pos+1);
+        $opt = '' unless @$opt;
+        $sig = substr($sig, 0, $pos);
+    }
+    my $req = split_args($sig);
+    {in_required  => (   @$req ? [map {eval_special_syntax($_)} @$req] : ''),
+     in_optional  => (ref $opt ? [map {eval_special_syntax($_)} @$opt] : ''),
+     out_required => (ref $ret ? [map {eval_special_syntax($_)} @$ret] : ''),
+     out_optional => (),
+    };

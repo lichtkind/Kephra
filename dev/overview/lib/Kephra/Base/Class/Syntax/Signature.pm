@@ -35,10 +35,16 @@ Type Names:
             simple    parametric      param is attr
 -----------------------------------------------------            
     name      ...    array of str    index of attr
-    symbol     T         @~            I.attr
+   shortcut   T...      @~...            I:attr
 
 
 Calling Syntax:
 
-   ->method(pos arg, pos arg)
-   ->method({name => arg})
+   ->method( =arg1, array of int arg2, @+arg3 -- ?arg4 = 0, index of .msg i, *sargs --> ?)
+   ->method({name => arg, })
+
+
+
+.Class
+T
+I:attr 

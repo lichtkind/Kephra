@@ -37,7 +37,7 @@ depends on:
    K::B::C::Builder::Accessor  .........      MB           create accessor method 
    K::B::C::Builder::Constructor  ......      MB           create constructor and destructor methods
    K::B::C::Builder  ...................      MB           API to class construction
-   K::B::C::Syntax::Signature  .........  C         1.0    convert signature string into data for KBC::Def.::Method::Signature object
+   K::B::C::Syntax::Signature  .........      M     1.0    convert signature string into data for KBC::Def.::Method::Signature object
    K::B::C::Syntax::Parser  ............         N         define class syntax, API to Keyword::Simple
    K::B::C::Syntax  ....................         N         -
    K::B::Class  ........................   P               root pkg of Kephra OO system (KBOS)

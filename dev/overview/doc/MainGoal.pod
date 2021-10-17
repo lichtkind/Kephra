@@ -1,0 +1,70 @@
+=head1 End Goal
+
+=head1 Main Thesis
+
+The purpose of an editor software is to support authors in creating digital texts.
+Therefore the needs and limitations of a human should be considered first 
+and these are discussed inside this document. 
+Technical details and user features are just mentioned as illustration.
+
+
+=head1 Minimize Mechanic Labour
+
+Obviously people do not have natural faculties to percieve and change 
+computational instructions or data. Together with devices as monitor, keyboard 
+and mouse it is the burden of good editor software, to be the smoothest a bridge
+into the sphere of electronics. An even better editor is transparent with relevant
+processes underneath and also helps to prevent upcoming issues.
+
+For instance encoding is the rulebook whith which the visible letters
+are translated into storable numbers. A good editor recognizes the encoding of
+a loaded file and  follows it when inserting new letters or saving it back on drive.
+The user does not have to think about encoding. If interested, he can see the
+current encoding in the status bar and change it there or by menu with a long click.
+An even better editor warns if the encoding seems corrupted or doesn't fit with
+the rest of the project. He offers good explanations what went wrong, 
+how to solve it with a one click solutions - preferably not in a popup window,
+so the user is free in completing the task at hand before deciding how to fix
+what doesn't has to be solved now.
+
+The next level is automation. Any form of repetitive work has to be avoidable.
+introspection
+
+
+=head1 Treat Me As An Individual
+
+settings
+meaningful choices
+where , icon | context menu
+
+visual clues
+personalize
+
+
+=head1 Remember Me (of what I done)
+
+learn from every action
+focus 
+set into context
+small short term memory
+knowledge
+resolution
+
+
+=head1 Help Me To Create
+
+work toward understanding
+reflect my understanding
+
+space for dirt
+
+
+full dynamic introspection (highlighting and other services are based
+on 100% behaviour of the language)
+
+unlimited, restorable (after app restart) undo, which saves branches too and is synched
+with version control integration
+
+talk to remote tty terminal
+
+full vi, emacs and org-mode compatibality

@@ -1,7 +1,9 @@
 use v5.20;
 use warnings;
+
 # signature defintition object - req, opt  x in, out
 package Kephra::Base::Class::Definition::Method::Signature;
+
 our $VERSION = 0.2;
 use Kephra::Base::Data::Type qw/is_type_known resolve_type_shortcut/;
 my %arg_kind = (Arg => 4, Attr => 4, Foreward => 3, Slurp => 3, Type => 4);
@@ -119,9 +121,6 @@ sub restate     { # %state   --> _
 1;
 
 __END__
-
-[req arg, opt arg, req ret val, opt ret val]
-  ,    --   ,    -->     ,     --   ,
 
   index    bedeutung
  

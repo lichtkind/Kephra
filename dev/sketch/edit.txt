@@ -13,3 +13,12 @@ bar: goto bookmark/marker classs, find, replace
 stripe:
 
 history: edit search replace goto
+
+
+
+
+all keys catch
+automate key bindings
+
+
+by category (syntaxschema)
