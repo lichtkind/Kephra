@@ -1,5 +1,5 @@
 
-=head1 Cellular Programming
+=head1 Cellular Programming (CP)
 
 =head2 Preamble
 
@@ -12,7 +12,89 @@
     a directory path that reflects its role within the overall project.
     
 
-=head2 Overview
+=head2 Goals
+
+In general CP aims at the golden mean between planning, iteration and spontaneity.
+It is created to optimize (in that order):
+
+=over 4
+=item code quality
+=over 4
+=item understandable (clear and consistent naming - simple and fitting abstractions)
+=item changeable (well organized files plus same as in "understandable")
+=item high test coverage and compliance
+=item well documented on every level of abstraction
+=back
+
+=item project organisation
+=over 4
+=item plan with detailed but changeable roadmap
+=item minimize risks
+=item enable specialized / parallel development with boundaries of ownership
+=item tracking progress
+=item precise estimate of effort (work hours) to achieve mile stone
+=back
+
+=item development speed
+=over 4
+=item selecting most productive task at hand
+=item declutter and set right aims for each activity
+=item max long term benefit of each activity
+=item reduce needless iterations
+=back
+=back
+
+
+
+
+=head3 Basic Steps
+
+
+    1) (Un-)structured attempt to define the goal on user level:
+       collect ideas, features, sketch GUI, user strories, possible components.
+       Only as precise to be a helpful guide, but update and iterate whenever 
+       the goal changes.
+
+    2) Sketch your goal by writing high level documentation.
+       Use such docs early for sharing with coprogrammer, and audience/boss.
+       Keep it always updated when plan changes.
+
+    3) Create dummy/empty classes, with dummy methods and comments where important.
+       Find names of components and where to place what functionality (roughly).
+       Keep it always updated when plan changes.
+
+    4) Envision stages in which the program can be released in equal sized steps 
+       without much rewrite. Particular features and their requirements are 
+       assigned to the stages.
+
+    5) Check technical requirements of current stage (risky features used from 
+       language and third party libraries) by writing functional prototypes.
+
+    6) Write own libraries of the project in packages as independent projects,
+       to match requirements of the current stage. Write first docs, than code
+       tests last.
+
+    7) Write one prototype for each set of user features, to experiment with
+       alternatives. Update libraries, stage plan and overview when necessary.
+
+    8) Combine code from feature prototypes and release stage (major release).
+       Move code of current stage to projects lib and bin dir.
+       Keep stage directory for further bug fixes. 
+
+    9) Proceed with next stage until project is completed.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 =head3 Directory Structure
 
@@ -30,8 +112,9 @@ itself the following subfolder, sorted by the granularity of their content:
 But the recommended order of usage is :
 
 =over 4
+=item /dev/sketch
 =item /dev/overview/doc
-=item /dev/overview/bin
+=item /dev/overview/lib
 =item /dev/stage
 =item /dev/function
 =item /dev/module
@@ -39,36 +122,6 @@ But the recommended order of usage is :
 =item /dev/stage
 =back
 
-=head3 Basic Steps
-
-
-    1) Sketch your goal by writing high level documentation.
-       Use such docs early for sharing with coprogrammer, and audience/boss.
-       Keep it always updated when plan changes.
-
-    2) Create dummy/empty classes, with dummy methods and comments where important.
-       Find names of components and where to place what functionality (roughly).
-       Keep it always updated when plan changes.
-
-    3) Envision stages in which the program can be released in equal sized steps 
-       without much rewrite. Particular features and their requirements are 
-       assigned to the stages.
-
-    4) Check technical requirements of current stage (risky features used from 
-       language and third party libraries) by writing functional prototypes.
-
-    5) Write own libraries of the project in packages as independent projects,
-       to match requirements of the current stage. Write first docs, than code
-       tests last.
-
-    6) Write one prototype for each set of user features, to experiment with
-       alternatives. Update libraries, stage plan and overview when necessary.
-
-    7) Combine code from feature prototypes and release stage (major release).
-       Move code of current stage to projects lib and bin dir.
-       Keep stage directory for further bug fixes. 
-
-    8) Proceed with next stage until project is completed.
 
 =head3 Fundamental Ideas
 

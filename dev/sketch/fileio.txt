@@ -5,3 +5,10 @@ speichern unter (server)
 datei filter
 
 automatisieren (at load/save/changed hooks)
+
+
+
+file io module:
+
+ dir tree,
+ bookmarks

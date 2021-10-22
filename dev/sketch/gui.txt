@@ -10,7 +10,7 @@
 --------------------------------------------------------------------------------
 | File  Edit  Tools  Doc  Project  View  Plugin  Help                          |
 --------------------------------------------------------------------------------
-| O C L                                                      | = I T S | L R U |
+| O C L                                                    | M I R T S | L R U |
 --------------------------------------------------------------------------------
 |+|      |       |      |      |      |      |       |      |      |      |    |
 --------------------------------------------------------------------------------
@@ -55,15 +55,9 @@
 
 
 
-
-
-
-
-
-
-
 Left: (macro doc): Filio, Project, Git
 
 Right (micro doc): DataStore, Outline, SnippetStore, Positions
 
 Bottom: Search - Replace - Goto -  Edit, Eval, Shell, 
+        Notes:, (per) syntax, project, doc,  row

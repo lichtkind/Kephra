@@ -4,7 +4,7 @@ use warnings;
 # signature defintition object - req, opt  x in, out
 package Kephra::Base::Class::Definition::Method::Signature;
 
-our $VERSION = 0.2;
+our $VERSION = 0.0;
 use Kephra::Base::Data::Type qw/is_type_known resolve_type_shortcut/;
 my %arg_kind = (Arg => 4, Attr => 4, Foreward => 3, Slurp => 3, Type => 4);
 my $is_ID = Kephra::Base::Data::Type::standard->get_type('identifier')->get_checker();
@@ -121,6 +121,15 @@ sub restate     { # %state   --> _
 1;
 
 __END__
+
+ name
+[name type]
+[name [type para]]
+[name [type      attr]]
+[name type              default]
+[name type                      slurpy]
+[name type                              foreward]
+
 
   index    bedeutung
  
