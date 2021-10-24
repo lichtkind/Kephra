@@ -52,16 +52,19 @@ It is created to optimize (in that order):
 
     1) (Un-)structured attempt to define the goal on user level:
        collect ideas, features, sketch GUI, user strories, possible components.
-       Only as precise to be a helpful guide, but update and iterate whenever 
-       the goal changes.
+       Only as precise to be a helpful guide but update (U).
 
-    2) Sketch your goal by writing high level documentation.
-       Use such docs early for sharing with coprogrammer, and audience/boss.
-       Keep it always updated when plan changes.
+    2) Systematize and precise goal by writing high level documentation.
+       Use such docs early for sharing with coprogrammer and audience/boss. (U)
 
-    3) Create dummy/empty classes, with dummy methods and comments where important.
-       Find names of components and where to place what functionality (roughly).
-       Keep it always updated when plan changes.
+    3) Create dummy/empty classes, with dummy methods to get a component/class 
+       structure that actually runs/compiles. Add method signatures when possible.
+       Insert comments to mark unclear spots or to clearify what the code suppose
+       to do at this position.
+       This process helps to get feel for the code structure and what belongs where.
+       It also assist greatly in finding fitting class and method names.
+       Useless UML diagrams, flawed abstractions and misleading names are prevented
+       before being able to do real damage. (U)
 
     4) Envision stages in which the program can be released in equal sized steps 
        without much rewrite. Particular features and their requirements are 
@@ -84,7 +87,7 @@ It is created to optimize (in that order):
     9) Proceed with next stage until project is completed.
 
 
-
+     *U = Do update when goal/plan changes
 
 
 

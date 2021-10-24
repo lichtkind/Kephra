@@ -1,5 +1,5 @@
 ---
-current: '9'
+current: 15
 docs:
   -
     change_pos: 0
@@ -9,10 +9,10 @@ docs:
     syntaxmode: no
   -
     change_pos: 0
-    cursor_pos: 1123
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/status.cp
-    syntaxmode: no
+    cursor_pos: 97
+    encoding: utf-8
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Standard.pm
+    syntaxmode: perl
   -
     change_pos: 0
     cursor_pos: 48
@@ -21,10 +21,16 @@ docs:
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 759
-    encoding: utf-8
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Standard.pm
-    syntaxmode: perl
+    cursor_pos: 3543
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/status.cp
+    syntaxmode: no
+  -
+    change_pos: 0
+    cursor_pos: 453
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Package.pm
+    syntaxmode: no
   -
     change_pos: 0
     cursor_pos: 659
@@ -75,10 +81,22 @@ docs:
     syntaxmode: no
   -
     change_pos: 0
-    cursor_pos: 455
+    cursor_pos: 0
     encoding: utf-8
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/doc/meta/CellularProgramming.pod
     syntaxmode: no
+  -
+    change_pos: 0
+    cursor_pos: 519
+    encoding: utf-8
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/doc/meta/KBOS.pod
+    syntaxmode: no
+  -
+    change_pos: 1258
+    cursor_pos: 1260
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Editor.pm
+    syntaxmode: perl
   -
     change_pos: 0
     cursor_pos: 327
