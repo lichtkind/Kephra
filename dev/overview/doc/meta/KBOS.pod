@@ -1,0 +1,114 @@
+
+=head1 Kephra Base Object System Programming (KBOS)
+
+
+=head2 Overview
+
+    KBOS is an extension of the Perl 5 language, which offers:
+       - inside out objects with really private attributes and 4 method scopes,
+       - rich signatures with type checking,
+       - separate channel for return value and error messages, 
+       - object and class marshalling.
+
+    This document explains its motivation, features, syntax and implementation
+
+
+=head2 Types
+
+    Not having to write data consistency checks over and over again was the 
+    triggering reason to develope KBOS. Types are seen here as nothing but
+    mechanism to save code lines, since a type name equals one to several
+    expressions that have to be evaluated with the data in question as argument.
+    Each expression can fail and drop a specific error message - telling the user
+    exactly what is missing.
+
+    Once that was implemented I've gone a step further to enable parametric types,
+    that take additional arguments - so that data can be checked if consistent 
+    with a another method argument or an object attribute. It also allows
+    to combine data for compound types, as in array of strings.
+
+    Of course own types can be defined with the new key word 'type'.
+
+
+=head2 Signatures
+
+    While types can be checked everywhere KBOS is loaded by function call, the
+    easiest and natural usage is inside signatures. Just insert the type name
+    (optionally) left to the method parameter name. Yes - all parameter have to
+    have names - even if you write method calls only with positional arguments.
+
+    The return values, of which can be none, one or many can also be typed,
+    but don't have to be named. 
+
+    Arguments and return values can be required or optional. To the ladder an 
+    default value can be assigned inside the signature, although every type
+    already has a default value.
+
+    Slurpy arguments work as in Raku and collect any additional arguments into
+    (in most cases) an array. Foreward arguments are automatically copied into
+    attributes with the same name, unless the method has a scope that does not 
+    allow access to that attribute.
+
+
+=head2 Four Method Scopes
+
+    Inside every method the two special variables $self and $args are provided
+    or can be pulled out of @_. $self allows method calls and attribute access 
+    with the privileges of the current scope. $args grants read only access to
+    the arguments by name or position.
+
+    Methods marked as ''private'' can be called only from inside the class.
+
+    Methods without any additional keyword beside ''method'' are public and can
+    be called from everywhere, same as the constructor and destructor.
+
+    $self inside the methods, that are designated by the keywords ''constructor'' 
+    and ''destructor'', has full read and write access to all attributes.
+    This is called build scope. Attributes with build scope access are our way 
+    to say they are read only. When missing - an constructor named new and a
+    destructor called destroy are auto generated. 
+
+    Also attribute accessor methods are auto generated - either as combined or 
+    separate getter and setter. But they can be also written manually. 
+    There scope can be set as ''public'', ''private'' or ''access''.
+    In the ladder case only $self inside the accessors can call them.
+
+    This four scope system is set up on purpose to support a three tier class
+    design, where the main work is done by private methods. And while public
+    methods define the interface to the outside world, the acessors are the 
+    API to the interior data or interior objects.
+
+
+=head2 Three Kinds of Attributes
+  
+     Attributes as known are called data attributes, because they contain ''raw''
+     data - accessed by getter and setter methods. 
+
+     Delegating attributs contain KBOS objects themself and are accessed via 
+     delegator methods, which can also be auto generated.
+
+     None KBOS objects can serve as wrapped attributes, which are accessed only
+     by hand written wrapper methods.
+
+
+=head2 No inheritance
+       
+     To prohibit inheritance is seen as a major feature of KBOS. As hinted,
+     classes are reused by incorporating their objects as attributes.
+
+
+=head2 Error Messages
+
+ hijack control flow
+
+
+
+=head2 Marshalling
+
+re boot
+transfer state
+over windown and net
+encryption
+
+
+cloned args ?

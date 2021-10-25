@@ -44,6 +44,10 @@ sub mount_events {
 		my $alt  = $event->AltDown     ? 1 : 0;
 		my $doc = Kephra::API::document();
 		my $bar = Kephra::API::doc_bar();
+#no strict 'refs';
+#say ".. $event";
+#say for keys %{*{"Wx::KeyEvent::"}{HASH}};
+
 		if   ($shift and $ctrl and $code == &Wx::WXK_PAGEUP)  {$bar->move_page_left() }
 		elsif($shift and $ctrl and $code == &Wx::WXK_PAGEDOWN){$bar->move_page_right() }
 		elsif(           $ctrl and $code == &Wx::WXK_PAGEUP)  {$bar->raise_page_left() }
