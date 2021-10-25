@@ -23,7 +23,6 @@ depends on:
    K::B::C::Definition::Attr.::Delegating C  .....  1.41   validate and serialize definition of attribute, which is KBOS object
    K::B::C::Definition::Attr.::Wrapping   C  .....  1.1    validate and serialize definition of attribute, which is a none KBOS object
    K::B::C::Definition::Attribute  .....  C  .....  1.0    validate and serialize attribute definition
-   K::B::C::Definition::Method::Signature     M...  0.0    validate and serialize signature definition
    K::B::C::Definition::Method  ........        I.  0.0    validate and serialize method definition
    K::B::C::Definition  ................     UM...  0.7    serializable data set to build a KBOS class from
    K::B::C::Instance::Attribute  .......       B N         central store for attribute values

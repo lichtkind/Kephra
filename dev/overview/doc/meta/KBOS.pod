@@ -10,8 +10,10 @@
        - separate channel for return value and error messages, 
        - object and class marshalling.
 
-    This document explains its motivation, features, syntax and implementation
-
+    KBOS aims to condense perl code, 
+              improve readability through more declerative syntax and 
+              to promote the design of well structured classes, 
+                                    that are highly reusable and easy adaptable.
 
 =head2 Types
 
@@ -57,12 +59,12 @@
     with the privileges of the current scope. $args grants read only access to
     the arguments by name or position.
 
-    Methods marked as ''private'' can be called only from inside the class.
+    Methods marked as 'private' can be called only from inside the class.
 
-    Methods without any additional keyword beside ''method'' are public and can
+    Methods without any additional keyword beside 'method' are public and can
     be called from everywhere, same as the constructor and destructor.
 
-    $self inside the methods, that are designated by the keywords ''constructor'' 
+    $self inside the methods, that are designated by the keywords 'constructor' 
     and ''destructor'', has full read and write access to all attributes.
     This is called build scope. Attributes with build scope access are our way 
     to say they are read only. When missing - an constructor named new and a
@@ -70,7 +72,7 @@
 
     Also attribute accessor methods are auto generated - either as combined or 
     separate getter and setter. But they can be also written manually. 
-    There scope can be set as ''public'', ''private'' or ''access''.
+    There scope can be set as 'public', 'private' or 'access'.
     In the ladder case only $self inside the accessors can call them.
 
     This four scope system is set up on purpose to support a three tier class
@@ -81,34 +83,46 @@
 
 =head2 Three Kinds of Attributes
   
-     Attributes as known are called data attributes, because they contain ''raw''
-     data - accessed by getter and setter methods. 
+    Attributes as known are called data attributes, because they contain ''raw''
+    data - accessed by getter and setter methods. 
 
-     Delegating attributs contain KBOS objects themself and are accessed via 
-     delegator methods, which can also be auto generated.
+    Delegating attributs contain KBOS objects themself and are accessed via 
+    delegator methods, which can also be auto generated.
 
-     None KBOS objects can serve as wrapped attributes, which are accessed only
-     by hand written wrapper methods.
+    None KBOS objects can serve as wrapped attributes, which are accessed only
+    by hand written wrapper methods.
 
 
-=head2 No inheritance
+=head2 No Inheritance
        
-     To prohibit inheritance is seen as a major feature of KBOS. As hinted,
-     classes are reused by incorporating their objects as attributes.
+    To prohibit inheritance is seen as a major feature of KBOS. As hinted,
+    classes are reused by incorporating their objects as attributes or argument.
 
 
 =head2 Error Messages
 
- hijack control flow
-
+    The KBOS way is to give error messages their dedicated communication channel,
+    so that they are never confused with a methods return value. But there
+    is no second control flow in case of error and thus no hijacking of the
+    regular control flow. The reciever of the return value and the error message
+    is free to react as seen fit. Error messages can be accessed via the object
+    reference, since attributes are stored safely elsewhere.
 
 
 =head2 Marshalling
+  
+     In KBOS each class has to have a pair of methods named 'state' and 'restate'.
+     Unlike Raku's '.raku' method, 'state' is allowed to return a nested data
+     structure without circular references (and not just a string like '.raku')
+     to represent the inner state of an object. The constructor method 'restate'
+     turns the data structure into a clone of the original object.
 
-re boot
-transfer state
-over windown and net
-encryption
+     This is needed to replicate the full state of the program after a restart or
+     to transfer the state of subsystems (as a document or file browser view)
+     to other KBOS instances on the same or conected computer. This enables 
+     features like a lossless undo history, moving document tabs between windows
+     or collaboratively editing.
 
-
-cloned args ?
+     And since KBOS itself is written in a way that allows the marshalling of
+     classes and closures too, Kephra can synchronise its own code while running
+     with instances of different versions or plugins missing.
