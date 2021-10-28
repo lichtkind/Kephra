@@ -1,5 +1,5 @@
 ---
-current: 15
+current: 13
 docs:
   -
     change_pos: 0
@@ -21,7 +21,7 @@ docs:
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 3543
+    cursor_pos: 1660
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/status.cp
     syntaxmode: no
@@ -63,7 +63,7 @@ docs:
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 340
+    cursor_pos: 1384
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/lib/Kephra/Base/Class/Syntax/Signature.pm
     syntaxmode: perl
@@ -80,20 +80,14 @@ docs:
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/doc/MainGoal.pod
     syntaxmode: no
   -
-    change_pos: 0
-    cursor_pos: 0
+    change_pos: 3014
+    cursor_pos: 3015
     encoding: utf-8
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/doc/meta/CellularProgramming.pod
     syntaxmode: no
   -
     change_pos: 0
-    cursor_pos: 519
-    encoding: utf-8
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/doc/meta/KBOS.pod
-    syntaxmode: no
-  -
-    change_pos: 1258
-    cursor_pos: 1260
+    cursor_pos: 1190
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Editor.pm
     syntaxmode: perl
