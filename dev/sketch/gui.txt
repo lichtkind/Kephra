@@ -10,19 +10,19 @@
 --------------------------------------------------------------------------------
 | File  Edit  Tools  Doc  Project  View  Plugin  Help                          |
 --------------------------------------------------------------------------------
-| O C L                                                    | M I R T S | L R U |
+| O C L                                                  | L R U | M I R T S C |
 --------------------------------------------------------------------------------
 |+|      |       |      |      |      |      |       |      |      |      |    |
 --------------------------------------------------------------------------------
-|F|           x|                                                |           x| |
+|F|           x|                                                |           x|V|
 | |------------|                                                |------------| |
-|P|            |                                                |            | |
+|P|            |                                                |            |O|
 | |            |                                                |            | |
+|V|            |                                                |            |D|
 | |            |                                                |            | |
+|O|            |                                                |            |S|
 | |            |                                                |            | |
-| |            |                                                |            | |
-| |            |                                                |            | |
-| |            |                                                |            | |
+| |            |                                                |            |P|
 | |            |                                                |            | |
 | |            |                                                |            | |
 | |            |                                                |            | |
@@ -55,9 +55,10 @@
 
 
 
-Left: (macro doc): Filio, Project, Git
+Left: (macro doc): Filio, Project, Git, Outline
 
-Right (micro doc): DataStore, Outline, SnippetStore, Positions
+Right (micro doc): Outline, SnippetStore, Positions, Orga
+                   visual history
+                 Notes:, (per) syntax, project, doc,  row
 
-Bottom: Search - Replace - Goto -  Edit, Eval, Shell, 
-        Notes:, (per) syntax, project, doc,  row
+Bottom: Search - Replace - Goto -  Edit, Eval, Shell , DataStore

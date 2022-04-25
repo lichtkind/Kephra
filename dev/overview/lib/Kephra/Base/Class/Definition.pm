@@ -32,3 +32,6 @@ sub attribute_names   {}  # ._  - ~kind                                      -->
 sub method_names      {}  # ._  - ~kind ~scope ?multi                        --> @~method_def.~name  # ~kind = ''|'simple'|'getter'|'setter'|'accessor'|'wrapper'|'delegator'|'constructor'
                                                                                                      # ~scope = 'public'|'private'|'access'
 1;                                                                                                   # ~multi = 'multi'|'only'| default = all
+
+__END__
+

@@ -1,5 +1,5 @@
 ---
-current: 13
+current: 18
 docs:
   -
     change_pos: 0
@@ -80,8 +80,8 @@ docs:
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/doc/MainGoal.pod
     syntaxmode: no
   -
-    change_pos: 3014
-    cursor_pos: 3015
+    change_pos: 0
+    cursor_pos: 4935
     encoding: utf-8
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/overview/doc/meta/CellularProgramming.pod
     syntaxmode: no
@@ -105,7 +105,13 @@ docs:
     syntaxmode: no
   -
     change_pos: 0
-    cursor_pos: 3304
+    cursor_pos: 1064
     encoding: utf-8
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/sketch/gui.txt
+    syntaxmode: no
+  -
+    change_pos: 0
+    cursor_pos: 317
+    encoding: utf-8
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/sketch/index.txt
     syntaxmode: no

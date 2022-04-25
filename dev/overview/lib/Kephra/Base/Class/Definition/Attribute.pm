@@ -15,3 +15,5 @@ sub new      {} # ~pkg ~name %properties       --> ._| ~errormsg          ._ = a
 
 
 1;
+
+__END__

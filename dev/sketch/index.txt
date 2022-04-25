@@ -1,0 +1,21 @@
+
+Sketch Overview of Kephra
+-------------------------
+
+Authors Editor   for programming and other Styles of writing
+
+advanced editing and text navigation and manipulation
+knowledge bases
+project management
+shell interaction
+version control
+org mode, vi shell
+
+easy integration of third party tools
+
+
+files and projects. . - fileio.txt
+editing features  . . - edit.txt
+graphical Interface . - gui.txt
+configuration . . . . - config.txt    
+plugin system . . . . - plugin.txt

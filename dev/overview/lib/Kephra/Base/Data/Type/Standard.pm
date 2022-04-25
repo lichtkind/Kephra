@@ -17,3 +17,30 @@ sub init_store        {}   #    -->  .type_store
 sub store             {}   #    -->  .type_store
 
 6;
+
+__END__
+
+
+value   $
+str     ~
+bool    ?
+num     +
+int_pos N
+int     Z
+
+
+array_ref    @
+hash_ref     % 
+code_ref     & 
+any_ref      \ 
+KBOS type    T
+
+KBOS object  .
+other object !
+
+
+
+
+index I
+@N
+%~

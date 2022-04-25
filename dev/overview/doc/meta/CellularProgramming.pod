@@ -4,44 +4,69 @@
 =head2 Preamble
 
     This document describes a set of workflows using a peculiar directory structure.
-    It evolved from the development of the Kephra editor.
+    It evolved from and for the development of the Kephra editor.
     Please stick to these guidelines if you want to join the Kephra dev team.
     In any other case - take from it and adapt what seems to be useful.
 
-    The word cell refers to an semi independent sub-project, which lives in 
-    a directory path that reflects its role within the overall project.
+    The word cell refers to an organisational subunit, which lives in 
+    a directory, that reflects its role within the overall project.
+    
+    Cells are the core concept, because they modularize the development,
+    which keeps complexity manageable.
     
 
 =head2 Goals
 
-In general CP aims at the golden mean between planning, iteration and spontaneity.
+In general CP aims at the golden mean between the big three conflicting
+forces in software development: 1. planning 2.iteration and 3.spontaneity.
 It is created to optimize (in that order):
 
 =over 4
+
 =item code quality
+
 =over 4
+
 =item understandable (clear and consistent naming - simple and fitting abstractions)
-=item changeable (well organized files plus same as in "understandable")
+
+=item changeable (small, well organized files)
+
 =item high test coverage and compliance
+
 =item well documented on every level of abstraction
+
 =back
 
 =item project organisation
+
 =over 4
+
 =item plan with detailed but changeable roadmap
+
 =item minimize risks
+
 =item enable specialized / parallel development with boundaries of ownership
+
 =item tracking progress
+
 =item precise estimate of effort (work hours) to achieve mile stone
+
 =back
 
 =item development speed
+
 =over 4
+
 =item selecting most productive task at hand
+
 =item declutter and set right aims for each activity
+
 =item max long term benefit of each activity
+
 =item reduce needless iterations
+
 =back
+
 =back
 
 
@@ -114,7 +139,8 @@ That dir has itself the following subfolder, representing the steps explained ab
 
 =head2 Steps in Detail
 
-=head3 Fundamental Ideas
+
+=head3 Step 1 - Collect Ideas
 
 =head3 Step 2 - Dummy Code
 
@@ -128,6 +154,7 @@ That dir has itself the following subfolder, representing the steps explained ab
        automatically, if in sync with the published code base.
 
 
+=head3 Fundamental Ideas
 
 =head2 Each Step In Detail
 
