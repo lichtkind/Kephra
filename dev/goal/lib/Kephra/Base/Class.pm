@@ -9,3 +9,7 @@ use Kephra::Base::Class::Syntax;
 # check init vals of deleg
 
 1;
+
+__END__
+
+root of KBOS system

@@ -44,3 +44,4 @@ other object !
 index I
 @N
 %~
+!Wx::App

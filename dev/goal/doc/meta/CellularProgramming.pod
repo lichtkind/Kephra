@@ -3,73 +3,156 @@
 
 =head2 Preamble
 
-    This document describes a set of workflows using a peculiar directory structure.
-    It evolved from and for the development of the Kephra editor.
-    Please stick to these guidelines if you want to join the Kephra dev team.
-    In any other case - take from it and adapt what seems to be useful.
+This document describes a set of workflows, which evolved from and
+for the development of the Kephra editor.
+Please stick to these guidelines if, you want to join the Kephra dev team.
+In any other case - take from it and adapt what seems to be useful.
 
-    The word cell refers to an organisational subunit, which lives in 
-    a directory, that reflects its role within the overall project.
-    
-    Cells are the core concept, because they modularize the development,
-    which keeps complexity manageable.
-    
+=head2 Main Ideas
+
+Cells are the core concept, because they modularize (portion)
+the process, which keeps complexity manageable.
+
+The word cell refers to an organisational subunit, which is
+semi-independent. No change in one cell can break something in another.
+But they build upon each others work and their relation is documented.
+A cell sits in a directory that reflects its role within the overall
+project.
+
+In general CP aims at the golden mean between the big three conflicting
+forces in software development: 1. planning, 2.iteration and 3.spontaneity.
+
+Because every kind of cell has a narrow goal, it becomes clear how much
+planning is needed for now, to get robust guardrails for the next steps.
+Instead of iterating over and over one code base, in CP we mostly hop
+from cell to cell. This way we get the the satisfaction of a completed
+milestone (cell), that has to be only good enough for a specific task.
+Limited tasks can be better reflected upon which also frees up attention,
+that can be used for creativity and care for details.
+
+Even if code does get copied over from one completed to another,
+just starting cell - its also gets adapted for the current task and thus
+partially rewritten. By this method of cascading, planned rewrites we're
+forcing the inevitable and get version 3 grade quality with version 1.0.
+
 
 =head2 Goals
 
-In general CP aims at the golden mean between the big three conflicting
-forces in software development: 1. planning 2.iteration and 3.spontaneity.
-It is created to optimize (in that order):
+Priorities are (in that order):
 
 =over 4
 
-=item code quality
+=item Code Quality
 
 =over 4
 
-=item understandable (clear and consistent naming - simple and fitting abstractions)
+=item understandable code (simple and fitting abstractions, clear and consistent naming)
 
-=item changeable (small, well organized files)
-
-=item high test coverage and compliance
+=item changeable and robust code (small, well organized files with consistent rules)
 
 =item well documented on every level of abstraction
 
-=back
-
-=item project organisation
-
-=over 4
-
-=item plan with detailed but changeable roadmap
-
-=item minimize risks
-
-=item enable specialized / parallel development with boundaries of ownership
-
-=item tracking progress
-
-=item precise estimate of effort (work hours) to achieve mile stone
+=item high test coverage and standard compliance
 
 =back
 
-=item development speed
+=item Project Organisation
 
 =over 4
 
-=item selecting most productive task at hand
+=item long term plan with a detailed but changeable roadmap
 
-=item declutter and set right aims for each activity
+=item minimize risks and track progress by mapping technological
+  and developmental dependencies
 
-=item max long term benefit of each activity
+=item clear boundaries of ownership of work, not lines of code
+
+=item result of every effort (and knowledge won by it) is easy to find
+
+=item maximise long term benefit of each parcel of work
+
+=back
+
+=item Development Speed
+
+=over 4
+
+=item supports finding the most productive task at hand
+
+=item declutter and sets right aim for each activity
 
 =item reduce needless iterations
 
-=back
+=item allows parallelization
 
 =back
 
+=back
 
+
+=head2 Cell Types
+
+There are 6 classes of cells. Dependent on project size and type, you 
+can leave out some. Essential are only function, module and goal,
+but in Kephra we use all six. The types are sorted by level of abstraction.
+
+=head3 Function
+
+research
+secure low level API you program against
+
+=head3 Module
+
+mid level API
+
+=head3 Feature
+
+High level API
+
+=head3 Stage
+
+organizing releaes
+
+=head3 Goal
+
+foreseeable future
+nice to havs
+
+dummy code with lot of comments and documentation
+
+=head3 Sketch
+
+collecting brain farts
+stupid stuff sit to stew
+organize
+
+
+=head2 Directory Structure
+
+You keep the directories like /lib, /bin, /t, /doc and so forth.
+These contain the currently deployed main version.
+However all development takes place in the /dev subfolder of a project.
+That dir has itself the following subfolder, representing the steps explained above:
+
+=over 4
+
+=item /dev/sketch - step 1
+
+=item /dev/overview/lib - step 2
+
+=item /dev/stage/index.txt - step 3
+
+=item /dev/overview/doc - step 4
+
+=item /dev/function/bin/ - step 5
+
+=item /dev/module/name/stagename - step 6
+
+=item /dev/feature/name/stagename - step 7
+
+=item /dev/stage/name - step 8
+
+=back
 
 
 =head2 Basic Steps
@@ -118,24 +201,6 @@ It is created to optimize (in that order):
 
     9) Update 1-4 (if not done) - release stage as next major version - goto 5
 
-
-=head2 Directory Structure
-
-You keep the directories like /lib, /bin, /t, /doc and so forth.
-These contain the currently deployed main version.
-However all development takes place in the /dev subfolder of a project.
-That dir has itself the following subfolder, representing the steps explained above:
-
-=over 4
-=item /dev/sketch - step 1
-=item /dev/overview/lib - step 2
-=item /dev/stage/index.txt - step 3
-=item /dev/overview/doc - step 4
-=item /dev/function/bin/ - step 5
-=item /dev/module/name/stagename - step 6
-=item /dev/feature/name/stagename - step 7
-=item /dev/stage/name - step 8
-=back
 
 =head2 Steps in Detail
 

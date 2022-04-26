@@ -35,3 +35,15 @@ sub method_names      {}  # ._  - ~kind ~scope ?multi                        -->
 
 __END__
 
+ - types
+ 
+  - attributes
+   - data
+   - delegating
+   - wrapping
+
+ - methods
+   - constructor
+   - accessor
+   - wrapper
+   - delegator
