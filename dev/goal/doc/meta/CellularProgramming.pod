@@ -22,7 +22,7 @@ project.
 In general CP aims at the golden mean between the big three conflicting
 forces in software development: 1. planning, 2.iteration and 3.spontaneity.
 
-Because every kind of cell has a narrow goal, it becomes clear how much
+Because every type of cell has a narrow goal, it becomes clear how much
 planning is needed for now, to get robust guardrails for the next steps.
 Instead of iterating over and over one code base, in CP we mostly hop
 from cell to cell. This way we get the the satisfaction of a completed
@@ -31,7 +31,7 @@ Limited tasks can be better reflected upon which also frees up attention,
 that can be used for creativity and care for details.
 
 Even if code does get copied over from one completed to another,
-just starting cell - its also gets adapted for the current task and thus
+just started cell - it also gets adapted for the current task and thus
 partially rewritten. By this method of cascading, planned rewrites we're
 forcing the inevitable and get version 3 grade quality with version 1.0.
 
@@ -92,39 +92,89 @@ Priorities are (in that order):
 
 =head2 Cell Types
 
-There are 6 classes of cells. Dependent on project size and type, you 
-can leave out some. Essential are only function, module and goal,
-but in Kephra we use all six. The types are sorted by level of abstraction.
+There are 6 kinds of cells. Dependent on the project size and structure,
+you can leave out some. Essential are only function, module and goal,
+but in Kephra we use them all. 
+This chapter explains their purpose and layout, sorted by the level of
+abstraction of its content - from the lowest, most concrete upwards.
+
 
 =head3 Function
 
-research
-secure low level API you program against
+The purpose of a functional prototype cell is pracical research. If your
+planned programm has to fetch data from a file format, that you're not
+familiar with, you have to find out how to do it. Reading documentation
+is a good first step, but you're not proficient in that task, 
+until you've programmed it. Beside - documentation might lie.
+
+You want to know the pro's and con's, the pitfalls and the benefits,
+the memory and CPU usage or if another library performs better. All this
+if best found out in a minimal sized program that does just this one task.
+This way you will know the dependencies of this little piece of code,
+which might be useful knowledge to make strategic decisions.
+
+A functional proto is a little project with its own documentation, tests
+and guidlines how to clean up the code, once its running. The prototype
+is done, when the cell has reached CP quality standards and the enquired
+functionality is encapsuled as you intend it to use it later. In short it's
+an ensurance, that the API you build on top of (no matter if its hardware,
+operating system or a library) does what it promises. And it also secures
+that you know how to implement base level tasks your project relies upon.
+That alone avoids one source of unforeseen delays.
+
+In case you have questions later, you will find the prototype,
+since there are properly named and sorted by topic. Then you can still
+play with it and extend it - without having the hassles and
+complexities of dealing with the main program.
+
 
 =head3 Module
 
-mid level API
+Module cells are the location where libraries, which are the backbone
+of the project, get implemented. This task becomes easier, when important
+decisions are made elsewhere - be it of design (goal), management (stage)
+or technical (function) nature. 
+
+All the documentation and the tests of a module cell serve only its content:
+a group of libraries, which together solve one larger task or are of the same topic.
+They together are a subunit of the program. Treating these subunits as
+separate projects, builds pressure to simplify the overall structure of
+the program and to clearify the interfaces between modules.
+It also allows to have different swappable alternatives for one module,
+or have failing experiments, which don't affect the rest of the project.
+
+To have different versions of the same module also serves a second purpose.
 
 =head3 Feature
 
-High level API
+Feature prototype cells are the test bed for the development of the
+high level (user level) API. The use (import) certain modules (see above),
+
+
 
 =head3 Stage
 
-organizing releaes
+
+major versions
+
+organizing releases
 
 =head3 Goal
 
 foreseeable future
-nice to havs
+include nice to haves
 
-dummy code with lot of comments and documentation
+planning with dummy code with lot of comments and documentation
+
+practical sketching board
+name finding
 
 =head3 Sketch
 
 collecting brain farts
 stupid stuff sit to stew
 organize
+loose ideas
 
 
 =head2 Directory Structure
