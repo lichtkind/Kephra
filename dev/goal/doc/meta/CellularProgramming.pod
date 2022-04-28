@@ -1,12 +1,14 @@
 
 =head1 Cellular Programming (CP)
 
+
 =head2 Preamble
 
 This document describes a set of workflows, which evolved from and
 for the development of the Kephra editor.
 Please stick to these guidelines if, you want to join the Kephra dev team.
 In any other case - take from it and adapt what seems to be useful.
+
 
 =head2 Main Ideas
 
@@ -131,81 +133,133 @@ complexities of dealing with the main program.
 =head3 Module
 
 Module cells are the location where libraries, which are the backbone
-of the project, get implemented. This task becomes easier, when important
+of the project, get developed. This task becomes easier, when important
 decisions are made elsewhere - be it of design (goal), management (stage)
-or technical (function) nature. 
+or technical (function) nature. In other words: we implemented 
+(put flesh on) already designed interfaces without solving hard
+technical problems, which is done during previous, functional cells.
 
 All the documentation and the tests of a module cell serve only its content:
 a group of libraries, which together solve one larger task or are of the same topic.
-They together are a subunit of the program. Treating these subunits as
-separate projects, builds pressure to simplify the overall structure of
-the program and to clearify the interfaces between modules.
+Together they are a subunit of the program. Treating these subunits as
+separate projects, builds pressure to simplify the overall structure
+(architecture) of the program and to clearify the interfaces between modules.
 It also allows to have different swappable alternatives for one module,
-or have failing experiments, which don't affect the rest of the project.
+or to produce failing experiments, which don't affect the rest of the project.
 
-To have different versions of the same module also serves a second purpose.
+It is advised to have a planned order in which to write the modules.
+This furthermore pushes for a clean architecture with a clear hierarchy
+of reliance, since a module is only allowed to use/import already 
+completed modules.
+
+If you have to extend a module to support the next major release -
+which (of course) has an expanded feature set and therefore needs more
+module methods - please start a new cell, by copying from another module.
+That source cell is assigned to an older release and will thus recieve
+only bug fixes. It can be automated, that these fixes will be forwarded
+to offshoot cells.
+
 
 =head3 Feature
 
 Feature prototype cells are the test bed for the development of the
-high level (user level) API. The use (import) certain modules (see above),
+high level API - the face your program shows to the user. Hence they are
+just a specialized case of module cell and much of the above applies.
+They are different because there is more communication and work that goes
+into artwork as well as GUI and CLI development and testing.
 
-
+One advantage to do these task in an prototype environment is that 
+(if time allows) one can pursue an ideal and cut back later. This is less
+effort than one might expect if the tools and partial solutions in palace
+anyway and good tools (editors) support such tasks.
 
 =head3 Stage
 
+Stage cells are the dockyards where major releases get to be planned and
+assembled. Their name refers to "stages of development" or toward the goal.
 
-major versions
+At first you note what subset of the general plan becomes the next release.
+Usually we try to balance an advantageous effort/feature need ratio
+with an practical assessment which features are best developed together.
+After that analysis a plan gets written down which function, modul and
+feature cells do the bulk of the work in that stage.
 
-organizing releases
+In the stage cell is hardly any coding done, only rudimental smoke tests,
+since even most of the integration testing is done in previous cells.
+It is rather user level documentation and the rest of the packaging,
+what is created here.
+
 
 =head3 Goal
 
-foreseeable future
-include nice to haves
+Because a sane software project has only one goal, there also should be
+only one goal cell. This breaks the previously established rule of getting
+things done and move on with the next cell - but there has to be one place
+for a general plan. In order to get stability and to minize changes, 
+we plan as far into the future as possible and reach for an ideal,
+which gets cut back in some places anyway. Cutting back is always easier
+and less troublesome, than attaching what does not really fit.
 
-planning with dummy code with lot of comments and documentation
+The current stage will pick only a subset of the goal, but is obliged to
+be consistent with the goal (checkable by software tests). Because the goal
+is of course subject to changes - older stages might become out of sync,
+but there are either in maintenance mode anyway or just a source of knowledge.
 
-practical sketching board
-name finding
+The cell consist of global developer level documentation and dummy code.
+The ladder has numerous advantages over UML and other abstract specs:
+
+1. It forces you to think about the implementation from early on, 
+not to construct sky castles.
+   
+2. It uses the same format as the actual implementation, no translation needed.
+
+3. Our compiler or interpreter will ensure consistancy. 
+
+4. Comments are easy to attach. They explain what supposed to happen where
+and often grow later into better, more detailled ideas.
+   
+5. Instead of describing what a class will do, write some dummy methods.
+That is more productive and at least as descriptive, if the class, 
+method and attribute names are well chosen.
+   
+6. Fitting and precisely speaking names are the soul of clean code.
+They go hand in glove with the abstractions they represent and should
+designed together. And starting as early with the search for names,
+gives us more time to find the ones we don't have to change later,
+when refactoring becomes a taxing work.
+
 
 =head3 Sketch
 
-collecting brain farts
-stupid stuff sit to stew
-organize
-loose ideas
+Sketch cells are a landing pads for sets of related ideas - 
+where the author can reflect, order, filter and rewrite them,
+until they might become something useful or not. For that are process are
+simple markup languages like  markdown, POD or org mode highly recommended.
+
+Sketch cells lend themself for prototyping goal documentation, but are the
+one place in this highly structured environment with no rules (within one cell),
+because you need a valve for creativity. The only requirements are:
+1. they have to sorted by topic and maturity.
+2. abandoned sketches are moved in a special sektion and 
+3. when a sketch page or its content becomes part of another cell, 
+ it has to be deleted here.
 
 
 =head2 Directory Structure
 
-You keep the directories like /lib, /bin, /t, /doc and so forth.
-These contain the currently deployed main version.
-However all development takes place in the /dev subfolder of a project.
-That dir has itself the following subfolder, representing the steps explained above:
+You keep the usual project subdirectories like /lib, /bin, /t, /doc and
+so forth. CP add just /dev to it, where all the action will take place.
+The above mentioned directories will only ontain the current release.
 
-=over 4
+/dev itself will have 6 subfolder, for each cell type one. 
+/dev/stage/ will of course have subfolder for every stage (/dev/stage/stage_name).
+Module and feature cells will be located like (/dev/module/cell_name/stage_name).
+Functional protos like: /dev/function/topic/cell_name):
 
-=item /dev/sketch - step 1
+Every root directory of a cell and cell type will contain a index.txt
+which gives an overview to its content.
 
-=item /dev/overview/lib - step 2
-
-=item /dev/stage/index.txt - step 3
-
-=item /dev/overview/doc - step 4
-
-=item /dev/function/bin/ - step 5
-
-=item /dev/module/name/stagename - step 6
-
-=item /dev/feature/name/stagename - step 7
-
-=item /dev/stage/name - step 8
-
-=back
-
-
-=head2 Basic Steps
+=head2 Basic Workflow
 
     The CP model can roughly be divided into two parts. 
       During the first part (steps 1 - 4) - an overall plan gets specified and 
@@ -252,7 +306,7 @@ That dir has itself the following subfolder, representing the steps explained ab
     9) Update 1-4 (if not done) - release stage as next major version - goto 5
 
 
-=head2 Steps in Detail
+=head2 Wokflow   in Detail
 
 
 =head3 Step 1 - Collect Ideas
@@ -472,8 +526,6 @@ Less friction here is an enormous productivity boost - a further reason,
 why they gotta be written altogether and by the same people.
 
 
-=head3 Overview
-
 =head3 Prototypes
 
 One of the things Steve Jobs got right was: "Start with envisioning the user
@@ -517,46 +569,6 @@ to think about and optimize for at once. Theset are the hardware or the near
 hardware software layer and the user. For the one side we have functional
 prototypes and for the second use case prototypes.
 
-=head4 Functional Prototypes
-
-After starting with a users wish, we go to the opposite end of the spectrum,
-to the building blocks of a program like computing a formula or writing a file.
-Because it doesn't make sense to plan on details if we don't know if it can be
-built or how. I mean experienced programmer know a lot, but there are far too
-many fast changing libraries, techniques and domains to know them all. And even
-if you use other peoples work - code can be buggy and docs might be unclear,
-missing, lying or simply out of date. So only when you built it and it's running
-you can be sure it runs. Therefor we do functional prototypes (FP).
-
-A FP has only one file and should be as short as possible. It can be used to
-check out how third party libraries work, but none of the projects libs should
-be used if possible. FP need no exceptions, no logging and alike.
-Just solve a core problem that is needed to implement a feature.
-If there are two ways to implement, try both. Usually that's not much more work
-and you can later make wiser decisions. Especially in discussion with the lead
-programmer that knows the whole structure and maybe sees more implications of
-these alternatives. That became only possible, because well commented FP are
-easier to grok than main program code.
-
-=head4 Use Case Prototypes
-
-Back to the users perspective. Same basic rules apply, except now you may use
-libs from the main project or some altered/simplified derivatives. Without these
-you can't write this kind of programs quickly because they are far more complex
-then functional prototypes. And it will be a good stress test for the libs too.
-
-Since this will be a program with only one feature or a set of related ones,
-you are free to model it to an ideal state, that maybe wouldn't fit to main branch.
-That enables a realstic decision making process, how to wrench it into the whole,
-or maybe even to alter the main thing to get it shipped this way.
-
-This creative phase is also the perfct time to make the artwork (UI and icons)
-and to figure out the key and mouse controls and possible options.
-
-=head3 Main Program
-
-Before the now prepackaged feature gets integrated - lets back up for a while,
-to see how we construct the sceleton of the program.
 
 =head4 Dry Programming
 
@@ -599,11 +611,6 @@ are there and do work. Make sure you only rely on included libs or modules that
 are listed in the installer. Please mention also in the comments, which prototypes
 were the basis of this feature.
 
-=head4 Libraries
-
-
-
-
 =head3 Tests
 
 The rise of Extreme Programming (XP) gave also rise to Test Driven Development (TDD),
@@ -645,11 +652,7 @@ realize in some languages, but not problem in Perl 6 and even Perl 5 should have
 at least one way to do that.
 
 
-=head3 Iterations
 
-Now we know the stages of development - lets descibe how to switch between them.
-
-Only in an ideal
 
 =head3 Releases
 
