@@ -256,8 +256,10 @@ The above mentioned directories will only ontain the current release.
 Module and feature cells will be located like (/dev/module/cell_name/stage_name).
 Functional protos like: /dev/function/topic/cell_name):
 
-Every root directory of a cell and cell type will contain a index.txt
-which gives an overview to its content.
+Every root directory of a cell has a status.cp.txt which reorts the
+progress and inner dependencies of cell.
+The root of every cell type except goal contains a index.cp.txt listing
+the viable cells and their status.
 
 =head2 Basic Workflow
 

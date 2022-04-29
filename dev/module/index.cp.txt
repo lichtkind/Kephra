@@ -4,7 +4,7 @@ Latest copies of all necessary libraries are copied into a proto before dev take
 
 design of the API's is done in: dev/overview
 relation between different types of protos: dev/roadmap.txt
-our development model in more details: doc/meta/CellularProgramming.pod
+our development model in more details: dev/goal/doc/meta/CellularProgramming.pod
 
 --[legend]----------------------------------------------------------------------
    K ~~ Kephra                            C = Complete
