@@ -208,25 +208,24 @@ but there are either in maintenance mode anyway or just a source of knowledge.
 The cell consist of global developer level documentation and dummy code.
 The ladder has numerous advantages over UML and other abstract specs:
 
-1. It forces you to think about the implementation from early on, 
-not to construct sky castles.
+    1. It forces you to think about the implementation from early on, 
+       not to construct sky castles.
    
-2. It uses the same format as the actual implementation, no translation needed.
+    2. It uses the same format as the actual implementation, no translation needed.
 
-3. Our compiler or interpreter will ensure consistancy. 
+    3. Our compiler or interpreter will ensure consistancy. 
 
-4. Comments are easy to attach. They explain what supposed to happen where
-and often grow later into better, more detailled ideas.
-   
-5. Instead of describing what a class will do, write some dummy methods.
-That is more productive and at least as descriptive, if the class, 
-method and attribute names are well chosen.
-   
-6. Fitting and precisely speaking names are the soul of clean code.
-They go hand in glove with the abstractions they represent and should
-designed together. And starting as early with the search for names,
-gives us more time to find the ones we don't have to change later,
-when refactoring becomes a taxing work.
+    4. Comments are easy to attach. They explain what supposed to happen where
+       and often grow later into better, more detailled ideas.
+
+    5. Instead of describing what a class will do, write some dummy methods.
+       That is more productive and at least as descriptive, if the class, 
+       method and attribute names are well chosen.
+    6. Fitting and precisely speaking names are the soul of clean code.
+       They go hand in glove with the abstractions they represent and should
+       designed together. And starting as early with the search for names,
+       gives us more time to find the ones we don't have to change later,
+       when refactoring becomes a taxing work.
 
 
 =head3 Sketch
@@ -239,13 +238,16 @@ simple markup languages like  markdown, POD or org mode highly recommended.
 Sketch cells lend themself for prototyping goal documentation, but are the
 one place in this highly structured environment with no rules (within one cell),
 because you need a valve for creativity. The only requirements are:
-1. they have to sorted by topic and maturity.
-2. abandoned sketches are moved in a special sektion and 
-3. when a sketch page or its content becomes part of another cell, 
- it has to be deleted here.
+
+    1. they have to sorted by topic and maturity.
+
+    2. abandoned sketches are moved in a special sektion and 
+
+    3. when a sketch page or its content becomes part of another cell, 
+       it has to be deleted here.
 
 
-=head2 Directory Structure
+=head2 Directory ans File Structure
 
 You keep the usual project subdirectories like /lib, /bin, /t, /doc and
 so forth. CP add just /dev to it, where all the action will take place.
@@ -262,6 +264,19 @@ The root of every cell type except goal contains a index.cp.txt listing
 the viable cells and their status.
 
 =head2 Basic Workflow
+
+This describes the way from project start to the first major release.
+For every next release the cycle (partially) repeats.
+
+
+    1) collect ideas: features, user stories, architectural parts, GUI
+       and sort them by topic, component and importance in sketch cells.
+       
+       
+        Add technologies, 
+       libraries and language features that can implement that idea in case your
+       nor already familiar with the technique.
+
 
     The CP model can roughly be divided into two parts. 
       During the first part (steps 1 - 4) - an overall plan gets specified and 
@@ -308,7 +323,7 @@ the viable cells and their status.
     9) Update 1-4 (if not done) - release stage as next major version - goto 5
 
 
-=head2 Wokflow   in Detail
+=head2 Wokflow in Detail
 
 
 =head3 Step 1 - Collect Ideas
@@ -654,15 +669,11 @@ realize in some languages, but not problem in Perl 6 and even Perl 5 should have
 at least one way to do that.
 
 
-
-
 =head3 Releases
-
 
 See more in L<lib/Kephra/Versioning.pod>
 
 
 =head3 Glossary
-
 
 =cut

@@ -1,8 +1,9 @@
 
-          ==[[ module prototype Kephra Base ]]==
+          ==[[ module cell Kephra Base for bed stage ]]==
 
 This is the lowest level core of the packages that extend Perl.
-See connections between stages and module protos under /dev/module/status.cp
+
+See connections between module cells under /dev/module/index.cp.txt
 
 --------------------------------------------------------------------------------
    K ~~ Kephra                            C = Complete
