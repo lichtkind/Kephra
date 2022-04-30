@@ -1,79 +1,81 @@
 
-=head1 Kephra Base Object System Programming (KBOS)
+=head1 Kephra Base Object System (KBOS)
 
 
 =head2 Overview
 
-    KBOS is an extension of the Perl 5 language, which offers:
-       - inside out objects with really private attributes and 4 method scopes,
+    KBOS is an extension of the Perl 5 language.
+        it aims to condense code, 
+        improve readability through more declerative syntax and 
+        to promote the design of well structured classes, 
+           that are highly reusable and easy adaptable.
+    
+    KBOS offers:
+       - inside out objects with real private attributes and 4 method scopes,
        - rich signatures with type checking,
        - separate channel for return value and error messages, 
        - object and class marshalling.
 
-    KBOS aims to condense perl code, 
-              improve readability through more declerative syntax and 
-              to promote the design of well structured classes, 
-                                    that are highly reusable and easy adaptable.
 
 =head2 Types
 
     Not having to write data consistency checks over and over again was the 
     triggering reason to develope KBOS. Types are seen here as nothing but
-    mechanism to save code lines, since a type name equals one to several
-    expressions that have to be evaluated with the data in question as argument.
-    Each expression can fail and drop a specific error message - telling the user
-    exactly what is missing.
+    mechanism to save code lines, since a type name equals one or several
+    expressions, that have to be evaluated with the data in question as argument.
+    Each expression can fail and drop an error message - telling what is missing.
 
     Once that was implemented I've gone a step further to enable parametric types,
     that take additional arguments - so that data can be checked if consistent 
     with a another method argument or an object attribute. It also allows
     to combine data for compound types, as in array of strings.
 
-    Of course own types can be defined with the new key word 'type'.
+    Own types can be defined with the keyword 'type'.
 
 
 =head2 Signatures
 
-    While types can be checked everywhere KBOS is loaded by function call, the
-    easiest and natural usage is inside signatures. Just insert the type name
-    (optionally) left to the method parameter name. Yes - all parameter have to
-    have names - even if you write method calls only with positional arguments.
+    While types can be checked everywhere KBOS is loaded by function call,
+    the easiest and natural usage is inside signatures. Just insert type
+    name (optionally) left to the method parameter name. Yes - all parameter
+    have to have names - even if only used as positionals.
 
     The return values, of which can be none, one or many can also be typed,
     but don't have to be named. 
 
-    Arguments and return values can be required or optional. To the ladder an 
-    default value can be assigned inside the signature, although every type
-    already has a default value.
+    Arguments and return values are required or optional. The ladder have
+    to have an default value that is either provided by the type, or can
+    be stated inside the signature.
 
-    Slurpy arguments work as in Raku and collect any additional arguments into
-    (in most cases) an array. Foreward arguments are automatically copied into
-    attributes with the same name, unless the method has a scope that does not 
-    allow access to that attribute.
+    Slurpy arguments work as in Raku and collect any additional arguments
+    into an array (or hash). Foreward arguments are automatically copied
+    into attributes with the same name, unless the method has a scope that
+    does not allow access to that attribute.
 
 
 =head2 Four Method Scopes
 
-    Inside every method the two special variables $self and $args are provided
-    or can be pulled out of @_. $self allows method calls and attribute access 
-    with the privileges of the current scope. $args grants read only access to
-    the arguments by name or position.
+    Inside every method the two special variables $self and $args are
+    provided or can be pulled out of @_. $self allows as expected method
+    calls and attribute access with the privileges of the current scope.
+    $args grants read only access to the arguments by name and position.
 
-    Methods marked as 'private' can be called only from inside the class.
+    $self inside methods, that are designated by the keywords 'constructor' 
+    and 'destructor', has full read and write access to all attributes.
+    This is called build scope. Attributes with build scope access are
+    our way to say they are read only. When missing - an constructor
+    named new and a destructor called destroy are auto generated. 
 
-    Methods without any additional keyword beside 'method' are public and can
-    be called from everywhere, same as the constructor and destructor.
-
-    $self inside the methods, that are designated by the keywords 'constructor' 
-    and ''destructor'', has full read and write access to all attributes.
-    This is called build scope. Attributes with build scope access are our way 
-    to say they are read only. When missing - an constructor named new and a
-    destructor called destroy are auto generated. 
-
-    Also attribute accessor methods are auto generated - either as combined or 
-    separate getter and setter. But they can be also written manually. 
+    Also attribute accessor methods are auto generated - either as combined
+    or separate getter and setter. But they can be also written manually. 
     There scope can be set as 'public', 'private' or 'access'.
-    In the ladder case only $self inside the accessors can call them.
+    In the ladder case, only $self inside the accessors can call them.
+
+    Methods marked as 'private' can only be called from inside the class.
+
+    Methods without any additional keyword beside 'method' are public and
+    can be called from everywhere, same as the constructor and destructor.
+    They have only access to 'private' attributes.
 
     This four scope system is set up on purpose to support a three tier class
     design, where the main work is done by private methods. And while public
@@ -83,46 +85,47 @@
 
 =head2 Three Kinds of Attributes
   
-    Attributes as known are called data attributes, because they contain ''raw''
-    data - accessed by getter and setter methods. 
+    Attributes as known are called 'data' attributes, because they contain
+    'raw' (native) data structures - accessed by getter and setter methods. 
 
-    Delegating attributs contain KBOS objects themself and are accessed via 
+    'Delegating' attributs contain KBOS objects themself and are accessed via 
     delegator methods, which can also be auto generated.
 
-    None KBOS objects can serve as wrapped attributes, which are accessed only
-    by hand written wrapper methods.
+    None KBOS objects can serve as 'wrapped' attributes, which are accessed
+    only by hand written wrapper methods.
 
 
 =head2 No Inheritance
        
     To prohibit inheritance is seen as a major feature of KBOS. As hinted,
-    classes are reused by incorporating their objects as attributes or argument.
+    classes are reused by incorporating their objects as attribute or argument.
 
 
 =head2 Error Messages
 
-    The KBOS way is to give error messages their dedicated communication channel,
-    so that they are never confused with a methods return value. But there
-    is no second control flow in case of error and thus no hijacking of the
-    regular control flow. The reciever of the return value and the error message
-    is free to react as seen fit. Error messages can be accessed via the object
-    reference, since attributes are stored safely elsewhere.
+    KBOS reserves a dedicated communication channel to error messages,
+    so they never get confused with return values. But there is no second
+    control flow mechanism (catch) that hijacks the regular one.
+    
+    The reciever of a method result gets both and is free to react as seen
+    fit. Error messages can be accessed via the object reference,
+    since attributes are stored safely elsewhere.
 
 
 =head2 Marshalling
   
-     In KBOS each class has to have a pair of methods named 'state' and 'restate'.
-     Unlike Raku's '.raku' method, 'state' is allowed to return a nested data
-     structure without circular references (and not just a string like '.raku')
-     to represent the inner state of an object. The constructor method 'restate'
-     turns the data structure into a clone of the original object.
+    In KBOS each class has to have a pair of methods named 'state' and 'restate'.
+    Unlike Raku's '.raku' method, 'state' is allowed to return a nested data
+    structure without circular references (and not just a string like '.raku')
+    to represent the inner state of an object. The constructor method 'restate'
+    turns the data structure into a clone of the original object.
 
-     This is needed to replicate the full state of the program after a restart or
-     to transfer the state of subsystems (as a document or file browser view)
-     to other KBOS instances on the same or conected computer. This enables 
-     features like a lossless undo history, moving document tabs between windows
-     or collaboratively editing.
+    This is needed to replicate the full state of the program after a restart or
+    to transfer the state of subsystems (as a document or file browser view)
+    to other KBOS instances on the same or conected computer. This enables 
+    features like a lossless undo history, moving document tabs between windows
+    or collaboratively editing.
 
-     And since KBOS itself is written in a way that allows the marshalling of
-     classes and closures too, Kephra can synchronise its own code while running
-     with instances of different versions or plugins missing.
+    And since KBOS itself is written in a way that allows the marshalling of
+    classes, objects and closures too, Kephra can synchronise its own code
+    while running with instances of different versions or plugins missing.
