@@ -206,7 +206,12 @@ is of course subject to changes - older stages might become out of sync,
 but there are either in maintenance mode anyway or just a source of knowledge.
 
 The cell consist of global developer level documentation and dummy code.
-The ladder has numerous advantages over UML and other abstract specs:
+Dev level doc means documentation that speaks to you team members and not
+users of your software. It explains the architecture and the components,
+the interfaces, the how and the why. Dummy code refers to compiling code,
+that has all the classes, methods and attributes as the completed software,
+but without any actual implementation (empty methods, but lots of comments).
+Dummy code has numerous advantages over UML and other abstract specs:
 
     1. It forces you to think about the implementation from early on, 
        not to construct sky castles.
@@ -271,65 +276,38 @@ For every next release the cycle (partially) repeats.
 
     1) collect ideas: features, user stories, architectural parts, GUI
        and sort them by topic, component and importance in sketch cells.
+       Note which candidates for language, libraries and technologies you
+       want to take into consideration.
+
+    2) derive dev documentation describing features and rough architecture
+       and store it under /dev/goal/doc
        
-       
-        Add technologies, 
-       libraries and language features that can implement that idea in case your
-       nor already familiar with the technique.
+    3) write the dummy code under /dev/goal/lib. Start with initializing
+       the big components and refine them one by one is several waves.
 
+    4) partition the envisioned features into several releases and not that
+       in the dev/stage/index.cp.txt
 
-    The CP model can roughly be divided into two parts. 
-      During the first part (steps 1 - 4) - an overall plan gets specified and 
-    documented. It also contains milestones (called stages). All parts of the
-    plan (except completed stages) have to be constantly updated so that they
-    always reflect the current vision and all won knowledge.
-    Test scripts which can to some extend verify this are part of CP.
-      The second part are the steps (5 - 8) during which one stage gets developed.
-    These steps get repeated for every stage. After completion a stage will only 
-    be touched for bug fixes.
+    5) plan inside dev/stage/name/status.cp.txt which function, module and
+       feature cell will be needed
 
+    6) implement the function cells
+    
+    7) implement the module cells
+    
+    8) implement the feature cells
 
-    1) collect ideas: features, user stories, architectural parts, sketch GUI
-       and sort them by topic, component and importance. Add technologies, 
-       libraries and language features that can implement that idea in case your
-       nor already familiar with the technique.
-
-    2) Create empty dummy classes to get a component structure that runs/compiles.
-       It should include most planned features and not impede the nice to haves.
-       Add dummy methods with signatures when possible. Whenever you feel like
-       add comments to clearify on names or what the code suppose to do at this
-       position. Change architecture and names to make comments redundant and
-       delete them. Iterate until you can't improve it anymore.
-
-    3) Envision stages in which the program can be developed. Top priorities first,
-       but in similar sized steps without much rewrite. Any feature and 
-       its requirement get assigned to a stage.(U)
-
-    4) Systematize and precise goal by writing the high level documentation.
-       Use such docs early for sharing with coprogrammer and audience/boss.
-
-
-    5) Check technical requirements of current stage (risky features used from 
-       language and third party libraries) by writing functional prototypes.
-
-    6) Write or extend packages of interdependent, self developed libraries as 
-       independent projects (modular prototypes) before they get combined as the
-       next stage release. Start with docs, than code - tests last.
-
-    7) Develope feature sets as independent feature prototype (if necessary).
-
-    8) Combine code from feature or modular prototypes into a coherent release.
-
-    9) Update 1-4 (if not done) - release stage as next major version - goto 5
+    9) assemple all at /dev/stage/name
+    
+    10) package, test and ship the release
 
 
 =head2 Wokflow in Detail
 
 
-=head3 Step 1 - Collect Ideas
+=head3 1: Collect Ideas
 
-=head3 Step 2 - Dummy Code
-
+=head3 2: Developer Documentation
 
        This process helps to get feel for the code structure and what belongs where.
        It assist greatly in finding fitting abstractions and self explanatory
@@ -339,19 +317,26 @@ For every next release the cycle (partially) repeats.
        Unlike boring fantasy UML diagrams, this dummy code can be checked
        automatically, if in sync with the published code base.
 
+=head3 3: Dummy Code
+
+=head3 4: Select Next Features
+
+=head3 5: Plan Stage
+
+=head3 6: Function Cell
+
+=head3 7: Module Cell
+
+=head3 8: Feature Cell
+
+=head3 9: Assemble Stage
+
+=head3 10: Packaging
+
 
 =head3 Fundamental Ideas
 
-=head2 Each Step In Detail
-
-=head3 Global Docs
-
-=head3 Module Overview
-
-
-=head3 Fundamental Ideas
-
-    1) adress one set of problems at a time
+    0) adress one set of problems at a time
 
 
     1) We look for a careful balance between
@@ -402,10 +387,7 @@ For every next release the cycle (partially) repeats.
        Decentral VCS like hg or git play a vital role in CP.
 
 
-
-
 =head3 Observations
-
 
     1) The awesome powers of prototypes are known but still not systematically used.
 
