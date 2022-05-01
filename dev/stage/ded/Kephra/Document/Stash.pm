@@ -39,6 +39,7 @@ sub set_active_doc {
 	}
 	return $doc;
 }
+
 sub pop_doc {
 	my $doc = shift;
 	return unless is_document($doc);

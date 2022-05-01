@@ -17,47 +17,15 @@ and about the relation of the different protos under dev/roadmap.txt
 --------------------------------------------------------------------------------
 
 
-[EDITOR] (/stc)
-
-ed             C       sed  simplest utf safe editor based on STC
-doubleview     C       ved  two parallel views on one WX::STC instance, both change no matter which you edit
-gethighlight         N      read coloring information from STC
-print                N      (colour) printing demo of higlithed source code
-
-
-
-[WIDGETS] (/wx)
-
-wxstatusbar          N sed  Wx::StatusBar demo
-wxsplitter     C       ved  Wx::SplitterWindow demo
-wxtree               N ved  Wx::TreeCtrl demo
-wxtabbar       C       ged  Wx::AuiNotebook demo
-wxtoolbar          M   ged  Wx::Toolbar demo
-
-
-
-[GUI] (/gui)
-
-zero           C            minimal Wx program to start with new functional proto
-XPMinline      C            read icon bitmap from inlined data
-wxshellio           P       talk async to the shell via Wx::Perl::ProcessStream
-sidetextbar          N      tabbar with sideway textual tabs
-contextpanel         N      like context menu just with graphics
-paintbar             N      custom status bar with self made text and bitmap labels (DC)
-customcursor         N      cursor from own bitmaps
-
-
-
-
 [PERL] (/perl)
 
 use_strict     C       aed          low level activation of strict pragma
 phaser         C       aed          report on how all phasers work together
 undef          C       aed          test how stable undef as return value is
 import         C       ded          report details of import mechanism
-date           C       ved    Log   create proper formatted timestamp info
-caller         C       ved    Log   formatted info about multi levels of caller for logging
-eval           C       ved  Event   store and run on the fly made coderef calls
+date           C       bed    Log   create proper formatted timestamp info
+caller         C       bed    Log   formatted info about multi levels of caller for logging
+eval           C       bed  Event   store and run on the fly made coderef calls
 nested_eval_return C   aed  Call:D  eval that uses evaled code
 fork                 N              inter fork communication
 codeinject           N              how implement roles (extend classes safely on runtime)
@@ -82,6 +50,33 @@ dir              U         list all relevant directories
 hglist              N      display status of my hg repos
 
 
+[EDITOR] (/stc)
 
+ed             C        sed  simplest utf safe editor based on STC
+doubleview     C        ded  two parallel views on one WX::STC instance, both change no matter which you edit
+gethighlight         N      read coloring information from STC
+print                N      (colour) printing demo of higlithed source code
+
+
+
+[WIDGETS] (/wx)
+
+minimum        C        sed  Wx::App demo
+status               N  sed  Wx::StatusBar demo
+wxsplitter     C        ged  Wx::SplitterWindow demo
+wxtree               N  ged  Wx::TreeCtrl demo
+wxtabbar       C        ged  Wx::AuiNotebook demo
+wxtoolbar          M    ged  Wx::Toolbar demo
+
+
+
+[GUI] (/gui)
+
+XPMinline      C            read icon bitmap from inlined data
+wxshellio           P       talk async to the shell via Wx::Perl::ProcessStream
+sidetextbar          N      tabbar with sideway textual tabs
+contextpanel         N      like context menu just with graphics
+paintbar             N      custom status bar with self made text and bitmap labels (DC)
+customcursor         N      cursor from own bitmaps
 
 

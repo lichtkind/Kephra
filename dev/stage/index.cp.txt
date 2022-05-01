@@ -22,10 +22,10 @@ sed    C         single file editor: simplest possible editor
                  feat: read, writes files, utf safe, perl highlighting 
                                      
 ded    C         doc ed: simplest way to edit more than one file
-                 feat:  stashed doc obj with file_path &more attr., docbar, central API.pm
+                 feat:  stashed doc obj with file_path &more attr., docbar, finnd & replace
                                      
 bed         P    base ed: establish Krphra Base core structure object and type system
-                 feat: doc objects, loging, event system, search bar
+                 feat: doc objects, loging, event system, search bar, shell interface
 --------------------------------------------------------------------------------
 
 ged        MP    gui edit: getting all principle graphical components in order
