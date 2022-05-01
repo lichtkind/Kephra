@@ -13,21 +13,20 @@ use Kephra::App::Window;
 use Kephra::Document;
 
 our ($app, $win);
-my $session_file = File::Spec->catfile(Cwd::cwd(),'session.yml');
 
-sub OnInit {
+sub OnInit { shift->boot(); 1; }
+sub OnExit { $app = shift;  1; }
+sub close  { $win->Close()     }
+
+
+sub boot{
 	$app = shift;
 	$win = Kephra::App::Window->new();
-	Kephra::Document->new();
-	for (@{YAML::Tiny->read( $session_file )}){ Kephra::Document->new($_) if $_ };
-
+	Kephra::Document::Session::restore_auto();
 	$win->Center();
 	$win->Show(1);
 	$app->SetTopWindow($win);
-	1;
 }
-sub OnExit { $app = shift; 1;  }
-sub close  { $win->Close()     }
 
 
 sub shut_down {
@@ -38,8 +37,7 @@ sub shut_down {
 		my $answer = Kephra::App::Dialog::yes_no('Save changes before closing?');
 		$doc->save() if $answer == &Wx::wxYES;
 	});
-	my $yaml = YAML::Tiny->new( Kephra::Document::Stash::get_doc_data() );
-	$yaml->write( $session_file );
+	Kephra::Document::Session::save_auto();
 	Wx::wxTheClipboard->Flush;
 	$win->Destroy();
 }

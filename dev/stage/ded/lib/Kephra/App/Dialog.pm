@@ -44,14 +44,16 @@ sub get_file_open {
 	my $dir    = shift // '.';
 	my $filter = shift // '(*)|*';
 	my $parent = shift // _parent();
+	$title  = 'Open File ...' if $title == -1;
 	Wx::FileSelector( $title, $dir, '', '', $filter, &Wx::wxFD_OPEN, $parent);
 }
 
 sub get_files_open {
-	my $title  = shift // 'Open File ...';
+	my $title  = shift // 'Open Files ...';
 	my $dir    = shift // '.';
 	my $filter = shift // '(*)|*';
 	my $parent = shift // _parent();
+	$title  = 'Open File ...' if $title == -1;
 	my $dialog = Wx::FileDialog->new
 		($parent, $title, $dir, '', $filter, &Wx::wxFD_OPEN | &Wx::wxFD_MULTIPLE);
 	if ($dialog->ShowModal != &Wx::wxID_CANCEL) {
@@ -64,13 +66,14 @@ sub get_file_save {
 	my $dir    = shift // '.';
 	my $filter = shift // '(*)|*';
 	my $parent = shift // _parent();
+	$title  = 'Save File As ...' if $title == -1;
 	Wx::FileSelector( $title, $dir, '', '', $filter, &Wx::wxFD_SAVE, $parent);
 }
 
 sub get_dir  {  Wx::DirSelector      ( @_[0,1], 0, [-1,-1], _parent()) }
 sub get_font {  Wx::GetFontFromUser  ( _parent(), $_[0]) }
 sub get_text {  Wx::GetTextFromUser  ( $_[0], $_[1], "", _parent()) }
-sub get_number {Wx::GetNumberFromUser( $_[0], '', $_[1],$_[2], 0, 100000, _parent())}
+sub get_number{ Wx::GetNumberFromUser( $_[0], '', $_[1],$_[2], 0, 100000, _parent())}
 
 # own dialogs
 #sub find {

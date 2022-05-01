@@ -39,7 +39,6 @@ sub set_active_doc {
 	}
 	return $doc;
 }
-
 sub pop_doc {
 	my $doc = shift;
 	return unless is_document($doc);
@@ -112,13 +111,5 @@ sub refresh_doc_label {
 	#}
 }
 
-sub get_doc_data {
-	my @files;
-	my $bar = doc_bar();
-	for (0 .. @doc_usage_queue - 1){
-		 push @files, find_doc_by_attr('panel', $bar->get_page_by_vis_nr($_))->{'file_path' } 
-	};
-	return @files;
-}
 
 1;

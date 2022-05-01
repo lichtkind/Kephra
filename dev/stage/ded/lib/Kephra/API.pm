@@ -4,12 +4,13 @@ use warnings;
 package Kephra::API;
 our $VERSION = 0.2;
 use Scalar::Util qw(blessed);
+use Kephra::Event;
 
-BEGIN {  # API is called first at start, to even work when mutually recursive included
+BEGIN {  # because API is called first at start, to even work when mutually recursive included
     require Exporter;
     our @ISA = qw(Exporter);
     our @EXPORT_OK = qw( app_window doc_bar editor document 
-        is_widget is_panel is_sizer is_color is_font is_editor is_document is_doc_bar
+                         is_widget is_panel is_sizer is_color is_font is_editor is_document is_doc_bar
     );
     our %EXPORT_TAGS = (cmp => [qw(is_widget is_panel is_sizer is_color is_font is_editor is_document is_doc_bar)],
                         app => [qw(app_window doc_bar editor)],
@@ -18,16 +19,15 @@ BEGIN {  # API is called first at start, to even work when mutually recursive in
     push @{$EXPORT_TAGS{all}}, grep {!$seen{$_}++} @{$EXPORT_TAGS{$_}} for keys %EXPORT_TAGS;
 }
 
-
 # application parts, environment
 sub app          { $Kephra::App::app }
 sub app_window   { $Kephra::App::win }
-sub doc_bar      { $Kephra::App::Window::docbar } #doc_panel()->active_doc_bar()
+sub doc_panel    { $Kephra::App::Window::docpanel}
+sub doc_bar      { $Kephra::App::Panel::Doc::bar } #doc_panel()->active_doc_bar()
 sub all_doc_bar  { doc_panel()->all_doc_bar()   }
 sub document     { Kephra::Document::Stash::active_doc()   }
 sub all_documents{ Kephra::Document::Stash::all_docs()     }
 sub editor       { Kephra::Document::Stash::active_editor()}
-
 
 # comparison checker
 sub is_widget    {(blessed($_[0]) and $_[0]->isa('Wx::Window')              )  ? 1 : 0}

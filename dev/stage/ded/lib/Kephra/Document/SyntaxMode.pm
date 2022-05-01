@@ -3,9 +3,26 @@ use warnings;
 use Wx;
 
 package Kephra::Document::SyntaxMode;
+use Exporter;
+our @EXPORT = qw();
 
 
-sub set_highlight_auto {}
+sub guess_mode_file_ending {
+	my ($self, $fileending) = @_;
+}
+
+sub set{
+	my ($self, $mode) = @_;
+	if    ($mode eq 'no')  {set_highlight_no($self)}
+	elsif ($mode eq 'perl'){set_highlight_perl($self)}
+}
+
+sub set_highlight_no {
+	my ($self) = @_;
+	$self->StyleClearAll;
+	$self->SetLexer( &Wx::wxSTC_LEX_NULL );
+	$self->SetKeyWords(0, '');
+}
 
 sub set_highlight_perl {
 	my ($self) = @_;

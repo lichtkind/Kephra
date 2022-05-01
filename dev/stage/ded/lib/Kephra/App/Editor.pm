@@ -44,6 +44,10 @@ sub mount_events {
 		my $alt  = $event->AltDown     ? 1 : 0;
 		my $doc = Kephra::API::document();
 		my $bar = Kephra::API::doc_bar();
+#no strict 'refs';
+#say ".. $event";
+#say for keys %{*{"Wx::KeyEvent::"}{HASH}};
+
 		if   ($shift and $ctrl and $code == &Wx::WXK_PAGEUP)  {$bar->move_page_left() }
 		elsif($shift and $ctrl and $code == &Wx::WXK_PAGEDOWN){$bar->move_page_right() }
 		elsif(           $ctrl and $code == &Wx::WXK_PAGEUP)  {$bar->raise_page_left() }
@@ -60,7 +64,8 @@ sub mount_events {
 		else {$event->Skip  }
 	});
 	Wx::Event::EVT_STC_UPDATEUI($self, -1, sub {
-		Kephra::API::app_window()->SetStatusText( $self->GetCurrentPos, 0);
+		Kephra::API::app_window()->SetStatusText( ($self->GetCurrentLine + 1).':'.$self->GetCurrentPos, 0);
+		#Kephra::API::document()->{'cursor_pos'} = $self->GetCurrentPos;
 	});
 	Wx::Event::EVT_STC_CHANGE       ($self, -1, sub {
 		my ($ed, $event) = @_;
@@ -79,6 +84,7 @@ sub mount_events {
 	});
 	Wx::Event::EVT_STC_SAVEPOINTLEFT($self, -1, sub {
 		my $doc = Kephra::API::document();
+		return unless ref $doc;
 		#return unless $doc;
 		Kephra::API::doc_bar()->set_page_title( $doc->{'title'}.' *', $doc->{'panel'} );
 		Kephra::API::app_window()->default_title_update();
@@ -191,9 +197,7 @@ $self->IndicatorClearRange( 0, $len )
 	#Wx::Event::EVT_STC_ROMODIFYATTEMPT($self, sub{}) 
 	#Wx::Event::EVT_STC_KEY($self, sub{}) 
 	#Wx::Event::EVT_STC_DOUBLECLICK($self, sub{}) 
-	Wx::Event::EVT_STC_UPDATEUI($self, -1, sub { 
-		#my ($ed, $event) = @_; $event->Skip; print "change \n"; 
-	});
+	Wx::Event::EVT_STC_UPDATEUI($self, -1, sub { #my ($ed, $event) = @_; $event->Skip; print "change \n"; });
 	#Wx::Event::EVT_STC_MODIFIED($self, sub {});
 	#Wx::Event::EVT_STC_MACRORECORD($self, sub{}) 
 	#Wx::Event::EVT_STC_MARGINCLICK($self, sub{}) 
@@ -216,9 +220,4 @@ $self->IndicatorClearRange( 0, $len )
 	#Wx::Event::EVT_STC_SAVEPOINTREACHED($self, -1, \&Kephra::File::savepoint_reached);
 	#Wx::Event::EVT_STC_SAVEPOINTLEFT($self, -1, \&Kephra::File::savepoint_left);
 	$self->SetAcceleratorTable(
-		Wx::AcceleratorTable->new(
-			[&Wx::wxACCEL_CTRL, ord 'n', 1000],
-	));
-
-
-
+		Wx::AcceleratorTable->new( [&Wx::wxACCEL_CTRL, ord 'n', 1000], ));
