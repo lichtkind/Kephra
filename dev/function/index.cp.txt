@@ -26,7 +26,7 @@ import         C       ded          report details of import mechanism
 date           C       bed    Log   create proper formatted timestamp info
 caller         C       bed    Log   formatted info about multi levels of caller for logging
 eval           C       bed  Event   store and run on the fly made coderef calls
-nested_eval_return C   aed  Call:D  eval that uses evaled code
+nestval        C       bed  Call:D  eval that uses evaled code
 fork                 N              inter fork communication
 codeinject           N              how implement roles (extend classes safely on runtime)
 
@@ -63,6 +63,7 @@ print                N      (colour) printing demo of higlithed source code
 
 minimum        C        sed  Wx::App demo
 status               N  sed  Wx::StatusBar demo
+list           C        get  Wx::ListCtrl demo
 wxsplitter     C        ged  Wx::SplitterWindow demo
 wxtree               N  ged  Wx::TreeCtrl demo
 wxtabbar       C        ged  Wx::AuiNotebook demo
