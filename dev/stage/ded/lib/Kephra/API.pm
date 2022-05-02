@@ -4,7 +4,6 @@ use warnings;
 package Kephra::API;
 our $VERSION = 0.2;
 use Scalar::Util qw(blessed);
-use Kephra::Event;
 
 BEGIN {  # because API is called first at start, to even work when mutually recursive included
     require Exporter;
