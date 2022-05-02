@@ -8,8 +8,8 @@ docs:
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/Document.pm
     syntaxmode: perl
   -
-    change_pos: 176
-    cursor_pos: 176
+    change_pos: 0
+    cursor_pos: 103
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/bin/kephra
     syntaxmode: perl

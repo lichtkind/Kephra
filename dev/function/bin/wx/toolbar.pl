@@ -2,8 +2,6 @@
 use v5.12;
 use warnings;
 
-use strict;
-
 package proto;
 use parent qw(Wx::App);
 use File::Spec;
