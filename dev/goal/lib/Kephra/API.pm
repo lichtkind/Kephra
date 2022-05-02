@@ -1,9 +1,10 @@
 use v5.16;
 use warnings;
 
-use Kephra::Base;
+# access to global symbols
 
 package Kephra::API;
+use Kephra::Base; # language extension
 
 BEGIN {} # because most other modules depend on these symbols the central API has to export first
 

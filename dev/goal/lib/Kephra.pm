@@ -1,17 +1,18 @@
-use v5.18;
+use v5.20;
 use warnings;
 use YAML;           # dependencies
-use Wx;
 use Sereal;
 use Digest::MD5;
+use Wx;
+use Wx::STC;
 
 # central starter
 # name, version, important dir retrieval or setting
 
 package Kephra;
 
-our $NAME = 'Kephra outline';
-our $VERSION = '0.4.1.1';
+our $NAME = 'Kephra goal';
+our $VERSION = '0.4.1.2';
 
 # create pipes
 # fork;

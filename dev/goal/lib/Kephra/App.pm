@@ -1,10 +1,12 @@
-use v5.14;
+use v5.20;
 use warnings;
 
 use Kephra::API;         # load first API
 use Kephra::App::Window;
 use Kephra::Document;
 use Kephra::Project;
+
+# main program
 
 package Kephra::App;
 
@@ -14,7 +16,7 @@ sub start {
 }
 
 sub shut_down {
-    # save unsaved docs
+    # save app , Plugin and doc state
 }
 
 1;
