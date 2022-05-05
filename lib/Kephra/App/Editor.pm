@@ -17,7 +17,7 @@ sub new {
     $self->set_margin();
     $self->mount_events();
     $self->set_tab_size(4);
-    $self->set_tab_usage(1);
+    $self->set_tab_usage(0);
     $self->SetScrollWidth(300);
     return $self;
 }

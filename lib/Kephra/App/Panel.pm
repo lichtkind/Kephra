@@ -12,7 +12,7 @@ sub new {
 	my $class = shift;
 	my $parent = shift;
 	$parent = Kephra::API::app_window() unless defined $parent and is_widget($parent);
-	my $self = $class->SUPER::new( $parent );
+	my $self = $class->SUPER::new( $parent, -1 );
 	$self->{'sizer'} = Kephra::App::Sizer->new('vertical');
 	$self->SetSizer( $self->{'sizer'}->bare_sizer );
 	$self->append(@_);
