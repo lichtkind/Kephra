@@ -10,7 +10,7 @@ MenuBar       top 1
 
 MainToolBar   top 2                             icons, dropdown menu, tool panel 
 
-TabBar        top 3                     
+DocBar        top 3                     
 Editor        center                            main editing area, dividable by 4
 
 SearchBar     below 1                           find and goto functions
@@ -21,7 +21,7 @@ IOUnit
  Output        below Search     ctrl+shift+<    just watching various output channels
  InputRow      below Output     ctrl+<          typing commands to kephra/perl/shell/other
 
-StatusLine    below Input
+StatusBar     below Input
 
 
 

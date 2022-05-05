@@ -4,19 +4,17 @@
 
 =head2 Perl Defaults
 
-    use v5.12;
+    use v5.20;
     use warnings;
     use Exporter;
 
-=head2 Technical Details
+=head2 Formal Details
 
     bracketing     = K & R
     indention size = 4
-    use of tabs    = yes
-    line with      = 80 (not strict)
+    use of tabs    = no
+    line with      = 80 - 120 (not strict)
     utf            = only in strings
-    min perl v     = 5.12
-    pragmas        = warnings
 
 
 =head2  Module Structure
