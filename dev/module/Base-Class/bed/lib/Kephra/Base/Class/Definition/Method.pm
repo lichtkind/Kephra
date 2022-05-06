@@ -34,3 +34,8 @@ sub adapt_to_class { # _                          --> ~errormsg
 1;
 
 __END__
+
+help: ~
+code: ~
+scope : 'build' | 'access' | 'private' | 'public'
+signature: ~

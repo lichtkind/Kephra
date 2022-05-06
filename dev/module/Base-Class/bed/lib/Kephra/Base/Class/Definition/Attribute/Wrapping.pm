@@ -5,6 +5,7 @@ use warnings;
 
 package Kephra::Base::Class::Definition::Attribute::Wrapping;
 our $VERSION = 1.1;
+our @ISA = 'Kephra::Base::Class::Definition::Attribute';
 my $kind = 'wrapping';
 ################################################################################
 sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
@@ -38,13 +39,8 @@ sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
     bless $self;
 }
 ################################################################################
-sub state   { $_[0] }
-sub restate { bless shift }
-################################################################################
-sub get_kind       { $kind }
-sub get_help       {$_[0]->{'help'}}
-sub get_class      {$_[0]->{'class'}}
-sub get_build      {$_[0]->{'build'}}
+sub class          {$_[0]->{'class'}}
+sub build_code     {$_[0]->{'build'}}
 sub is_lazy        {$_[0]->{'lazy'}}
 sub load_package   {$_[0]->{'load'}}
 sub require_package{$_[0]->{'require'}}
@@ -59,3 +55,14 @@ wrapping attribute name => { help  => '',                 # short explaining tex
                   ?|      require  => 'Module'            # package you actually have to require , defaults to use
                              wrap  => [wrapper_name]|name # accessor methods
                    |  [lazy_]build => 'code'              # code snippets to run (lazily) create $attr object and bring it into init state
+
+required 
+
+     class : ~
+     build : ~(code)             # create default value (reset)
+
+optional
+
+    getter : ~ // name
+ get_scope : 'build' | 'access' | 'private' | 'public' // 'access'
+   is_lazy : ?

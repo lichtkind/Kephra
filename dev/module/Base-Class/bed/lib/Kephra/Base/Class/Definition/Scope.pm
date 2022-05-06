@@ -3,6 +3,7 @@ use warnings;
 use experimental qw/switch/;
 
 # namespace constants, paths & priority logic
+# 0101_Base-Class-Definition-Scope.t
 
 package Kephra::Base::Class::Definition::Scope;
 our $VERSION = 1.6;
