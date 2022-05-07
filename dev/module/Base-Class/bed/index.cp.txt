@@ -1,5 +1,5 @@
 
-          ==[[ module prototype Kephra Base Class ]]==
+          ==[[ module prototype : Kephra-Base-Class ]]==
 
 Kephra's own object system with class types, signature checking, real data hiding,
 serialisation, interfaces and three types of attributes and 4 scopes. 

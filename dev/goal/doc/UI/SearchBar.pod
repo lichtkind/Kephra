@@ -1,0 +1,10 @@
+=head1 Design of Kephra search Bar
+
+
+
+
+   [Buttons]      |<--  Text Fiel -->|   [Buttons]  [Add Replace]
+   Case                                   Find first
+   Word                                   find prev
+   Wrap                                   find next
+   Rx                                     find next doc

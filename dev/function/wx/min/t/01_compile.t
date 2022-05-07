@@ -1,7 +1,6 @@
 #!/usr/bin/perl -w
 
 use v5.12;
-use strict;
 use Cwd;
 use File::Find qw(find);
 use File::Spec;

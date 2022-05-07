@@ -85,8 +85,8 @@
 
 =head2 Three Kinds of Attributes
   
-    Attributes as known are called 'raw' attributes, because they contain
-    raw (native) data structures - accessed by getter and setter methods. 
+    Attributes as known are called 'native' attributes, because they contain
+    native (raw) perl data structures - accessed by getter and setter methods. 
 
     'Delegating' attributs contain KBOS objects themself and are accessed via 
     delegator methods, which can also be auto generated.

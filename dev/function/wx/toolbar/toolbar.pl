@@ -6,7 +6,7 @@ package proto;
 use parent qw(Wx::App);
 use File::Spec;
 use Wx;
-our $icon_directory = '../../data';
+our $icon_directory = '/icon';
 
 sub OnInit {
 	my( $app ) = @_;
@@ -33,9 +33,11 @@ sub OnInit {
 	});
 
 	my $ctrlb = Wx::ToolBar->new($frame,-1,[-1,-1],[-1,-1],  &Wx::wxTB_HORIZONTAL|&Wx::wxTB_HORZ_LAYOUT);
+    my $combo = Wx::ComboBox->new($ctrlb, -1, 'text', [-1,-1],[220,22]);
+    #$combo->
 	$ctrlb->SetToolBitmapSize([16,16]);
 	$ctrlb->AddControl(Wx::TextCtrl->new($ctrlb, -1, $version_string, [-1,-1],[220,22], &Wx::wxTE_READONLY));
-	$ctrlb->AddControl(Wx::ComboBox->new($ctrlb, -1, '', [-1,-1],[220,22]));
+	$ctrlb->AddControl( $combo );
 	$ctrlb->Realize();
 
 	Wx::Window::SetFocus($ed);
@@ -47,7 +49,7 @@ sub OnInit {
 	$hsizer->Add($vsizer, 1, &Wx::wxGROW);
 
 	Wx::Event::EVT_TOOL($frame, 1000, sub{$img_button->recreate({img_size => $img_button->{'img_size'} == 16 ? 32 : 16}, 'retach') });
-	Wx::Event::EVT_TOOL($frame, 1001, sub{$img_button->recreate({margin => $img_button->{'margin'} + 2 % 18}, 'retach') });
+	Wx::Event::EVT_TOOL($frame, 1001, sub{$img_button->recreate({margin => $img_button->{'margin'} + 4}, 'retach') });
 	Wx::Event::EVT_TOOL($frame, 1002, sub{$img_button->recreate({separator => !$img_button->{'separator'}}, 'retach') });
 	Wx::Event::EVT_TOOL($frame, 1003, sub{$img_button->{'bar'}->EnableTool(1102, ! $img_button->{'bar'}->GetToolEnabled(1102))});
 	Wx::Event::EVT_TOOL($frame, 1004, sub{$img_button->{'bar'}->ToggleTool(1102, ! $img_button->{'bar'}->GetToolState(1102))  });

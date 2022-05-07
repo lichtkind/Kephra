@@ -2,12 +2,13 @@ use v5.20;
 use warnings;
 
 # data structure holding a definition of a KBOS attribute that holds a none KBOS object
+# 0104_Base-Class-Definition-Attribute-Wrapping.t
 
 package Kephra::Base::Class::Definition::Attribute::Wrapping;
 our $VERSION = 1.1;
 our @ISA = 'Kephra::Base::Class::Definition::Attribute';
-my $kind = 'wrapping';
-################################################################################
+
+
 sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
     my ($pkg, $attr_def) = (@_);
     return "need a property hash to create a wrapping attribute definition" unless ref $attr_def eq 'HASH';
@@ -44,7 +45,6 @@ sub build_code     {$_[0]->{'build'}}
 sub is_lazy        {$_[0]->{'lazy'}}
 sub load_package   {$_[0]->{'load'}}
 sub require_package{$_[0]->{'require'}}
-sub accessor_names {@{ $_[0]->{'methods'}}}
 
 1;
 __END__

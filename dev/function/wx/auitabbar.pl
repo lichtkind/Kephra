@@ -68,3 +68,5 @@ sub OnQuit {
 package main;
 MyApp->new->MainLoop;
 
+__END__
+keep keyboard order after DND

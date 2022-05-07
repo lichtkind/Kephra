@@ -1,9 +1,10 @@
 
           ==[[ module cell Kephra Base for bed stage ]]==
 
-This is the lowest level core of the packages that extend Perl.
+This is the lowest level core of the packages that extend Perl,
+mostly regarding symbol manipulation and type checking.
 
-See connections between module cells under /dev/module/index.cp.txt
+See connections between stages and module cells under /dev/module/index.cp.txt
 
 --------------------------------------------------------------------------------
    K ~~ Kephra                            C = Complete

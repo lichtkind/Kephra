@@ -10,7 +10,7 @@ our @ISA = 'Kephra::Base::Class::Definition::Attribute';
 
 sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
     my ($pkg, $attr_def) = (@_);
-    my $error_start = "definition of native class attribute  ";
+    my $error_start = "definition of native class attribute";
     my $self = {build => '', lazy => 0};
     return "need a property hash to create a native data attribute definition" unless ref $attr_def eq 'HASH';
     for (qw/name help type/) {
@@ -20,7 +20,6 @@ sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
         $error_start .= $attr_def->{'name'} if $_ eq 'name';
         $self->{$_} = delete $attr_def->{$_};
     }
-    $self->{'kind'} = 'native';
     $self->{'type_class'} = delete $self->{'type'};
     $self->{'lazy'}  = 1 if defined $attr_def->{'lazy_build'} and $attr_def->{'lazy_build'};
     $self->{'build'} = delete $attr_def->{'build'} if defined $attr_def->{'build'};
@@ -73,6 +72,7 @@ sub new {        # ~pkg %attr_def            --> ._ | ~errormsg
         $self->{'setter_scope'} = 'build';
     }
     return "$error_start contains unknown keys: ".join( ' ', (keys %$attr_def)) if %$attr_def;
+    $self->{'kind'} = 'native';
     bless $self;
 }
 

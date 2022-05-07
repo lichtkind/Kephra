@@ -5,5 +5,7 @@
 
 perl 5.20       - postfix deref and smartmatch
 Wx              - GUI frontend
+Wx::
 Sereal          - serialisation data format
 Keyword::Simple - to extend the language
+YAML            - config file format

@@ -1,15 +1,14 @@
 #!/usr/bin/perl -w
-use v5.16;
+use v5.20;
 use warnings;
-use experimental qw/switch/;
 use Test::More tests => 87;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 require Kephra::Base::Class::Definition::Attribute::Delegating;
-my $class = 'Kephra::Base::Class::Definition::Attribute::Delegating';
-sub mk_attr_def {Kephra::Base::Class::Definition::Attribute::Delegating->new(@_)}
-my $req_properies = {name => 'name', help => 'help', class => 'K::B::C', delegate => 'method'};
 
+sub mk_attr_def {Kephra::Base::Class::Definition::Attribute::Delegating->new(@_)}
+my $class = 'Kephra::Base::Class::Definition::Attribute::Delegating';
+my $req_properies = {name => 'name', help => 'help', class => 'K::B::C', delegate => 'method'};
 
 my $def = mk_attr_def({%$req_properies, default_args => ['C']});
 is( ref $def,                                               $class,        'created first delegating attribute definition object');

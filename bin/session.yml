@@ -1,5 +1,5 @@
 ---
-current: '1'
+current: '11'
 docs:
   -
     change_pos: 0
@@ -9,7 +9,67 @@ docs:
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 103
+    cursor_pos: 3859
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/bin/kephra
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/goal/doc/meta/KBOS.pod
+    syntaxmode: no
+  -
+    change_pos: 0
+    cursor_pos: 684
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Window.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 321
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Panel.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 243
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Panel/Doc.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 1037
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Splitter.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 193
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Editor.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 189
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 2828
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute/Native.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 2908
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute/Delegating.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 562
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/tool/overview.pl
+    syntaxmode: perl
+  -
+    change_pos: 66
+    cursor_pos: 67
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/tool/lib/CPutils.pm
     syntaxmode: perl

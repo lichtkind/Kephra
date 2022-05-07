@@ -33,4 +33,4 @@ ged        MP    gui edit: getting all principle graphical components in order
 ved      UBMP    view: several tab bars, filebrowser, notes, direct io, EventTable.pm, LogBook.pm
 ked          N   keylog: every key calls a call, own edit history
 ned          N   nav edit: own find&replace, searchbar, marker, bookmarks, last edit
-ced          N   comfort editing: brace&block navigation, selection, goto last edit ....
+ced          N   comfort editing: brace&block navigation, selection, goto last edit ^

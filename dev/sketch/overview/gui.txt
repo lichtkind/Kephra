@@ -1,18 +1,15 @@
 
 
-
-
-
-
+            Kephra Graphical User Interface
 
 
 
 --------------------------------------------------------------------------------
-| File  Edit  Tools  Doc  Project  View  Plugin  Help                          |
+| File  Edit  Tools  Doc  Project  View  Plugin  Help                          |      Menu Bar
 --------------------------------------------------------------------------------
-| O C L                                                  | L R U | M I R T S C |
+| N O C L                                                        | M S | L D R |      Tool Bar
 --------------------------------------------------------------------------------
-|+|      |       |      |      |      |      |       |      |      |      |    |
+|+|      |       |      |      |      |      |       |      |      |      |    |      Doc Bar
 --------------------------------------------------------------------------------
 |F|           x|                                                |           x|V|
 | |------------|                                                |------------| |
@@ -38,12 +35,12 @@
 | |            |                                                |            | |
 | |            |                                                |            | |
 --------------------------------------------------------------------------------
-|              |                                                               |
+|              |                                                               |     IO Box
 |              |                                                               |
 |              |                                                               |
 |              |                                                               |
 --------------------------------------------------------------------------------
-|             |            |               |                     |             |
+|             |            |               |                     |             |     Status Bar
 --------------------------------------------------------------------------------
 
 
@@ -62,3 +59,9 @@ Right (micro doc): Outline, SnippetStore, Positions, Orga
                  Notes:, (per) syntax, project, doc,  row
 
 Bottom: Search - Replace - Goto -  Edit, Eval, Shell , DataStore
+
+
+
+
+Toolbar: New Open Save | Undo Redo |             Menu Status | Left  Lower Right 
+                                                               Panel Panel Panel
