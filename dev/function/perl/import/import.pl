@@ -1,7 +1,6 @@
 use v5.16;
 use warnings;
-
-BEGIN { unshift @INC, 'bin/perl', '.'}
+use lib '.';
 
 package MAIN;
 use Import qw/t1 t2/;

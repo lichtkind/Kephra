@@ -19,10 +19,10 @@ and about the relation of the different protos under dev/roadmap.txt
 
 [PERL] (/perl)
 
-use_strict     C       aed          low level activation of strict pragma
-phaser         C       aed          report on how all phasers work together
-undef          C       aed          test how stable undef as return value is
 import         C       ded          report details of import mechanism
+phaser         C       bed          report on how all phasers work together
+use_strict     C       aed          low level activation of strict pragma
+undef          C       aed          test how stable undef as return value is
 date           C       bed    Log   create proper formatted timestamp info
 caller         C       bed    Log   formatted info about multi levels of caller for logging
 eval           C       bed  Event   store and run on the fly made coderef calls
@@ -35,7 +35,6 @@ codeinject           N              how implement roles (extend classes safely o
 [Objects] (/oo)
 
 mo               bed      test mo OO framework
-new_syntax       bed      how to introduce new oo keywords
 parent           bed      checker of workings of parent pragma
 scalar_object    bed      test scalar ref as object refs
 build_method     bed      manually insert codref in name table
@@ -50,12 +49,20 @@ dir              U         list all relevant directories
 hglist              N      display status of my hg repos
 
 
+
+[PARSE] (/parse)
+
+braces           C    bed    brace matching in difficult cases
+keywords         C    bed    how to introduce new oo keywords
+
+
+
 [EDITOR] (/stc)
 
 ed             C        sed  simplest utf safe editor based on STC
 doubleview     C        ded  two parallel views on one WX::STC instance, both change no matter which you edit
-gethighlight         N      read coloring information from STC
-print                N      (colour) printing demo of higlithed source code
+gethighlight         N       read coloring information from STC
+print                N       (colour) printing demo of higlithed source code
 
 
 
