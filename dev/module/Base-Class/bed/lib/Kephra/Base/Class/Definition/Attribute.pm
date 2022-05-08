@@ -9,17 +9,18 @@ our $VERSION = 2.0;
 use Kephra::Base::Class::Definition::Scope;
 
 sub new { # ~pkg %properties ~name  --> ._| ~errormsg
-    my ($pkg, $attr_def, $name) = (@_);
-    my $error_start = "definition of class attribute";
-    $error_start .= ' "'.$name.'"' if defined $name;
+    my ($pkg, $name, $attr_def) = (@_);
+    return 'need two argumens: attribte definition (HASH ref) and name (identifier)' unless defined $attr_def;
+    my $error_start = "definition of class attribute '$name'";
     return $error_start.' has to be a HASH reference' unless ref $attr_def eq 'HASH';
     return $error_start.' needs a descriptive text of more than 10 character under key "help"'
         unless exists $attr_def->{'help'} and not ref $attr_def->{'help'} and length $attr_def->{'help'} > 10;
-    my $self = { help => delete $attr_def->{'help'}};
+    my $self = { help => delete $attr_def->{'help'}, build => '', lazy => 0, setter_name => '', setter_scope => ''};
     $attr_def->{'kind'} = 'native' unless exists $attr_def->{'kind'}; # default to native kind of attribute
+
     my $kind = $self->{'kind'} = delete $attr_def->{'kind'};
     if    ($kind eq 'native')    {
-        return $error_start.' misses under key "type" a name of an existing type' 
+        return $error_start." misses under key 'type' a name of an existing type" 
             unless exists $attr_def->{'type'} and not ref $attr_def->{'type'};
         $self->{'type_class'} = delete $attr_def->{'type'};
         if (defined $attr_def->{'setter'}){
@@ -28,7 +29,7 @@ sub new { # ~pkg %properties ~name  --> ._| ~errormsg
                 return "$error_start property 'setter' demands unknown scope '$scope' ".
                        "instead of build (default), access, private, public" 
                     unless Kephra::Base::Class::Definition::Scope::is_method_scope( $scope );
-                $self->{'setter_name'} = $self->{'name'};
+                $self->{'setter_name'} = $name;
                 $self->{'setter_scope'} = $scope;
             } elsif (ref $attr_def->{'setter'} eq 'HASH'){
                 return "$error_start property 'setter' has too many keys" if keys %{$attr_def->{'setter'}} > 1;
@@ -42,13 +43,13 @@ sub new { # ~pkg %properties ~name  --> ._| ~errormsg
                 delete $attr_def->{'setter'}
             } else { return "$error_start property 'setter' has to be a name string or hash: {name => 'scope'}"}
         } else {
-            $self->{'setter_name'} = $self->{'name'};
+            $self->{'setter_name'} = $name;
             $self->{'setter_scope'} = 'build';
         }
 
     } elsif ($kind eq 'delegating'){
         return $error_start.' needs under key "class" a name of an existing KBOS class' 
-            unless exists $attr_def->{'type'} and not ref $attr_def->{'type'};
+            unless exists $attr_def->{'class'} and not ref $attr_def->{'class'};
         $self->{'type_class'} = delete $attr_def->{'class'};
 
     } elsif ($kind eq 'wrapping')  {
@@ -68,7 +69,7 @@ sub new { # ~pkg %properties ~name  --> ._| ~errormsg
             return "$error_start property 'getter' demands unknown scope '$scope' ".
                    "instead of build, access (default), private, public" 
                 unless Kephra::Base::Class::Definition::Scope::is_method_scope( $scope );
-            $self->{'getter_name'} = $self->{'name'};
+            $self->{'getter_name'} = $name;
             $self->{'getter_scope'} = $scope;
         } elsif (ref $attr_def->{'getter'} eq 'HASH'){
             return "$error_start property 'getter' has too many keys" if keys %{$attr_def->{'getter'}} > 1;
@@ -82,15 +83,15 @@ sub new { # ~pkg %properties ~name  --> ._| ~errormsg
             delete $attr_def->{'getter'}
         } else { return "$error_start property 'getter' has to be a name string or hash: {name => 'scope'}"}
     } else {
-        $self->{'getter_name'} = $self->{'name'};
+        $self->{'getter_name'} = $name;
         $self->{'getter_scope'} = 'access';
     }
 
-    $self->{'lazy'}  = 1 if defined $attr_def->{'lazy_build'} and $attr_def->{'lazy_build'};
+    $self->{'lazy'}  = 1 if defined $attr_def->{'build_lazy'} and $attr_def->{'build_lazy'};
     $self->{'build'} = delete $attr_def->{'build'} if defined $attr_def->{'build'};
-    $self->{'build'} = delete $attr_def->{'lazy_build'} if defined $attr_def->{'lazy_build'};
+    $self->{'build'} = delete $attr_def->{'build_lazy'} if defined $attr_def->{'build_lazy'};
 
-    return "$error_start contains unneeded keys: ".join( ' ', (keys %$attr_def))
+    return "$error_start contains not needed keys: ".join( ' ', (keys %$attr_def))
           .", for attribute kind $kind" if %$attr_def;
     bless $self;
 }

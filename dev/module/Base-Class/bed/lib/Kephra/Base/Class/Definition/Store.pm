@@ -1,4 +1,4 @@
-use v5.20;
+use v5.20;-+-------
 use warnings;
 
 # central storage for all class definitions and their instances
@@ -6,28 +6,49 @@ use warnings;
 package Kephra::Base::Class::Definition::Store;
 our $VERSION = 0.00;
 
+use Kephra::Base::Class::Definition;
 
-my %object = (); # register of all objects by class name
-my %by_ref = (); # cross ref
-my %parent = (); # ref to parent object
+sub new { bless {object_by_name => {}, stage => {}} }
 
 sub add_class {
-
+    my ($self, $name, $class_def) = @_;
+    return "need 2 argumentss, a name and a Kephra::Base::Class::Definition object" unless defined $class_def;
+    return "class name needs to be an identifier a-zA-Z0-9_), starting with letter" unless $name =~ /^[A-Za-z][A-Za-z0-9]*$/;
+    return "name $name is taken in this store " if exists $self->{'object_by_name'}{$name};
+    return "$class_def is not an Kephra::Base::Class::Definition object" if ref $class_def ne 'Kephra::Base::Class::Definition';
+    # check deps
+    $self->{'object_by_name'}{$name} = $class_def;
 }
 
 sub stage_class {
+    my ($self, $name, $class_def) = @_;
 
 }
 
 sub commit_all {
+    my ($self) = @_;
 
+    while (1) {
+        my $size = int keys %{$self->{'stage'}};
+        last unless $size;
+        for my $name (keys %{$self->{'stage'}}){
+            
+        }
+        if ($size == int keys %{$self->{'stage'}}){
+            return "";
+        }
+    }
 }
 
-sub get_class {
-
+sub get_class_by_name {
+    my ($self, $name) = @_;
+    $self->{'object_by_name'}{$name} if exists $self->{'object_by_name'}{$name};
 }
 
 
+################################################################################
+sub state       { $_[0] }
+sub restate     { bless shift }
 ################################################################################
 
 1;
@@ -103,3 +124,6 @@ sub get_types                { $set{$_[0]}{types}            if exists $set{$_[0
  - method
  - dependency
  - requirement
+
+# Kephra::Base::Data::Type::standard->check_basic_type('identifier', $name);
+# return "attribute definition needs an identifier (a-zA-Z0-9_) as first argument" 
