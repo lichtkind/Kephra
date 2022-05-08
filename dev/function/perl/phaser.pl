@@ -2,7 +2,7 @@ use v5.16;
 use warnings;
 
 package TestRun;
-
+use lib '.';
 require RequirePhaserBefore;
 use UsePhaserBefore;
 use UsePhaserBefore2;
