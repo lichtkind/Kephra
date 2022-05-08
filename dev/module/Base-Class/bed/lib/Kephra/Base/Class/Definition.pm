@@ -278,3 +278,6 @@ sub add_method     {        # ._  ~name @signature ~code %keywords           -->
 }
 ################################################################################
 1;
+
+# Kephra::Base::Data::Type::standard->check_basic_type('identifier', $name);
+# return "attribute definition needs an identifier (a-zA-Z0-9_) as first argument" 

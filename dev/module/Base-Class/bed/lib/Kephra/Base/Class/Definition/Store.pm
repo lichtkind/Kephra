@@ -81,5 +81,7 @@ sub get_delegating_attributes{ $set{$_[0]}{delegating}       if exists $set{$_[0
 sub get_wrapping_attributes  { $set{$_[0]}{wrapping}         if exists $set{$_[0]} }
 sub get_types                { $set{$_[0]}{types}            if exists $set{$_[0]} }
 
-################################################################################
-1;
+ - types
+ - attr
+ - method
+ - deps

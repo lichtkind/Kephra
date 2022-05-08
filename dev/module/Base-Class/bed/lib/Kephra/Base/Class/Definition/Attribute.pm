@@ -6,7 +6,6 @@ use warnings;
 
 package Kephra::Base::Class::Definition::Attribute;
 our $VERSION = 2.0;
-# use Kephra::Base::Data::Type;
 use Kephra::Base::Class::Definition::Scope;
 
 sub new { # ~pkg %properties ~name  --> ._| ~errormsg
@@ -61,7 +60,7 @@ sub new { # ~pkg %properties ~name  --> ._| ~errormsg
         return $error_start.' needs code to build a none KBOS class under the key "build" or "build_lazy".'
             unless (exists $attr_def->{'build'} and not ref $attr_def->{'build'})
                 or (exists $attr_def->{'build_lazy'} and not ref $attr_def->{'build_lazy'});
-    } else {"$error_start lacks valid attribute 'kind', has to be: 'native' or 'delegating' or 'wrapping'"}
+    } else {return "$error_start lacks valid attribute 'kind', has to be: 'native' or 'delegating' or 'wrapping'"}
 
     if (defined $attr_def->{'getter'}){
         if (not ref $attr_def->{'getter'}){
@@ -114,6 +113,3 @@ sub setter_name {$_[0]->{'setter_name'}}
 sub setter_scope{$_[0]->{'setter_scope'}}
 
 1;
-
-# Kephra::Base::Data::Type::standard->check_basic_type('identifier', $name);
-# return "attribute definition needs an identifier (a-zA-Z0-9_) as first argument" 

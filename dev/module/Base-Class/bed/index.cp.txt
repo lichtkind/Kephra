@@ -24,7 +24,8 @@ depends on:
    K::B::C::Definition::Attribute  ....... CP .....  2.0    validate & serialize def. of class attributes (all 3 kinds)
    K::B::C::Definition::Method  ..........       I.  0.0    validate & serialize method definition
    K::B::C::Definition::Method::Signature        I.  0.0    validate and serialize method definition
-   K::B::C::Definition  ..................    UM...  0.7    serializable data set to build a KBOS class from
+   K::B::C::Definition::Store  ...........    UM...  0.0    store for class definitions
+   K::B::C::Definition  ..................    UM...  0.0    serializable data set to build a KBOS class from
    K::B::C::Instance::Attribute  .........      B N         central store for attribute values
    K::B::C::Instance::Arguments  .........      B N         central store for arguments values
    K::B::C::Instance  ....................      B N         central store 4 object ref (4x self + attr ref)

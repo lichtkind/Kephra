@@ -243,6 +243,10 @@ the viable cells and their status.
 A lot of what is usually hidden in branches, will in CP have its place
 in the dir structure. This way it is search- and findable.
 
+Under /dev/tool lies software to monitor state (which stages are there, which
+are completed and so forth) and integrity of the project (do the module cells of
+the current stage match the module structure in /dev/goal/lib) as well as a
+global test runner.
 
 =head2 Basic Workflow
 

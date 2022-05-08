@@ -1,5 +1,5 @@
 ---
-current: '11'
+current: 7
 docs:
   -
     change_pos: 0
@@ -44,32 +44,44 @@ docs:
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Editor.pm
     syntaxmode: perl
   -
-    change_pos: 0
-    cursor_pos: 189
+    change_pos: 1050
+    cursor_pos: 1051
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 2828
+    cursor_pos: 2892
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/t/0102_Base-Class-Definition-Attribute.t
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 1064
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute/Native.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 2908
+    cursor_pos: 2807
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute/Delegating.pm
     syntaxmode: perl
   -
-    change_pos: 0
-    cursor_pos: 562
+    change_pos: 174
+    cursor_pos: 273
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/tool/overview.pl
     syntaxmode: perl
   -
-    change_pos: 66
-    cursor_pos: 67
+    change_pos: 0
+    cursor_pos: 0
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/tool/lib/CPutils.pm
-    syntaxmode: perl
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/stage/index.cp.txt
+    syntaxmode: no
+  -
+    change_pos: 34
+    cursor_pos: 35
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/index.cp.txt
+    syntaxmode: no
