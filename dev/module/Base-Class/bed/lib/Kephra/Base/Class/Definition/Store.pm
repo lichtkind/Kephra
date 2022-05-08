@@ -11,6 +11,23 @@ my %object = (); # register of all objects by class name
 my %by_ref = (); # cross ref
 my %parent = (); # ref to parent object
 
+sub add_class {
+
+}
+
+sub stage_class {
+
+}
+
+sub commit_all {
+
+}
+
+sub get_class {
+
+}
+
+
 ################################################################################
 
 1;
@@ -81,7 +98,8 @@ sub get_delegating_attributes{ $set{$_[0]}{delegating}       if exists $set{$_[0
 sub get_wrapping_attributes  { $set{$_[0]}{wrapping}         if exists $set{$_[0]} }
 sub get_types                { $set{$_[0]}{types}            if exists $set{$_[0]} }
 
- - types
- - attr
+ - type
+ - attribute
  - method
- - deps
+ - dependency
+ - requirement
