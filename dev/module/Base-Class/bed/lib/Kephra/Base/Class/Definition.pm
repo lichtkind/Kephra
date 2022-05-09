@@ -11,8 +11,19 @@ use Kephra::Base::Class::Definition::Attribute;
 use Kephra::Base::Class::Definition::Method;
 use Kephra::Base::Class::Definition::Store;
 
+# attrib 
+# methods
+# type store
+
+
+
+1;
+
+__END__
 my $default_methods = {state  => {name => 'state', scope => 'build'}, 
                      restate => {name => 'restate', scope => 'build'}};
+
+
 ################################################################################
 sub new            {        # ~class_name                       --> ._
     return "need one argument ('class name') to create class definition" unless @_ == 2;

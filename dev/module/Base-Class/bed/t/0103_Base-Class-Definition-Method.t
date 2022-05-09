@@ -1,10 +1,19 @@
 #!/usr/bin/perl -w
-use v5.16;
+use v5.20;
 use warnings;
-use experimental qw/switch/;
-use Test::More tests => 22;
+use Test::More tests => 83;
 
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
+require Kephra::Base::Class::Definition::Method;
+
+sub mk_method_def {Kephra::Base::Class::Definition::Method->new(@_)}
+my $class = 'Kephra::Base::Class::Definition::Method';
+
+
+
+exit 0;
+
+__END__
 use Kephra::Base::Class::Definition;    my $class = 'Kephra::Base::Class::Definition';
 
 my $def = Kephra::Base::Class::Definition->new('C');
@@ -20,5 +29,3 @@ is( $def->method_names(),                          2,        'only two default m
 is( $def->get_dependencies(),                  undef,        'now class definition has no dependencies');
 is( $def->get_requirements(),                  undef,        'now class definition has no requirements');
 
-
-exit 0;

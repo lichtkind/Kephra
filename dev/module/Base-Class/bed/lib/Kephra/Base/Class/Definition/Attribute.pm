@@ -15,7 +15,10 @@ sub new { # ~pkg %properties ~name  --> ._| ~errormsg
     return $error_start.' has to be a HASH reference' unless ref $attr_def eq 'HASH';
     return $error_start.' needs a descriptive text of more than 10 character under key "help"'
         unless exists $attr_def->{'help'} and not ref $attr_def->{'help'} and length $attr_def->{'help'} > 10;
-    my $self = { help => delete $attr_def->{'help'}, build => '', lazy => 0, setter_name => '', setter_scope => ''};
+
+    $attr_def = {%$attr_def}; # shallow clone data to keep input untouched
+    my $self = { help => delete $attr_def->{'help'}, 
+                 build => '', state => '', restate => '', lazy => 0, setter_name => '', setter_scope => ''};
     $attr_def->{'kind'} = 'native' unless exists $attr_def->{'kind'}; # default to native kind of attribute
 
     my $kind = $self->{'kind'} = delete $attr_def->{'kind'};
@@ -48,17 +51,23 @@ sub new { # ~pkg %properties ~name  --> ._| ~errormsg
         }
 
     } elsif ($kind eq 'delegating'){
-        return $error_start.' needs under key "class" a name of an existing KBOS class' 
+        return $error_start.' can as a delegating attribute not have code under keys "state" or "restate"'
+            if exists $attr_def->{'state'} or exists $attr_def->{'restate'};
+        return $error_start.' needs as a delegating attribute under key "class" a name of an existing KBOS class' 
             unless exists $attr_def->{'class'} and not ref $attr_def->{'class'};
         $self->{'type_class'} = delete $attr_def->{'class'};
+        $attr_def->{'build'} = delete $attr_def->{'build_args'} if exists $attr_def->{'build_args'};
+        $attr_def->{'build_lazy'} = delete $attr_def->{'build_args_lazy'} if exists $attr_def->{'build_args_lazy'};
 
     } elsif ($kind eq 'wrapping')  {
+        return $error_start.' needs as a wrapping attribut under key "state" and "restate" code to serialize the none KBOS object'
+            unless exists $attr_def->{'state'} and exists $attr_def->{'restate'};
         return $error_start.' needs under key "require" a name (or array ref to list of names) '
               .'of required modules to load none KBOS class' 
             unless exists $attr_def->{'require'} 
             and (not ref $attr_def->{'require'} or ref $attr_def->{'require'} eq 'ARRAY');
         $self->{'type_class'} = delete $attr_def->{'require'};
-        return $error_start.' needs code to build a none KBOS class under the key "build" or "build_lazy".'
+        return $error_start.' needs as a wrapping attribute code to build a none KBOS class under the key "build" or "build_lazy".'
             unless (exists $attr_def->{'build'} and not ref $attr_def->{'build'})
                 or (exists $attr_def->{'build_lazy'} and not ref $attr_def->{'build_lazy'});
     } else {return "$error_start lacks valid attribute 'kind', has to be: 'native' or 'delegating' or 'wrapping'"}
@@ -88,11 +97,12 @@ sub new { # ~pkg %properties ~name  --> ._| ~errormsg
     }
 
     $self->{'lazy'}  = 1 if defined $attr_def->{'build_lazy'} and $attr_def->{'build_lazy'};
-    $self->{'build'} = delete $attr_def->{'build'} if defined $attr_def->{'build'};
+    for (qw/state restate build/) {
+        $self->{$_} = delete $attr_def->{$_} if defined $attr_def->{$_};
+    }
     $self->{'build'} = delete $attr_def->{'build_lazy'} if defined $attr_def->{'build_lazy'};
 
-    return "$error_start contains not needed keys: ".join( ' ', (keys %$attr_def))
-          .", for attribute kind $kind" if %$attr_def;
+    return "$error_start contains not needed keys: ".join( ' ', (keys %$attr_def)).", for attribute kind $kind" if %$attr_def;
     bless $self;
 }
 
@@ -106,7 +116,9 @@ sub type        {$_[0]->{'type_class'}}
 sub class       {$_[0]->{'type_class'}}
 sub require     {$_[0]->{'type_class'}}
 sub build_code  {$_[0]->{'build'}}      # can be just value different from type default
-sub build_args  {$_[0]->{'build'}}      
+sub state_code  {$_[0]->{'state'}}
+sub restate_code{$_[0]->{'restate'}}
+sub build_args  {$_[0]->{'build'}}
 sub is_lazy     {$_[0]->{'lazy'}}
 sub getter_name {$_[0]->{'getter_name'}}
 sub getter_scope{$_[0]->{'getter_scope'}}

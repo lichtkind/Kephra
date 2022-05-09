@@ -1,9 +1,13 @@
 use v5.20;
 use warnings;
 
+# validate and serialize method definition
+# 0103_Base-Class-Definition-Method.t
+
 package Kephra::Base::Class::Definition::Method;
-our $VERSION = 0.1;
-use Kephra::Base::Class::Definition::Method::Signature;
+our $VERSION = 0.2;
+#use Kephra::Base::Class::Definition::Method::Signature;
+use Kephra::Base::Class::Definition::Scope;
 
 sub new           { # ~name %sig_def ~code >@keywords               --> _
     my ($pkg, $name, $help, $sig_def, $code, $scope, $multi) = (@_);
@@ -38,4 +42,4 @@ __END__
 help: ~
 code: ~
 scope : 'build' | 'access' | 'private' | 'public'
-signature: ~
+signature: [reqin, optin, reqout, optout, [arg] ....]  ; arg = name kind ?subkind ?type sectype .....
