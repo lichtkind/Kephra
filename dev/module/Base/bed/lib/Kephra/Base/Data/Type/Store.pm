@@ -8,7 +8,7 @@ no warnings 'experimental::smartmatch';
 #       multiple parametric types with same name and different parameters must have same owner and shortcut (basic type shortcuts have own name space)
 
 package Kephra::Base::Data::Type::Store;
-our $VERSION = 1.21;
+our $VERSION = 1.30;
 use Kephra::Base::Data::Type::Basic;             my $btclass = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;        my $ptclass = 'Kephra::Base::Data::Type::Parametric';
 ################################################################################
@@ -21,7 +21,8 @@ sub state {    #            --> %state
     my %state = ('basic_type' => {}, 'param_type' => {}, forbid_shortcut => [@{$self->{'forbid_shortcut'}}], open => $self->{'open'});
     for my $type_def (values %{$self->{'basic_type'}}) {
         my $type_name = $type_def->{'object'}->get_name;
-        $state{'basic_type'}{ $type_name } = { 'object' => $type_def->{'object'}->state, file => $type_def->{'file'}, package => $type_def->{'package'}};
+        $state{'basic_type'}{ $type_name } = { object => $type_def->{'object'}->state,
+                                               file => $type_def->{'file'}, package => $type_def->{'package'}};
         $state{'basic_type'}{ $type_name }{'shortcut'} = $type_def->{'shortcut'} if exists $type_def->{'shortcut'};
     }
     for my $type_name (keys %{$self->{'param_type'}}) {
@@ -50,11 +51,11 @@ sub restate {  # %state     --> .tstore
     $self;
 }
 ################################################################################
-sub is_open{ $_[0]->{'open'} }                                               # --> ?
-sub close  { return 0 if $_[0]->{'open'} eq 'open'; $_[0]->{'open'} = 0; 1 } # --> ?
+sub is_open{ $_[0]->{'open'} } #(open store cant be closed)                  # --> ?
+sub close  { return 0 if $_[0]->{'open'} eq 'open' or not $_[0]->{'open'}; $_[0]->{'open'} = 0; 1 } # --> ?
 ################################################################################
 sub list_type_names   {                        # - ~kind ~ptype              --> @~btype|@~ptype|@~param
-    my ($self, $kind, $type_name) = @_;
+    my ($self, $kind, $type_name) = @_;        # kind = 'basic' | 'param'
     ($kind = _key_from_kind_($kind)) or return;
     if (defined $type_name){
         return unless exists $self->{'param_type'}{$type_name} and $kind eq 'param';
@@ -81,7 +82,7 @@ sub add_type {                                 # .type - ~shortcut           -->
     return "type store can not add type, because $type is neither instance of $btclass or $ptclass" if ref $type ne $btclass and ref $type ne $ptclass;
     my $kind = ref $type eq $ptclass ? 'param' : 'basic';
     my $type_name = $type->get_name;
-    my $name_error = $self->_validate_type_name_( $type_name );
+    my $name_error = Kephra::Base::Data::Type::Basic::_check_name( $type_name );
     return "type store can not add type $type_name, because $name_error" if $name_error;
     if (defined $shortcut){
         my $shortcut_error = $self->_validate_shortcut_( $shortcut );
@@ -94,7 +95,7 @@ sub add_type {                                 # .type - ~shortcut           -->
     $type_def->{'shortcut'} = $shortcut if defined $shortcut;
     if (ref $type eq $ptclass){
         my $param_name = $type->get_parameter->get_name;
-        my $name_error = $self->_validate_type_name_( $param_name );
+        my $name_error = Kephra::Base::Data::Type::Basic::_check_name( $param_name );
         return "type store can not add type $type_name, because of its parameter name: $name_error" if $name_error;
         if (exists $self->{'param_type'}{$type_name}){
             $type_def = $self->{'param_type'}{$type_name};
@@ -191,15 +192,6 @@ sub forbid_shortcuts  {                        # .tstore @~shortcut          -->
     for (@_){push @{$self->{'forbid_shortcut'}}, $_ unless exists $sc{$_}; $sc{$_}++ };
 }
 ################################################################################
-sub _validate_type_name_ {
-    my $self = shift;
-    return "type name is not defined" unless defined $_[0];
-    return "type name $_[0] contains none id character" if  $_[0] =~ /[^a-z0-9_]/;
-    return "type name $_[0] has to start with a letter" unless $_[0] =~ /^[a-z]/;
-    return "type name $_[0] is too long" if  length $_[0] > 12;
-    return "type name $_[0] is not long enough" if  length $_[0] < 3;
-    '';
-}
 sub _validate_shortcut_ {
     my $self = shift;
     return "type shortcut is undefined" unless defined $_[0];
@@ -210,7 +202,7 @@ sub _validate_shortcut_ {
 }
 sub _key_from_kind_ {
     return 'basic' if not $_[0] or $_[0] eq 'basic';
-    return 'param' if index($_[0], 'param') > -1;
+    return 'param' if index($_[0], 'para') > -1;
 }
 sub _get_type_def_ {
     my ($self, $type_name, $param_name) = @_;
@@ -219,24 +211,5 @@ sub _get_type_def_ {
     else                     { $self->{'basic_type'}{$type_name}                                                          }
 }
 ################################################################################
-sub check_basic_type {                     # .tstore ~type $val              -->  ~errormsg
-    my ($self, $type_name, $value) = @_;
-    my $type = $self->get_type( $type_name );
-    return "no basic type named $type_name is known by this store" unless ref $type;
-    $type->check($value);
-}
-sub check_param_type {                     # .tstore ~type ~param $val $pval -->  ~errormsg
-    my ($self, $type_name, $param_name, $value, $param_value) = @_;
-    my $type = $self->get_type( $type_name, $param_name );
-    return "no type $type_name with parameter $param_name is known by this store" unless ref $type;
-    $type->check($value, $param_value);
-}
-sub guess_basic_type {                     # .tstore $val                    --> @~type
-    my ($self, $value) = @_;
-    my @types = $self->list_type_names('basic');
-    return undef unless @types;
-    map {$_->[0]} sort {$b->[1] <=> $a->[1]} map {[$_->[0], int @{$_->[1]->get_check_pairs}]}
-        grep {not $_->[1]->check($value)} map {[$_, $self->get_type($_)]} @types;
-}
-################################################################################
+
 4;

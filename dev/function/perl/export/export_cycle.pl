@@ -1,7 +1,6 @@
 use v5.16;
 use warnings;
-
-BEGIN {unshift @INC, '.'}
+use lib '.';
 use Export1;
 use Export2;
 

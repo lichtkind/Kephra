@@ -1,5 +1,6 @@
 use v5.20;
 use warnings;
+use List::Util;
 
 # serializable data set to build a KBOS class from
 
@@ -10,28 +11,74 @@ use Kephra::Base::Class::Definition::Scope;
 use Kephra::Base::Class::Definition::Attribute;
 use Kephra::Base::Class::Definition::Method;
 use Kephra::Base::Class::Definition::Store;
+use List::Util qw/reduce/;
 
-# attrib 
-# methods
-# type store
+my $default_methods = {state  => {name => 'state', scope => 'build'}, 
+                     restate => {name => 'restate', scope => 'build'}};
 
+sub new            {        # ~class_name                       --> ._
+    return "need one argument ('class name') to create class definition" unless @_ == 2;
+    return "class name has to start with an upper case letter" unless reduce {$a && $b} map {/^[A-Z]/} split /::/, $_[1];
+    return "class name can only contain word character" unless $_[1] =~ /^[\w:]+$/;
+    my $type_store = Kephra::Base::Data::Type::Store->new();
+    $type_store->forbid_shortcuts( @Kephra::Base::Data::Type::Standard::forbidden_shortcuts );
+    bless {name => $_[1], dependencies => [], requirements => [],
+           types => $type_store,  attribute => {}, method => {%$default_methods} };
+}
+
+sub add_type {
+    my ($self, $type_def) = @_;
+}
+sub get_type {
+}
+
+sub add_attribute {
+    my ($self, $attr_def) = @_;
+
+}
+sub get_attribute {
+
+}
+
+sub add_method    {
+    my ($self, $method_def) = @_;
+
+}
+sub get_method    {
+
+}
+
+sub get_type         {                             # ._                      --> .type 
+    my $self = shift;
+    Kephra::Base::Data::Type::standard->get_type(@_) // $self->{'types'}->get_type(@_);
+}
+sub attribute_names { sort keys (%{$_[0]->{'attribute'}})  }   # ._    --> @~attrnames
+sub method_names    { keys %{$_[0]->{'method'}} }       # ._           --> @~method_def.~name
+sub get_dependencies { @{ $_[0]->{'dependencies'}} } # ._              --> @~depnames
+sub get_requirements { @{ $_[0]->{'requirements'}} } # ._              --> @~reqnames
+
+sub complete    {
+    my $self = shift;
+    $self->{'types'}->close();
+}
+sub is_complete      { $_[0]->{'types'}->is_open ? 0 : 1 }     # ._          --> ?
+
+################################################################################
+sub state         {      # ._                          --> %state
+
+}
+
+sub restate       {      # %state                      --> ._
+
+}
 
 
 1;
 
 __END__
-my $default_methods = {state  => {name => 'state', scope => 'build'}, 
-                     restate => {name => 'restate', scope => 'build'}};
 
 
 ################################################################################
-sub new            {        # ~class_name                       --> ._
-    return "need one argument ('class name') to create class definition" unless @_ == 2;
-    return "class name has to start with an upper case letter" unless $_[1] =~ /^[A-Z]/;
-    my $type_store = Kephra::Base::Data::Type::Store->new();
-    $type_store->forbid_shortcuts( @Kephra::Base::Data::Type::Standard::forbidden_shortcuts );
-    bless {name => $_[1], types => $type_store,  method => {%$default_methods}, dependencies => {}, requirements => {} };
-}
 sub restate        {        # %state                      --> ._
     my ($self, $state) = (@_);
     return "restate needs a state (HASH ref with types, attribtutes and methods) to create new Base::Class::Definition" 

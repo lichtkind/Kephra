@@ -4,6 +4,7 @@
 ==============================
 
 perl 5.20       - postfix deref and smartmatch
+List::Util      -
 Wx              - GUI frontend
 Wx::
 Sereal          - serialisation data format

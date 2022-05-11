@@ -1,5 +1,5 @@
 ---
-current: 7
+current: '12'
 docs:
   -
     change_pos: 0
@@ -44,44 +44,38 @@ docs:
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Editor.pm
     syntaxmode: perl
   -
-    change_pos: 1050
-    cursor_pos: 1051
+    change_pos: 0
+    cursor_pos: 222
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 320
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 2892
+    cursor_pos: 3541
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/t/0102_Base-Class-Definition-Attribute.t
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 1064
+    cursor_pos: 1163
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute/Native.pm
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Basic.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 2807
+    cursor_pos: 2567
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute/Delegating.pm
-    syntaxmode: perl
-  -
-    change_pos: 174
-    cursor_pos: 273
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/tool/overview.pl
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Parametric.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 0
+    cursor_pos: 473
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/stage/index.cp.txt
-    syntaxmode: no
-  -
-    change_pos: 34
-    cursor_pos: 35
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/index.cp.txt
-    syntaxmode: no
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/t/0003_Base-Data-Type-Parametric.t
+    syntaxmode: perl

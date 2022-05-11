@@ -259,8 +259,8 @@ For every next release the cycle (partially) repeats.
        Note which candidates for language, libraries and technologies you
        want to take into consideration.
 
-    2) derive dev documentation describing features and rough architecture
-       and store it under /dev/goal/doc
+    2) derive dev documentation from collected ideas, describing features
+       and rough architecture under /dev/goal/doc
        
     3) write the dummy code under /dev/goal/lib. Start with initializing
        the big components and refine them one by one is several waves.

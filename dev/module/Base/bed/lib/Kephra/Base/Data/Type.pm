@@ -4,10 +4,11 @@ use warnings;
 # organize type related symbols, mostly easy access to stdandard types
 
 package Kephra::Base::Data::Type;
-our $VERSION = 1.51;
+our $VERSION = 1.52;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
 use Kephra::Base::Data::Type::Store;
+use Kephra::Base::Data::Type::Checker;
 use Kephra::Base::Data::Type::Util;
 use Kephra::Base::Data::Type::Standard;
 use Exporter 'import';
@@ -62,7 +63,7 @@ sub check_type {
         next if ref $_ ne $STORE;
         return $_->check_basic_type($type_name, $value) if $_->is_type_known($type_name);
     } 
-    "KBOS type $type_name is not known";
+    "KBOS type '$type_name' is not known";
 }
 
 sub guess      { &guess_type }

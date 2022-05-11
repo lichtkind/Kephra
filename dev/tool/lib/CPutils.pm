@@ -4,9 +4,10 @@ use File::Find;
 use File::Spec;
 
 package CPutils;
+our $VERSION = 0.2;
 use Cwd;
 use Exporter 'import';
-our @EXPORT_OK = qw(has_status read_index list_subdir);
+our @EXPORT_OK = qw(has_status read_index list_subdir extract_version);
 
 
 my $file_ending = 'cp.txt';
@@ -36,7 +37,7 @@ sub read_status {
 
 sub read_index {
     my $file = index_file(shift);
-    return unless -e $file;
+    return unless defined $file and -r $file;
     my @subs;
     open my $FH, '<', $file or die "could not open file $file: $!";
     my $sec_nr = 0;
@@ -52,6 +53,15 @@ sub read_index {
     }
     @subs;
 
+}
+
+sub extract_version {
+    my $file = shift;
+    return unless defined $file and -r $file;
+    open my $FH, '<', $file or die "could not open file $file: $!";
+    while (<$FH>){
+        return $1 if /^our \$VERSION\s*=\s*v?([0-9\.]+)/i;
+    }
 }
 
 

@@ -4,7 +4,7 @@ use warnings;
 # serializable closure
 
 package Kephra::Base::Closure;
-our $VERSION = 1.1;
+our $VERSION = 1.2;
 use Exporter 'import';
 our @EXPORT_OK = (qw/new_closure/);
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
@@ -19,7 +19,7 @@ sub new {
         $state    = $code->{'state'} if exists $code->{'state'};
         $code   = exists $code->{'code'} ? $code->{'code'} : undef;
     }
-    return 'need at least one argument: the perl source code to run as this call' unless defined $code;
+    return 'need at least one argument: the perl source code as string to run this closure' unless defined $code;
     my $std_type;
     if (defined $type){
         if (ref $type){

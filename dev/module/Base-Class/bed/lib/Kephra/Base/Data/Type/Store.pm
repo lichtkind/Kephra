@@ -50,8 +50,8 @@ sub restate {  # %state     --> .tstore
     $self;
 }
 ################################################################################
-sub is_open{ $_[0]->{'open'} }                                               # --> ?
-sub close  { return 0 if $_[0]->{'open'} eq 'open'; $_[0]->{'open'} = 0; 1 } # --> ?
+sub is_open{ $_[0]->{'open'} } #(open store cant be closed)                  # --> ?
+sub close  { return 0 if $_[0]->{'open'} eq 'open' or not $_[0]->{'open'}; $_[0]->{'open'} = 0; 1 } # --> ?
 ################################################################################
 sub list_type_names   {                        # - ~kind ~ptype              --> @~btype|@~ptype|@~param
     my ($self, $kind, $type_name) = @_;

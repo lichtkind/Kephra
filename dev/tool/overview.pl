@@ -8,7 +8,8 @@ use File::Spec;
 use FindBin qw($Bin);
 
 BEGIN { chdir $Bin }
-use CPutils qw/has_status list_subdir read_index/;
+use CPutils qw/has_status list_subdir read_index extract_version/;
+
 
 my $name = 'Kephra CP';
 
@@ -17,7 +18,9 @@ chdir '..';
 
 my @stages = read_index('stage');
 say " = $name stages";
-say "   - $_" for @stages;
+for my $name (@stages){
+    say "   - $name ";
+}
 say '';
 
 say " = $name modules";
@@ -38,5 +41,7 @@ say "   - $_" for list_subdir('function');
 say '';
 
 
+say extract_version('tool/lib/CPutils.pm');
+#say getcwd();
 # File::Spec->catdir($Bin, 
 #my @dir = list_subdir ('.');
