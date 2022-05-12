@@ -5,7 +5,7 @@ use warnings;
 
 package Kephra::Base::Data::Type::Standard;
 our $VERSION = 2.6;
-use Kephra::Base::Data::Type::Util;
+use Kephra::Base::Data::Type::Namespace;
 
 our @basic_type_definitions;
 our @parametric_type_definitions;

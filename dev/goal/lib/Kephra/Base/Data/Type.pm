@@ -6,10 +6,7 @@ use warnings;
 package Kephra::Base::Data::Type;
 our $VERSION = 1.5;
 
-use Kephra::Base::Data::Type::Basic;
-use Kephra::Base::Data::Type::Parametric;
-use Kephra::Base::Data::Type::Store;
-use Kephra::Base::Data::Type::Util;
+use Kephra::Base::Data::Type::Namespace;
 use Kephra::Base::Data::Type::Standard;
 
 sub state         {} # %state           -->

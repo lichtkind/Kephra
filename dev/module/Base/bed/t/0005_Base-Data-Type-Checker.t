@@ -4,9 +4,12 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Kephra::Base::Data::Type::Basic;       my $bclass  = 'Kephra::Base::Data::Type::Basic';
-use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Type::Parametric';
-use Kephra::Base::Data::Type::Store;       my $sclass  = 'Kephra::Base::Data::Type::Store';
+use Kephra::Base::Data::Type::Checker;
+
+my $bclass  = 'Kephra::Base::Data::Type::Basic';
+my $pclass  = 'Kephra::Base::Data::Type::Parametric';
+my $tclass  = 'Kephra::Base::Data::Type::Namespace';
+my $tclass  = 'Kephra::Base::Data::Type::Checker';
 
 package TypeTester; 
 use Test::More tests => 255;

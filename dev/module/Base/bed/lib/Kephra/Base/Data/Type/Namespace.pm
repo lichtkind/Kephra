@@ -8,7 +8,7 @@ no warnings 'experimental::smartmatch';
 #       multiple parametric types with same name and different parameters must have same owner and shortcut (basic type shortcuts have own name space)
 #       open stores cannot be closed (like normal ones can) 
 
-package Kephra::Base::Data::Type::NameSpace;
+package Kephra::Base::Data::Type::Namespace;
 our $VERSION = 0.13;
 use Kephra::Base::Data::Type::Basic;             my $btclass = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;        my $ptclass = 'Kephra::Base::Data::Type::Parametric';

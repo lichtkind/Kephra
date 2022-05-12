@@ -4,7 +4,7 @@ use warnings;
 # extendable collection of simple and parametric type objects + dependency resolver
 # multiple parametric types with same name and different parameters must have same owner and shortcut (basic type shortcuts have own name space)
 
-package Kephra::Base::Data::Type::Store;
+package Kephra::Base::Data::Type::Namespace;
 our $VERSION = 1.21;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;

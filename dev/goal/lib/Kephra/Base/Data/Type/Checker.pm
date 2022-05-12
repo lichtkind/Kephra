@@ -7,7 +7,7 @@ use warnings;
 package Kephra::Base::Data::Type::Checker;
 our $VERSION = 1.21;
 
-use Kephra::Base::Data::Type::Store;
+use Kephra::Base::Data::Type::Namespace;
 
 
 1;

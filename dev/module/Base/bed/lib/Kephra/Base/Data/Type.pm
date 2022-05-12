@@ -15,12 +15,13 @@ our @EXPORT_OK = qw/create_type check_type guess_type is_type_known resolve_type
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 ################################################################################
-my $standard_types = Kephra::Base::Data::Type::Standard::init_store();
-my $shared_types = Kephra::Base::Data::Type::Store->new('open'); 
-my $STORE = 'Kephra::Base::Data::Type::Store';
+my $standard_types = Kephra::Base::Data::Type::Standard::init();
+my $shared_types = Kephra::Base::Data::Type::Namespace->new('open'); 
+my $namespace = 'Kephra::Base::Data::Type::Namespace';
+
 sub standard    { $standard_types }
 sub shared      { $shared_types }
-sub class_names { @Kephra::Base::Data::Type::Util::type_class_names }
+sub class_names { qw/Kephra::Base::Data::Type::Basic Kephra::Base::Data::Type::Parametric/ }
 ################################################################################
 sub state       { $shared_types->state }
 sub restate     { $shared_types = Kephra::Base::Data::Type::Store->restate($_[0]) }
@@ -83,8 +84,6 @@ sub guess_type {
 __END__
 
 
-our @type_class_names = qw/Kephra::Base::Data::Type::Basic
-                           Kephra::Base::Data::Type::Parametric/;
 ################################################################################
 # replace_name_with_type
 
