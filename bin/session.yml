@@ -1,5 +1,5 @@
 ---
-current: '12'
+current: 12
 docs:
   -
     change_pos: 0
@@ -57,25 +57,49 @@ docs:
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 3541
+    cursor_pos: 1857
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/t/0102_Base-Class-Definition-Attribute.t
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Method.pm
     syntaxmode: perl
   -
-    change_pos: 0
-    cursor_pos: 1163
+    change_pos: 4604
+    cursor_pos: 1959
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Basic.pm
     syntaxmode: perl
   -
-    change_pos: 0
-    cursor_pos: 2567
+    change_pos: 3039
+    cursor_pos: 6072
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Parametric.pm
     syntaxmode: perl
   -
-    change_pos: 0
-    cursor_pos: 473
+    change_pos: 6157
+    cursor_pos: 6157
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/t/0003_Base-Data-Type-Parametric.t
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Store.pm
+    syntaxmode: perl
+  -
+    change_pos: 455
+    cursor_pos: 456
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/t/0004_Base-Data-Type-Store.t
+    syntaxmode: perl
+  -
+    change_pos: 1190
+    cursor_pos: 429
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/t/0005_Base-Data-Type-Checker.t
+    syntaxmode: perl
+  -
+    change_pos: 1374
+    cursor_pos: 1375
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Checker.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 434
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Util.pm
     syntaxmode: perl

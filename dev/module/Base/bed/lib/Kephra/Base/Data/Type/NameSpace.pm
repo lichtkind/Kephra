@@ -6,21 +6,23 @@ no warnings 'experimental::smartmatch';
 # extendable collection of simple and parametric type objects + dependency resolver
 #       serialize type keys: object, shortcut, file, package
 #       multiple parametric types with same name and different parameters must have same owner and shortcut (basic type shortcuts have own name space)
+#       open stores cannot be closed (like normal ones can) 
 
-package Kephra::Base::Data::Type::Store;
-our $VERSION = 1.30;
+package Kephra::Base::Data::Type::NameSpace;
+our $VERSION = 0.13;
 use Kephra::Base::Data::Type::Basic;             my $btclass = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;        my $ptclass = 'Kephra::Base::Data::Type::Parametric';
 ################################################################################
-sub new {      # - 'open'   --> .tstore
+sub new {      # - |'open'   --> .tstore
     my ($pkg) = @_;
-    bless {basic_type => {}, param_type => {}, basic_name_by_shortcut => {}, param_name_by_shortcut => {}, forbid_shortcut => [], open => $_[1]//1};
+    bless {basic_type => {}, param_type => {}, open => $_[1]//1,
+           basic_name_by_shortcut => {}, param_name_by_shortcut => {}, forbid_shortcut => []};
 }
 sub state {    #            --> %state
     my ($self) = @_;
     my %state = ('basic_type' => {}, 'param_type' => {}, forbid_shortcut => [@{$self->{'forbid_shortcut'}}], open => $self->{'open'});
     for my $type_def (values %{$self->{'basic_type'}}) {
-        my $type_name = $type_def->{'object'}->get_name;
+        my $type_name = $type_def->{'object'}->name;
         $state{'basic_type'}{ $type_name } = { object => $type_def->{'object'}->state,
                                                file => $type_def->{'file'}, package => $type_def->{'package'}};
         $state{'basic_type'}{ $type_name }{'shortcut'} = $type_def->{'shortcut'} if exists $type_def->{'shortcut'};
@@ -75,13 +77,14 @@ sub add_type {                                 # .type - ~shortcut           -->
     return 'can not add to a closed type store '.$self->{'open'} unless $self->{'open'};
     if (ref $type eq 'HASH'){
         if (exists $type->{'parameter'} or ref $type->{'parent'} eq $ptclass){
-                 $type = Kephra::Base::Data::Type::Parametric->new($type)
+                 $type = Kephra::Base::Data::Type::Parametric->new($type);
         } else { $type = Kephra::Base::Data::Type::Basic->new($type) }
         return "type store can not create type from hash definition, because $type" unless ref $type;
     }
+
     return "type store can not add type, because $type is neither instance of $btclass or $ptclass" if ref $type ne $btclass and ref $type ne $ptclass;
     my $kind = ref $type eq $ptclass ? 'param' : 'basic';
-    my $type_name = $type->get_name;
+    my $type_name = $type->name;
     my $name_error = Kephra::Base::Data::Type::Basic::_check_name( $type_name );
     return "type store can not add type $type_name, because $name_error" if $name_error;
     if (defined $shortcut){
@@ -92,9 +95,10 @@ sub add_type {                                 # .type - ~shortcut           -->
     }
     my ($package, $file, $line) = caller();
     my $type_def = {package => $package , file => $file };
+
     $type_def->{'shortcut'} = $shortcut if defined $shortcut;
     if (ref $type eq $ptclass){
-        my $param_name = $type->get_parameter->get_name;
+        my $param_name = $type->parameter->name;
         my $name_error = Kephra::Base::Data::Type::Basic::_check_name( $param_name );
         return "type store can not add type $type_name, because of its parameter name: $name_error" if $name_error;
         if (exists $self->{'param_type'}{$type_name}){
@@ -174,7 +178,7 @@ sub remove_shortcut   {                    # .tstore ~kind ~shortcut         -->
     delete $self->{$key.'_name_by_shortcut'}{ delete $type_def->{'shortcut'} };
     '';
 }
-sub get_shortcut {                             # ~kind ~type                 --> ~errormsg
+sub type_shortcut {                             # ~kind ~type                 --> ~errormsg
     my ($self, $kind, $type_name) = @_;
     return unless defined $type_name;
     ($kind = _key_from_kind_($kind)) or return;
@@ -213,3 +217,31 @@ sub _get_type_def_ {
 ################################################################################
 
 4;
+__END__
+sub can_substitude_names {   # %type_def              --> =amount
+    my $type_def = shift;
+    return 0 unless ref $type_def eq 'HASH';
+    (defined $type_def->{'parent'} and not ref $type_def->{'parent'})         +
+    (defined $type_def->{'parent'} and ref $type_def->{'parent'} eq 'ARRAY')  +
+    (exists $type_def->{'parameter'} and not ref $type_def->{'parameter'})    +
+    (ref $type_def->{'parameter'} eq 'HASH' and exists $type_def->{'parameter'}{'parent'} and not ref $type_def->{'parameter'}{'parent'});
+}
+sub substitude_names {   # %type_def @.type_store      --> =amount
+    my $type_def = shift;
+    return 0 unless ref $type_def eq 'HASH';
+    my $amount = 0;
+    for my $store (@_){
+        next unless ref $store eq 'Kephra::Base::Data::Type::Store';
+        if (defined $type_def->{'parent'} and not ref $type_def->{'parent'}){
+            my $tmp = $store->get_type( $type_def->{'parent'} );              $type_def->{'parent'} = $tmp, $amount++ if ref $tmp;
+        } elsif (ref $type_def->{'parent'} eq 'ARRAY'){
+            my $tmp = $store->get_type( @{$type_def->{'parent'}} );           $type_def->{'parent'} = $tmp, $amount++ if ref $tmp;
+        }
+        if (ref $type_def->{'parameter'} eq 'HASH' and exists $type_def->{'parameter'}{'parent'} and not ref $type_def->{'parameter'}{'parent'}){
+            my $tmp = $store->get_type($type_def->{'parameter'}{'parent'});   $type_def->{'parameter'}{'parent'} = $tmp, $amount++ if ref $tmp;
+        } elsif (exists $type_def->{'parameter'} and not ref $type_def->{'parameter'}){
+            my $tmp = $store->get_type( $type_def->{'parameter'} );           $type_def->{'parameter'} = $tmp, $amount++ if ref $tmp;
+        }
+    }
+    $amount;
+}

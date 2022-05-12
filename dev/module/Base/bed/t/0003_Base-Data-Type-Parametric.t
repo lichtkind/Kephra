@@ -7,33 +7,36 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 package Very::Long::Package; sub new {bless {}} 
 
 use Kephra::Base::Data::Type::Parametric;
-use Test::More tests => 185;
+use Test::More tests => 195;
 
 sub simple_type { Kephra::Base::Data::Type::Basic->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }
+my $btclass = 'Kephra::Base::Data::Type::Basic';
+my $ptclass = 'Kephra::Base::Data::Type::Parametric';
 
 my $erefdef = [];
 my $crefdef = [1];
 my $Tany   = simple_type('any', 'anything', '1', undef, '1');
-my $Tval   = simple_type('value', 'not a reference', 'not ref $value', undef, '');
-my $Tstr   = simple_type('str', undef, undef, $Tval );
-my $Tint   = simple_type('int', 'integer number', 'int $value eq $value', $Tval, 0);
+my $Tval   = simple_type('value', 'not a reference', 'not ref $value', undef, '', 'sowner', 'sorigin');
+my $Tstr   = simple_type('str', 'character string', undef, $Tval );
+my $Tint   = simple_type('int', 'integer number', 'int $value eq $value', $Tval, 0 );
 my $Tpint  = simple_type('pos_int', 'positive integer', '$value >= 0', $Tint);
 my $Tarray = simple_type('array', 'array reference', 'ref $value eq "ARRAY"', undef, $crefdef);
 my $Ttype  = simple_type('array', 'array reference', 'ref $value eq "ARRAY"', $Tstr, 'ANY');
-my $btclass = 'Kephra::Base::Data::Type::Basic';
-my $ptclass = 'Kephra::Base::Data::Type::Parametric';
 
-my $Tindex = para_type('index', 'valid index of array', {name => 'array', parent => $Tarray},    # inherit both defaults
-                       'return "value $value is out of range" if $value >= @$param', $Tpint);
-my $Tref = para_type({name => 'reference', help => 'reference of given type', parameter => {name => 'refname', parent => $Tstr, default => 'ARRAY'}, 
-                     code => 'return "value $value is not a $param reference" if ref $value ne $param', parent => $Tany, default => $erefdef}); # overwrite both defaults
+my $Tindex = para_type('index', 'valid index of array', {name => 'parray', help => 'dummy basic array type', parent => $Tarray},    # inherit both defaults
+                       'return "value $value is out of range" if $value >= @$param', $Tpint, undef, 'powner', 'porigin');
+my $Tref = para_type({name => 'reference', help => 'reference of given type', 
+                      parameter => {name => 'refname', help => 'name of areference', parent => $Tstr, default => 'ARRAY'}, 
+                      code => 'return "value $value is not a $param reference" if ref $value ne $param', default => $erefdef, parent => $Tany, }); # overwrite both defaults
 my $Tshortref = para_type({name => 'short_ref', help => 'reference with short, given name',  
-                     code => 'return "reference $param is too long " if length $param > 9',             parent => $Tref}); # 
+                     code => 'return "reference $param is too long " if length $param > 9', parent => $Tref, owner => 'powner', origin => 'porigin'}); # 
 
 is ( ref $Tindex, $ptclass,                    'created first prametric type object, type "index" with positional arguments');
 is ( $Tindex->name, 'index',                   'got attribute "name" from getter of "index"');
 is ( $Tindex->help, 'valid index of array',    'got attribute "help" from getter of "index"');
+is ( $Tindex->owner, 'powner',                 'got attribute "owner" at set value');
+is ( $Tindex->origin, 'porigin',               'got attribute "origin" at set value');
 is ( $Tindex->default_value, 0,                'got attribute "default" value from getter of "index"');
 is( ref $Tindex->parents, 'HASH',              'got parents in HASH ref');
 is( keys %{$Tindex->parents}, 3,               'has three parents');
@@ -46,7 +49,7 @@ ok( $Tindex->has_parent('pos_int'),            'Type "pos_int" is parent, by dir
 
 my $param = $Tindex->parameter();
 is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "index"');
-is ( $param->name, 'array',                    'got attribute "name" from "index" parameter');
+is ( $param->name, 'parray',                    'got attribute "name" from "index" parameter');
 is ( $param->default_value, $crefdef,          'got attribute "default" from "index" parameter');
 my $checker = $Tindex->checker;
 my $tchecker = $Tindex->trusting_checker;
@@ -77,17 +80,19 @@ my $state = $Tindex->state;
 is ( ref $state, 'HASH',                       'state of "index" type is a HASH ref');
 is ( ref $state->{'parameter'}, 'HASH',        'state of "index" type parameter is a HASH ref');
 is ( $state->{'name'},          'index',       '"name" in type "index" state HASH is correct');
-is ( $state->{'parameter'}{'name'}, 'array',   'parameter "name" in type "index" state is correct');
+is ( $state->{'parameter'}{'name'}, 'parray',  'parameter "name" in type "index" state is correct');
 my $Ticlone = Kephra::Base::Data::Type::Parametric->restate($state);
 is ( ref $Ticlone, $ptclass,                   'recreated first prametric type object, type "index" by restate from dumped state');
 is ( $Ticlone->name, 'index',                  'got attribute "name" from getter of "index" clone');
+is ( $Ticlone->owner, 'powner',                'got attribute "owner" at set value');
+is ( $Ticlone->origin, 'porigin',              'got attribute "origin" at set value');
 ok( $Ticlone->has_parent('pos_int'),           'Type "pos_int" is parent');
 ok( $Ticlone->has_parent('int'),               'Type "int" is parent');
 is ( $Ticlone->help,'valid index of array',    'got attribute "help" from getter of "index" clone');
 is ( $Ticlone->default_value, 0,               'got attribute "default" value from getter of "index" clone');
 $param = $Ticlone->parameter();
 is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "index" clone');
-is ( $param->name, 'array',                    'got attribute "name" from "index" clone parameter');
+is ( $param->name, 'parray',                   'got attribute "name" from "index" clone parameter');
 is ( $param->default_value, $crefdef,          'got attribute "default" from "index" clone parameter');
 $checker = $Ticlone->checker;
 $tchecker = $Ticlone->trusting_checker;
@@ -137,6 +142,8 @@ ok ( $tchecker->(3,[1,2,3]),                   'trusting checker of type "index"
 
 is ( ref $Tref, $ptclass,                      'created second prametric type object, type "ref" with named arguments');
 is ( $Tref->name, 'reference',                 'got attribute "name" from getter of type "ref"');
+is ( $Tref->owner, '',                         'got attribute "owner" at default value');
+is ( $Tref->origin, '',                        'got attribute "origin" at default value');
 is ( $Tref->help,'reference of given type',    'got attribute "help" from getter of type "ref"');
 is ( $Tref->default_value, $erefdef,           'got attribute "default" value from getter of "ref"');
 ok( $Tref->has_parent('any'),                  'Type "any" is parent');
@@ -174,6 +181,8 @@ is ( $state->{'parameter'}{'name'}, 'refname', 'parameter "name" in type "ref" s
 my $Trefclone = Kephra::Base::Data::Type::Parametric->restate($state);
 is ( ref $Trefclone, $ptclass,                 'recreated prametric type object, "ref" by restate from dumped state');
 is ( $Trefclone->name, 'reference',            'got attribute "name" from getter of "ref" clone');
+is ( $Trefclone->owner, '',                         'got attribute "owner" at default value');
+is ( $Trefclone->origin, '',                        'got attribute "origin" at default value');
 is ( $Trefclone->help, 'reference of given type','got attribute "help" from getter of "ref" clone');
 is ( $Trefclone->default_value, $erefdef,      'got attribute "default" value from getter of "ref"');
 ok( $Trefclone->has_parent('any'),             'Type "any" is parent');
@@ -205,6 +214,8 @@ ok ( $Trefclone->check_data([],[]),                 'check method of type "ref" 
 
 is ( ref $Tshortref, $ptclass,                      'created prametric type that inherits from another param type');
 is ( $Tshortref->name, 'short_ref',                 'got attribute "name" from getter of type "short_ref"');
+is ( $Tshortref->owner, 'powner',                   'got attribute "owner" at set value');
+is ( $Tshortref->origin, 'porigin',                 'got attribute "origin" at set value');
 is ( $Tshortref->help,'reference with short, given name', 'got attribute "help" from getter of type "short_ref"');
 is ( $Tshortref->default_value, $erefdef,           'got attribute "default" value from getter of "short_ref" (was inherited properly)');
 ok( $Tshortref->has_parent('any'),                  'Type "ANY" is parent');

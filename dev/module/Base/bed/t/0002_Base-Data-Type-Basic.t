@@ -4,7 +4,7 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Test::More tests => 145;
+use Test::More tests => 153;
 
 use Kephra::Base::Data::Type::Basic;
 sub create_type { Kephra::Base::Data::Type::Basic->new(@_) }
@@ -21,9 +21,11 @@ like( $check->('abcdabcdabcdabcde'), qr/not be longer/, 'type name have max 16 c
 my $pkg = 'Kephra::Base::Data::Type::Basic';
 my $vh = 'not a reference'; # type value help
 my $vc = 'not ref $value'; # type value code
-my $Tvalue = create_type('value', $vh, $vc, undef, '');
+my $Tvalue = create_type('value', $vh, $vc, undef, '', 'owner', 'origin');
 is( ref $Tvalue, $pkg,                'created first type object "value"');
 is( $Tvalue->name, 'value',           'got attribute "name" from getter of value type object');
+is( $Tvalue->owner, 'owner',          'got attribute "owner" at set value');
+is( $Tvalue->origin, 'origin',        'got attribute "origin" at set value');
 is( $Tvalue->has_parent(undef), '',   'has no parents');
 ok( $Tvalue->has_parent('') == 0,     'has no parents, (with empty string too)');
 is( $Tvalue->has_parent('value'), '', 'self is not a parent');
@@ -52,7 +54,8 @@ is( ref $state, 'HASH',               'state dump is hash ref');
 my $Tvclone = Kephra::Base::Data::Type::Basic->restate($state);
 is( ref $Tvclone, $pkg,               'recreated object for type "value" from serialized state');
 is( $Tvclone->name, 'value',          'got attribute "name" from getter');
-
+is( $Tvclone->owner, 'owner',         'got attribute "owner" at set value');
+is( $Tvclone->origin, 'origin',       'got attribute "origin" at set value');
 is( int @{$Tvclone->parents}, 0,      'has no parents');
 is( $Tvclone->default_value, '',      'got attribute "default" value from getter');
 is( $Tvclone->check_data(3), '',      'check method of type "value" clone accepts correctly value 3');
@@ -105,23 +108,26 @@ ok( $Tbclone->check_data([]),        'check method of type "bool" clone denies w
 ok( $Tbclone->check_data(5),         'check method of type "bool" clone denies with error correctly value 5');
 ok( $Tbclone->check_data('--'),      'check method of type "bool" clone denies with error correctly string value --');
 
-my $Tstr = create_type('str', undef, undef, $Tvalue);
+my $str_help = 'character string';
+my $Tstr = create_type('str', $str_help, undef, $Tvalue);
 is( ref $Tstr, $pkg,                 'created rename type object str with undef help and code');
 is( $Tstr->name, 'str',              'got attribute "name" from getter of type str');
-is( $Tstr->default_value, '',        'inherited default value correctly');
+is( $Tstr->default_value, '',        'got attribute "default" inherited from parent');
+is( $Tstr->owner, '',                'got attribute "owner" to default empty');
+is( $Tstr->origin, '',               'got attribute "origin" default empty');
 is( $Tstr->check_data('-'), '',      'check method of type "str" accepts correctly "-"');
 is( $Tstr->check_data(1), '',        'check method of type "str" accepts correctly 1');
 ok( $Tstr->check_data([]),           'check method of type "str" denies with error correctly value ARRAY ref');
 $checks = $Tstr->source;
 is( ref $checks, 'ARRAY',            'check pairs are stored in an ARRAY');
 is( @$checks, 2,                     'type str has one check pair');
-is( $checks->[0], $vh,               'first check pair key is inherited help string');
+is( $checks->[0], $str_help,         'first check pair key is inherited help string');
 is( $checks->[1], $vc,               'first pair pair value is inherited code string');
 $code = $Tstr->assemble_code;
-ok( $code =~ /$vh/,                  'code of type checker contains help string from parent');
+ok( $code =~ /$str_help/,             'replaces error msg of data checker');
 ok( $code =~ /$qmc/,                 'code of type checker contains code string from parent');
 
-$Tstr = create_type('str', '', '', $Tvalue);
+$Tstr = create_type('str', 'character string', '', $Tvalue);
 is( ref $Tstr, $pkg,                 'created rename type object str with empty help and code');
 is( $Tstr->name, 'str',              'got attribute "name" from getter of str');
 is( $Tstr->default_value, '',        'inherited default value correctly');
@@ -151,9 +157,12 @@ is( $checks->[3], $bc,               'second check pair value is code string');
 
 
 $Tbool = create_type({name => 'bool', help => '0 or 1', code => '$value eq 0 or $value eq 1',default => 0, 
+                                      owner => 'sowner', origin => 'sorigin', 
                                       parent => {name => 'value', help => $vh, code => $vc, default => ''}});
 is( ref $Tbool, $pkg,                'created type "bool", with hash definition of parent type "value" in place');
 is( $Tbool->name, 'bool',            'got attribute "name" from getter of type bool');
+is( $Tbool->owner, 'sowner',         'got attribute "owner" to set value');
+is( $Tbool->origin, 'sorigin',       'got attribute "origin" to set value');
 is( ref $Tbool->parents, 'ARRAY',    'got parents in array ref');
 is( int @{$Tbool->parents}, 1,       'has one parent');
 ok( 'value' ~~ $Tbool->parents,      'Type "value" is parent');

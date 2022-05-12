@@ -16,18 +16,18 @@ use Kephra::Base::Data::Type::Basic;         my $btype = 'Kephra::Base::Data::Ty
 
 ################################################################################
 sub _unhash_arg_ {
-    ref $_[0] eq 'HASH' ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'parameter'}, $_[0]->{'code'}, $_[0]->{'parent'}, $_[0]->{'default'}) : @_;
+    ref $_[0] eq 'HASH' ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'parameter'}, $_[0]->{'code'},
+                           $_[0]->{'parent'}, $_[0]->{'default'}, $_[0]->{'owner'}, $_[0]->{'origin'}) : @_;
 }
 sub new {   # ~name  ~help  %parameter|.parameter  ~code  .parent - $default    --> .ptype | ~errormsg 
     my $pkg = shift;
-    my ($name, $help, $parameter, $code, $parent, $default) = _unhash_arg_(@_);
+    my ($name, $help, $parameter, $code, $parent, $default, $owner, $origin) = _unhash_arg_(@_);
     my $name_error = Kephra::Base::Data::Type::Basic::_check_name($name);
     return $name_error if $name_error;
     return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref), 'code' (str) ".
         "and maybe 'parent' ($btype) to create parametric type object" unless defined $code and $code and $help ;
     return "parent has to be instance of $btype or ".__PACKAGE__." to create parametric type $name"
         if defined $parent and $parent and ref $parent ne $btype and ref $parent ne __PACKAGE__;
-
     my $parents = {};
     my $checks = [];
     if (ref $parent){
@@ -44,11 +44,12 @@ sub new {   # ~name  ~help  %parameter|.parameter  ~code  .parent - $default    
         $checks = $parent->{'checks'};
         $default //= $parent->default_value;
     }
-    return "parametric type $name need to get or inherit a default value " unless defined $default;    
-    return "argument 'parameter' of parametric type $name has to be $btype or a hash ref definition "
+    return "parametric type '$name' need to get or inherit a default value " unless defined $default;    
+    return "parametric type '$name' has to have a 'parameter' which is a $btype class or a hash ref definition."
         if ref $parameter ne $btype and ref $parameter ne 'HASH';
     $parameter = Kephra::Base::Data::Type::Basic->new( $parameter ) if ref $parameter eq 'HASH';
-    return "'parameter' definition of parametric type $name has issue: $parameter " unless ref $parameter;
+    return "parametric type '$name' has issues with definition of its 'parameter': $parameter " unless ref $parameter;
+
 
     my $error_start = "type '$name' with parameter '".$parameter->name."'";
     my $source = _compile_( $name, $checks, $code, $parameter );
@@ -57,6 +58,7 @@ sub new {   # ~name  ~help  %parameter|.parameter  ~code  .parent - $default    
     my $error = $coderef->( $default, $parameter->default_value);
     return "$error_start default value '". $parameter->default_value."' does not pass check - '$source' - because: $error!" if $error;
     bless { name => $name, help => $help, code => $code, checks => $checks, default => $default, parents => $parents,
+            owner=> $owner // '', origin=> $origin // '',
             coderef => $coderef, trustcoderef => eval _compile_with_safe_param_( $name, $checks, $code), parameter => $parameter};
 }
 ################################################################################
@@ -68,8 +70,8 @@ sub restate {                                        # %state                -->
     bless $state;
 }
 sub state {                                          # _                     -->  %state
-    { name => $_[0]->{'name'}, help => $_[0]->{'help'}, code => $_[0]->{'code'}, checks => [@{$_[0]->{'checks'}}],
-      parents => {%{$_[0]->{'parents'}}}, default => $_[0]->{'default'}, parameter => $_[0]->{'parameter'}->state() }
+    { name=> $_[0]->{'name'}, help=> $_[0]->{'help'}, default=> $_[0]->{'default'}, code=> $_[0]->{'code'}, checks=> [@{$_[0]->{'checks'}}],
+      owner => $_[0]->{'owner'}, origin => $_[0]->{'origin'}, parents => {%{$_[0]->{'parents'}}}, parameter=> $_[0]->{'parameter'}->state() }
 }
 ################################################################################
 sub _compile_ {
@@ -84,8 +86,10 @@ sub _compile_with_safe_param_ {
     . Kephra::Base::Data::Type::Basic::_asm_($name, $check) . $code . ";return ''}"
 }
 ################################################################################
-sub name          { $_[0]->{'name'} }            # _                     -->  ~PTname
-sub parents       { $_[0]->{'parents'} }         # _                     -->  %_parent.name -> :parent:parameter:name
+sub name          { $_[0]->{'name'} }            # _                     -->  ~PTname (type name)
+sub owner         { $_[0]->{'owner'} }           # _                     -->  ~owner (pkg)
+sub origin        { $_[0]->{'origin'} }          # _                     -->  ~origin (file)
+sub parents       { $_[0]->{'parents'} }         # _                     -->  ?? %_parent.name -> :parent:parameter:name
 sub help          { $_[0]->{'help'} }            # _                     -->  ~help
 sub default_value { $_[0]->{'default'} }         # _                     -->  $default
 sub parameter     { $_[0]->{'parameter'} }       # _                     -->  .btype

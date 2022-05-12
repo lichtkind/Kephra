@@ -1,6 +1,8 @@
 use v5.14;
 use warnings;
 
+# needed for 0001_Base-Package.t
+
 package TestClass;
 
 sub new {bless { key => 'val', init => $_[1]}}
