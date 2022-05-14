@@ -1,5 +1,5 @@
 ---
-current: 12
+current: 16
 docs:
   -
     change_pos: 0
@@ -62,44 +62,50 @@ docs:
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Method.pm
     syntaxmode: perl
   -
-    change_pos: 4604
-    cursor_pos: 1959
+    change_pos: 2799
+    cursor_pos: 4139
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Basic.pm
     syntaxmode: perl
   -
-    change_pos: 3039
-    cursor_pos: 6072
+    change_pos: 5871
+    cursor_pos: 6881
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Parametric.pm
     syntaxmode: perl
   -
-    change_pos: 6157
-    cursor_pos: 6157
+    change_pos: 484
+    cursor_pos: 1321
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Store.pm
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Namespace.pm
     syntaxmode: perl
   -
-    change_pos: 455
-    cursor_pos: 456
+    change_pos: 510
+    cursor_pos: 509
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/t/0004_Base-Data-Type-Store.t
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/t/0004_Base-Data-Type-NameSpace.t
     syntaxmode: perl
   -
-    change_pos: 1190
-    cursor_pos: 429
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/t/0005_Base-Data-Type-Checker.t
-    syntaxmode: perl
-  -
-    change_pos: 1374
-    cursor_pos: 1375
+    change_pos: 288
+    cursor_pos: 289
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Checker.pm
     syntaxmode: perl
   -
-    change_pos: 0
-    cursor_pos: 434
+    change_pos: 319
+    cursor_pos: 315
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Util.pm
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/t/0005_Base-Data-Type-Checker.t
+    syntaxmode: perl
+  -
+    change_pos: 1890
+    cursor_pos: 3937
+    encoding: utf-8
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Standard.pm
+    syntaxmode: perl
+  -
+    change_pos: 726
+    cursor_pos: 781
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type.pm
     syntaxmode: perl

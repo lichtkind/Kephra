@@ -1,0 +1,4 @@
+
+
+crash bad char bug
+replace/insert @

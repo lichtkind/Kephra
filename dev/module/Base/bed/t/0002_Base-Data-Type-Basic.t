@@ -4,7 +4,7 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Test::More tests => 153;
+use Test::More tests => 145;
 
 use Kephra::Base::Data::Type::Basic;
 sub create_type { Kephra::Base::Data::Type::Basic->new(@_) }
@@ -21,14 +21,12 @@ like( $check->('abcdabcdabcdabcde'), qr/not be longer/, 'type name have max 16 c
 my $pkg = 'Kephra::Base::Data::Type::Basic';
 my $vh = 'not a reference'; # type value help
 my $vc = 'not ref $value'; # type value code
-my $Tvalue = create_type('value', $vh, $vc, undef, '', 'owner', 'origin');
+my $Tvalue = create_type('value', $vh, $vc, undef, '');
 is( ref $Tvalue, $pkg,                'created first type object "value"');
 is( $Tvalue->name, 'value',           'got attribute "name" from getter of value type object');
-is( $Tvalue->owner, 'owner',          'got attribute "owner" at set value');
-is( $Tvalue->origin, 'origin',        'got attribute "origin" at set value');
-is( $Tvalue->has_parent(undef), '',   'has no parents');
-ok( $Tvalue->has_parent('') == 0,     'has no parents, (with empty string too)');
-is( $Tvalue->has_parent('value'), '', 'self is not a parent');
+is( $Tvalue->is_parent(undef), '',   'has no parents');
+ok( $Tvalue->is_parent('') == 0,     'has no parents, (with empty string too)');
+is( $Tvalue->is_parent('value'), '', 'self is not a parent');
 is( $Tvalue->default_value, '',       'got attribute "default" value from getter');
 my $checks = $Tvalue->source;
 is( ref $checks, 'ARRAY',             'check pairs are stored in an ARRAY');
@@ -54,8 +52,6 @@ is( ref $state, 'HASH',               'state dump is hash ref');
 my $Tvclone = Kephra::Base::Data::Type::Basic->restate($state);
 is( ref $Tvclone, $pkg,               'recreated object for type "value" from serialized state');
 is( $Tvclone->name, 'value',          'got attribute "name" from getter');
-is( $Tvclone->owner, 'owner',         'got attribute "owner" at set value');
-is( $Tvclone->origin, 'origin',       'got attribute "origin" at set value');
 is( int @{$Tvclone->parents}, 0,      'has no parents');
 is( $Tvclone->default_value, '',      'got attribute "default" value from getter');
 is( $Tvclone->check_data(3), '',      'check method of type "value" clone accepts correctly value 3');
@@ -71,7 +67,7 @@ my $bc = '$value eq 0 or $value eq 1'; # type bool code
 my $Tbool = create_type('bool','0 or 1', $bc, $Tvalue, 0);
 is( ref $Tbool, $pkg,                 'created child type object bool');
 is( $Tbool->name, 'bool',             'got attribute "name" from getter of type bool');
-is( $Tvalue->has_parent(undef), '',   'has no parents');
+is( $Tvalue->is_parent(undef), '',    'has no parents');
 ok( 'value' ~~ $Tbool->parents,       'Type "value" is parent');
 
 is( $Tbool->default_value, 0,         'got attribute "default" value from getter');
@@ -113,8 +109,6 @@ my $Tstr = create_type('str', $str_help, undef, $Tvalue);
 is( ref $Tstr, $pkg,                 'created rename type object str with undef help and code');
 is( $Tstr->name, 'str',              'got attribute "name" from getter of type str');
 is( $Tstr->default_value, '',        'got attribute "default" inherited from parent');
-is( $Tstr->owner, '',                'got attribute "owner" to default empty');
-is( $Tstr->origin, '',               'got attribute "origin" default empty');
 is( $Tstr->check_data('-'), '',      'check method of type "str" accepts correctly "-"');
 is( $Tstr->check_data(1), '',        'check method of type "str" accepts correctly 1');
 ok( $Tstr->check_data([]),           'check method of type "str" denies with error correctly value ARRAY ref');
@@ -161,12 +155,10 @@ $Tbool = create_type({name => 'bool', help => '0 or 1', code => '$value eq 0 or 
                                       parent => {name => 'value', help => $vh, code => $vc, default => ''}});
 is( ref $Tbool, $pkg,                'created type "bool", with hash definition of parent type "value" in place');
 is( $Tbool->name, 'bool',            'got attribute "name" from getter of type bool');
-is( $Tbool->owner, 'sowner',         'got attribute "owner" to set value');
-is( $Tbool->origin, 'sorigin',       'got attribute "origin" to set value');
 is( ref $Tbool->parents, 'ARRAY',    'got parents in array ref');
 is( int @{$Tbool->parents}, 1,       'has one parent');
 ok( 'value' ~~ $Tbool->parents,      'Type "value" is parent');
-ok( $Tbool->has_parent('value'),     'Type "value" is parent (by direct method)');
+ok( $Tbool->is_parent('value'),      'Type "value" is parent (by direct method)');
 is( $Tbool->default_value, 0,        'got attribute "default" value from getter');
 is( $Tbool->check_data(1), '',       'check method of type "bool" accepts correctly 1');
 ok( $Tbool->check_data([]),          'check method of type "bool" denies with error correctly value ARRAY ref');
@@ -193,8 +185,8 @@ my $Tint = create_type({name => 'int', help => 'integer', code => 'int $value ==
 my $Tpint = create_type({name => 'int_pos', help => 'positive', code => '$value >= 0', parent => $Tint});
 is( ref $Tpint->parents,             'ARRAY','got parents in array ref');
 is( int @{$Tpint->parents}, 2,       'has two parents');
-ok( $Tpint->has_parent('value'),     'Type "value" is parent (by direct method)');
-ok( $Tpint->has_parent('int'),       'Type "int" is parent (by direct method)');
+ok( $Tpint->is_parent('value'),      'Type "value" is parent (by direct method)');
+ok( $Tpint->is_parent('int'),        'Type "int" is parent (by direct method)');
 ok( 'int' ~~ $Tpint->parents,        'Type "int" is parent');
 
 

@@ -17,11 +17,11 @@ See connections between stages and module cells under /dev/module/index.cp.txt
                                           .      N = Not yet (planned)
 --------------------------------------------------------------------------------
    K::B::Package  ......................  C  .....  1.1    low level symbol manipulation
-   K::B::Data::Type::Basic  ............  C  .....  1.6    inheritable single value checker
-   K::B::Data::Type::Parametric  .......  C  .....  1.5    checks relation between two values
-   K::B::Data::Type::Store  ............  C  .....  1.21   collection of type objects (namespace)
-   K::B::Data::Type::Util  .............  C  .....  1.01   helper functions for type creation
-   K::B::Data::Type::Standard  .........  C  .....  2.8    definition of standard types
+   K::B::Data::Type::Basic  ............  C  .....  1.61   inheritable single value checker
+   K::B::Data::Type::Parametric  .......  C  .....  1.6    checks relation between two values
+   K::B::Data::Type::Namespace  ........  M  .....  1.13   collection of type objects with symbols & owners
+   K::B::Data::Type::Checker  ..........  M  .....  0.01   namespace set for data checking
+   K::B::Data::Type::Standard  .........  P  .....  2.83   definition of standard types
    K::B::Data::Type  ...................  C  .....  1.51   manage type related symbols
    K::B::Data  .........................  C  .....  0.2    root of none OO data handling
    K::B::Closure  ......................  C  .....  1.1    serializable closure (code and data)
