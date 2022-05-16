@@ -12,16 +12,16 @@ my $dummy_type = Kephra::Base::Data::Type::Basic->new('dummy', 'dummy', 1, undef
 
 our @basic_type_definitions = (
   {name=> 'any',        help=> 'anything',             code=> '1',                                                 default=> '' },
-  {name=> 'value',      help=> 'defined value',        code=> 'defined $value',                                    default=> '',    shortcut => '$' },
-  {name=> 'no_ref',     help=> 'not a reference',      code=> 'not ref $value',             parent=> 'value',                        },
-  {name=> 'bool',       help=> '0 or 1',               code=> '$value eq 0 or $value eq 1', parent=> 'no_ref',     default=> 0,     shortcut => '?' },
-  {name=> 'num',        help=> 'number',               code=> 'looks_like_number($value)',  parent=> 'no_ref',     default=> 0,     shortcut => '+' },
+  {name=> 'value',      help=> 'defined value',        code=> 'defined $value',                                    default=> '',     },
+  {name=> 'no_ref',     help=> 'not a reference',      code=> 'not ref $value',             parent=> 'value',                       symbol => '$' },
+  {name=> 'bool',       help=> '0 or 1',               code=> '$value eq 0 or $value eq 1', parent=> 'no_ref',     default=> 0,     symbol => '?' },
+  {name=> 'num',        help=> 'number',               code=> 'looks_like_number($value)',  parent=> 'no_ref',     default=> 0,     symbol => '+' },
   {name=> 'num_pos',    help=> 'greater equal zero',   code=> '$value >= 0',                parent=> 'num'                          },
   {name=> 'num_spos',   help=> 'greater equal zero',   code=> '$value > 0',                 parent=> 'num',        default=> 1  },
-  {name=> 'int',        help=> 'integer',              code=> 'int($value) eq $value',      parent=> 'no_ref',     default=> 0,     shortcut => 'Z' },
-  {name=> 'int_pos',    help=> 'greater equal zero',   code=> '$value >= 0',                parent=> 'int',                         shortcut => 'N' },
+  {name=> 'int',        help=> 'integer',              code=> 'int($value) eq $value',      parent=> 'no_ref',     default=> 0,     symbol => 'Z' },
+  {name=> 'int_pos',    help=> 'greater equal zero',   code=> '$value >= 0',                parent=> 'int',                         symbol => 'N' },
   {name=> 'int_spos',   help=> 'strictly positive',    code=> '$value > 0',                 parent=> 'int',        default=> 1  },
-  {name=> 'str',                                                                            parent=> 'no_ref',                      shortcut => '~' },
+  {name=> 'str',                                                                            parent=> 'no_ref',                      symbol => '~' },
   {name=> 'str_ne',     help=> 'none empty string',    code=> '$value or ~$value',          parent=> 'no_ref',     default=> ' '},
   {name=> 'str_lc',     help=> 'lower case string',    code=> 'lc $value eq $value',        parent=> 'str_ne',     default=> 'a'},
   {name=> 'str_uc',     help=> 'upper case string',    code=> 'uc $value eq $value',        parent=> 'str_ne',     default=> 'A'},
@@ -31,13 +31,13 @@ our @basic_type_definitions = (
   {name=> 'pkg_name',   help=> 'package name',         code=> '$value =~ /^[A-Z][\w:]*$/',  parent=> 'str_ne',     default=> 'Pkg'},
   {name=> 'type_name',  help=> 'simple type name',     code=> __PACKAGE__.'::name_space->is_type_known($value)',
                                                                                             parent=>'identifier',  default=> 'any', },
-  {name=> 'any_ref',    help=> 'reference of any sort',code=> q/ref $value/,                                       default=> [],    shortcut => '\\' }, 
+  {name=> 'any_ref',    help=> 'reference of any sort',code=> q/ref $value/,                                       default=> [],    symbol => '\\' }, 
   {name=> 'scalar_ref', help=> 'array reference',      code=> q/ref $value eq 'SCALAR'/,                           default=> \1  },
-  {name=> 'array_ref',  help=> 'array reference',      code=> q/ref $value eq 'ARRAY'/,                            default=> [],    shortcut => '@'  },
-  {name=> 'hash_ref',   help=> 'hash reference',       code=> q/ref $value eq 'HASH'/,                             default=> {},    shortcut => '%'  },
-  {name=> 'code_ref',   help=> 'code reference',       code=> q/ref $value eq 'CODE'/,                            default=> sub {}, shortcut => '&'  },
-  {name=> 'object',     help=> 'object reference',     code=> q/blessed($value)/,                                default=> bless {},shortcut => '!'  },
-  {name=> 'type',       help=> 'type checker object',  code=> 'ref $value ~~ [Kephra::Base::Data::Type::class_names]', default=> $dummy_type, shortcut => 'T' }
+  {name=> 'array_ref',  help=> 'array reference',      code=> q/ref $value eq 'ARRAY'/,                            default=> [],    symbol => '@'  },
+  {name=> 'hash_ref',   help=> 'hash reference',       code=> q/ref $value eq 'HASH'/,                             default=> {},    symbol => '%'  },
+  {name=> 'code_ref',   help=> 'code reference',       code=> q/ref $value eq 'CODE'/,                            default=> sub {}, symbol => '&'  },
+  {name=> 'object',     help=> 'object reference',     code=> q/blessed($value)/,                                default=> bless {},symbol => '!'  },
+  {name=> 'type',       help=> 'type checker object',  code=> 'ref $value ~~ [Kephra::Base::Data::Type::class_names]', default=> $dummy_type, symbol => 'T' }
   {name=> 'element_type',help=>'basic type object',    code=> q/ref $value eq 'Kephra::Base::Data::Type::Basic'/,  default=> $dummy_type},
 );
 
@@ -60,13 +60,13 @@ our @parametric_type_definitions =  (
      code=> 'return "value $value is not a $param reference" if ref $value ne $param',  parent=> 'value',     default=> [], 
                                            parameter => {   name => 'ref_name',  parent=> 'str',       default=> 'ARRAY'}, },
 );
-our @forbidden_shortcuts = (qw/{ } ( ) < > - _ | = * ' "/,','); # §    #  ^ ' " ! /  ;
+our @forbidden_symbols = (qw/{ } ( ) < > - _ | = * ' "/,','); # §    #  ^ ' " ! /  ;
 
 my $space = Kephra::Base::Data::Type::Namespace->new(); 
 sub name_space      {$space}                                      #    -->  .tnamespace
 sub init {                                                        #    -->  .tnamespace
     return $store unless $space->is_open();
-    $space->forbid_shortcuts(@forbidden_shortcuts);
+    $space->forbid_symbols(@forbidden_symbols);
     $space->add_type( $_ ) for @basic_type_definitions, @parametric_type_definitions;
     $space->close();
     $space;

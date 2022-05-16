@@ -10,7 +10,7 @@ no warnings 'experimental::smartmatch';
 #                 coderef => eval{ sub{ return $_[0] 'failed not a reference' unless not ref $_[0]; ...; 0} } }
 
 package Kephra::Base::Data::Type::Basic;
-our $VERSION = 1.7;
+our $VERSION = 1.71;
 use Scalar::Util qw/blessed looks_like_number/;
 ################################################################################
 sub _unhash_arg_ {
@@ -56,6 +56,7 @@ sub restate {    # %state                               --> .type | ~errormsg
 }
 #### getter ####################################################################
 sub name           { $_[0]->{'name'} }            # _                  -->  ~name
+sub full_name      { $_[0]->{'name'} }            # _                  -->  ~name
 sub help           { $_[0]->{'checks'}[-2] }      # _                  -->  ~help
 sub code           { $_[0]->{'checks'}[-1] }      # _                  -->  ~code
 sub parents        { $_[0]->{'parents'} }         # _                  -->  @:parent~name

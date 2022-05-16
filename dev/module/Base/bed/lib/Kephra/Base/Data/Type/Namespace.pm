@@ -14,7 +14,7 @@ use Kephra::Base::Data::Type::Parametric;        my $ptclass = 'Kephra::Base::Da
 #### constructor, serialisation ################################################
 sub new {      # -- |'open'   --> .tnamespace
     my ($pkg) = @_;                      #  0|1|'open' (stay)    __PACKAGE__  __FILE__
-    bless {basic_type => {}, param_type => {}, open => $_[1]//1, 
+    bless {basic_type => {}, param_type => {}, open => (exists $_[1] and lc $_[1] eq 'open') ? 'open' : 1, 
            basic_owner => {}, param_owner => {}, basic_origin => {}, param_origin => {},
            basic_symbol => {}, basic_symbol_name => {}, param_symbol => {}, param_symbol_name => {}, forbid_symbol => {}};
 }
@@ -45,7 +45,7 @@ sub restate {  # %state     --> .tnamespace
 }
 
 ################################################################################
-sub is_open{ $_[0]->{'open'} } #(open store cant be closed)                  # --> ?
+sub is_open{ $_[0]->{'open'} ? 1 : 0 } # (open store cant be closed)                  # --> ?
 sub close  { return 0 if $_[0]->{'open'} eq 'open' or not $_[0]->{'open'}; $_[0]->{'open'} = 0; 1 } # --> ?
 
 ##### type definition handling (resolving type names) ##########################
@@ -74,13 +74,14 @@ sub resolve_names {                                 # .typedef --> +solved, @ope
         my $type = $self->get_type( $rparent->{'parent'} );
         if (ref $type){ $rparent->{'parent'} = $type; $known++ } else { $open++ }
     }
-    $rparameter = $rparameter->{'parent'} until exists $rparameter->{'parameter'} or ref $rparameter ne 'HASH';
+    $rparameter = $rparameter->{'parent'} while ref $rparameter eq 'HASH' and exists $rparameter->{'parent'}
+                                                                          and not exists $rparameter->{'parameter'};
     if (ref $rparameter->{'parameter'} eq 'HASH'){
         $rparameter = $rparameter->{'parent'} while ref $rparameter->{'parent'} eq 'HASH';
-        return $known, $open if ref $rparameter->{'parent'}; 
+        return $known, $open if ref $rparameter->{'parent'} or not exists $rparameter->{'parent'}; 
         my $type = $self->get_type( $rparameter->{'parent'} );
         if (ref $type){ $rparameter->{'parent'} = $type; $known++ } else { $open++ }
-    } elsif (not ref $rparameter->{'parameter'}){
+    } elsif (exists $rparameter->{'parameter'} and not ref $rparameter->{'parameter'}){
         my $type = $self->get_type( $rparameter->{'parameter'} );
         if (ref $type){ $rparameter->{'parameter'} = $type; $known++ } else { $open++ }
     }
@@ -90,7 +91,7 @@ sub create_type {                                 # .typedef --> +solved, @open_
     my ($self, $type_def) = @_;
     return undef unless ref $type_def eq 'HASH';
     my ($known, $open) = $self->resolve_names($type_def);
-    return "definition of type $type_def->{name} refers to unknown types" if $open;
+    return "definition of type '$type_def->{name}' refers to unknown types" if $open;
     (exists $type_def->{'parameter'} or ref $type_def->{'parent'} eq $ptclass)
           ? Kephra::Base::Data::Type::Parametric->new( $type_def )
           : Kephra::Base::Data::Type::Basic->new( $type_def );
@@ -100,7 +101,7 @@ sub create_type {                                 # .typedef --> +solved, @open_
 sub add_type {                               # .type - ~symbol ?public      --> .type, @~names | ~!
     my ($self, $type, $symbol, $public) = @_;
     return 'can not add to a closed type namespace' unless $self->{'open'};
-    my ($package, $file, $line) = (defined $public and $public) ? caller() : ('', '', '');
+    my ($package, $file, $line) = (defined $public and $public) ? ('', '', '') : caller();
     my $type_ref = ref $type;
     if ($type_ref eq 'HASH'){
         for my $tname( $self->need_resolve( $type )) {
@@ -177,15 +178,22 @@ sub _add_type_object {
 }
 
 sub remove_type {                          # ~type - ~param                  --> .type|~!
-    my ($self, $type_name, $param_name) = @_;
+    my $self = shift;
     return 'can not remove from a closed type namespace' unless $self->{'open'};
-    my $type = $self->get_type( $type_name, $param_name );
-    my $full_name = defined $param_name ? $type_name.' of '.$param_name : $type_name;
-    return "type '$full_name' is unknown and can not be removed from store" unless ref $type;
+    my $type = $self->get_type( @_ );
+    my $full_name = $type->full_name;
+    return "type '$full_name' is unknown and can not be removed from namespace" unless ref $type;
     my ($package, $file, $line) = caller();
     my $owned = $self->_is_type_owned($type, $package, $file);
     return "type '$full_name' can not be deleted by caller '$package' in '$file', because it is no the owner" unless $owned;
-    if (defined $param_name) {
+    my $type_name = $type->name;
+    if ($type->kind eq 'basic') {
+        delete $self->{'basic_symbol_name'}{ delete $self->{'basic_symbol'}{ $type_name } } if exists $self->{'basic_symbol'}{ $type_name };
+        delete $self->{'basic_origin'}{ $type_name };
+        delete $self->{'basic_owner'}{ $type_name };
+        delete $self->{'basic_type'}{ $type_name };
+    } else {  
+        my $param_name = $type->parameter->name;
         my $type = delete $self->{'param_type'}{ $type_name }{ $param_name };
         delete $self->{'param_type'}{ $type_name } unless %{$self->{'param_type'}{ $type_name }};
         if (exists $self->{'param_symbol'}{ $type_name } and not exists $self->{'param_type'}{ $type_name }){
@@ -195,13 +203,8 @@ sub remove_type {                          # ~type - ~param                  -->
         delete $self->{'param_origin'}{ $type_name }                unless %{$self->{'param_origin'}{ $type_name }};
         delete $self->{'param_owner'}{ $type_name }{ $param_name } if exists $self->{'param_owner'}{ $type_name };
         delete $self->{'param_owner'}{ $type_name }                unless %{$self->{'param_owner'}{ $type_name }};
-        $type;
-    } else {  
-        delete $self->{'basic_symbol_name'}{ delete $self->{'basic_symbol'}{ $type_name } };
-        delete $self->{'basic_origin'}{ $type_name };
-        delete $self->{'basic_owner'}{ $type_name };
-        delete $self->{'basic_type'}{ $type_name };
     }
+    $type;
 }
 
 sub get_type {                                 # ~type -- ~param       --> .btype|.ptype|undef
@@ -209,7 +212,9 @@ sub get_type {                                 # ~type -- ~param       --> .btyp
     ($type_name, $param_name) = @$type_name if ref $type_name eq 'ARRAY';
     if (defined $param_name and $param_name){
        return $self->{'param_type'}{$type_name}{$param_name} if exists $self->{'param_type'}{$type_name}
-    } else { return $self->{'basic_type'}{$type_name}  }
+    } elsif (defined $type_name) {
+       return $self->{'basic_type'}{$type_name}  
+    }
     undef;
 }
 sub has_type      { ref get_type(@_) ? 1 : 0 }      #.tnamespace ~type - ~param --> ?
@@ -225,8 +230,8 @@ sub _is_type_owned {
     if ($type->kind eq 'basic'){
         return ($self->{'basic_owner'}{$type->name} eq $package and $self->{'basic_origin'}{$type->name} eq $file) ? 1 : 0
     } else {
-        return ($self->{'basic_owner'}{$type->name}{$type->parameter->name} eq $package 
-                and $self->{'basic_origin'}{$type->name}{$type->parameter->name} eq $file) ? 1 : 0
+        return ($self->{'param_owner'}{$type->name}{$type->parameter->name} eq $package 
+                and $self->{'param_origin'}{$type->name}{$type->parameter->name} eq $file) ? 1 : 0
     }
 }
 

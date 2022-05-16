@@ -10,7 +10,7 @@ no warnings 'experimental::smartmatch';
 #           parameter =>{name => 'ARRAY', help => 'array reference', code => 'ref $value eq "ARRAY"', default => []}    }   # type is required
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 1.6;
+our $VERSION = 1.61;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type::Basic;         my $btype = 'Kephra::Base::Data::Type::Basic';
 
@@ -85,6 +85,7 @@ sub _compile_with_safe_param_ {
 }
 ################################################################################
 sub name           { $_[0]->{'name'} }            # _                     -->  ~PTname (type name)
+sub full_name      { $_[0]->{'name'}.' of '.$_[0]->{'parameter'}->name } # _ -->  ~name.~paramname
 sub help           { $_[0]->{'help'} }            # _                     -->  ~help
 sub default_value  { $_[0]->{'default'} }         # _                     -->  $default
 sub parameter      { $_[0]->{'parameter'} }       # _                     -->  .parameter

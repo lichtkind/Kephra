@@ -7,7 +7,7 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 package Very::Long::Package; sub new {bless {}} 
 
 use Kephra::Base::Data::Type::Parametric;
-use Test::More tests => 188;
+use Test::More tests => 190;
 
 sub simple_type { Kephra::Base::Data::Type::Basic->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }
@@ -34,6 +34,7 @@ my $Tshortref = para_type({name => 'short_ref', help => 'reference with short, g
 
 is ( ref $Tindex, $ptclass,                    'created first prametric type object, type "index" with positional arguments');
 is ( $Tindex->name, 'index',                   'got attribute "name" from getter of "index"');
+is ( $Tindex->full_name, 'index of parray',    'got full name of type "index of parray"');
 is ( $Tindex->help, 'valid index of array',    'got attribute "help" from getter of "index"');
 is ( $Tindex->default_value, 0,                'got attribute "default" value from getter of "index"');
 is( ref $Tindex->parents, 'HASH',              'got parents in HASH ref');
@@ -138,6 +139,7 @@ ok ( $tchecker->(3,[1,2,3]),                   'trusting checker of type "index"
 
 is ( ref $Tref, $ptclass,                      'created second prametric type object, type "ref" with named arguments');
 is ( $Tref->name, 'reference',                 'got attribute "name" from getter of type "ref"');
+is ( $Tref->full_name, 'reference of refname', 'got full name of type "reference of refname"');
 is ( $Tref->help,'reference of given type',    'got attribute "help" from getter of type "ref"');
 is ( $Tref->default_value, $erefdef,           'got attribute "default" value from getter of "ref"');
 ok( $Tref->is_parent('any'),                   'Type "any" is parent');
