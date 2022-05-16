@@ -2,10 +2,10 @@ use v5.20;
 use warnings;
 use utf8;
 
-# definition and store of standard data type checker objects
+# definition and set (namespace) of standard data type checker objects
 
 package Kephra::Base::Data::Type::Standard;
-our $VERSION = 2.83;
+our $VERSION = 2.9;
 use Kephra::Base::Data::Type::Namespace;
 
 my $dummy_type = Kephra::Base::Data::Type::Basic->new('dummy', 'dummy', 1, undef, 1);
@@ -63,16 +63,11 @@ our @parametric_type_definitions =  (
 our @forbidden_shortcuts = (qw/{ } ( ) < > - _ | = * ' "/,','); # §    #  ^ ' " ! /  ;
 
 my $space = Kephra::Base::Data::Type::Namespace->new(); 
-sub name_space      {$space}                                      #    -->  .tstore
-sub init {                                             #    -->  .tstore
+sub name_space      {$space}                                      #    -->  .tnamespace
+sub init {                                                        #    -->  .tnamespace
     return $store unless $space->is_open();
     $space->forbid_shortcuts(@forbidden_shortcuts);
-    for (@basic_type_definitions, @parametric_type_definitions){
-        #Kephra::Base::Data::Type::Util::substitude_names($_, $store);
-        $space->add_type( $_ );
-    }
-    #$store->add_shortcut( 'basic', $_, $basic_type_shortcut{$_} )   for keys %basic_type_shortcut;
-    #$store->add_shortcut( 'param', $_, $parametric_type_shortcut{$_} ) for keys %parametric_type_shortcut;
+    $space->add_type( $_ ) for @basic_type_definitions, @parametric_type_definitions;
     $space->close();
     $space;
 }

@@ -8,16 +8,31 @@ no warnings 'experimental::smartmatch';
 package Kephra::Base::Data::Type::Checker;
 our $VERSION = 0.01;
 
-use Kephra::Base::Data::Type::NameSpace;;
+use Kephra::Base::Data::Type::Namespace;;
 
 sub new {
     my ($pkg, @name_spaces) = @_;
 
-    bless {};
+    bless {order => [], spaces => {}, open => $_[1]//1, };
 }
 
+sub state {
+
+}
+
+sub restate {
+
+}
+
+################################################################################
+
 sub add_namespace{
-    my ($self, $ns_name, $name_space) = @_;
+    my ($self, $ns_name, $name_space, $pos) = @_;
+
+}
+
+sub move_namespace {
+    my ($self, $ns_name) = @_;
 
 }
 
@@ -28,6 +43,16 @@ sub remove_namespace {
 
 sub close {
     my ($self) = @_;
+}
+################################################################################
+
+sub get_type {                                 # ~type -- ~param       --> .btype|.ptype|undef
+    my ($self, $type_name, $param_name) = @_;
+    ($type_name, $param_name) = @$type_name if ref $type_name eq 'ARRAY';
+    if (defined $param_name and $param_name){
+       return $self->{'param_type'}{$type_name}{$param_name} if exists $self->{'param_type'}{$type_name}
+    } else { return $self->{'basic_type'}{$type_name}  }
+    undef;
 }
 
 sub list_type_names   {                        # - ~kind ~ptype              --> @~btype|@~ptype|@~param
@@ -51,12 +76,14 @@ sub check_basic_type {                     # .tstore ~type $val              -->
     return "no basic type named $type_name is known by this store" unless ref $type;
     $type->check($value);
 }
+
 sub check_param_type {                     # .tstore ~type ~param $val $pval -->  ~errormsg
     my ($self, $type_name, $param_name, $value, $param_value) = @_;
     my $type = $self->get_type( $type_name, $param_name );
     return "no type $type_name with parameter $param_name is known by this store" unless ref $type;
     $type->check($value, $param_value);
 }
+
 sub guess_basic_type {                     # .tstore $val                    --> @~type
     my ($self, $value) = @_;
     my @types = $self->list_type_names('basic');

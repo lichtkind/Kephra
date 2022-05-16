@@ -4,7 +4,7 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Test::More tests => 145;
+use Test::More tests => 160;
 
 use Kephra::Base::Data::Type::Basic;
 sub create_type { Kephra::Base::Data::Type::Basic->new(@_) }
@@ -24,6 +24,8 @@ my $vc = 'not ref $value'; # type value code
 my $Tvalue = create_type('value', $vh, $vc, undef, '');
 is( ref $Tvalue, $pkg,                'created first type object "value"');
 is( $Tvalue->name, 'value',           'got attribute "name" from getter of value type object');
+is( $Tvalue->help, $vh,               'got attribute "help" from getter of value type object');
+is( $Tvalue->code, $vc,               'got attribute "code" from getter of value type object');
 is( $Tvalue->is_parent(undef), '',   'has no parents');
 ok( $Tvalue->is_parent('') == 0,     'has no parents, (with empty string too)');
 is( $Tvalue->is_parent('value'), '', 'self is not a parent');
@@ -52,6 +54,8 @@ is( ref $state, 'HASH',               'state dump is hash ref');
 my $Tvclone = Kephra::Base::Data::Type::Basic->restate($state);
 is( ref $Tvclone, $pkg,               'recreated object for type "value" from serialized state');
 is( $Tvclone->name, 'value',          'got attribute "name" from getter');
+is( $Tvclone->help, $vh,              'got attribute "help" from getter');
+is( $Tvclone->code, $vc,              'got attribute "code" from getter');
 is( int @{$Tvclone->parents}, 0,      'has no parents');
 is( $Tvclone->default_value, '',      'got attribute "default" value from getter');
 is( $Tvclone->check_data(3), '',      'check method of type "value" clone accepts correctly value 3');
@@ -67,6 +71,7 @@ my $bc = '$value eq 0 or $value eq 1'; # type bool code
 my $Tbool = create_type('bool','0 or 1', $bc, $Tvalue, 0);
 is( ref $Tbool, $pkg,                 'created child type object bool');
 is( $Tbool->name, 'bool',             'got attribute "name" from getter of type bool');
+is( $Tbool->help, '0 or 1',           'got attribute "help" from getter of type bool');
 is( $Tvalue->is_parent(undef), '',    'has no parents');
 ok( 'value' ~~ $Tbool->parents,       'Type "value" is parent');
 
@@ -108,6 +113,8 @@ my $str_help = 'character string';
 my $Tstr = create_type('str', $str_help, undef, $Tvalue);
 is( ref $Tstr, $pkg,                 'created rename type object str with undef help and code');
 is( $Tstr->name, 'str',              'got attribute "name" from getter of type str');
+is( $Tstr->help, $str_help,          'got attribute "help" from getter of type str');
+is( $Tstr->code, 'not ref $value',   '"code" has inherited value');
 is( $Tstr->default_value, '',        'got attribute "default" inherited from parent');
 is( $Tstr->check_data('-'), '',      'check method of type "str" accepts correctly "-"');
 is( $Tstr->check_data(1), '',        'check method of type "str" accepts correctly 1');
@@ -132,6 +139,8 @@ ok( $Tstr->check_data([]),           'check method of type "str" denies with err
 $Tbool = create_type({name => 'bool', help => '0 or 1', code => '$value eq 0 or $value eq 1',default => 0, parent => $Tvalue});
 is( ref $Tbool, $pkg,                'created type "bool", child of type "value" with argument hash');
 is( $Tbool->name, 'bool',            'got attribute "name" from getter of type bool');
+is( $Tbool->help, '0 or 1',          'got attribute "help" from getter of type bool');
+is( $Tbool->code, '$value eq 0 or $value eq 1',       'got attribute "code" from getter of type bool');
 is( ref $Tbool->parents, 'ARRAY',    'got parents in array ref');
 is( int @{$Tbool->parents}, 1,       'has one parent');
 ok( 'value' ~~ $Tbool->parents,      'Type "value" is parent');
@@ -174,6 +183,9 @@ is( $checks->[3], $bc,               'second check pair value is code string');
 
 $Tbool = create_type('bool', '0 or 1', '$value eq 0 or $value eq 1', {name => 'value', help => $vh, code => $vc, default => ''},0);
 is( ref $Tbool, $pkg,                'created type "bool", with positional definition of parent type "value" in place');
+is( $Tbool->name, 'bool',            'got attribute "name" from getter of type bool');
+is( $Tbool->help, '0 or 1',          'got attribute "help" from getter of type bool');
+is( $Tbool->code, '$value eq 0 or $value eq 1', 'got attribute "code" from getter of type bool');
 is( $Tbool->check_data(1), '',       'check method of type "bool" accepts correctly 1');
 ok( $Tbool->check_data([]),          'check method of type "bool" denies with error correctly value ARRAY ref');
 ok( $Tbool->check_data(5),           'check method of type "bool" denies with error correctly value 5');
@@ -188,6 +200,9 @@ is( int @{$Tpint->parents}, 2,       'has two parents');
 ok( $Tpint->is_parent('value'),      'Type "value" is parent (by direct method)');
 ok( $Tpint->is_parent('int'),        'Type "int" is parent (by direct method)');
 ok( 'int' ~~ $Tpint->parents,        'Type "int" is parent');
+is( $Tpint->name, 'int_pos',         'got attribute "name" from getter of type pos int');
+is( $Tpint->help, 'positive',        'got attribute "help" from getter of type pos int');
+is( $Tpint->code, '$value >= 0',     'got attribute "code" from getter of type pos int');
 
 
 ok( not (ref create_type()),                        'can not create type without any argument');

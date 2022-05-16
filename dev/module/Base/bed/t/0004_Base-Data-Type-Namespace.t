@@ -6,19 +6,28 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 use Kephra::Base::Data::Type::Basic;       my $bclass  = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Type::Parametric';
-use Kephra::Base::Data::Type::NameSpace;   my $sclass  = 'Kephra::Base::Data::Type::NameSpace';
+                                           my $sclass  = 'Kephra::Base::Data::Type::Namespace';
 
 package TypeTester; 
-use Test::More tests => 220;
+use Test::More tests => 300;
 
-my $store = Kephra::Base::Data::Type::NameSpace->new();
-is( ref $store, $sclass,                                                  'could create a closable type store object');
-is( $store->list_type_names('basic'),                      undef,         'no basic types can be listed');
-is( $store->list_type_names('param'),                      undef,         'no parametric types can be listed');
-is( $store->list_shortcuts('basic'),                       undef,         'no basic shortcut can be listed');
-is( $store->list_shortcuts('param'),                       undef,         'no parametric shortcut can be listed');
-is( $store->list_forbidden_shortcuts(),                    undef,         'no forbidden shortcut can be listed');
-is( $store->is_open(),                                         1,         'newly made type store is open');
+eval "use $sclass;";
+is( $@, '',                                                               'loaded namespace package');
+
+
+my $space = Kephra::Base::Data::Type::Namespace->new();
+is( ref $space, $sclass,                                                  'could create a closable type namespace object');
+is( $space->list_type_names('basic'),                      undef,         'no basic types can be listed');
+is( $space->list_type_names('param'),                      undef,         'no parametric types can be listed');
+is( $space->list_symbols('basic'),                         undef,         'no basic symbols can be listed');
+is( $space->list_symbols('param'),                         undef,         'no parametric symbols can be listed');
+is( $space->list_forbidden_symbols(),                      undef,         'no forbidden symbols can be listed');
+is( $space->is_open(),                                         1,         'newly made type namespace is open');
+
+
+exit 0;
+
+__END__
 is( $store->is_type_known('superkalifrailistisch'),            0,         'check for unknown basic type');
 is( $store->is_type_known('superkalifrailistisch', 'p'),       0,         'check for unknown parametric type');
 is( $store->is_type_owned('superkalifrailistisch'),            0,         'caller does not own unknown basic type');
