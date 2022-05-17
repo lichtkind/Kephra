@@ -10,7 +10,7 @@ no warnings 'experimental::smartmatch';
 #                 coderef => eval{ sub{ return $_[0] 'failed not a reference' unless not ref $_[0]; ...; 0} } }
 
 package Kephra::Base::Data::Type::Basic;
-our $VERSION = 1.71;
+our $VERSION = 1.8;
 use Scalar::Util qw/blessed looks_like_number/;
 ################################################################################
 sub _unhash_arg_ {
@@ -33,7 +33,7 @@ sub new {        # ~name ~help -- ~code  .parent $default  --> .type | ~errormsg
         return "can not create type $name, because definition of parent has issue: $parent" unless ref $parent;
         @$checks = @{$parent->source};
         $default //= $parent->default_value;
-        push @$parents, $parent->name, @{$parent->parents}; 
+        push @$parents, $parent->name, $parent->parents; 
     }
     if ($code) {  push @$checks, $help, $code }
     else       { $checks->[-2] = $help  }
@@ -55,20 +55,21 @@ sub restate {    # %state                               --> .type | ~errormsg
     bless $state;
 }
 #### getter ####################################################################
+sub kind           { 'basic' }                    # _                  -->  'basic'|'param'
+sub ID             { $_[0]->{'name'} }            # _                  -->  ~name
 sub name           { $_[0]->{'name'} }            # _                  -->  ~name
 sub full_name      { $_[0]->{'name'} }            # _                  -->  ~name
 sub help           { $_[0]->{'checks'}[-2] }      # _                  -->  ~help
 sub code           { $_[0]->{'checks'}[-1] }      # _                  -->  ~code
-sub parents        { $_[0]->{'parents'} }         # _                  -->  @:parent~name
+sub parents        { @{$_[0]->{'parents'}} }      # _                  -->  @:parent~name
 sub parameter      { '' }                         # _                  -->  ''  # make API compatible
-sub is_parent      { $_[1] ~~ $_[0]->{'parents'} }# _  ~parent         -->  ?
+sub has_parent     { $_[1] ~~ $_[0]->{'parents'} }# _  ~parent         -->  ?
 sub source         { $_[0]->{'checks'} }          # _                  -->  @checks
 sub default_value  { $_[0]->{'default'} }         # _                  -->  $default
 sub checker        { $_[0]->{'coderef'} }         # _                  -->  &checker
 #### public API ################################################################
 sub check_data     { $_[0]->{'coderef'}->($_[1]) }# _  $val            -->  '' | ~errormsg
 sub assemble_code { _asm_($_[0]->name, $_[0]->source) }
-sub kind           { 'basic' }                    # _                  -->  'basic'|'param'
 #### internal util #############################################################
 sub _check_name  {
     return "type name is not defined" unless defined $_[0];

@@ -63,7 +63,7 @@ sub _parameter_root_name {
     _root_parent_name( $type_def->{'parameter'} ) if $type_def eq 'HASH' and exists $type_def->{'parameter'};
 }
 sub need_resolve { grep {$_} _root_parent_name($_[1]), _parameter_root_name($_[1]) }  # _ .typedef -->  @~ names == $: +solved = 0|1|2
-sub can_resolve { grep {$_[0]->has_type($_)} _root_parent_name($_[1]), _parameter_root_name($_[1]) } # .typedef --> +solved = 0|1|2
+sub can_resolve { grep {$_[0]->get_type($_)} _root_parent_name($_[1]), _parameter_root_name($_[1]) } # .typedef --> +solved = 0|1|2
 sub resolve_names {                                 # .typedef --> +solved, @open_names
     my ($self, $type_def) = @_;
     return undef unless ref $type_def eq 'HASH';
@@ -253,7 +253,7 @@ sub _key_from_kind_ {
 sub list_symbols    {                        #                             --> @~symbols
     my ($self, $kind) = @_;
     ($kind = _key_from_kind_($kind)) or return;
-    sort keys( %{$self->{$kind.'_symbol'}});
+    sort keys( %{$self->{$kind.'_symbol_name'}});
 }
 sub type_name_from_symbol {                          # ~symbolt -- ~kind      --> ~name|undef
     my ($self, $symbol, $kind) = @_;

@@ -8,17 +8,20 @@ use Kephra::Base::Data::Type::Basic;       my $bclass  = 'Kephra::Base::Data::Ty
 use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Type::Parametric';
                                            my $sclass  = 'Kephra::Base::Data::Type::Namespace';
 
-my $val_def = { name=> 'value',  help=> 'defined value',    code=> 'defined $value',                            default=> '',     };
-my $nref_def = {name=> 'no_ref', help=> 'not a reference',  code=> 'not ref $value',        parent=> 'value',              , symbol => '$'};
-my $int_def = { name=> 'int',    help=> 'integer',          code=> 'int($value) eq $value', parent=> 'no_ref',  default=> 0, symbol => 'N'};
-my $ip_def =  { name=> 'int_pos',help=> 'greater equal zero',code=>'$value >= 0',           parent=> 'int'};
-my $aref_def = {name=> 'array_ref', help=> 'array reference',code=> q/ref $value eq 'ARRAY'/,                   default=> []};
-my $nea_def = {name=> 'nemty_array', help=> 'array with content', code=> '@$value',         parent => 'array_ref', default=> [1]};
-my $index_def ={name => 'index', help=> 'valid index of array',code=> 'return "value $value is out of range" if $value >= @$param', symbol => 'I', 
+my $val_def  = { name=> 'value',  help=> 'defined value',     code=> 'defined $value',                             default=> '',     };
+my $nref_def = { name=> 'no_ref', help=> 'not a reference',   code=> 'not ref $value',        parent=> 'value',              ,  symbol => '$'};
+my $int_def  = { name=> 'int',    help=> 'integer',           code=> 'int($value) eq $value', parent=> 'no_ref',   default=> 0, symbol => 'N'};
+my $ip_def   = { name=> 'int_pos',help=> 'greater equal zero',code=>'$value >= 0',            parent=> 'int'};
+my $aref_def = { name=> 'array_ref',help=> 'array reference', code=> q/ref $value eq 'ARRAY'/,                     default=> []};
+my $nea_def  = { name=> 'nemty_array',help=>'array with content',code=> '@$value',            parent => 'array_ref', default=> [1]};
+my $index_def= { name=> 'index',  help=> 'valid index of array',code=> 'return "value $value is out of range" if $value >= @$param', symbol => 'I', 
                      parent=> 'int_pos',  parameter => {   name => 'array',  parent=> 'array_ref', default=> [1] }, };
 my $dindex_def ={name => 'index', help=> 'valid index of array',code=> 'return "value $value is out of range" if $value >= @$param', symbol => 'I', 
                      parent=> 'int_pos',  parameter => 'nemty_array'} ;
-my $simple_para = {name => 'simple_para', help => 'help', code => 1, default => 1, parameter => { name => 'name',  help => 'help', code => 1, default => 1, }};
+my $simple_para   = {name => 'simple_para', help => 'help', code => 1, default => 1, parameter => { name => 'param',  help => 'help', code => 1, default => 1, }};
+my $simple_pchild = {name => 'sp_child', help => 'help', code => 2, default => 2, parent => 'simple_para'};
+my $simple_ppara  = {name => 'sp_para', help => 'help', code => 3, default => 3, parameter => 'value'};
+my $simple_pparent= {name => 'sp_ppara', help => 'help', code => 4, default => 4, parameter => { name => 'ppp', help => 'help', code => 5, parent => 'value'}};
 
 package NameSpaceTester; 
 use Test::More tests => 300;
@@ -84,6 +87,16 @@ is( $ospace->get_type( $ptype->name,$ptype->parameter->name ), $ptype,    'can r
 is( $ospace->get_type( [$ptype->name,$ptype->parameter->name]), $ptype,   'can retrieve param type from namespace (ARRAY ref syntax)');
 is( $ospace->is_type_owned( $ptype->name,$ptype->parameter->name ), 1,    'ownership of current package confirmed');
 is( $ospace->is_type_owned( [$ptype->name,$ptype->parameter->name] ), 1,  'ownership of current package confirmed (ARRAY ref syntax)');
+
+package Foreign;
+Test::More::is( $ospace->is_type_owned( $btype->name ),                    0,         'basic type owned by different package');
+Test::More::like( $ospace->remove_type( $btype->name ),   qr/not be deleted/,         'foreign package can not remove basic type');
+Test::More::is( $ospace->is_type_owned( $ptype->name,$ptype->parameter->name ), 0,    'param type owned by different package');
+Test::More::is( $ospace->is_type_owned( [$ptype->name,$ptype->parameter->name] ), 0,  'param type owned by different package (ARRAY ref syntax)');
+Test::More::like( $ospace->remove_type( $ptype->name,$ptype->parameter->name ),       qr/not be deleted/,         'foreign package can not remove param type');
+Test::More::like( $ospace->remove_type( [$ptype->name,$ptype->parameter->name]),      qr/not be deleted/,         'foreign package can not remove param type (ARRAY ref syntax)');
+
+package NameSpaceTester; 
 my @names = $ospace->list_type_names('basic');
 is( int @names,                                                1,         'only one basic type was stored');
 is( $names[0],                                      $btype->name,         'listed its name right');
@@ -97,19 +110,56 @@ my @symbols = $ospace->list_symbols('basic');
 is( int @symbols,                                              0,         'no basic type symbols was stored yet');
 @symbols = $ospace->list_symbols('param');
 is( int @symbols,                                              0,         'no parametric type symbols was stored yet');
+@names = $ospace->need_resolve($nref_def);
+is( int @names,                                                1,         'parent of basic type needs to be resolved(name => obj ref)');
+is( $names[0],                                      $btype->name,         'listed its name right');
+@names = $ospace->can_resolve($nref_def);
+is( int @names,                                                1,         'found parent name can be resolved');
+is( $names[0],                                      $btype->name,         'listed its name right');
+my $nrf_copy = {%$nref_def};
+my ($known, $open) = $ospace->resolve_names($nrf_copy);
+is( $known,                                                    1,         'found parent name to resolve');
+is( $open,                                                     0,         'nothing else to resolve');
+@names = $ospace->need_resolve($nrf_copy);
+is( int @names,                                                0,         'parent of basic type was already resolved');
+is( ref $ospace->create_type($nrf_copy),                 $bclass,         'parent was indeed resolved, could create type');
+is( ref $ospace->create_type($nref_def),                 $bclass,         'created type object while resolving parent');
+@names = $ospace->add_type( $nref_def );
+is( $ospace->has_type( $nref_def->{'name'} ),                  1,         'created and added basic type that needed resolve');
+@names = $ospace->list_type_names('basic');
+is( int @names,                                                2,         'not there are two basic types in namespace');
+@symbols = $ospace->list_symbols('basic');
+is( int @symbols,                                              1,         'and one symbol for basic type');
+is( $symbols[0],                                             '$',         'got correct symbol name');
+is( $ospace->type_symbol_from_name($nref_def->{'name'}),     '$',         'got symbol related to baseic type name');
+is( $ospace->type_name_from_symbol('$'),     $nref_def->{'name'},         'got name related to symbol');
+
+
+
 is( $ospace->remove_type( $btype->name ),                 $btype,         'could remove basic type from namespace');
 is( $ospace->has_type( $btype->name ),                         0,         'type object is gone from namespace');
 is( $ospace->get_type( $btype->name ),                     undef,         'and its no longer retrievable');
 is( $ospace->remove_type( [$ptype->name,$ptype->parameter->name] ), $ptype,  'could remove parametric type from namespace');
-is( $ospace->has_type( $btype->name ),                         0,         'type object is gone from namespace');
-is( $ospace->get_type( $btype->name ),                     undef,         'and its no longer retrievable');
+is( $ospace->has_type( $ptype->name ),                         0,         'type object is gone from namespace');
+is( $ospace->get_type( $ptype->name ),                     undef,         'and its no longer retrievable');
+
+
 
 
 exit 0;
 
 __END__
 
+
+
 add type defs
 replace them
+forbid symbols
+allow
 symbols
-reject ownership
+test ownership of public types
+
+my $simple_para   = {name => 'simple_para', help => 'help', code => 1, default => 1, parameter => { name => 'param',  help => 'help', code => 1, default => 1, }};
+my $simple_pchild = {name => 'sp_child', help => 'help', code => 2, default => 2, parent => 'simple_para'};
+my $simple_ppara  = {name => 'sp_para', help => 'help', code => 3, default => 3, parameter => 'value'};
+my $simple_pparent= {name => 'sp_ppara', help => 'help', code => 4, default => 4, parameter => { name => 'ppp', help => 'help', code => 5, parent => 'value'}};

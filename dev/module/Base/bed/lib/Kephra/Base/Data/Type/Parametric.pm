@@ -10,7 +10,7 @@ no warnings 'experimental::smartmatch';
 #           parameter =>{name => 'ARRAY', help => 'array reference', code => 'ref $value eq "ARRAY"', default => []}    }   # type is required
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 1.61;
+our $VERSION = 1.7;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type::Basic;         my $btype = 'Kephra::Base::Data::Type::Basic';
 
@@ -23,33 +23,31 @@ sub new {   # ~name  ~help  %parameter|.parameter  ~code  .parent - $default    
     my ($name, $help, $parameter, $code, $parent, $default) = _unhash_arg_(@_);
     my $name_error = Kephra::Base::Data::Type::Basic::_check_name($name);
     return $name_error if $name_error;
-    return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref), 'code' (str) ".
+    return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref or type object), 'code' (str) ".
         "and maybe 'parent' ($btype) to create parametric type object" unless defined $code and $code and $help ;
     return "parent has to be instance of $btype or ".__PACKAGE__." to create parametric type $name"
         if defined $parent and $parent and ref $parent ne $btype and ref $parent ne __PACKAGE__;
 
-    my $parents = {};
+    my $all_parents = [];
     my $checks = [];
     if (ref $parent){
         if (ref $parent eq __PACKAGE__){
             $code = $parent->{'code'}.';'.$code;
             $parameter //= $parent->parameter;
-            return "parent has to to have the same or derived parameter type" unless $parent->parameter->name eq $parameter->name
-                                                                                  or $parent->parameter->name ~~ $parameter->parents;
-            %$parents = %{$parent->parents};
-            $parents->{ $parent->name } = $parent->parameter->name;
         } else {
             $code = Kephra::Base::Data::Type::Basic::_asm_($name, $parent->source).';'.$code;
-            $parents->{$_} = '' for @{$parent->parents}, $parent->name;
         }
+        push @$all_parents, $parent->ID, $parent->parents;
         $default //= $parent->default_value;
     }
     return "parametric type '$name' need to get or inherit a default value " unless defined $default;
-    return "parametric type '$name' has to have a 'parameter' which is a $btype class or a hash ref definition."
+    return "parametric type '$name' has to have or inherit a 'parameter' which is a $btype class or a hash ref definition."
         if ref $parameter ne $btype and ref $parameter ne 'HASH';
     $parameter = Kephra::Base::Data::Type::Basic->new( $parameter ) if ref $parameter eq 'HASH';
     return "parametric type '$name' has issues with definition of its 'parameter': $parameter " unless ref $parameter;
-
+    return "parent of parametric type has to to have the same or parent of own parameter type"
+           if $parent->kind eq 'param' and $parameter->name ne $parent->parameter->name 
+                                       and not ($parameter->has_parent( $parent->parameter ));
 
     my $error_start = "type '$name' with parameter '".$parameter->name."'";
     my $source = _compile_( $name, $checks, $code, $parameter );
@@ -57,7 +55,7 @@ sub new {   # ~name  ~help  %parameter|.parameter  ~code  .parent - $default    
     return "$error_start has bad source code : '$source' - could not eval because: $@ !" if $@;
     my $error = $coderef->( $default, $parameter->default_value);
     return "$error_start default value '". $parameter->default_value."' does not pass check - '$source' - because: $error!" if $error;
-    bless { name => $name, help => $help, default => $default, parents => $parents, parameter => $parameter, 
+    bless { name => $name, help => $help, default => $default, parents => $all_parents, parameter => $parameter, 
             code => $code, coderef => $coderef, trustcoderef => eval _compile_with_safe_param_( $name, $checks, $code),  };
 }
 ################################################################################
@@ -70,7 +68,7 @@ sub restate {                                        # %state                -->
 }
 sub state {                                          # _                     -->  %state
     { name=> $_[0]->{'name'}, help=> $_[0]->{'help'}, default=> $_[0]->{'default'}, code=> $_[0]->{'code'}, 
-      parents => \%{$_[0]->{'parents'}}, parameter=> $_[0]->{'parameter'}->state() }
+      parents => \@{$_[0]->{'parents'}}, parameter=> $_[0]->{'parameter'}->state() }
 }
 ################################################################################
 sub _compile_ {
@@ -83,28 +81,33 @@ sub _compile_with_safe_param_ {
     my ($name, $check, $code) = @_;
     'sub { my ($value, $param) = @_; no warnings "all";' . $code . ";return ''}"
 }
+sub _ID_equal {
+    my ($A, $B) = @_;
+    return 0 if ref $A ne ref $B or not defined $A or not defined $B; 
+    return 1 if not ref $A and $A eq $B;
+    return 1 if ref $A eq 'ARRAY' and $A->[0] eq $B->[0] and $A->[1] eq $B->[1];
+    0;
+}
 ################################################################################
-sub name           { $_[0]->{'name'} }            # _                     -->  ~PTname (type name)
+sub kind           { 'param' }                    # _                        -->  'basic'|'param'
+sub ID             { [$_[0]->{'name'}, $_[0]->{'parameter'}->name] }     # _ -->
+sub name           { $_[0]->{'name'} }            # _                        -->  ~PTname (type name)
 sub full_name      { $_[0]->{'name'}.' of '.$_[0]->{'parameter'}->name } # _ -->  ~name.~paramname
-sub help           { $_[0]->{'help'} }            # _                     -->  ~help
-sub default_value  { $_[0]->{'default'} }         # _                     -->  $default
-sub parameter      { $_[0]->{'parameter'} }       # _                     -->  .parameter
-sub parents        { $_[0]->{'parents'} }         # _                     -->  ?? %_parent.name -> :parent:parameter:name
-sub checker        { $_[0]->{'coderef'} }         # _                     -->  &check
-sub trusting_checker{$_[0]->{'trustcoderef'} }    # _                     -->  &trusting_check  # when parameter is already type checked
-sub kind           { 'param' }                    # _                     -->  'basic'|'param'
-################################################################################
-sub is_parent        {                            # _ ~BTname|[~PTname ~BTname]  -->  ?
+sub help           { $_[0]->{'help'} }            # _                        -->  ~help
+sub default_value  { $_[0]->{'default'} }         # _                        -->  $default
+sub parameter      { $_[0]->{'parameter'} }       # _                        -->  .parameter
+sub parents        { @{$_[0]->{'parents'}} }      # _                        -->  ?? %_parent.name -> :parent:parameter:name
+sub has_parent     {                              # _ ~BTname|[~PTname ~BTname] -->  ?
     my ($self, $typename, $paramname) = @_;
     return unless defined $typename;
-    defined $paramname ? (exists $self->{'parents'}{$typename} and $self->{'parents'}{$typename} eq $paramname)
-                       :  exists $self->{'parents'}{$typename};
+    my $ID = defined $paramname ? [$typename, $paramname] : $typename;
+    for ($self->parents){ return 1 if _ID_equal($ID, $_) }
+    0;
 }
-sub is_parameter_parent {                        # _ ~BTname|[~PTname ~BTname]  -->  ?
-    my ($self, $typename) = @_;
-    $self->parameter->name eq $typename or $self->parameter->is_parent($typename);
-}
-sub check_data     { $_[0]->{'coderef'}->($_[1], $_[2]) } # _ $val $param    -->  '' | ~errormsg
+################################################################################
+sub checker         { $_[0]->{'coderef'} }         # _                        -->  &check
+sub trusting_checker{ $_[0]->{'trustcoderef'} }    # _                        -->  &trusting_check  # when parameter is already type checked
+sub check_data      { $_[0]->{'coderef'}->($_[1], $_[2]) } # _ $val $param    -->  '' | ~errormsg
 ################################################################################
 
 2;
