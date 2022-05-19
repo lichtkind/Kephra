@@ -1,7 +1,5 @@
 use v5.20;
 use warnings;
-use feature "switch";
-no warnings 'experimental::smartmatch';
 
 # extendable collection of simple and parametric type objects with symbol, dependency and ownership resolver
 #       multiple parametric types with same name and different parameters must have same owner and shortcut
@@ -49,34 +47,36 @@ sub is_open{ $_[0]->{'open'} ? 1 : 0 } # (open store cant be closed)            
 sub close  { return 0 if $_[0]->{'open'} eq 'open' or not $_[0]->{'open'}; $_[0]->{'open'} = 0; 1 } # --> ?
 
 ##### type definition handling (resolving type names) ##########################
-sub _root_parent_name {
+sub _root_parent_ID {
     my ($type_def) = @_;
     return unless defined $type_def;
     $type_def = $type_def->{'parent'} while ref $type_def eq 'HASH' and exists $type_def->{'parent'};
     return $type_def if ref $type_def eq 'ARRAY' or (not ref $type_def and $type_def);
 }
-sub _parameter_root_name {
-    my ($self, $type_def) = @_;
-    return unless defined $type_def;
+sub _root_parameter_ID {
+    my ($type_def) = @_;
     $type_def = $type_def->{'parent'} while ref $type_def eq 'HASH' 
                                         and exists $type_def->{'parent'} and not exists $type_def->{'parameter'};
-    _root_parent_name( $type_def->{'parameter'} ) if $type_def eq 'HASH' and exists $type_def->{'parameter'};
+    _root_parent_ID( $type_def->{'parameter'} ) if ref $type_def eq 'HASH' and exists $type_def->{'parameter'};
 }
-sub need_resolve { grep {$_} _root_parent_name($_[1]), _parameter_root_name($_[1]) }  # _ .typedef -->  @~ names == $: +solved = 0|1|2
-sub can_resolve { grep {$_[0]->get_type($_)} _root_parent_name($_[1]), _parameter_root_name($_[1]) } # .typedef --> +solved = 0|1|2
-sub resolve_names {                                 # .typedef --> +solved, @open_names
+sub _solve_ID { _root_parent_ID($_[0]), _root_parameter_ID($_[0]) }
+sub need_resolve { grep {$_}                 _solve_ID($_[1]) }  # _ .typedef -->  @ID (0-2)
+sub can_resolve { grep {$_[0]->get_type($_)} _solve_ID($_[1]) }  # _ .typedef -->  @ID (0-2)
+sub resolve_names {                                              # _          --> +known, +solved
     my ($self, $type_def) = @_;
     return undef unless ref $type_def eq 'HASH';
     my $rparent = my $rparameter = $type_def;
     my ($known, $open) = (0,0);
     $rparent = $rparent->{'parent'} while ref $rparent->{'parent'} eq 'HASH';
-    if (exists $rparent->{'parent'} and not ref $rparent->{'parent'}){
+    if (exists $rparent->{'parent'} and (not ref $rparent->{'parent'} or ref $rparent->{'parent'} eq 'ARRAY')){
         my $type = $self->get_type( $rparent->{'parent'} );
         if (ref $type){ $rparent->{'parent'} = $type; $known++ } else { $open++ }
     }
-    $rparameter = $rparameter->{'parent'} while ref $rparameter eq 'HASH' and exists $rparameter->{'parent'}
-                                                                          and not exists $rparameter->{'parameter'};
+    $rparameter = $rparameter->{'parent'} while ref $rparameter->{'parent'} eq 'HASH'
+                                            and not exists $rparameter->{'parameter'};
+
     if (ref $rparameter->{'parameter'} eq 'HASH'){
+        $rparameter = $rparameter->{'parameter'};
         $rparameter = $rparameter->{'parent'} while ref $rparameter->{'parent'} eq 'HASH';
         return $known, $open if ref $rparameter->{'parent'} or not exists $rparameter->{'parent'}; 
         my $type = $self->get_type( $rparameter->{'parent'} );
@@ -87,7 +87,7 @@ sub resolve_names {                                 # .typedef --> +solved, @ope
     }
     $known, $open;
 }
-sub create_type {                                 # .typedef --> +solved, @open_names
+sub create_type {                                 # %typedef --> .type 
     my ($self, $type_def) = @_;
     return undef unless ref $type_def eq 'HASH';
     my ($known, $open) = $self->resolve_names($type_def);
@@ -98,7 +98,7 @@ sub create_type {                                 # .typedef --> +solved, @open_
 }
 
 #### type handling (add remove lookup) ########################################
-sub add_type {                               # .type - ~symbol ?public      --> .type, @~names | ~!
+sub add_type {                               # .type - ~symbol ?public      --> .type, @ID | ~!
     my ($self, $type, $symbol, $public) = @_;
     return 'can not add to a closed type namespace' unless $self->{'open'};
     my ($package, $file, $line) = (defined $public and $public) ? ('', '', '') : caller();
@@ -114,7 +114,7 @@ sub add_type {                               # .type - ~symbol ?public      --> 
 }
 sub _add_type_def {
     my ($self, $type_def, $symbol, $package, $file ) = @_;
-    my ($type, $name, @added_names);
+    my ($name, @added_names);
     return unless ref $type_def eq 'HASH';
     if (ref $type_def->{'parameter'} eq 'HASH'){
         my @result = $self->_add_type_def( $type_def->{'parameter'}, undef, $package, $file);
@@ -124,7 +124,7 @@ sub _add_type_def {
     } elsif (exists $type_def->{'parameter'} and not ref $type_def->{'parameter'}){
         my $ptype = $self->get_type( $type_def->{'parameter'} );
         return "definition of type '$type_def->{name}' has issue: parameter name '$type_def->{'parameter'}' refers to unknow type"
-            unless ref $type;
+            unless ref $ptype;
         $type_def->{'parameter'} = $ptype;
     }
     if (ref $type_def->{'parent'}  eq 'HASH'){
@@ -132,19 +132,20 @@ sub _add_type_def {
         return @result unless ref $result[0];
         $type_def->{'parent'} = shift @result;
         push @added_names, @result;
-    } elsif (exists $type_def->{'parent'} and not ref $type_def->{'parent'}){
+    } elsif (exists $type_def->{'parent'} and (not ref $type_def->{'parent'} or ref  $type_def->{'parent'} eq 'ARRAY')){
         my $ptype = $self->get_type( $type_def->{'parent'} );
         return "definition of type '$type_def->{name}' has issue: parent name '$type_def->{'parent'}' refers to unknow type"
-            unless ref $type;
+            unless ref $ptype;
         $type_def->{'parent'} = $ptype;
     }
     $symbol = delete $type_def->{'symbol'} unless defined $symbol;
-    $type = (exists $type->{'parameter'} or ref $type->{'parent'} eq $ptclass)
+
+    my $type = (exists $type_def->{'parameter'} or ref $type_def->{'parent'} eq $ptclass)
           ? Kephra::Base::Data::Type::Parametric->new( $type_def )
           : Kephra::Base::Data::Type::Basic->new( $type_def );
     ($type, $name) = $self->_add_type_object( $type, $symbol, $package, $file );
      return $type unless ref $type;
-    $type, $name, @added_names;
+    $type, $type->ID, @added_names;
 }
 sub _add_type_object {
     my ($self, $type, $symbol, $package, $file) = @_;
@@ -228,11 +229,15 @@ sub is_type_owned {                                 # .tnamespace ~type - ~param
 sub _is_type_owned {
     my ($self, $type, $package, $file) = @_;
     if ($type->kind eq 'basic'){
-        return ($self->{'basic_owner'}{$type->name} eq $package and $self->{'basic_origin'}{$type->name} eq $file) ? 1 : 0
+        return 1 if not exists $self->{'basic_owner'}{$type->name};
+        return 1 if $self->{'basic_owner'}{$type->name} eq $package and $self->{'basic_origin'}{$type->name} eq $file;
     } else {
-        return ($self->{'param_owner'}{$type->name}{$type->parameter->name} eq $package 
-                and $self->{'param_origin'}{$type->name}{$type->parameter->name} eq $file) ? 1 : 0
+        return 1 if not exists $self->{'param_owner'}{$type->name}
+                 or not exists $self->{'param_owner'}{$type->name}{$type->parameter->name};
+        return 1 if $self->{'param_owner'}{$type->name}{$type->parameter->name} eq $package 
+                and $self->{'param_origin'}{$type->name}{$type->parameter->name} eq $file;
     }
+    0;
 }
 
 sub list_type_names   {                        # - ~kind ~ptype              --> @~btype|@~ptype|@~param
@@ -250,28 +255,28 @@ sub _key_from_kind_ {
 }
 
 #### type symbols ##############################################################
-sub list_symbols    {                        #                             --> @~symbols
+sub list_symbols    {                                # _                     --> @~symbols
     my ($self, $kind) = @_;
     ($kind = _key_from_kind_($kind)) or return;
     sort keys( %{$self->{$kind.'_symbol_name'}});
 }
-sub type_name_from_symbol {                          # ~symbolt -- ~kind      --> ~name|undef
+sub type_name_from_symbol {                          # ~symbolt -- ~kind     --> ~name|undef
     my ($self, $symbol, $kind) = @_;
     ($kind = _key_from_kind_($kind)) or return;
     $self->{$kind.'_symbol_name'}{$symbol};
 }
-sub type_symbol_from_name {                          # ~name --  ~kind      --> ~symbol|undef
+sub type_symbol_from_name {                          # ~name --  ~kind       --> ~symbol|undef
     my ($self, $name, $kind) = @_;
     ($kind = _key_from_kind_($kind)) or return;
     $self->{$kind.'_symbol'}{$name};
 }
-sub list_forbidden_symbols { sort keys %{$_[0]->{'forbid_symbol'}} }  # .tstore     --> @~symbols
-sub allow_symbols  {                        # .tstore @~shortcut          --> ~errormsg
+sub list_forbidden_symbols { sort keys %{$_[0]->{'forbid_symbol'}} }     # _ --> @~symbols
+sub allow_symbols  {                                 # _ @~shortcut          --> ~errormsg
     my ($self) = shift;
     return 'can not change a closed type namespace' unless $self->{'open'};
     map {delete $self->{'forbid_symbol'}{$_}} grep {exists $self->{'forbid_symbol'}{$_}} @_;
 }
-sub forbid_symbols  {                        # .tstore @~shortcut          --> ~errormsg
+sub forbid_symbols  {                                # _ @~shortcut          --> ~errormsg
     my ($self) = shift;
     return 'can not change a closed type namespace' unless $self->{'open'};
     map {$self->{'forbid_symbol'}{$_}++} grep {not exists $self->{'forbid_symbol'}{$_}} grep { _is_symbol($_) } @_;

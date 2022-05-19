@@ -67,7 +67,8 @@ sub name_space      {$space}                                      #    -->  .tna
 sub init {                                                        #    -->  .tnamespace
     return $store unless $space->is_open();
     $space->forbid_symbols(@forbidden_symbols);
-    $space->add_type( $_ ) for @basic_type_definitions, @parametric_type_definitions;
+    #( $typedef, no symbol[comes from type def], public [no owner] )
+    $space->add_type( $_, undef, 1 ) for @basic_type_definitions, @parametric_type_definitions;
     $space->close();
     $space;
 }

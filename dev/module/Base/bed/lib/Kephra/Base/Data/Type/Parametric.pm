@@ -46,8 +46,8 @@ sub new {   # ~name  ~help  %parameter|.parameter  ~code  .parent - $default    
     $parameter = Kephra::Base::Data::Type::Basic->new( $parameter ) if ref $parameter eq 'HASH';
     return "parametric type '$name' has issues with definition of its 'parameter': $parameter " unless ref $parameter;
     return "parent of parametric type has to to have the same or parent of own parameter type"
-           if $parent->kind eq 'param' and $parameter->name ne $parent->parameter->name 
-                                       and not ($parameter->has_parent( $parent->parameter ));
+           if ref $parent and $parent->kind eq 'param' and $parameter->name ne $parent->parameter->name 
+                                                       and not ($parameter->has_parent( $parent->parameter ));
 
     my $error_start = "type '$name' with parameter '".$parameter->name."'";
     my $source = _compile_( $name, $checks, $code, $parameter );
@@ -103,6 +103,10 @@ sub has_parent     {                              # _ ~BTname|[~PTname ~BTname] 
     my $ID = defined $paramname ? [$typename, $paramname] : $typename;
     for ($self->parents){ return 1 if _ID_equal($ID, $_) }
     0;
+}
+sub ID_equals      {                              # _ $typeID                -->  ?
+    my ($self, $ID) = @_;
+    (ref $ID eq 'ARRAY' and @$ID == 2 and $ID->[0] eq $self->name and $ID->[1] eq $self->parameter->name ) ? 1 : 0
 }
 ################################################################################
 sub checker         { $_[0]->{'coderef'} }         # _                        -->  &check

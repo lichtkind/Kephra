@@ -13,7 +13,7 @@ use Kephra::Base::Data::Type::Namespace;;
 sub new {
     my ($pkg, @name_spaces) = @_;
 
-    bless {order => [], spaces => {}, open => $_[1]//1, };
+    bless {space_order => [], spaces => {}, open => $_[1]//1, };
 }
 
 sub state {
@@ -24,6 +24,10 @@ sub restate {
 
 }
 
+################################################################################
+sub close {
+    my ($self) = @_;
+}
 ################################################################################
 
 sub add_namespace{
@@ -41,9 +45,12 @@ sub remove_namespace {
 
 }
 
-sub close {
-    my ($self) = @_;
+sub get_namespace {
+    my ($self, $ns_name) = @_;
+
 }
+
+
 ################################################################################
 
 sub get_type {                                 # ~type -- ~param       --> .btype|.ptype|undef

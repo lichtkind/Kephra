@@ -1,4 +1,4 @@
-use v5.12;
+use v5.20;
 use warnings;
 use Wx;
 
@@ -160,6 +160,11 @@ sub rot_syntaxmode {
     $self->{'syntaxmode'} = $self->{'syntaxmode'} eq 'perl' ? 'no' : 'perl';
     Kephra::Document::SyntaxMode::set($self->{'editor'}, $self->{'syntaxmode'});
     app_window()->SetStatusText( $self->{'syntaxmode'}, 1);
+}
+sub rot_encoding {
+    my $self = shift;
+    $self->{'encoding'} = $self->{'encoding'} eq 'utf-8' ? 'ascii' : 'utf-8' ;
+    app_window()->SetStatusText( $self->{'encoding'}, 2);
 }
 
 1;

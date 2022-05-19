@@ -4,7 +4,7 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Test::More tests => 165;
+use Test::More tests => 168;
 
 my $pkg = 'Kephra::Base::Data::Type::Basic';
 sub create_type { Kephra::Base::Data::Type::Basic->new(@_) }
@@ -56,10 +56,11 @@ is( $Tvalue->check_data($val),
     $checker->($val),                 'got same error message when running checker explicitly or implicitly');
 
 my $state = $Tvalue->state;
-is( ref $state, 'HASH',               'state dump is hash ref');
+is( ref $state, 'HASH',                  'state dump is hash ref');
 my $Tvclone = Kephra::Base::Data::Type::Basic->restate($state);
-is( ref $Tvclone, $pkg,               'recreated object for type "value" from serialized state');
-is( $Tvclone->ID, 'value',            'got attribute "ID" from getter');
+is( ref $Tvclone, $pkg,                  'recreated object for type "value" from serialized state');
+is( $Tvclone->ID, 'value',               'got attribute "ID" from getter');
+is( $Tvclone->ID_equals( $Tvalue->ID),1, 'ID equals to the one of clone');
 is( $Tvclone->name, 'value',          'got attribute "name" from getter');
 is( $Tvclone->help, $vh,              'got attribute "help" from getter');
 is( $Tvclone->code, $vc,              'got attribute "code" from getter');
@@ -77,6 +78,8 @@ is( $checks->[1], 'not ref $value',   'check pair value is code string');
 my $bc = '$value eq 0 or $value eq 1'; # type bool code
 my $Tbool = create_type('bool','0 or 1', $bc, $Tvalue, 0);
 is( ref $Tbool, $pkg,                 'created child type object bool');
+is( $Tbool->ID, 'bool',               'got attribute "ID" from getter of type bool');
+is( $Tbool->ID_equals( $Tvalue->ID),0,'ID not equals to the one of type "value"');
 is( $Tbool->name, 'bool',             'got attribute "name" from getter of type bool');
 is( $Tbool->help, '0 or 1',           'got attribute "help" from getter of type bool');
 is( $Tvalue->has_parent(undef), '',   'has no parents');

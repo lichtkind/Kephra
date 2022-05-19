@@ -53,6 +53,7 @@ sub mount_events {
         elsif(           $ctrl and $code == &Wx::WXK_PAGEUP)  {$bar->raise_page_left() }
         elsif(           $ctrl and $code == &Wx::WXK_PAGEDOWN){$bar->raise_page_right() }
         elsif($shift and $ctrl and $code == ord('G'))         {$ed->SetSelection($ed->{'change_pos'}, $ed->{'change_pos'}) }
+        elsif(           $ctrl and $code == ord('E'))         { $doc->rot_encoding() }
         elsif(           $ctrl and $code == ord('M'))         { $doc->rot_syntaxmode() }
         elsif(           $ctrl and $code == ord('N'))         { Kephra::Document::new() }
         elsif($shift and $ctrl and $code == ord('O'))         {$doc->reopen() }

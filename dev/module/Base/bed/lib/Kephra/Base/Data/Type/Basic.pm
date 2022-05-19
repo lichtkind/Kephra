@@ -33,7 +33,7 @@ sub new {        # ~name ~help -- ~code  .parent $default  --> .type | ~errormsg
         return "can not create type $name, because definition of parent has issue: $parent" unless ref $parent;
         @$checks = @{$parent->source};
         $default //= $parent->default_value;
-        push @$parents, $parent->name, $parent->parents; 
+        push @$parents, $parent->ID, $parent->parents; 
     }
     if ($code) {  push @$checks, $help, $code }
     else       { $checks->[-2] = $help  }
@@ -57,6 +57,7 @@ sub restate {    # %state                               --> .type | ~errormsg
 #### getter ####################################################################
 sub kind           { 'basic' }                    # _                  -->  'basic'|'param'
 sub ID             { $_[0]->{'name'} }            # _                  -->  ~name
+sub ID_equals      {(defined $_[1] and not ref $_[1] and $_[0]->ID eq $_[1] ) ? 1 : 0 } # _ $typeID  -->  ?
 sub name           { $_[0]->{'name'} }            # _                  -->  ~name
 sub full_name      { $_[0]->{'name'} }            # _                  -->  ~name
 sub help           { $_[0]->{'checks'}[-2] }      # _                  -->  ~help

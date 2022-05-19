@@ -7,7 +7,7 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 package Very::Long::Package; sub new {bless {}} 
 
 use Kephra::Base::Data::Type::Parametric;
-use Test::More tests => 191;
+use Test::More tests => 197;
 
 sub simple_type { Kephra::Base::Data::Type::Basic->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }
@@ -42,6 +42,9 @@ is( int ($Tindex->parents), 3,                 'has three parents');
 ok( $Tindex->has_parent('value'),              'Type "value" is parent');
 ok( $Tindex->has_parent('int'),                'Type "int" is parent');
 ok( $Tindex->has_parent('pos_int'),            'Type "pos_int" is parent');
+is( ref $Tindex->ID,  'ARRAY',                 'parametric type has complex ID');
+is( $Tindex->ID->[0], 'index',                 'contains type name');
+is( $Tindex->ID->[1], 'parray',                'and parameter name');
 
 my $param = $Tindex->parameter();
 is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "index"');
@@ -79,7 +82,10 @@ is ( $state->{'name'},          'index',       '"name" in type "index" state HAS
 is ( $state->{'parameter'}{'name'}, 'parray',  'parameter "name" in type "index" state is correct');
 my $Ticlone = Kephra::Base::Data::Type::Parametric->restate($state);
 is ( ref $Ticlone, $ptclass,                   'recreated first prametric type object, type "index" by restate from dumped state');
+is ( $Ticlone->kind, 'param',                  'got attribute "ID" from getter of "index" clone');
 is ( $Ticlone->name, 'index',                  'got attribute "name" from getter of "index" clone');
+is ( $Ticlone->ID_equals($Tindex->ID), 1,      'cloning should not change ID');
+is ( $Ticlone->ID_equals($Tindex->parameter->ID), 0,      'parameter should have different ID');
 ok( $Ticlone->has_parent('pos_int'),           'Type "pos_int" is parent');
 ok( $Ticlone->has_parent('int'),               'Type "int" is parent');
 is ( $Ticlone->help,'valid index of array',    'got attribute "help" from getter of "index" clone');
