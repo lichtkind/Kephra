@@ -4,22 +4,21 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Kephra::Base::Data::Type::Checker;
+package TypeTester; 
+use Test::More tests => 200;
 
 my $bclass  = 'Kephra::Base::Data::Type::Basic';
 my $pclass  = 'Kephra::Base::Data::Type::Parametric';
-my $tclass  = 'Kephra::Base::Data::Type::Namespace';
+my $tclass  = 'Kephra::Base::Data::Type::Set';
 my $cclass  = 'Kephra::Base::Data::Type::Checker';
-
-package TypeTester; 
-use Test::More tests => 255;
-
 
 
 eval "use $cclass;";
 is( $@, '',                                                               'loaded type checker package');
 
+exit 0;
 
+__END__
 
 my $store = Kephra::Base::Data::Type::Store->new();
 is( ref $store, $sclass,                                                  'could create a closable type store object');

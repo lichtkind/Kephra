@@ -1,15 +1,15 @@
 #!/usr/bin/perl -w
 use v5.20;
 use warnings;
-use experimental qw/smartmatch/;
+#use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 package NameSpaceTester; 
-use Test::More tests => 203;
+use Test::More tests => 211;
 
 use Kephra::Base::Data::Type::Basic;       my $bclass  = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Type::Parametric';
-                                           my $sclass  = 'Kephra::Base::Data::Type::Namespace';
+                                           my $sclass  = 'Kephra::Base::Data::Type::Set';
 
 my $val_def  = { name=> 'value',  help=> 'defined value',     code=> 'defined $value',                             default=> '',     };
 my $nref_def = { name=> 'no_ref', help=> 'not a reference',   code=> 'not ref $value',        parent=> 'value',              ,  symbol => '$'};
@@ -36,12 +36,13 @@ eval "use $sclass;";
 is( $@, '',                                                               'loaded namespace package');
 
 
-my $space = Kephra::Base::Data::Type::Namespace->new();
+my $space = Kephra::Base::Data::Type::Set->new();
 is( ref $space, $sclass,                                                  'could create a closable type namespace object');
 is( $space->list_type_names('basic'),                      undef,         'no basic types can be listed');
 is( $space->list_type_names('param'),                      undef,         'no parametric types can be listed');
-is( $space->list_symbols('basic'),                         undef,         'no basic symbols can be listed');
-is( $space->list_symbols('param'),                         undef,         'no parametric symbols can be listed');
+is( int($space->list_types( )),                                0,         'no type ID can be listed');
+is( $space->list_type_symbols('basic'),                    undef,         'no basic symbols can be listed');
+is( $space->list_type_symbols('param'),                    undef,         'no parametric symbols can be listed');
 is( $space->list_forbidden_symbols(),                      undef,         'no forbidden symbols can be listed');
 is( $space->type_name_from_symbol('&'),                    undef,         'requested symbol s not there');
 is( $space->type_symbol_from_name('type'),                 undef,         'requested name of unknown symbol');
@@ -57,7 +58,7 @@ like($space->forbid_symbols(1),                      qr/can not/,         'can n
 like($space->allow_symbols(2),                       qr/can not/,         'can not remove from forbidden symbols at closed namespace');
 
 
-my $ospace = Kephra::Base::Data::Type::Namespace->new('open');
+my $ospace = Kephra::Base::Data::Type::Set->new('open');
 is( ref $ospace, $sclass,                                                 'could create an unclosable type namespace object');
 is( $ospace->is_open(),                                        1,         'newly made type namespace is open');
 is( $ospace->close(),                                          0,         'could not close namespace');
@@ -112,9 +113,9 @@ is( $names[0],                                      $ptype->name,         'liste
 @names = $ospace->list_type_names('param', 'simple_para');
 is( int @names,                                                1,         'only one sub type of parametric type was stored');
 is( $names[0],                           $ptype->parameter->name,         'listed its name right');
-my @symbols = $ospace->list_symbols('basic');
+my @symbols = $ospace->list_type_symbols('basic');
 is( int @symbols,                                              0,         'no basic type symbols was stored yet');
-@symbols = $ospace->list_symbols('param');
+@symbols = $ospace->list_type_symbols('param');
 is( int @symbols,            
                                   0,         'no parametric type symbols was stored yet');
 @names = $ospace->need_resolve($nref_def);
@@ -135,11 +136,14 @@ is( ref $ospace->create_type($nref_def),                 $bclass,         'creat
 is( $ospace->has_type( $nref_def->{'name'} ),                  1,         'created and added basic type that needed resolve');
 @names = $ospace->list_type_names('basic');
 is( int @names,                                                2,         'not there are two basic types in namespace');
-@symbols = $ospace->list_symbols('basic');
+@symbols = $ospace->list_type_symbols('basic');
 is( int @symbols,                                              1,         'and one symbol for basic type');
 is( $symbols[0],                                             '$',         'got correct symbol name');
 is( $ospace->type_symbol_from_name($nref_def->{'name'}),     '$',         'got symbol related to baseic type name');
 is( $ospace->type_name_from_symbol('$'),     $nref_def->{'name'},         'got name related to symbol');
+my @ID = $ospace->list_types( );
+is( @ID,                                                       3,         'now 3 type ID base, parametric and its parameter');
+
 
 # adding nested type def of basic types and without owner
 $ip_def->{'parent'} = $int_def;
@@ -149,7 +153,7 @@ is( ref $res[0],                                         $bclass,         'got b
 is( $res[1],                                       $res[0]->name,         'names are consistent');
 is( $res[1],                                   $ip_def->{'name'},         'got back type name');
 is( $res[2],                                  $int_def->{'name'},         'got back parents type name');
-@symbols = $ospace->list_symbols('basic');
+@symbols = $ospace->list_type_symbols('basic');
 is( int @symbols,                                              2,         'have now 3 symbls');
 is( $ospace->type_symbol_from_name('int'),                   'N',         'got symbol related to baseic type name');
 is( $ospace->type_name_from_symbol('N'),                   'int',         'got name related to symbol');
@@ -168,6 +172,8 @@ is($ospace->allow_symbols('a'),                                0,         'a was
 is($ospace->allow_symbols('Z'),                                1,         'Z allowed again');
 @res = $ospace->add_type( $aref_def, 'Z', 1 );
 is( ref $res[0],                                         $bclass,         'now i can add basic type again');
+@ID = $ospace->list_types( );
+is( @ID,                                                       6,         'now 6 types in open set');
 
 # replacing names in param type defs
 @names = $ospace->need_resolve($bchild);
@@ -195,6 +201,8 @@ is( $names[1][1],                 $bchild->{'parameter'}{'name'},         'type 
 is( $names[2],                    $bchild->{'parameter'}{'name'},         'parameter typ object was created under right name');
 is( $ospace->has_type( $bchild->{'name'}, $bchild->{'parameter'}{'name'} ),  1,         'type indeed was registered');
 is( $ospace->has_type( $bchild->{'parameter'}{'name'} ),       1,         'parameter type indeed was registered');
+@ID = $ospace->list_types( );
+is( @ID,                                                       8,         'now 8 types in set');
 
 @names = $ospace->need_resolve($pchild);
 is( int @names,                                                1,         'parametric type with parametric parent name, which needs to be resolved');
@@ -223,6 +231,8 @@ is( ref $names[1],                                       'ARRAY',         'creat
 is( $names[1][0],                              $pchild->{'name'},         'type object was created under right name');
 is( $names[1][1],           $pchild->{'parent'}->parameter->name,         'type object was created with right parameter name');
 is( $ospace->has_type( $pchild->{'name'}, $pchild->{'parent'}->parameter->name), 1, 'type indeed was registered');
+@ID = $ospace->list_types( );
+is( @ID,                                                       9,         'now 9 type ID base, parametric and its parameter');
 
 @names = $ospace->need_resolve($nchild);
 is( int @names,                                                1,         'parent of param type needs to be resolved');
@@ -252,7 +262,9 @@ is( ref $names[0],                                       $pclass,         'right
 is( ref $names[1],                                       'ARRAY',         'created type object has parametric ID');
 is( $names[1][0],                          $param_name->{'name'},         'type object was created under right name');
 is( $names[1][1],                                        'value',         'type object was created with right parameter name');
-is( $ospace->has_type([ $param_name->{'name'}, 'value']),      1,        'type indeed was registered');
+is( $ospace->has_type([ $param_name->{'name'}, 'value']),      1,         'type indeed was registered');
+@ID = $ospace->list_types( );
+is( @ID,                                                      10,         'now 10 types in open set');
 
 @names = $ospace->need_resolve($param_parent);
 is( int @names,                                                1,         'param type with named parameter type, which parent needs resolve');
@@ -282,6 +294,9 @@ is( $names[1][1],           $param_parent->{'parameter'}{'name'},         'type 
 is( $names[2],              $param_parent->{'parameter'}{'name'},         'type object was created under right name');
 is( $ospace->has_type([ $param_parent->{'name'}, $param_parent->{'parameter'}{'name'}]),      1,        'type indeed was registered');
 is( $ospace->has_type('pp_param'),                             1,         'but dependant types were now registered');
+@ID = $ospace->list_types( );
+is( @ID,                                                      12,         'now 12 types in open set');
+#say " - $_" for $ospace->list_type_IDs( );
 
 @names = $ospace->need_resolve($parent_param);
 is( int @names,                                                2,         'param type with named parameter type and named parent');
@@ -300,7 +315,7 @@ is( $ospace->need_resolve($tdef_copy),                         0,         'same 
 is( ref $ospace->create_type($tdef_copy),                $pclass,         'type object created from resolved type definition');
 $tdef_copy = {%$parent_param};
 $tdef_copy->{'parameter'} = {%{$parent_param->{'parameter'}}};
-my $type = $ospace->create_type($tdef_copy);
+$type = $ospace->create_type($tdef_copy);
 is( ref $type,                                           $pclass,         'type object created and resolved type definition');
 is( $type->parameter->name,                          'ppp_param',         'parameter got the right name');
 @names = $ospace->add_type( $parent_param );
@@ -312,6 +327,8 @@ is( $names[1][1],           $parent_param->{'parameter'}{'name'},         'type 
 is( $names[2],              $parent_param->{'parameter'}{'name'},         'type object was created under right name');
 is( $ospace->has_type([ $parent_param->{'name'}, $parent_param->{'parameter'}{'name'}]),      1,        'type indeed was registered');
 is( $ospace->has_type('ppp_param'),                            1,         'but dependant types were now registered');
+@ID = $ospace->list_types( );
+is( @ID,                                                      14,         'now 14 types in open set');
 
 
 $ospace->remove_type( 'array_ref' );

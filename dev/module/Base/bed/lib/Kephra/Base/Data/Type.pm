@@ -4,20 +4,18 @@ use warnings;
 # organize type related symbols, mostly easy access to stdandard types
 
 package Kephra::Base::Data::Type;
-our $VERSION = 1.52;
-use Kephra::Base::Data::Type::Basic;
-use Kephra::Base::Data::Type::Parametric;
-use Kephra::Base::Data::Type::NameSpace;
+our $VERSION = 1.6;
+
 use Kephra::Base::Data::Type::Checker;
-use Kephra::Base::Data::Type::Standard;
+
 use Exporter 'import';
 our @EXPORT_OK = qw/create_type check_type guess_type is_type_known resolve_type_shortcut/;
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 ################################################################################
-my $standard_types = Kephra::Base::Data::Type::Standard::init();
-my $shared_types = Kephra::Base::Data::Type::Namespace->new('open'); 
-my $namespace = 'Kephra::Base::Data::Type::Namespace';
+my $standard_types = Kephra::Base::Data::Type::Standard::set();
+my $shared_types = Kephra::Base::Data::Type::Set->new('open'); 
+my $set_class = 'Kephra::Base::Data::Type::Set';
 
 sub standard    { $standard_types }
 sub shared      { $shared_types }

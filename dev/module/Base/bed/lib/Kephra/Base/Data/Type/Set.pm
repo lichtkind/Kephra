@@ -5,8 +5,8 @@ use warnings;
 #       multiple parametric types with same name and different parameters must have same owner and shortcut
 #       open stores ($self->{open} eq 'open') cannot be closed (like normal == 0 | 1 = ?) 
 
-package Kephra::Base::Data::Type::Namespace;
-our $VERSION = 0.13;
+package Kephra::Base::Data::Type::Set;
+our $VERSION = 0.20;
 use Kephra::Base::Data::Type::Basic;             my $btclass = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;        my $ptclass = 'Kephra::Base::Data::Type::Parametric';
 #### constructor, serialisation ################################################
@@ -240,6 +240,12 @@ sub _is_type_owned {
     0;
 }
 
+sub list_types   {                          # -                           --> @ ~ID|@ID
+    my ($self) = @_;
+    values %{$self->{'basic_type'}},
+    map {values %$_} values %{$self->{'param_type'}}
+}
+
 sub list_type_names   {                        # - ~kind ~ptype              --> @~btype|@~ptype|@~param
     my ($self, $kind, $type_name) = @_;        # kind = 'basic' | 'param'
     ($kind = _key_from_kind_($kind)) or return;
@@ -255,7 +261,7 @@ sub _key_from_kind_ {
 }
 
 #### type symbols ##############################################################
-sub list_symbols    {                                # _                     --> @~symbols
+sub list_type_symbols    {                            # _                    --> @~symbols
     my ($self, $kind) = @_;
     ($kind = _key_from_kind_($kind)) or return;
     sort keys( %{$self->{$kind.'_symbol_name'}});
@@ -292,4 +298,4 @@ sub _check_symbol {
 }
 sub _is_symbol {length $_[0] == 1 and $_[0] !~ /[a-z0-9_]/ }
 
-3;
+4;
