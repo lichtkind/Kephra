@@ -19,7 +19,7 @@ my $set_class = 'Kephra::Base::Data::Type::Set';
 
 sub standard    { $standard_types }
 sub shared      { $shared_types }
-sub class_names { qw/Kephra::Base::Data::Type::Basic Kephra::Base::Data::Type::Parametric/ }
+sub class_names { Kephra::Base::Data::Type::Factory::class_names }
 ################################################################################
 sub state       { $shared_types->state }
 sub restate     { $shared_types = Kephra::Base::Data::Type::Store->restate($_[0]) }
@@ -77,25 +77,5 @@ sub guess_type {
 }
 ################################################################################
 
-6;
+7;
 
-__END__
-
-
-################################################################################
-# replace_name_with_type
-
-sub create_type {        # %type_def @.type_store      --> .type
-    my $type_def = shift;
-    return "need a type definition (hash ref) as argument" unless ref $type_def eq 'HASH';
-    for my $store (@_){
-        substitude_names($type_def, $store) if ref $store eq 'Kephra::Base::Data::Type::Store';
-    }
-    (exists $type_def->{'parameter'} or ref $type_def->{'parent'} eq 'Kephra::Base::Data::Type::Parametric')
-        ? Kephra::Base::Data::Type::Parametric->new($type_def)
-        : Kephra::Base::Data::Type::Basic->new($type_def);
-}
-sub is_type {
-    my $ref = shift;
-    for (@type_class_names){ return 1 if ref $ref eq $_ } 0;
-}

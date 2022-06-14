@@ -15,23 +15,23 @@ sub new {
     my ($pkg, $name, $first_set_name, $no_std) = @_;
     return "need a name as first argument" unless defined $name;
     my $self = {set_order => [], set => {}, open => $_[1]//1, name => $name };
+        $self->{'set'}{$std_name} = Kephra::Base::Data::Type::Standard::set unless defined $no_std and $no_std;
     if (defined $name and $name) {
         return "set name can not be '$std_name'" if $name eq $std_name;
-    }
-    unless (defined $no_std and $no_std) {
+        $self->{'set'}{$name} = Kephra::Base::Data::Type::Set->new();
     }
     bless $self;
 }
 
 sub state {
     my ($self) = @_;
-    my $state = {};
+    my $state = { name => $self->{'name'}, set_order => [@{$self->{'set_order'}}],};
+    $state->{'set'}{$_} = $self->{'set'}{$_}->state() for @{$self->{'set_order'}};
     $state;
 }
-
 sub restate {
     my ($pkg, $state) = @_;
-
+    $state->{'set'}{$_} =  Kephra::Base::Data::Type::Set->restate( $state->{'set'}{$_} ) for @{$state->{'set_order'}};
     bless $state;
 }
 
@@ -75,7 +75,8 @@ sub remove_set {                                      # _ ~name              -->
     delete $self->{'set'}{$set_name};
 }
 sub get_type_set{ $_[0]->{'set'}{$_[1]} }
-sub sets        { map {$_[0]->get_type_set($_)} @{$_[0]->{'set_order'}} }
+sub sets        { map {$_[0]->get_type_set($_)} $_[0]->set_names }
+sub set_names    { @{$_[0]->{'set_order'}} }
 sub _get_name_pos { grep { $_[0]->{'set_order'}[$_] eq $_[1]} 0 .. $#{$_[0]->{'set_order'}}}
 
 ##### methods regarding data types #############################################
@@ -110,4 +111,4 @@ sub guess_basic_type {                     # .tstore $val                    -->
         grep {not $_->[1]->check_data($value)} map {[$_, $self->get_type($_)]} @types;
 }
 
-5;
+6;

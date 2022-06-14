@@ -19,9 +19,10 @@ See connections between stages and module cells under /dev/module/index.cp.txt
    K::B::Package  ......................  C  .....  1.1    low level symbol manipulation
    K::B::Data::Type::Basic  ............  C  .....  1.8    inheritable single value checker
    K::B::Data::Type::Parametric  .......  C  .....  1.7    checks relation between two values
+   K::B::Data::Type::Factory  ..........  N  .....  0.00   creation and property check of type definitions
    K::B::Data::Type::Set ...............  C  .....  1.20   collection of type objects with symbols & owners
+   K::B::Data::Type::Standard  .........  P  .....  2.91   definition of standard types
    K::B::Data::Type::Checker  ..........  M  .....  0.01   namespace set for data checking
-   K::B::Data::Type::Standard  .........  P  .....  2.9    definition of standard types
    K::B::Data::Type  ...................  C  .....  1.51   manage type related symbols
    K::B::Data  .........................  C  .....  0.2    root of none OO data handling
    K::B::Closure  ......................  C  .....  1.1    serializable closure (code and data)

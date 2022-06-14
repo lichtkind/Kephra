@@ -6,9 +6,9 @@ use warnings;
 #       open stores ($self->{open} eq 'open') cannot be closed (like normal == 0 | 1 = ?) 
 
 package Kephra::Base::Data::Type::Set;
-our $VERSION = 0.20;
-use Kephra::Base::Data::Type::Basic;             my $btclass = 'Kephra::Base::Data::Type::Basic';
-use Kephra::Base::Data::Type::Parametric;        my $ptclass = 'Kephra::Base::Data::Type::Parametric';
+our $VERSION = 0.21;
+use Kephra::Base::Data::Type::Factory ':all';
+
 #### constructor, serialisation ################################################
 sub new {      # -- |'open'   --> .tnamespace
     my ($pkg) = @_;                      #  0|1|'open' (stay)    __PACKAGE__  __FILE__
@@ -47,54 +47,26 @@ sub is_open{ $_[0]->{'open'} ? 1 : 0 } # (open store cant be closed)            
 sub close  { return 0 if $_[0]->{'open'} eq 'open' or not $_[0]->{'open'}; $_[0]->{'open'} = 0; 1 } # --> ?
 
 ##### type definition handling (resolving type names) ##########################
-sub _root_parent_ID {
-    my ($type_def) = @_;
-    return unless defined $type_def;
-    $type_def = $type_def->{'parent'} while ref $type_def eq 'HASH' and exists $type_def->{'parent'};
-    return $type_def if ref $type_def eq 'ARRAY' or (not ref $type_def and $type_def);
-}
-sub _root_parameter_ID {
-    my ($type_def) = @_;
-    $type_def = $type_def->{'parent'} while ref $type_def eq 'HASH' 
-                                        and exists $type_def->{'parent'} and not exists $type_def->{'parameter'};
-    _root_parent_ID( $type_def->{'parameter'} ) if ref $type_def eq 'HASH' and exists $type_def->{'parameter'};
-}
-sub _solve_ID { _root_parent_ID($_[0]), _root_parameter_ID($_[0]) }
-sub need_resolve { grep {$_}                 _solve_ID($_[1]) }  # _ .typedef -->  @ID (0-2)
-sub can_resolve { grep {$_[0]->get_type($_)} _solve_ID($_[1]) }  # _ .typedef -->  @ID (0-2)
-sub resolve_names {                                              # _          --> +known, +solved
+sub need_resolve { open_type_ID($_[1]) }                                     # _ .typedef -->  @ID (0-2)
+sub can_resolve { grep {$_[0]->get_type($_)} $_[0]->need_resolve($_[1]) }    # _ .typedef -->  @ID (0-2)
+sub resolve_type_ref {                                                          # _ .typedef --> +known, +solved
     my ($self, $type_def) = @_;
     return undef unless ref $type_def eq 'HASH';
-    my $rparent = my $rparameter = $type_def;
-    my ($known, $open) = (0,0);
-    $rparent = $rparent->{'parent'} while ref $rparent->{'parent'} eq 'HASH';
-    if (exists $rparent->{'parent'} and (not ref $rparent->{'parent'} or ref $rparent->{'parent'} eq 'ARRAY')){
-        my $type = $self->get_type( $rparent->{'parent'} );
-        if (ref $type){ $rparent->{'parent'} = $type; $known++ } else { $open++ }
-    }
-    $rparameter = $rparameter->{'parent'} while ref $rparameter->{'parent'} eq 'HASH'
-                                            and not exists $rparameter->{'parameter'};
-
-    if (ref $rparameter->{'parameter'} eq 'HASH'){
-        $rparameter = $rparameter->{'parameter'};
-        $rparameter = $rparameter->{'parent'} while ref $rparameter->{'parent'} eq 'HASH';
-        return $known, $open if ref $rparameter->{'parent'} or not exists $rparameter->{'parent'}; 
-        my $type = $self->get_type( $rparameter->{'parent'} );
-        if (ref $type){ $rparameter->{'parent'} = $type; $known++ } else { $open++ }
-    } elsif (exists $rparameter->{'parameter'} and not ref $rparameter->{'parameter'}){
-        my $type = $self->get_type( $rparameter->{'parameter'} );
-        if (ref $type){ $rparameter->{'parameter'} = $type; $known++ } else { $open++ }
-    }
-    $known, $open;
+    my @need = open_type_ID( $type_def );
+    return (0,0) unless @need;
+    my @have = grep {$_} map { $self->get_type($_) } @need;
+    return (int @have, @need - @have) unless @need == @have;
+    my %dict = map {Kephra::Base::Data::Type::Factory::full_name_from_ID( $need[$_] ), $have[$_]} 0 .. $#have;
+    Kephra::Base::Data::Type::Factory::resolve_type_ref( $type_def, \%dict );
+   (int @have, int @need );
 }
+
 sub create_type {                                 # %typedef --> .type 
     my ($self, $type_def) = @_;
     return undef unless ref $type_def eq 'HASH';
-    my ($known, $open) = $self->resolve_names($type_def);
-    return "definition of type '$type_def->{name}' refers to unknown types" if $open;
-    (exists $type_def->{'parameter'} or ref $type_def->{'parent'} eq $ptclass)
-          ? Kephra::Base::Data::Type::Parametric->new( $type_def )
-          : Kephra::Base::Data::Type::Basic->new( $type_def );
+    my ($known, $open) = $self->resolve_type_ref( $type_def );
+    return "definition of type '$type_def->{name}' refers to unknown types, by name resolved $known" if $open;
+    Kephra::Base::Data::Type::Factory::_create_type($type_def);
 }
 
 #### type handling (add remove lookup) ########################################
@@ -102,26 +74,25 @@ sub add_type {                               # .type - ~symbol ?public      --> 
     my ($self, $type, $symbol, $public) = @_;
     return 'can not add to a closed type namespace' unless $self->{'open'};
     my ($package, $file, $line) = (defined $public and $public) ? ('', '', '') : caller();
-    my $type_ref = ref $type;
-    if ($type_ref eq 'HASH'){
+    if (ref $type eq 'HASH'){
         for my $tname( $self->need_resolve( $type )) {
             return "definition of type $type->{name} refers to unknown type '$tname'" unless ref $self->get_type( $tname );
         }
         $self->_add_type_def( $type, $symbol, $package, $file );
-    } elsif ($type_ref eq $btclass or $type_ref eq $ptclass) {
+    } elsif ( is_type($type) ) {
         $self->_add_type_object( $type, $symbol, $package, $file );
     } else { "this namespace accepts only type objects or type definitions (hash ref)" }
 }
 sub _add_type_def {
     my ($self, $type_def, $symbol, $package, $file ) = @_;
-    my ($name, @added_names);
+    my ($name, @added_ID);
     return unless ref $type_def eq 'HASH';
     if (ref $type_def->{'parameter'} eq 'HASH'){
         my @result = $self->_add_type_def( $type_def->{'parameter'}, undef, $package, $file);
         return @result unless ref $result[0];
         $type_def->{'parameter'} = shift @result;
-        push @added_names, @result;
-    } elsif (exists $type_def->{'parameter'} and not ref $type_def->{'parameter'}){
+        push @added_ID, @result;
+    } elsif (exists $type_def->{'parameter'} ){
         my $ptype = $self->get_type( $type_def->{'parameter'} );
         return "definition of type '$type_def->{name}' has issue: parameter name '$type_def->{'parameter'}' refers to unknow type"
             unless ref $ptype;
@@ -131,8 +102,8 @@ sub _add_type_def {
         my @result = $self->_add_type_def( $type_def->{'parent'}, undef, $package, $file);
         return @result unless ref $result[0];
         $type_def->{'parent'} = shift @result;
-        push @added_names, @result;
-    } elsif (exists $type_def->{'parent'} and (not ref $type_def->{'parent'} or ref  $type_def->{'parent'} eq 'ARRAY')){
+        push @added_ID, @result;
+    } elsif (exists $type_def->{'parent'}){
         my $ptype = $self->get_type( $type_def->{'parent'} );
         return "definition of type '$type_def->{name}' has issue: parent name '$type_def->{'parent'}' refers to unknow type"
             unless ref $ptype;
@@ -140,12 +111,11 @@ sub _add_type_def {
     }
     $symbol = delete $type_def->{'symbol'} unless defined $symbol;
 
-    my $type = (exists $type_def->{'parameter'} or ref $type_def->{'parent'} eq $ptclass)
-          ? Kephra::Base::Data::Type::Parametric->new( $type_def )
-          : Kephra::Base::Data::Type::Basic->new( $type_def );
+    my $type = Kephra::Base::Data::Type::Factory::_create_type($type_def);
+    return $type unless ref $type;
     ($type, $name) = $self->_add_type_object( $type, $symbol, $package, $file );
-     return $type unless ref $type;
-    $type, $type->ID, @added_names;
+    return $type unless ref $type;
+    $type, $type->ID, @added_ID;
 }
 sub _add_type_object {
     my ($self, $type, $symbol, $package, $file) = @_;
@@ -154,15 +124,15 @@ sub _add_type_object {
          return $error if $error;
     } else { $symbol = '' }
     my $type_name = $type->name;
-    if (ref $type eq $btclass){ # basic types
+    if ( is_type($type, 'basic') ){
         return "there is alreasy a basic type under the name '$type_name' in this namespace" if exists $self->{'basic_type'}{ $type_name};
         $self->{'basic_type'}{ $type_name} = $type;
         $self->{'basic_owner'}{ $type_name } = $package if $package;
         $self->{'basic_origin'}{ $type_name } = $file if $file;
         $self->{'basic_symbol'}{ $type_name } = $symbol if $symbol;
         $self->{'basic_symbol_name'}{ $symbol } = $type_name if $symbol;
-        return $type, $type_name;
-    } elsif (ref $type eq $ptclass) { # param types
+        return $type, $type->ID;
+    } elsif ( is_type($type, 'param') ) {
         my $param_name = $type->parameter->name;
         my $full_name = $type_name.' of '.$param_name;
         return "there is alreasy a parametric type under the name '$full_name' in this namespace" 
@@ -174,7 +144,7 @@ sub _add_type_object {
             $self->{'param_symbol'}{ $type_name } = $symbol;
             $self->{'param_symbol_name'}{ $symbol } = $type_name;
         }
-        return $type, [$type_name, $param_name];
+        return $type, $type->ID;
     }
 }
 
@@ -298,4 +268,4 @@ sub _check_symbol {
 }
 sub _is_symbol {length $_[0] == 1 and $_[0] !~ /[a-z0-9_]/ }
 
-4;
+5;

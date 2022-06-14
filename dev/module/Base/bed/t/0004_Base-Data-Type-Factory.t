@@ -9,7 +9,7 @@ use Test::More tests => 211;
 
 use Kephra::Base::Data::Type::Basic;       my $bclass  = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Type::Parametric';
-                                           my $sclass  = 'Kephra::Base::Data::Type::Set';
+                                           my $class  = 'Kephra::Base::Data::Type::Factory';
 
 my $val_def  = { name=> 'value',  help=> 'defined value',     code=> 'defined $value',                             default=> '',     };
 my $nref_def = { name=> 'no_ref', help=> 'not a reference',   code=> 'not ref $value',        parent=> 'value',              ,  symbol => '$'};
@@ -32,7 +32,7 @@ my $index_def= { name=> 'index',  help=> 'valid index of array',code=> 'return "
                      parent=> 'int_pos',  parameter => {   name => 'array',  parent=> 'array_ref', default=> [1] }, };
 
 
-eval "use $sclass;";
+eval "use $class;";
 is( $@, '',                                                               'loaded namespace package');
 
 
