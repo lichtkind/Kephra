@@ -4,7 +4,7 @@ use warnings;
 use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
-use Test::More tests => 168;
+use Test::More tests => 171;
 
 my $pkg = 'Kephra::Base::Data::Type::Basic';
 sub create_type { Kephra::Base::Data::Type::Basic->new(@_) }
@@ -31,6 +31,7 @@ is( $Tvalue->full_name, 'value',      'got attribute "full_name" from getter of 
 is( $Tvalue->help, $vh,               'got attribute "help" from getter of value type object');
 is( $Tvalue->code, $vc,               'got attribute "code" from getter of value type object');
 is( $Tvalue->parents,  0,             'has no parents');
+is( int $Tvalue->has_parent,  0,      'has not any parent');
 is( $Tvalue->has_parent(undef), '',   'getter is_parent works on undef input');
 ok( $Tvalue->has_parent('') == 0,     'getter is_parent works on empty input');
 is( $Tvalue->has_parent('value'), '', 'self is not a parent');
@@ -41,7 +42,7 @@ is( ref $checks, 'ARRAY',             'check pairs are stored in an ARRAY');
 is( @$checks, 2,                      'type value has only one check pair ');
 is( $checks->[0], $vh,                'check pair key is help string');
 is( $checks->[1], $vc,                'check pair value is code string');
-my $code = $Tvalue->assemble_code;
+my $code = $Tvalue->assemble_source;
 my $qmc = quotemeta($vc);
 ok( $code =~ /$vh/,                   'code of type checker contains given help string');
 ok( $code =~ /$qmc/,                  'code of type checker contains given code string');
@@ -68,7 +69,7 @@ is( $Tvclone->parents,   0,      'has no parents');
 is( $Tvclone->default_value, '',      'got attribute "default" value from getter');
 is( $Tvclone->check_data(3), '',      'check method of type "value" clone accepts correctly value 3');
 ok( $Tvclone->check_data([]),         'check method of type "value" clone denies correctly with error an ARRAY ref');
-is( $Tvclone->assemble_code(), $code, 'clone still has same code as original');
+is( $Tvclone->assemble_source(), $code, 'clone still has same code as original');
 $checks = $Tvclone->source;
 is( ref $checks, 'ARRAY',             'check pairs are stored in an ARRAY');
 is( @$checks, 2,                      'type value has only one check pair ');
@@ -83,6 +84,8 @@ is( $Tbool->ID_equals( $Tvalue->ID),0,'ID not equals to the one of type "value"'
 is( $Tbool->name, 'bool',             'got attribute "name" from getter of type bool');
 is( $Tbool->help, '0 or 1',           'got attribute "help" from getter of type bool');
 is( $Tvalue->has_parent(undef), '',   'has no parents');
+is( $Tbool->has_parent,  1,           'type "bool" has parents');
+
 is( $Tbool->has_parent('value'), 1,   'Type "value" is parent of "bool"');
 is( $Tbool->default_value, 0,         'got attribute "default" value from getter');
 $checks = $Tbool->source;
@@ -110,7 +113,8 @@ my $Tbclone = Kephra::Base::Data::Type::Basic->restate( $Tbool->state );
 is( ref $Tbclone, $pkg,              'recreated child type object bool');
 is( $Tbclone->name, 'bool',          'got attribute "name" from getter');
 is( $Tbclone->parents, 1,            'has one parent');
-is( $Tbclone->has_parent('value'), 1,'Type "value" is parent');
+is( $Tbclone->has_parent,  1,        'type "bool" clone has parents');
+is( $Tbclone->has_parent('value'), 1,'type "value" is parent');
 is( $Tbclone->default_value, 0,      'got attribute "default" value from getter');
 is( $Tbclone->check_data(0), '',     'check method of type "bool" clone accepts correctly 0');
 is( $Tbclone->check_data(1), '',     'check method of type "bool" clone accepts correctly 1');
@@ -133,7 +137,7 @@ is( ref $checks, 'ARRAY',            'check pairs are stored in an ARRAY');
 is( @$checks, 2,                     'type str has one check pair');
 is( $checks->[0], $str_help,         'first check pair key is inherited help string');
 is( $checks->[1], $vc,               'first pair pair value is inherited code string');
-$code = $Tstr->assemble_code;
+$code = $Tstr->assemble_source;
 ok( $code =~ /$str_help/,             'replaces error msg of data checker');
 ok( $code =~ /$qmc/,                 'code of type checker contains code string from parent');
 

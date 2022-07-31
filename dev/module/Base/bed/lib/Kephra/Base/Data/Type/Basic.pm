@@ -10,7 +10,7 @@ no warnings 'experimental::smartmatch';
 #                 coderef => eval{ sub{ return $_[0] 'failed not a reference' unless not ref $_[0]; ...; 0} } }
 
 package Kephra::Base::Data::Type::Basic;
-our $VERSION = 1.8;
+our $VERSION = 1.9;
 use Scalar::Util qw/blessed looks_like_number/;
 ################################################################################
 sub _unhash_arg_ {
@@ -55,23 +55,25 @@ sub restate {    # %state                               --> .type | ~errormsg
     bless $state;
 }
 #### getter ####################################################################
-sub kind           { 'basic' }                    # _                  -->  'basic'|'param'
-sub ID             { $_[0]->{'name'} }            # _                  -->  ~name
-sub ID_equals      {(defined $_[1] and not ref $_[1] and $_[0]->ID eq $_[1] ) ? 1 : 0 } # _ $typeID  -->  ?
-sub name           { $_[0]->{'name'} }            # _                  -->  ~name
-sub full_name      { $_[0]->{'name'} }            # _                  -->  ~name
-sub help           { $_[0]->{'checks'}[-2] }      # _                  -->  ~help
-sub code           { $_[0]->{'checks'}[-1] }      # _                  -->  ~code
-sub parents        { @{$_[0]->{'parents'}} }      # _                  -->  @:parent~name
-sub parameter      { '' }                         # _                  -->  ''  # make API compatible
-sub has_parent     { $_[1] ~~ $_[0]->{'parents'} }# _  ~parent         -->  ?
-sub source         { $_[0]->{'checks'} }          # _                  -->  @checks
-sub default_value  { $_[0]->{'default'} }         # _                  -->  $default
+sub kind            { 'basic' }                    # _                  -->  'basic'|'param'
+sub ID              { $_[0]->{'name'} }            # _                  -->  ~name
+sub ID_equals       {(defined $_[1] and not ref $_[1] and $_[0]->ID eq $_[1] ) ? 1 : 0 } # _ $typeID  -->  ?
+sub name            { $_[0]->{'name'} }            # _                  -->  ~name
+sub full_name       { $_[0]->{'name'} }            # _                  -->  ~name
+sub help            { $_[0]->{'checks'}[-2] }      # _                  -->  ~help
+sub code            { $_[0]->{'checks'}[-1] }      # _                  -->  ~code
+sub parents         { @{$_[0]->{'parents'}} }      # _                  -->  @.parent~name
+sub parameter       { '' }                         # _                  -->  ''  # make API compatible
+sub has_parent      { 
+    defined $_[1] ? ($_[1] ~~ $_[0]->{'parents'}) 
+                  : int @{$_[0]->{'parents'}} > 0 }# _  ~parent         -->  ?
+sub source          { $_[0]->{'checks'} }          # _                  -->  @checks
+sub default_value   { $_[0]->{'default'} }         # _                  -->  $default
 #### public API ################################################################
-sub checker        { $_[0]->{'coderef'} }         # _                  -->  &checker
-sub check_data     { $_[0]->{'coderef'}->($_[1]) }# _  $val            -->  '' | ~errormsg
-sub assemble_code  { _asm_($_[0]->name, $_[0]->source) }
+sub checker         { $_[0]->{'coderef'} }         # _                  -->  &checker
+sub check_data      { $_[0]->{'coderef'}->($_[1]) }# _  $val            -->  '' | ~errormsg
 #### internal util #############################################################
+sub assemble_source { _asm_($_[0]->name, $_[0]->source) }
 sub _check_name  {
     return "type name is not defined" unless defined $_[0];
     return "type name $_[0] has to contain only lower case char, digits and underscore (_)" if  $_[0] =~ /[^a-z0-9_]/;
