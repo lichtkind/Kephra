@@ -1,48 +1,6 @@
 ---
-current: 10
+current: '8'
 docs:
-  -
-    change_pos: 0
-    cursor_pos: 459
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Panel.pm
-    syntaxmode: perl
-  -
-    change_pos: 0
-    cursor_pos: 6213
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/Document.pm
-    syntaxmode: perl
-  -
-    change_pos: 0
-    cursor_pos: 1197
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Window.pm
-    syntaxmode: perl
-  -
-    change_pos: 0
-    cursor_pos: 106
-    encoding: utf-8
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/lib/Kephra/App/Editor.pm
-    syntaxmode: perl
-  -
-    change_pos: 0
-    cursor_pos: 222
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition.pm
-    syntaxmode: perl
-  -
-    change_pos: 0
-    cursor_pos: 320
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Attribute.pm
-    syntaxmode: perl
-  -
-    change_pos: 0
-    cursor_pos: 1857
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base-Class/bed/lib/Kephra/Base/Class/Definition/Method.pm
-    syntaxmode: perl
   -
     change_pos: 0
     cursor_pos: 4139
@@ -50,62 +8,62 @@ docs:
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Basic.pm
     syntaxmode: perl
   -
-    change_pos: 7201
+    change_pos: 0
     cursor_pos: 25
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Parametric.pm
     syntaxmode: perl
   -
-    change_pos: 392
+    change_pos: 0
+    cursor_pos: 619
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Factory.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
     cursor_pos: 1299
     encoding: ascii
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Set.pm
     syntaxmode: perl
   -
-    change_pos: 2690
-    cursor_pos: 2690
+    change_pos: 0
+    cursor_pos: 216
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Checker.pm
+    syntaxmode: perl
+  -
+    change_pos: 0
+    cursor_pos: 151
     encoding: utf-8
     file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Standard.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 2805
+    cursor_pos: 1337
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/t/0005_Base-Data-Type-Standard.t
-    syntaxmode: perl
-  -
-    change_pos: 4960
-    cursor_pos: 4961
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type/Checker.pm
-    syntaxmode: perl
-  -
-    change_pos: 379
-    cursor_pos: 525
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/t/0006_Base-Data-Type-Checker.t
-    syntaxmode: perl
-  -
-    change_pos: 2853
-    cursor_pos: 2854
-    encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data/Type.pm
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/goal/lib/Kephra/Base/Data/Type/Basic.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 913
+    cursor_pos: 1759
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Data.pm
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/goal/lib/Kephra/Base/Data/Type/Parametric.pm
+    syntaxmode: perl
+  -
+    change_pos: 296
+    cursor_pos: 356
+    encoding: ascii
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/goal/lib/Kephra/Base/Data/Type/Factory.pm
     syntaxmode: perl
   -
     change_pos: 0
-    cursor_pos: 3516
+    cursor_pos: 367
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/lib/Kephra/Base/Closure.pm
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/goal/lib/Kephra/Base/Data/Type/Checker.pm
     syntaxmode: perl
   -
-    change_pos: 1481
-    cursor_pos: 1481
+    change_pos: 292
+    cursor_pos: 293
     encoding: ascii
-    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/module/Base/bed/status.cp.txt
-    syntaxmode: no
+    file_path: /home/herbert/code/perl/projekt/editor/Kephra/dev/goal/lib/Kephra/Base/Data/Type/Set.pm
+    syntaxmode: perl

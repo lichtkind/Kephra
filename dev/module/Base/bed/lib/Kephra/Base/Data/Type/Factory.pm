@@ -1,4 +1,4 @@
-use v5.20;
+use v5.18;
 use warnings;
 
 # checking type definition , type objects and creating type objects from them definitions
@@ -20,7 +20,7 @@ my @type_class_names = values %type_class;
 
 ##### which kinds of types are there ###########################################
 sub class_names { @type_class_names }
-sub is_type {                              # .type  --  ~kind = 'basic'|'param' --> ?
+sub is_type_object {                              # .type  --  ~kind = 'basic'|'param' --> ?
     my $ref = shift;
     if (defined $_[0]){
        (exists $type_class{$_[0]} and ref $ref eq $type_class{$_[0]}) ? 1 : 0;
@@ -116,3 +116,8 @@ sub _create_type {
 }
 
 4;
+
+__END__
+
+ID str = simple
+   ARRAY = parametric

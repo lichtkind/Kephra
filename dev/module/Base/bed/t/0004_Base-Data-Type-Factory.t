@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-use v5.20;
+use v5.18;
 use warnings;
 #use experimental qw/smartmatch/;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
@@ -33,7 +33,7 @@ my $index_def= { name=> 'index',  help=> 'valid index of array',code=> 'return "
 
 
 eval "use $class;";
-is( $@, '',                                                               'loaded namespace package');
+is( $@, '',                                                               'loaded factory package');
 
 
 my $space = Kephra::Base::Data::Type::Set->new();

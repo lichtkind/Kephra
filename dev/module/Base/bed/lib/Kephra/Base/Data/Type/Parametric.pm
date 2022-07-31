@@ -1,4 +1,4 @@
-use v5.20;
+use v5.18;
 use warnings;
 use feature "switch";
 no warnings 'experimental::smartmatch';
@@ -90,7 +90,7 @@ sub _ID_equal {
 }
 ################################################################################
 sub kind           { 'param' }                    # _                        -->  'basic'|'param'
-sub ID             { [$_[0]->{'name'}, $_[0]->{'parameter'}->name] }     # _ -->
+sub ID             { [$_[0]->{'name'}, $_[0]->{'parameter'}->ID] }       # _ -->
 sub name           { $_[0]->{'name'} }            # _                        -->  ~PTname (type name)
 sub full_name      { $_[0]->{'name'}.' of '.$_[0]->{'parameter'}->name } # _ -->  ~name.~paramname
 sub help           { $_[0]->{'help'} }            # _                        -->  ~help

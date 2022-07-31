@@ -1,4 +1,4 @@
-use v5.20;
+use v5.18;
 use warnings;
 
 # extendable collection of simple and parametric type objects with symbol, dependency and ownership resolver

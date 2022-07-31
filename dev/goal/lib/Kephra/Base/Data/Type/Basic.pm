@@ -12,13 +12,32 @@ sub restate            {} # %state                                           -->
 sub state              {} # -                                                --> %state
 sub assemble_code      {} # -                                                --> ~checkcode
 
-sub get_name           {} # -                      --> ~name
-sub get_default_value  {} # -                      --> $default
-sub get_parents        {} # -                      --> @_parent.name
-sub get_check_pairs    {} # -                      --> @checks   # [help, code, ..]
-sub get_checker        {} # -                      --> &checker
+sub name               {} # -                      --> ~name
+sub ID                 {} # -                      --> ~name
+sub default_value      {} # -                      --> $default
+sub parents            {} # -                      --> @_parent.name
+sub check_pairs        {} # -                      --> @checks   # [help, code, ..]
+sub checker            {} # -                      --> &checker
 
 sub has_parent         {} # - ~name                --> ?
-sub check              {} # -  $val                --> ~errormsg
+sub check_data         {} # -  $val                --> ~errormsg
+
+#### getter ####################################################################
+sub kind           { 'basic' }                    # _                  -->  'basic'|'param'
+sub ID             { $_[0]->{'name'} }            # _                  -->  ~name
+sub ID_equals      {(defined $_[1] and not ref $_[1] and $_[0]->ID eq $_[1] ) ? 1 : 0 } # _ $typeID  -->  ?
+sub name           { $_[0]->{'name'} }            # _                  -->  ~name
+sub full_name      { $_[0]->{'name'} }            # _                  -->  ~name
+sub help           { $_[0]->{'checks'}[-2] }      # _                  -->  ~help
+sub code           { $_[0]->{'checks'}[-1] }      # _                  -->  ~code
+sub parents        { @{$_[0]->{'parents'}} }      # _                  -->  @:parent~name
+sub parameter      { '' }                         # _                  -->  ''  # make API compatible
+sub has_parent     { $_[1] ~~ $_[0]->{'parents'} }# _  ~parent         -->  ?
+sub source         { $_[0]->{'checks'} }          # _                  -->  @checks
+sub default_value  { $_[0]->{'default'} }         # _                  -->  $default
+sub checker        { $_[0]->{'coderef'} }         # _                  -->  &checker
+#### public API ################################################################
+sub check_data     { $_[0]->{'coderef'}->($_[1]) }# _  $val            -->  '' | ~errormsg
+sub assemble_code { _asm_($_[0]->name, $_[0]->source) }
 
 1;

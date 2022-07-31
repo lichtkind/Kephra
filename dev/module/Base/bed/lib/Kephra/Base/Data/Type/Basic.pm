@@ -1,4 +1,4 @@
-use v5.20;
+use v5.18;
 use warnings;
 use feature "switch";
 no warnings 'experimental::smartmatch';
@@ -67,10 +67,10 @@ sub parameter      { '' }                         # _                  -->  ''  
 sub has_parent     { $_[1] ~~ $_[0]->{'parents'} }# _  ~parent         -->  ?
 sub source         { $_[0]->{'checks'} }          # _                  -->  @checks
 sub default_value  { $_[0]->{'default'} }         # _                  -->  $default
-sub checker        { $_[0]->{'coderef'} }         # _                  -->  &checker
 #### public API ################################################################
+sub checker        { $_[0]->{'coderef'} }         # _                  -->  &checker
 sub check_data     { $_[0]->{'coderef'}->($_[1]) }# _  $val            -->  '' | ~errormsg
-sub assemble_code { _asm_($_[0]->name, $_[0]->source) }
+sub assemble_code  { _asm_($_[0]->name, $_[0]->source) }
 #### internal util #############################################################
 sub _check_name  {
     return "type name is not defined" unless defined $_[0];
