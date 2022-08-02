@@ -14,7 +14,7 @@ our $VERSION = 1.7;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type::Basic;         my $btype = 'Kephra::Base::Data::Type::Basic';
 
-################################################################################
+#### construct $ destruct ######################################################
 sub _unhash_arg_ {
     ref $_[0] eq 'HASH' ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'parameter'}, $_[0]->{'code'}, $_[0]->{'parent'}, $_[0]->{'default'} ) : @_;
 }
@@ -58,7 +58,7 @@ sub new {   # ~name  ~help  %parameter|.parameter  ~code  .parent - $default    
     bless { name => $name, help => $help, default => $default, parents => $all_parents, parameter => $parameter, 
             code => $code, coderef => $coderef, trustcoderef => eval _compile_with_safe_param_( $name, $checks, $code),  };
 }
-################################################################################
+
 sub restate {                                        # %state                -->  .ptype | ~errormsg
     my ($pkg, $state) = @_;
     $state->{'parameter'} = Kephra::Base::Data::Type::Basic->restate( $state->{'parameter'} );
@@ -90,16 +90,18 @@ sub _ID_equal {
 }
 ################################################################################
 sub kind           { 'param' }                    # _                        -->  'basic'|'param'
-sub ID             { [$_[0]->{'name'}, $_[0]->{'parameter'}->ID] }       # _ -->
 sub name           { $_[0]->{'name'} }            # _                        -->  ~PTname (type name)
 sub full_name      { $_[0]->{'name'}.' of '.$_[0]->{'parameter'}->name } # _ -->  ~name.~paramname
+sub ID             { [$_[0]->{'name'}, $_[0]->{'parameter'}->ID] }       # _ -->
 sub help           { $_[0]->{'help'} }            # _                        -->  ~help
+sub code           { $_[0]->{'code'} }            # _                        -->  ~help
+#sub source         { $_[0]->{'code'} }            # _                        -->  ~help
 sub default_value  { $_[0]->{'default'} }         # _                        -->  $default
 sub parameter      { $_[0]->{'parameter'} }       # _                        -->  .parameter
 sub parents        { @{$_[0]->{'parents'}} }      # _                        -->  ?? %_parent.name -> :parent:parameter:name
 sub has_parent     {                              # _ ~BTname|[~PTname ~BTname] -->  ?
     my ($self, $typename, $paramname) = @_;
-    return unless defined $typename;
+    return int @{$self->{'parents'}} > 0 unless defined $typename;
     my $ID = defined $paramname ? [$typename, $paramname] : $typename;
     for ($self->parents){ return 1 if _ID_equal($ID, $_) }
     0;

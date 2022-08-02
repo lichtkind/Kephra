@@ -121,3 +121,72 @@ __END__
 
 ID str = simple
    ARRAY = parametric
+
+sub resolve_type_ref {                                                          # _ .typedef --> +known, +solved
+    my ($self, $type_def) = @_;
+    return undef unless ref $type_def eq 'HASH';
+    my @need = open_type_ID( $type_def );
+    return (0,0) unless @need;
+    my @have = grep {$_} map { $self->get_type($_) } @need;
+    return (int @have, @need - @have) unless @need == @have;
+    my %dict = map {Kephra::Base::Data::Type::Factory::full_name_from_ID( $need[$_] ), $have[$_]} 0 .. $#have;
+    Kephra::Base::Data::Type::Factory::resolve_type_ref( $type_def, \%dict );
+   (int @have, int @need );
+}
+
+sub create_type {                                 # %typedef --> .type 
+    my ($self, $type_def) = @_;
+    return undef unless ref $type_def eq 'HASH';
+    my ($known, $open) = $self->resolve_type_ref( $type_def );
+    return "definition of type '$type_def->{name}' refers to unknown types, by name resolved $known" if $open;
+    Kephra::Base::Data::Type::Factory::_create_type($type_def);
+}
+
+#### type handling (add remove lookup) ########################################
+sub add_type {                               # .type - ~symbol ?public      --> .type, @ID | ~!
+    my ($self, $type, $symbol, $public) = @_;
+    return 'can not add to a closed type namespace' unless $self->{'open'};
+    my ($package, $file, $line) = (defined $public and $public) ? ('', '', '') : caller();
+    if (ref $type eq 'HASH'){
+        for my $tname( $self->need_resolve( $type )) {
+            return "definition of type $type->{name} refers to unknown type '$tname'" unless ref $self->get_type( $tname );
+        }
+        $self->_add_type_def( $type, $symbol, $package, $file );
+    } elsif ( is_type($type) ) {
+        $self->_add_type_object( $type, $symbol, $package, $file );
+    } else { "this namespace accepts only type objects or type definitions (hash ref)" }
+}
+sub _add_type_def {
+    my ($self, $type_def, $symbol, $package, $file ) = @_;
+    my ($name, @added_ID);
+    return unless ref $type_def eq 'HASH';
+    if (ref $type_def->{'parameter'} eq 'HASH'){
+        my @result = $self->_add_type_def( $type_def->{'parameter'}, undef, $package, $file);
+        return @result unless ref $result[0];
+        $type_def->{'parameter'} = shift @result;
+        push @added_ID, @result;
+    } elsif (exists $type_def->{'parameter'} ){
+        my $ptype = $self->get_type( $type_def->{'parameter'} );
+        return "definition of type '$type_def->{name}' has issue: parameter name '$type_def->{'parameter'}' refers to unknow type"
+            unless ref $ptype;
+        $type_def->{'parameter'} = $ptype;
+    }
+    if (ref $type_def->{'parent'}  eq 'HASH'){
+        my @result = $self->_add_type_def( $type_def->{'parent'}, undef, $package, $file);
+        return @result unless ref $result[0];
+        $type_def->{'parent'} = shift @result;
+        push @added_ID, @result;
+    } elsif (exists $type_def->{'parent'}){
+        my $ptype = $self->get_type( $type_def->{'parent'} );
+        return "definition of type '$type_def->{name}' has issue: parent name '$type_def->{'parent'}' refers to unknow type"
+            unless ref $ptype;
+        $type_def->{'parent'} = $ptype;
+    }
+    $symbol = delete $type_def->{'symbol'} unless defined $symbol;
+
+    my $type = Kephra::Base::Data::Type::Factory::_create_type($type_def);
+    return $type unless ref $type;
+    ($type, $name) = $self->_add_type_object( $type, $symbol, $package, $file );
+    return $type unless ref $type;
+    $type, $type->ID, @added_ID;
+}

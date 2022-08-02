@@ -12,7 +12,8 @@ no warnings 'experimental::smartmatch';
 package Kephra::Base::Data::Type::Basic;
 our $VERSION = 1.9;
 use Scalar::Util qw/blessed looks_like_number/;
-################################################################################
+
+#### construct $ destruct ######################################################
 sub _unhash_arg_ {
     ref $_[0] eq 'HASH' ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'code'}, $_[0]->{'parent'}, $_[0]->{'default'} ) : @_;
 }
@@ -45,7 +46,7 @@ sub new {        # ~name ~help -- ~code  .parent $default  --> .type | ~errormsg
     return "type '$name' default value '$default' does not pass check - '$source' - because: $error!" if $error;
     bless {name=> $name, coderef=> $coderef, checks=> $checks, default=> $default, parents=> $parents };
 }
-################################################################################
+
 sub state             {                           # ._  -->  %state
     {name => $_[0]->{'name'}, parents => [@{$_[0]->{'parents'}}], checks => [@{$_[0]->{'checks'}}], default => $_[0]->{'default'} }
 }

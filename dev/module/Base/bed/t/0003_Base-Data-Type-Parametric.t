@@ -7,7 +7,7 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 package Very::Long::Package; sub new {bless {}} 
 
 use Kephra::Base::Data::Type::Parametric;
-use Test::More tests => 197;
+use Test::More tests => 199;
 
 sub simple_type { Kephra::Base::Data::Type::Basic->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }
@@ -39,6 +39,7 @@ is ( $Tindex->full_name, 'index of parray',    'got full name of type "index of 
 is ( $Tindex->help, 'valid index of array',    'got attribute "help" from getter of "index"');
 is ( $Tindex->default_value, 0,                'got attribute "default" value from getter of "index"');
 is( int ($Tindex->parents), 3,                 'has three parents');
+is( $Tindex->has_parent(), 1,                  'param type "index" has parents');
 ok( $Tindex->has_parent('value'),              'Type "value" is parent');
 ok( $Tindex->has_parent('int'),                'Type "int" is parent');
 ok( $Tindex->has_parent('pos_int'),            'Type "pos_int" is parent');
@@ -145,6 +146,7 @@ is ( $Tref->name, 'reference',                 'got attribute "name" from getter
 is ( $Tref->full_name, 'reference of refname', 'got full name of type "reference of refname"');
 is ( $Tref->help,'reference of given type',    'got attribute "help" from getter of type "ref"');
 is ( $Tref->default_value, $erefdef,           'got attribute "default" value from getter of "ref"');
+is ( $Tref->has_parent(), 1,                   'param type "reference" has parents');
 ok( $Tref->has_parent('any'),                  'Type "any" is parent');
 $param = $Tref->parameter();
 is ( ref $param, $btclass,                     'got attribute "parameter" object from getter of "ref"');
