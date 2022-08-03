@@ -15,7 +15,9 @@ use Scalar::Util qw/blessed looks_like_number/;
 
 #### construct $ destruct ######################################################
 sub _unhash_arg_ {
-    ref $_[0] eq 'HASH' ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'code'}, $_[0]->{'parent'}, $_[0]->{'default'} ) : @_;
+    ref $_[0] eq 'HASH' 
+        ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'code'}, $_[0]->{'parent'}, $_[0]->{'default'} ) 
+        : @_;
 }
 sub new {        # ~name ~help -- ~code  .parent $default  --> .type | ~errormsg 
     my $pkg = shift;
@@ -23,15 +25,13 @@ sub new {        # ~name ~help -- ~code  .parent $default  --> .type | ~errormsg
     $code //= '';
     my $name_error = _check_name($name);
     return $name_error if $name_error;
-    return "'parent' of basic type '$name' has to be a hash definition or an instance of ".__PACKAGE__ if defined $parent and ref $parent ne __PACKAGE__ and ref $parent ne 'HASH';
+    return "'parent' of basic type '$name' has to be an instance of ".__PACKAGE__ if defined $parent and ref $parent ne __PACKAGE__;
     return "definition of basic type '$name' misses description under the key 'help'" unless defined $help;
     return "definition of basic type '$name' misses code either from key 'code' or 'parent'" 
         unless $code or (ref $parent and (exists $parent->{'code'} or exists $parent->{'checks'}));
     my $checks = [];
     my $parents = [];
     if (defined $parent){
-        $parent = Kephra::Base::Data::Type::Basic->new($parent) if ref $parent eq 'HASH';
-        return "can not create type $name, because definition of parent has issue: $parent" unless ref $parent;
         @$checks = @{$parent->source};
         $default //= $parent->default_value;
         push @$parents, $parent->ID, $parent->parents; 

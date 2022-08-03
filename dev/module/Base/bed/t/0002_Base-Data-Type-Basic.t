@@ -172,8 +172,7 @@ is( $checks->[3], $bc,               'second check pair value is code string');
 
 
 $Tbool = create_type({name => 'bool', help => '0 or 1', code => '$value eq 0 or $value eq 1',default => 0, 
-                                      owner => 'sowner', origin => 'sorigin', 
-                                      parent => {name => 'value', help => $vh, code => $vc, default => ''}});
+                                      owner => 'sowner', origin => 'sorigin', parent => $Tvalue});
 is( ref $Tbool, $pkg,                'created type "bool", with hash definition of parent type "value" in place');
 is( $Tbool->kind, 'basic',           'got attribute "kind" from getter of type bool');
 is( $Tbool->name, 'bool',            'got attribute "name" from getter of type bool');
@@ -193,7 +192,7 @@ is( $checks->[1], $vc,               'first pair pair value is inherited code st
 is( $checks->[2], '0 or 1',          'second check pair key is help string');
 is( $checks->[3], $bc,               'second check pair value is code string');
 
-$Tbool = create_type('bool', '0 or 1', '$value eq 0 or $value eq 1', {name => 'value', help => $vh, code => $vc, default => ''},0);
+$Tbool = create_type('bool', '0 or 1', '$value eq 0 or $value eq 1', $Tvalue, 0);
 is( ref $Tbool, $pkg,                'created type "bool", with positional definition of parent type "value" in place');
 is( $Tbool->name, 'bool',            'got attribute "name" from getter of type bool');
 is( $Tbool->help, '0 or 1',          'got attribute "help" from getter of type bool');

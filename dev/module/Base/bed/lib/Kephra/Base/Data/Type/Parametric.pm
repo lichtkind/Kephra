@@ -3,9 +3,9 @@ use warnings;
 use feature "switch";
 no warnings 'experimental::smartmatch';
 
-# data type depending on second value (parameter) 
+# serializable data type checks properties of a value and its relation to a second (parameter)
 # example:     valid index (type) of an actual array (parameter)
-#              { name => 'index', help => 'valid index of array', parent => 'int_pos', 
+#              { name => 'index', help => 'valid index of array', parent => 'int_pos', # positive integer
 #                code =>'return "value $value is out of range" if $value >= @$param', default => 0,
 #           parameter =>{name => 'ARRAY', help => 'array reference', code => 'ref $value eq "ARRAY"', default => []}    }   # type is required
 
@@ -16,7 +16,9 @@ use Kephra::Base::Data::Type::Basic;         my $btype = 'Kephra::Base::Data::Ty
 
 #### construct $ destruct ######################################################
 sub _unhash_arg_ {
-    ref $_[0] eq 'HASH' ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'parameter'}, $_[0]->{'code'}, $_[0]->{'parent'}, $_[0]->{'default'} ) : @_;
+    ref $_[0] eq 'HASH'
+        ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'parameter'}, $_[0]->{'code'}, $_[0]->{'parent'}, $_[0]->{'default'} ) 
+        : @_;
 }
 sub new {   # ~name  ~help  %parameter|.parameter  ~code  .parent - $default    --> .ptype | ~errormsg 
     my $pkg = shift;
