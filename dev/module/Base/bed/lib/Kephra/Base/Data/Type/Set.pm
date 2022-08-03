@@ -1,9 +1,9 @@
 use v5.18;
 use warnings;
 
-# extendable collection of simple and parametric type objects with symbol, dependency and ownership resolver
-#       multiple parametric types with same name and different parameters must have same owner and shortcut
-#       open stores ($self->{open} eq 'open') cannot be closed (like normal == 0 | 1 = ?) 
+# extendable collection of simple and parametric type objects (2 name spaces) + dependency resolver
+# store shortcut symbols correlating to base names independent of parameter type
+#       open sets ($self->{open} eq 'open') cannot be closed (like normal == 0 | 1 = ?) 
 
 package Kephra::Base::Data::Type::Set;
 our $VERSION = 0.21;

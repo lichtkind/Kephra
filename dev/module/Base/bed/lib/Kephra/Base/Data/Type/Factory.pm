@@ -19,33 +19,12 @@ my %class_type = ($btclass => 'basic', $ptclass => 'param');
 my @type_kinds = keys %type_class;
 my @type_class_names = values %type_class;
 
-##### which kinds of types are there ###########################################
+##### main function & helper ###################################################
 
-sub create_type              {} # $Tdef      --> @[full_name => .T, ..] .T =^ (basic | param)
-                                #                $.T                       =^ (type object)
-
-sub root_parent_ID           {} # %Tdef      --> undef | typeID
-sub root_parameter_ID        {} # %Tdef      --> undef | typeID
-sub open_type_IDs            {} # %Tdef      --> undef | typeID [1..2]
-
-sub base_name_from_ID        {} # $typeID    --> ~name
-sub param_name_from_ID       {} # $typeID    --> ~name
-sub full_name_from_ID        {} # $typeID    --> ~full_name 
-sub ID_from_full_name        {} # ~full_name --> $typeID
-
-sub is_type_ID               {} # $typeID    --> ?
-sub type_ID_kind             {} # $typeID    --> ( 'basic' | 'param' | '' )
-
-sub is_type_def              {} # %Tdef      --> ?
-sub is_basic_type_def        {} # %Tdef      --> ?
-sub is_param_type_def        {} # %Tdef      --> ?
-sub type_def_kind            {} # %Tdef      --> ( 'basic' | 'param' | '' )
- 
-sub is_type                  {} # .T         --> ?
-sub is_basic_type            {} # .T         --> ?
-sub is_param_type            {} # .T         --> ?
-sub type_kind                {} # .T         --> ( 'basic' | 'param' | '' )
-
+sub create_type {
+    my $tdef = shift;
+    return "type definitions have to be a HASH ref" unless ref $tdef eq 'HASH';
+}
 
 sub root_parent_ID {
     my ($type_def) = @_;
@@ -63,6 +42,32 @@ sub root_parameter_ID {
 }
 sub open_type_IDs { grep {$_} root_parent_ID($_[0]), root_parameter_ID($_[0]) }
 
+##### ID checker and converter #################################################
+
+sub base_name_from_ID        {} # $typeID    --> ~name
+sub param_name_from_ID       {} # $typeID    --> ~name
+sub full_name_from_ID        {} # $typeID    --> ~full_name 
+sub ID_from_full_name        {} # ~full_name --> $typeID
+
+sub is_type_ID               {} # $typeID    --> ?
+sub type_ID_kind             {} # $typeID    --> ( 'basic' | 'param' | '' )
+
+##### type def checker #########################################################
+
+sub is_type_def              {} # %Tdef      --> ?
+sub is_basic_type_def        {} # %Tdef      --> ?
+sub is_param_type_def        {} # %Tdef      --> ?
+sub type_def_kind            {
+    my $def = shift;
+    return unless ref $def eq 'HASH';
+} # %Tdef      --> ( 'basic' | 'param' | '' )
+ 
+##### type object checker #######################################################
+
+sub is_type                  { exists $class_type{ ref $_[0] } }
+sub is_basic_type            { ref $_[0] eq $%type_class{'basic'} }
+sub is_param_type            { ref $_[0] eq $%type_class{'param'} }
+sub type_kind                { $class_type{ ref $_[0] } }
 
 4;
 

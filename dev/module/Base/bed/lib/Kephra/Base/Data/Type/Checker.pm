@@ -6,7 +6,6 @@ use warnings;
 package Kephra::Base::Data::Type::Checker;
 our $VERSION = 0.10;
 
-use Kephra::Base::Data::Type::Set;
 use Kephra::Base::Data::Type::Standard;
 
 #### constructor, serialisation ################################################
@@ -111,4 +110,4 @@ sub guess_basic_type {                     # .tstore $val                    -->
         grep {not $_->[1]->check_data($value)} map {[$_, $self->get_type($_)]} @types;
 }
 
-6;
+7;

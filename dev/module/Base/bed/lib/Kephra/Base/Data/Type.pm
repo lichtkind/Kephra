@@ -5,7 +5,6 @@ use warnings;
 
 package Kephra::Base::Data::Type;
 our $VERSION = 1.6;
-
 use Kephra::Base::Data::Type::Checker;
 
 use Exporter 'import';
