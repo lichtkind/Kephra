@@ -6,13 +6,16 @@ BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 package Very::Long::Package; sub new {bless {}} 
 
-use Kephra::Base::Data::Type::Parametric;
-use Test::More tests => 199;
+use Test::More tests => 200;
+
+my $btclass = 'Kephra::Base::Data::Type::Basic';
+my $ptclass = 'Kephra::Base::Data::Type::Parametric';
 
 sub simple_type { Kephra::Base::Data::Type::Basic->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }
-my $btclass = 'Kephra::Base::Data::Type::Basic';
-my $ptclass = 'Kephra::Base::Data::Type::Parametric';
+
+eval "use $ptclass";
+is( not($@), 1, 'could load the module '.$ptclass);
 
 my $erefdef = [];
 my $crefdef = [1];
@@ -24,10 +27,11 @@ my $Tpint  = simple_type('pos_int', 'positive integer', '$value >= 0', $Tint);
 my $Tarray = simple_type('array', 'array reference', 'ref $value eq "ARRAY"', undef, $crefdef);
 my $Ttype  = simple_type('array', 'array reference', 'ref $value eq "ARRAY"', $Tstr, 'ANY');
 
-my $Tindex = para_type('index', 'valid index of array', {name => 'parray', help => 'dummy basic array type', parent => $Tarray},    # inherit both defaults
-                       'return "value $value is out of range" if $value >= @$param', $Tpint, undef, 'powner', 'porigin');
+my $Tindex = para_type('index', 'valid index of array',
+                       simple_type( {name => 'parray', help => 'dummy basic array type', parent => $Tarray}),    # inherit both defaults
+                       'return "value $value is out of range" if $value >= @$param', $Tpint, 0, 'powner', 'porigin');
 my $Tref = para_type({name => 'reference', help => 'reference of given type', 
-                      parameter => {name => 'refname', help => 'name of areference', parent => $Tstr, default => 'ARRAY'}, 
+                      parameter => simple_type( {name => 'refname', help => 'name of areference', parent => $Tstr, default => 'ARRAY'}), 
                       code => 'return "value $value is not a $param reference" if ref $value ne $param', default => $erefdef, parent => $Tany, }); # overwrite both defaults
 my $Tshortref = para_type({name => 'short_ref', help => 'reference with short, given name',  
                      code => 'return "reference $param is too long " if length $param > 9', parent => $Tref,}); # 

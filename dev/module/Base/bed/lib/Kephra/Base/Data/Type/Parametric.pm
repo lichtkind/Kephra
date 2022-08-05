@@ -10,7 +10,7 @@ no warnings 'experimental::smartmatch';
 #           parameter =>{name => 'ARRAY', help => 'array reference', code => 'ref $value eq "ARRAY"', default => []}    }   # type is required
 
 package Kephra::Base::Data::Type::Parametric;
-our $VERSION = 1.7;
+our $VERSION = 1.8;
 use Scalar::Util qw/blessed looks_like_number/;
 use Kephra::Base::Data::Type::Basic;         my $btype = 'Kephra::Base::Data::Type::Basic';
 
@@ -43,10 +43,9 @@ sub new {   # ~name  ~help  %parameter|.parameter  ~code  .parent - $default    
         $default //= $parent->default_value;
     }
     return "parametric type '$name' need to get or inherit a default value " unless defined $default;
-    return "parametric type '$name' has to have or inherit a 'parameter' which is a $btype class or a hash ref definition."
-        if ref $parameter ne $btype and ref $parameter ne 'HASH';
-    $parameter = Kephra::Base::Data::Type::Basic->new( $parameter ) if ref $parameter eq 'HASH';
-    return "parametric type '$name' has issues with definition of its 'parameter': $parameter " unless ref $parameter;
+    return "parametric type '$name' got no 'parameter' type" unless defined $parameter;
+    return "parametric type '$name' has to have or inherit a 'parameter' type which has to be a $btype class, not '$parameter'."
+        if ref $parameter ne $btype;
     return "parent of parametric type has to to have the same or parent of own parameter type"
            if ref $parent and $parent->kind eq 'param' and $parameter->name ne $parent->parameter->name 
                                                        and not ($parameter->has_parent( $parent->parameter ));

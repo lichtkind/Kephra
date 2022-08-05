@@ -21,17 +21,49 @@ my @type_class_names = values %type_class;
 
 ##### main function & helper ###################################################
 
-sub create_type {
-    my $tdef = shift;
-    return "type definitions have to be a HASH ref" unless ref $tdef eq 'HASH';
+sub create_type      {  # $Tdef      --> @[full_name => .T, ..] .T =^ (basic | param)
+    my $Tdef = shift;
+    return "type definitions have to be a HASH ref" unless ref $Tdef eq 'HASH';
+    $Tdef->{'parameter'} ? Kephra::Base::Data::Type::Parametric->new($Tdef) 
+                         : Kephra::Base::Data::Type::Basic->new($Tdef);
 }
 
-sub root_parent_ID {
+sub create_type_chain {  # $Tdef      --> @[full_name => .T, ..] .T =^ (basic | param)
+    my $Tdef = shift;
+    return "type definitions have to be a HASH ref" unless ref $Tdef eq 'HASH';
+    my $open = get_open_IDs($Tdef);
+    return $open if %$open,
+    my @ret = _create_type_chain( $Tdef );
+    wantarray ? @ret : $ret[1];
+}
+sub _create_type_chain       {
+    my $Tdef = shift;
+    my @ret;
+    if (ref $Tdef->{'parent'} eq 'HASH'){
+    }
+}
+sub get_open_IDs             { # %Tdef      --> %open
+    my $Tdef = shift;
+    return {} unless ref $Tdef eq 'HASH';
+    my $open = {};
+    my @parent_ID = root_parent_ID( $Tdef );
+    if (@parent_ID) {
+      $open->{'parent_ID'} = $parent_ID[0];
+      $open->{'parent_ref'} = $parent_ID[1];
+    }
+    my @param_ID = root_parameter_ID( $Tdef );
+    if (@param_ID) {
+      $open->{'param_ID'} = $param_ID[0];
+      $open->{'param_ref'} = $param_ID[1];
+    }
+    $open;
+}
+sub root_parent_ID           { # %Tdef      --> - typeID, %Tdef
     my ($type_def) = @_;
     $type_def = $type_def->{'parent'} while ref $type_def eq 'HASH' and exists $type_def->{'parent'};
     return $type_def if is_type_ID( $type_def );
 }
-sub root_parameter_ID {
+sub root_parameter_ID        { # %Tdef      --> - typeID, %Tdef
     my ($type_def) = @_;
     $type_def = $type_def->{'parent'} while ref $type_def eq 'HASH' and exists $type_def->{'parent'}
                                                                     and not exists $type_def->{'parameter'};
@@ -40,27 +72,74 @@ sub root_parameter_ID {
     $type_def = $type_def->{'parent'} while ref $type_def eq 'HASH' and exists $type_def->{'parent'};
     return $type_def if is_type_ID( $type_def );
 }
-sub open_type_IDs { grep {$_} root_parent_ID($_[0]), root_parameter_ID($_[0]) }
+
+sub resolve_open_ID        { # %open      --> ?
+    my ($open) = @_;
+    return 0 unless ref $open eq 'HASH';
+    if (ref $open->{'parent_ref'} eq 'HASH' 
+    and (ref $open->{'parent'} eq 'HASH') or is_type($open->{'parent'})) {
+        $open->{'parent_ref'}{'parent'} = $open->{'parent'};
+        delete $open->{'parent'};
+        delete $open->{'parent_ID'};
+        delete $open->{'parent_ref'};
+    }
+    my @param_ID = root_parameter_ID( $Tdef );
+    if (ref $open->{'param_ref'} eq 'HASH'
+    and (ref $open->{'param'} eq 'HASH') or is_type($open->{'param'})) {
+        $open->{'param_ref'}{'parent'} = $open->{'param'};
+        delete $open->{'param'};
+        delete $open->{'param_ID'};
+        delete $open->{'param_ref'};
+    }
+    (%$open) ? 1 : 0;
+}
 
 ##### ID checker and converter #################################################
 
-sub base_name_from_ID        {} # $typeID    --> ~name
-sub param_name_from_ID       {} # $typeID    --> ~name
-sub full_name_from_ID        {} # $typeID    --> ~full_name 
-sub ID_from_full_name        {} # ~full_name --> $typeID
+sub base_name_from_ID        { # $typeID     --> ~name
+    return '' unless defined $_[0];
+    return $_[0] unless ref $_[0];
+    (ref $_[0] eq 'ARRAY' and @{$_[0]} == 2) ? $_[0][0] : '';
 
-sub is_type_ID               {} # $typeID    --> ?
-sub type_ID_kind             {} # $typeID    --> ( 'basic' | 'param' | '' )
+}
+sub param_name_from_ID       { # $typeID     --> ~name
+    (ref $_[0] eq 'ARRAY' and @{$_[0]} == 2) ? $_[0][1] : '';
+}
+sub full_name_from_ID        { # $typeID     --> ~full_name 
+    return '' unless defined $_[0];
+    return $_[0] unless ref $_[0];
+    (ref $_[0] eq 'ARRAY' and @{$_[0]} == 2) ? $_[0][1].' of '.$_[0][1] : '';
+}
+sub ID_from_full_name        { # ~full_name  --> $typeID
+    return '' unless defined $_[0] and not ref $_[0] and $_[0];
+    my @parts = split / of /, shift;
+    (@parts == 1) ? $_[0] : (@parts == 2) ? \@parts : '';
+}
+
+sub is_type_ID               { # $typeID     --> ?
+    return 0 unless defined $_[0];
+    return 1 if ref $_[0] eq 'ARRAY' and @{$_[0]} == 2;
+    (not ref $_[0] and $_[0]) ? 1 : 0;
+}
+sub type_ID_kind             { # $typeID     --> ( 'basic' | 'param' | '' )
+    return '' unless defined $_[0];
+    return 'param' if ref $_[0] eq 'ARRAY' and @{$_[0]} == 2;
+    (not ref $_[0] and $_[0]) ? 'basic' : '';
+
+}
 
 ##### type def checker #########################################################
 
-sub is_type_def              {} # %Tdef      --> ?
-sub is_basic_type_def        {} # %Tdef      --> ?
-sub is_param_type_def        {} # %Tdef      --> ?
-sub type_def_kind            {
+sub is_type_def              { # %Tdef       --> ?
+}
+sub is_basic_type_def        { # %Tdef       --> ?
+}
+sub is_param_type_def        { # %Tdef       --> ?
+}
+sub type_def_kind            { # %Tdef       --> ( 'basic' | 'param' | '' )
     my $def = shift;
     return unless ref $def eq 'HASH';
-} # %Tdef      --> ( 'basic' | 'param' | '' )
+}
  
 ##### type object checker #######################################################
 
@@ -144,64 +223,6 @@ sub _add_type_def {
     return $type unless ref $type;
     $type, $type->ID, @added_ID;
 }
-
-
-
-sub create_type              {} # $Tdef      --> @[full_name => .T, ..] .T =^ (basic | param)
-                                #                $.T                       =^ (type object)
-
-sub root_parent_ID           {} # %Tdef      --> undef | typeID
-sub root_parameter_ID        {} # %Tdef      --> undef | typeID
-sub open_type_IDs            {} # %Tdef      --> undef | typeID [1..2]
-
-sub base_name_from_ID        {} # $typeID    --> ~name
-sub param_name_from_ID       {} # $typeID    --> ~name
-sub full_name_from_ID        {} # $typeID    --> ~full_name 
-sub ID_from_full_name        {} # ~full_name --> $typeID
-
-sub is_type_ID               {} # $typeID    --> ?
-sub type_ID_kind             {} # $typeID    --> ( 'basic' | 'param' | '' )
-
-sub is_type_def              {} # %Tdef      --> ?
-sub is_basic_type_def        {} # %Tdef      --> ?
-sub is_param_type_def        {} # %Tdef      --> ?
-sub type_def_kind            {} # %Tdef      --> ( 'basic' | 'param' | '' )
- 
-sub is_type                  {} # .T         --> ?
-sub is_basic_type            {} # .T         --> ?
-sub is_param_type            {} # .T         --> ?
-sub type_kind                {} # .T         --> ( 'basic' | 'param' | '' )
-
-
-sub is_type_object {                              # .type  --  ~kind = 'basic'|'param' --> ?
-    my $ref = shift;
-    if (defined $_[0]){
-       (exists $type_class{$_[0]} and ref $ref eq $type_class{$_[0]}) ? 1 : 0;
-    }
-    for (@type_class_names){ return 1 if ref $ref eq $_ } 0;
-}
-
-sub is_type_kind {                              # ~kind  --> ?
-    my $ref = shift;
-    if (defined $_[0]){
-       (exists $type_class{$_[0]} and ref $ref eq $type_class{$_[0]}) ? 1 : 0;
-    }
-    for (@type_class_names){ return 1 if ref $ref eq $_ } 0;
-}
-
-sub is_type_ID {                          # $val                     --> ?
-    return 0 unless defined $_[0] and $_[0];
-    return 1 if not ref $_[0];
-    (ref $_[0] eq 'ARRAY' and @{$_[0]} == 2) ? 1 : 0;
-}
-
-sub full_name_from_ID {                          # $val                     --> ?
-    return undef unless defined $_[0] and $_[0];
-    return $_[0] if not ref $_[0];
-    (ref $_[0] eq 'ARRAY' and @{$_[0]} == 2) ? $_[0][0].' of '.$_[0][1] : undef;
-}
-
-##### check dependencies #######################################################
 
 
 
