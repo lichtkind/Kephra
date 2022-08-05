@@ -5,11 +5,17 @@ use warnings;
 BEGIN { unshift @INC, 'lib', '../lib', '.', 't'}
 
 package NameSpaceTester; 
-use Test::More tests => 211;
+use Test::More tests => 1;
 
 use Kephra::Base::Data::Type::Basic;       my $bclass  = 'Kephra::Base::Data::Type::Basic';
 use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Type::Parametric';
                                            my $class  = 'Kephra::Base::Data::Type::Factory';
+
+eval "use $class";
+is( $@, '', 'could load the module '.$class);
+exit 0;
+
+__END__
 
 my $val_def  = { name=> 'value',  help=> 'defined value',     code=> 'defined $value',                             default=> '',     };
 my $nref_def = { name=> 'no_ref', help=> 'not a reference',   code=> 'not ref $value',        parent=> 'value',              ,  symbol => '$'};

@@ -17,15 +17,15 @@ use Kephra::Base::Data::Type::Basic;         my $btype = 'Kephra::Base::Data::Ty
 #### construct $ destruct ######################################################
 sub _unhash_arg_ {
     ref $_[0] eq 'HASH'
-        ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'parameter'}, $_[0]->{'code'}, $_[0]->{'parent'}, $_[0]->{'default'} ) 
+        ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'code'}, $_[0]->{'parameter'}, $_[0]->{'parent'}, $_[0]->{'default'} ) 
         : @_;
 }
 sub new {   # ~name  ~help  %parameter|.parameter  ~code  .parent - $default    --> .ptype | ~errormsg 
     my $pkg = shift;
-    my ($name, $help, $parameter, $code, $parent, $default) = _unhash_arg_(@_);
+    my ($name, $help, $code, $parameter, $parent, $default) = _unhash_arg_(@_);
     my $name_error = Kephra::Base::Data::Type::Basic::_check_name($name);
     return $name_error if $name_error;
-    return "need the arguments 'name' (str), 'help' (str), 'parameter' (hashref or type object), 'code' (str) ".
+    return "need the arguments 'name' (str), 'help' (str), 'parameter' ( basic type object), 'code' (str) ".
         "and maybe 'parent' ($btype) to create parametric type object" unless defined $code and $code and $help ;
     return "parent has to be instance of $btype or ".__PACKAGE__." to create parametric type $name"
         if defined $parent and $parent and ref $parent ne $btype and ref $parent ne __PACKAGE__;

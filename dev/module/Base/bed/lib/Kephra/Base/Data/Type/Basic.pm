@@ -19,7 +19,7 @@ sub _unhash_arg_ {
         ? ($_[0]->{'name'}, $_[0]->{'help'}, $_[0]->{'code'}, $_[0]->{'parent'}, $_[0]->{'default'} ) 
         : @_;
 }
-sub new {        # ~name ~help -- ~code  .parent $default  --> .type | ~errormsg 
+sub new {        # ~name ~help - ~code .parent $default  --> .type | ~errormsg 
     my $pkg = shift;
     my ($name, $help, $code, $parent, $default) = _unhash_arg_(@_);
     $code //= '';

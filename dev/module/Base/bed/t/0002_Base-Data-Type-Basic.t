@@ -11,7 +11,7 @@ sub create_type { Kephra::Base::Data::Type::Basic->new(@_) }
 my $check = \&Kephra::Base::Data::Type::Basic::_check_name;
 
 eval "use $pkg;";
-is( $@, '',                                     'loaded basic type class (code compiles)');
+is( $@, '',                                     'could load the module '.$pkg);
 
 like( $check->(),    qr/not defined/,           'type name chacker has to have a have input');
 like( $check->('-'),  qr/only lower case/,      'type name have char set restrictions');

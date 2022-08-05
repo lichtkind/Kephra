@@ -15,7 +15,7 @@ sub simple_type { Kephra::Base::Data::Type::Basic->new(@_) }
 sub para_type { Kephra::Base::Data::Type::Parametric->new(@_) }
 
 eval "use $ptclass";
-is( not($@), 1, 'could load the module '.$ptclass);
+is( $@, '', 'could load the module '.$ptclass);
 
 my $erefdef = [];
 my $crefdef = [1];
@@ -27,9 +27,9 @@ my $Tpint  = simple_type('pos_int', 'positive integer', '$value >= 0', $Tint);
 my $Tarray = simple_type('array', 'array reference', 'ref $value eq "ARRAY"', undef, $crefdef);
 my $Ttype  = simple_type('array', 'array reference', 'ref $value eq "ARRAY"', $Tstr, 'ANY');
 
-my $Tindex = para_type('index', 'valid index of array',
+my $Tindex = para_type('index', 'valid index of array', 'return "value $value is out of range" if $value >= @$param',
                        simple_type( {name => 'parray', help => 'dummy basic array type', parent => $Tarray}),    # inherit both defaults
-                       'return "value $value is out of range" if $value >= @$param', $Tpint, 0, 'powner', 'porigin');
+                       $Tpint, 0, 'powner', 'porigin');
 my $Tref = para_type({name => 'reference', help => 'reference of given type', 
                       parameter => simple_type( {name => 'refname', help => 'name of areference', parent => $Tstr, default => 'ARRAY'}), 
                       code => 'return "value $value is not a $param reference" if ref $value ne $param', default => $erefdef, parent => $Tany, }); # overwrite both defaults
@@ -123,8 +123,8 @@ ok ( $Tindex->check_data('-',[1,2,3]),         'check method of type "index" clo
 ok ( $Tindex->check_data([],[1,2,3]),          'check method of type "index" clone denies with error correctly none value index');
 ok ( $Tindex->check_data(0,{1=>2}),            'check method of type "index" clone denies with error correctly none ARRAY parameter');
 
-$Tindex = para_type('index', 'valid index of array', $Tarray, 'return "value $value is out of range" if $value >= @$param', $Tpint);
-is ( ref $Tindex, $ptclass,                    'created first prametric type "index" with direct type object as parameter');
+$Tindex = para_type('index', 'valid index of array', 'return "value $value is out of range" if $value >= @$param', $Tarray, $Tpint);
+is ( ref $Tindex, $ptclass,                    'created first prametric type "index" with type object as parameter');
 is ( $Tindex->name, 'index',                   'got attribute "name" from getter of "index"');
 is ( $Tindex->help, 'valid index of array',    'got attribute "help" from getter of "index"');
 is ( $Tindex->default_value, 0,                'got attribute "default" value from getter of "index"');
