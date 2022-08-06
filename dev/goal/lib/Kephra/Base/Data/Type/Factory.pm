@@ -1,41 +1,47 @@
 use v5.20;
 use warnings;
 
-# extendable collection of simple and parametric type objects + dependency resolver
-# multiple parametric types with same name and different parameters must have same owner and shortcut (basic type shortcuts have own name space)
+# utils for type object creation: checking, deps resolve, ID conversion
 
 package Kephra::Base::Data::Type::Factory;
-our $VERSION = 1.21;
+our $VERSION = 0.2;
 use Kephra::Base::Data::Type::Basic;
 use Kephra::Base::Data::Type::Parametric;
 
 
-sub new                      {} # - 'open'                           --> ._       open store can not finalized
-sub state                    {} # ._                                 --> %state   dump all active types data
-sub restate                  {} # %state                             --> ._       recreate all type checker from data dump
+sub create_type              {} # $Tdef      --> .T | ~!                   =^ type object (basic | param) or error msg
+sub create_type_chain        {} # $Tdef      --> @[full_name => .T, ..] .T =^ array of name and object in order of creation
+                                #              | .T                        =^ in scalar context
+                                #              | .R - .R                   =^ 1 or 2 resolver objects
+sub get_ID_resolver          {} # %Tdef      --> - .R , .R                
+sub root_parent_ID           {} # %Tdef      --> - typeID, %Tdef
+sub root_parameter_ID        {} # %Tdef      --> - typeID, %Tdef
 
-sub is_open                  {} # ._                                 --> ?
-sub close                    {} # ._                                 --> ?
 
-sub list_type_names          {} # ._  - ~kind ~param_type            --> @~btype|@~ptype|@~param   # ~name     == a-z,(a-z0-9_)*
-sub list_shortcuts           {} # ._  - ~kind                        --> @~shortcut                # ~shortcut == [^a-z0-9_]
-sub list_forbidden_shortcuts {} # ._                                 --> @~shortcut
+sub base_name_from_ID        {} # $typeID    --> ~name
+sub param_name_from_ID       {} # $typeID    --> ~name
+sub full_name_from_ID        {} # $typeID    --> ~full_name 
+sub ID_from_full_name        {} # ~full_name --> $typeID
 
-sub add_type                 {} # ._  .type|%typedef - ~shortcut     --> ~errormsg
-sub remove_type              {} # ._  ~type - ~param                 --> .type|~errormsg
-sub get_type                 {} # ._  ~type - ~param                 --> ~errormsg
+sub is_type_ID               {} # $typeID    --> ?
+sub type_ID_kind             {} # $typeID    --> ( 'basic' | 'param' | '' )
+
+
+sub is_type_def              {} # %Tdef      --> ?
+sub is_basic_type_def        {} # %Tdef      --> ?
+sub is_param_type_def        {} # %Tdef      --> ?
+sub type_def_kind            {} # %Tdef      --> ( 'basic' | 'param' | '' )
+
  
-sub is_type_known            {} # ._  ~type - ~param                 --> ?
-sub is_type_owned            {} # ._  ~type - ~param                 --> ?
+sub is_type                  {} # .T         --> ?
+sub is_basic_type            {} # .T         --> ?
+sub is_param_type            {} # .T         --> ?
+sub type_kind                {} # .T         --> ( 'basic' | 'param' | '' )
 
-sub add_shortcut             {} # ._  ~kind ~type ~shortcut          --> ~errormsg
-sub remove_shortcut          {} # ._  ~kind ~shortcut                --> ~errormsg
-sub get_shortcut             {} # ._  ~kind ~type                    --> ~errormsg    ~kind = 'simple'|'para[meter]'
-sub resolve_shortcut         {} # ._  ~kind ~shortcut                --> ~type|undef
-sub forbid_shortcuts         {} # ._ @~shortcut                      --> ~errormsg    can not forbid forbidden or shortcuts currently in use
+package Kephra::Base::Data::Type::Resolver;
 
-sub check_basic_type         {} # ._  ~type $val                     -->  ~errormsg   = "reason $val"
-sub check_param_type         {} # ._  ~type ~param $val $pval        -->  ~errormsg    
-sub guess_basic_type         {} # ._  $val                           --> @~type       guess simple type
+sub new                      {} # $typeID, %Tdef, ('parent'|'parameter')  --> _ | ~!
+sub open_ID                  {} # _                                       --> $typeID
+sub resolve_open_ID          {} # .T | $Tdef                              --> ?
 
 4;

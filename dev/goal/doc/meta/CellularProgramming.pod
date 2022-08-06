@@ -641,7 +641,7 @@ the algorithm, its use cases and its role in the larger scheme fully. And having
 to rewrite the code and the tests several times is frustrating. Besides - TDD
 is not even doable for GUI and other areas where the supporting structure has to
 be built first to even run a test. A startling read about even more prescribed
-madness in software testing is Elisabeth Hendricksons paper: "better testing — 
+madness in software testing is Elisabeth Hendricksons paper: "better testing - 
 worse quality?" at L<http://testobsessed.com/wp-content/uploads/2011/04/btwq.pdf>
 But the other benefits of testing are still as worthwhile as describes by TDD people.
 

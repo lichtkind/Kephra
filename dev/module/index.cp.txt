@@ -16,7 +16,7 @@ our development model in more details: dev/goal/doc/meta/CellularProgramming.pod
                                           .     I = In Progress (currently worked on)
                                           .      N = Not yet (planned)
 --[bed]-------------------------------------------------------------------------
- - Kephra::Base  .......................  C  .....  0.11   symbol maipulation, closures, data, types
+ - Kephra::Base  .......................  P  .....  0.11   symbol maipulation, closures, data, types
  - Kephra::Base::Class .................        I          inside out OO with signatures, interfaces and serialisation
 ================================================================================
  - Kephra::Base::Object

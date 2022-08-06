@@ -269,3 +269,29 @@ sub _check_symbol {
 sub _is_symbol {length $_[0] == 1 and $_[0] !~ /[a-z0-9_]/ }
 
 5;
+
+__END__
+vsub new                      {} #   -- 'open'                        --> ._       open store can not finalized
+sub state                    {} # _                                  --> %state   dump all active types data
+sub restate                  {} # %state                             --> ._       recreate all type checker from data dump
+
+sub is_open                  {} # _                                  --> ?
+sub close                    {} # _                                  --> ?
+
+sub list_type_names          {} # _  - ~kind ~param_type             --> @~btype|@~ptype|@~param   # ~name     == a-z,(a-z0-9_)*
+sub list_shortcuts           {} # _  - ~kind                         --> @~shortcut                # ~shortcut == [^a-z0-9_]
+sub list_forbidden_shortcuts {} # _                                  --> @~shortcut
+
+sub add_type                 {} # _ .type|%typedef - ~shortcut       --> ~errormsg
+sub remove_type              {} # _ ~type - ~param                   --> .type|~errormsg
+sub get_type                 {} # _ ~type - ~param                   --> .type|~errormsg
+ 
+sub is_type_known            {} # _ ~type - ~param                   --> ?
+sub is_type_owned            {} # _ ~type - ~param                   --> ?
+
+sub add_shortcut             {} # _ ~kind ~type ~shortcut            --> ~errormsg
+sub remove_shortcut          {} # _ ~kind ~shortcut                  --> ~errormsg
+sub get_shortcut             {} # _ ~kind ~type                      --> ~shortcut|~errormsg       # ~kind = 'simple'|'para[meter]'
+sub resolve_shortcut         {} # _ ~kind ~shortcut                  --> ~full_name|undef
+sub allow_shortcuts          {} # _ @~shortcut                       --> @~shortcut                # already allowed shortcuts
+sub forbid_shortcuts         {} # _ @~shortcut                       --> @~shortcut                # already forbidden shortcuts

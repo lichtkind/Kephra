@@ -11,31 +11,68 @@ use Kephra::Base::Data::Type::Basic;       my $bclass  = 'Kephra::Base::Data::Ty
 use Kephra::Base::Data::Type::Parametric;  my $pclass  = 'Kephra::Base::Data::Type::Parametric';
                                            my $class  = 'Kephra::Base::Data::Type::Factory';
 
+my $erefdef = [];
+my $crefdef = [1];
+my $Tany   = {name=> 'any', help=> 'anything', code=> '1', parent=> undef, default => '1'};
+my $Tval   = {name=> 'value', help=> 'not a reference', code=> 'not ref $value', default=> ''};
+my $Tstr   = {name=> 'str', help=> 'character string', parent=> $Tval };
+my $Tint   = {name=> 'int', help=> 'integer number', code=> 'int $value eq $value', parent=> $Tval, default=> 0 };
+my $Tpint  = {name=> 'pos_int', help=> 'positive integer', code=> '$value >= 0', parent=> $Tint};
+my $Tarray = {name=> 'array', help=> 'array reference', code=> 'ref $value eq "ARRAY"', default=> $crefdef };
+my $Ttype  = {name=> 'array', help=> 'array reference', code=> 'ref $value eq "ARRAY"', parent=> $Tstr, default=> 'ANY' };
+
+my $Tindex = { name =>'index', help => 'valid index of array', 'return "value $value is out of range" if $value >= @$param',
+                       {name => 'parray', help => 'dummy basic array type', parent => $Tarray},    # inherit both defaults
+                      parent=> $Tpint, default => 0 };
+my $Tref =  {name => 'reference', help => 'reference of given type', 
+             code => 'return "value $value is not a $param reference" if ref $value ne $param',
+             parameter => {name => 'refname', help => 'name of areference', parent => $Tstr }, 
+             default => $erefdef, parent => $Tany }; # overwrite both defaults
+my $Tshortref = {name => 'short_ref', help => 'reference with short, given name',  
+                 code => 'return "reference $param is too long " if length $param > 9', parent => $Tref};
+
+
 eval "use $class";
 is( $@, '', 'could load the module '.$class);
+
+
+
+
+
 exit 0;
 
 __END__
 
-my $val_def  = { name=> 'value',  help=> 'defined value',     code=> 'defined $value',                             default=> '',     };
-my $nref_def = { name=> 'no_ref', help=> 'not a reference',   code=> 'not ref $value',        parent=> 'value',              ,  symbol => '$'};
-my $int_def  = { name=> 'int',    help=> 'integer',           code=> 'int($value) eq $value', parent=> 'no_ref',   default=> 0, symbol => 'N'};
-my $ip_def   = { name=> 'int_pos',help=> 'greater equal zero',code=>'$value >= 0',            parent=> 'int'};
-my $aref_def = { name=> 'array_ref',help=> 'array reference', code=> q/ref $value eq 'ARRAY'/,                     default=> []};
-my $nea_def  = { name=> 'nemty_array',help=>'array with content',code=> '@$value',            parent => 'array_ref', default=> [1]};
 
-my $dindex_def ={name => 'index', help=> 'valid index of array',code=> 'return "value $value is out of range" if $value >= @$param', symbol => 'I', 
-                     parent=> 'int_pos',  parameter => 'nemty_array'} ;
-my $para   = {name => 'simple_para', help => 'help', code => 1, default => 1, parameter => { name => 'param',  help => 'help', code => 1, default => 1, }};
-my $bchild = {name => 'sb_child', help => 'help', code => 2, default => 2, parent => 'value', 
-                                                                                  parameter => { name => 'bparam',  help => 'help', code => 1, default => 1, }};
-my $pchild = {name => 'sp_child', help => 'help', code => 3, default => 3, parent => ['simple_para', 'param']};
-my $nchild = {name => 'sn_child', help => 'help', code => 4, default => 4, parent => ['simple_para', 'para']};
-my $param_name  = {name => 'sp_para', help => 'help', code => 5, default => 5, parameter => 'value'};
-my $param_parent ={name => 'spp_para', help => 'help', code => 6, default => 6, parameter => { name => 'pp_param', help => 'help', code => 6.5, parent => 'value'}};
-my $parent_param ={name => 'sppp_para', help => 'help', code => 7, default => 7, parent => 'value', parameter => { name => 'ppp_param', help => 'help', code => 5, parent => 'value'}};
-my $index_def= { name=> 'index',  help=> 'valid index of array',code=> 'return "value $value is out of range" if $value >= @$param', symbol => 'I', 
-                     parent=> 'int_pos',  parameter => {   name => 'array',  parent=> 'array_ref', default=> [1] }, };
+sub create_type              {} # $Tdef      --> .T | ~!                   =^ type object (basic | param) or error msg
+sub create_type_chain        {} # $Tdef      --> @[full_name => .T, ..] .T =^ array of name and object in order of creation
+                                #                .T                        =^ in scalar context
+                                #                | %open                   =^ (open parent or param type ID and ref under keys)
+
+sub get_open_IDs             {} # %Tdef      --> %open                         # has 0, 2, 4 keys
+sub root_parent_ID           {} # %Tdef      --> - typeID, %Tdef
+sub root_parameter_ID        {} # %Tdef      --> - typeID, %Tdef
+sub resolve_open_ID          {} # %open      --> ?
+
+sub base_name_from_ID        {} # $typeID    --> ~name
+sub param_name_from_ID       {} # $typeID    --> ~name
+sub full_name_from_ID        {} # $typeID    --> ~full_name 
+sub ID_from_full_name        {} # ~full_name --> $typeID
+
+sub is_type_ID               {} # $typeID    --> ?
+sub type_ID_kind             {} # $typeID    --> ( 'basic' | 'param' | '' )
+
+sub is_type_def              {} # %Tdef      --> ?
+sub is_basic_type_def        {} # %Tdef      --> ?
+sub is_param_type_def        {} # %Tdef      --> ?
+sub type_def_kind            {} # %Tdef      --> ( 'basic' | 'param' | '' )
+ 
+sub is_type                  {} # .T         --> ?
+sub is_basic_type            {} # .T         --> ?
+sub is_param_type            {} # .T         --> ?
+sub type_kind                {} # .T         --> ( 'basic' | 'param' | '' )
+
+
 
 
 eval "use $class;";

@@ -6,8 +6,7 @@ use warnings;
 package Kephra::Base::Data::Type;
 our $VERSION = 1.5;
 
-use Kephra::Base::Data::Type::Namespace;
-use Kephra::Base::Data::Type::Standard;
+use Kephra::Base::Data::Type::Checker;
 
 sub state         {} # %state           -->
 sub restate       {} #                  --> %state
