@@ -57,7 +57,7 @@ sub _create_type_chain       {
     push @ret, $Tobj->full_name, $Tobj;
     @ret;
 }
-sub get_ID_resolver          { # %Tdef      --> - .R , .R  
+sub get_ID_resolver          { # %Tdef      --> - .R - .R  
     my $Tdef = shift;
     return unless ref $Tdef eq 'HASH';
     my @open;
@@ -86,7 +86,7 @@ sub root_parameter_ID        { # %Tdef      --> - typeID, %Tdef
     return $type_def->{'parent'}, $type_def if is_type_ID( $type_def->{'parent'} );
 }
 
-##### ID checker and converter #################################################
+##### ID names conversion ######################################################
 
 sub base_name_from_ID        { # $typeID     --> ~name
     return '' unless defined $_[0];
@@ -107,6 +107,12 @@ sub ID_from_full_name        { # ~full_name  --> $typeID
     my @parts = split / of /, shift;
     (@parts == 1) ? $_[0] : (@parts == 2) ? \@parts : '';
 }
+sub full_name_kind          { # ~full_name  --> ( 'basic' | 'param' | '' )
+    return '' unless defined $_[0] and not ref $_[0] and $_[0];
+    my @parts = split / of /, shift;
+    (@parts == 1) ? 'basic' : (@parts == 2) ? 'param' : '';
+}
+
 
 sub is_type_ID               { # $typeID     --> ?
     return 0 unless defined $_[0];

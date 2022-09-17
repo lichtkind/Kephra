@@ -14,28 +14,27 @@ sub new                      {} #   -- 'open'                        --> ._     
 sub state                    {} # _                                  --> %state   dump all active types data
 sub restate                  {} # %state                             --> ._       recreate all type checker from data dump
 
-sub is_open                  {} # _                                  --> ?
+sub is_open                  {} # _                                  --> ? | 'open'
 sub close                    {} # _                                  --> ?
 
 
-sub add_type                 {} # _ .type|%typedef - ~symbol         --> ~errormsg
-sub remove_type              {} # _ ~type - ~param                   --> .type|~errormsg
-sub get_type                 {} # _ ~type - ~param                   --> .type|~errormsg
-sub list_type_names          {} # _  - ~kind ~param_type             --> @~btype|@~ptype|@~param # ~name     == a-z,(a-z0-9_)*
+sub add_type                 {} # _ .type|%typedef - ~symbol         --> .type|~!
+sub remove_type              {} # _ ~full_name                       --> .type|~!
+sub get_type                 {} # _ ~full_name                       --> .type|~!
+sub list_type_names          {} # _ - ~kind ~param_name              --> @~btype|@~ptype|@~param # ~name     == a-z,(a-z0-9_)*
  
-sub is_type_known            {} # _ ~type - ~param                   --> ?
-sub is_type_owned            {} # _ ~type - ~param                   --> ?
+sub is_type_known            {} # _ ~full_name                       --> ?
+sub is_type_owned            {} # _ ~full_name                       --> ?
 
 
-sub add_symbol               {} # _ ~kind ~type ~symbol              --> ~errormsg
-sub remove_symbol            {} # _ ~kind ~symbol                    --> ~errormsg
-sub get_symbol               {} # _ ~kind ~type                      --> ~symbol|~errormsg       # ~kind = 'simple'|'para[meter]'
-sub resolve_symbol           {} # _ ~kind ~symbol                    --> ~full_name|undef
+sub add_symbol               {} # _ ~symbol ~full_name               --> ~!
+sub remove_symbol            {} # _ ~symbol ~full_name               --> ~!
+sub symbol_from_full_name    {} # _ ~full_name                       --> ~symbol|~!              # ~kind = 'simple'|'para[meter]'
+sub full_name_from_symbol    {} # _ ~symbol - ~kind                  --> ?~full_name
 
-sub list_symbols             {} # _  - ~kind                         --> @~symbol                # ~shortcut == [^a-z0-9_]
+sub list_symbols             {} # _ - ~kind                          --> @~symbol                # shortcuts for basic (default) or params
 sub list_forbidden_symbols   {} # _                                  --> @~symbol
-sub allow_symbols            {} # _ @~symbol                         --> @~symbol                # already allowed shortcuts
-sub forbid_symbols           {} # _ @~symbol                         --> @~symbol                # already forbidden shortcuts
-sub is_symbol                {} # _ ~symbol                          --> ?
-
+sub allow_symbols            {} # _ @~symbol                         --> @~symbol                # now allowed shortcuts
+sub forbid_symbols           {} # _ @~symbol                         --> @~symbol                # now forbidden shortcuts
+                                                                                                 # ~shortcut == [^a-z0-9_]
 5;

@@ -18,7 +18,7 @@ sub full_name          {} # _                      --> ~fullname
 sub ID                 {} # _                      --> ~name
 sub ID_equals          {} # _ $typeID              --> ?
 sub parents            {} # _                      --> @parent~name
-sub has_parent         {} # _ -- ~parent           --> ?
+sub has_parent         {} # _ - ~parent            --> ?
 sub parameter          {} # _                      --> ''
 sub default_value      {} # _                      --> $default
 sub help               {} # _                      --> ~help
@@ -28,6 +28,6 @@ sub assemble_source    {} # _                      --> ~checkcode
 
 #### public API ################################################################
 sub checker            {} # _                      --> &checker
-sub check_data         {} # _  $val                --> ~errormsg|''
+sub check_data         {} # _  $val                --> ?~!
 
 1;

@@ -31,6 +31,6 @@ sub assemble_source    {} # _                           --> ~checkcode
 
 #### public API ################################################################
 sub checker            {} # _                           --> &checker
-sub check_data         {} # _  $val                     --> ~errormsg|''
+sub check_data         {} # _  $val                     --> ?~!
 
 1;

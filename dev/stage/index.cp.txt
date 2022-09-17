@@ -18,8 +18,8 @@ complete development model: /dev/goal/doc/meta/CompleteProgramming.pod
              N = not yet (planned)
 
 --------------------------------------------------------------------------------
-sed    C         single file editor: simplest possible editor
-                 feat: read, writes files, utf safe, perl highlighting 
+sed     I        single file editor: simplest possible useful editor
+                 feat: read, writes files, utf safe, perl highlighting, searchbar 
                                      
 ded    C         doc ed: simplest way to edit more than one file
                  feat:  stashed doc obj with file_path &more attr., docbar, finnd & replace

@@ -12,16 +12,22 @@ use Kephra::Base::Data::Type::Factory ':all';
 #### constructor, serialisation ################################################
 sub new {      # -- |'open'   --> .tnamespace
     my ($pkg) = @_;                      #  0|1|'open' (stay)    __PACKAGE__  __FILE__
-    bless {basic_type => {}, param_type => {}, open => (exists $_[1] and lc $_[1] eq 'open') ? 'open' : 1, 
+    bless {open => (exists $_[1] and lc $_[1] eq 'open') ? 'open' : 1, 
+           basic_type => {}, param_type => {}, 
            basic_owner => {}, param_owner => {}, basic_origin => {}, param_origin => {},
-           basic_symbol => {}, basic_symbol_name => {}, param_symbol => {}, param_symbol_name => {}, forbid_symbol => {}};
+           basic_symbol => {}, basic_symbol_name => {}, param_symbol => {}, param_symbol_name => {}, 
+           forbid_symbol => {},
+};
 }
 sub state {    #            --> %state
     my ($self) = @_;
-    my %state = (basic_owner => {%{$self->{'basic_owner'}}}, basic_origin => {%{$self->{'basic_origin'}}}, 
-                 basic_symbol => {%{$self->{'basic_symbol'}}},  param_symbol => {%{$self->{'param_symbol'}}},
+    my %state = (basic_symbol => {%{$self->{'basic_symbol'}}},  param_symbol => {%{$self->{'param_symbol'}}},
                  forbid_symbol => [@{$self->{'forbid_symbol'}}],  open => $self->{'open'}  );
     $state{'basic_type'}{$_->name} = $_->state for values %{$self->{'basic_type'}};
+    $state{'basic_owner'} = {%{$self->{'basic_owner'}}} if exists $self->{'basic_owner'};
+    $state{'basic_owner'} = {%{$self->{'basic_owner'}}} if exists $self->{'basic_owner'};
+basic_owner => {%{$self->{'basic_owner'}}}, basic_origin => {%{$self->{'basic_origin'}}}, 
+
     for my $type_name (keys %{$self->{'param_type'}}) {
         $state{'param_type'}{$type_name}{$_->parameter->name} = $_->state for values %{$self->{'param_type'}{$type_name}};
         $state{'param_owner'}{$type_name} = {%{$self->{'param_owner'}{$type_name}}} if exists $self->{'param_owner'}{$type_name};
@@ -43,8 +49,13 @@ sub restate {  # %state     --> .tnamespace
 }
 
 ################################################################################
-sub is_open{ $_[0]->{'open'} ? 1 : 0 } # (open store cant be closed)                  # --> ?
-sub close  { return 0 if $_[0]->{'open'} eq 'open' or not $_[0]->{'open'}; $_[0]->{'open'} = 0; 1 } # --> ?
+sub is_open { $_[0]->{'open'} }  # _ --> ? | 'open' # (cant be closed), closed cant be changed
+sub close   {                    # _ --> ?
+    return 0 if $_[0]->{'open'} eq 'open';
+    delete $_[0]->{$_} for qw /basic_owner param_owner basic_origin param_origin/;
+    $_[0]->{'open'} = 0; 
+    1;
+}
 
 ##### type definition handling (resolving type names) ##########################
 sub need_resolve { open_type_ID($_[1]) }                                     # _ .typedef -->  @ID (0-2)
@@ -188,8 +199,8 @@ sub get_type {                                 # ~type -- ~param       --> .btyp
     }
     undef;
 }
-sub has_type      { ref get_type(@_) ? 1 : 0 }      #.tnamespace ~type - ~param --> ?
-sub is_type_owned {                                 # .tnamespace ~type - ~param --> ?
+sub has_type      { ref get_type(@_) ? 1 : 0 }      # _ ~type - ~param --> ?
+sub is_type_owned {                                 # _ ~type - ~param --> ?
     my $self = shift;
     my $type = $self->get_type(@_);
     return 0 unless ref $type;
@@ -210,7 +221,7 @@ sub _is_type_owned {
     0;
 }
 
-sub list_types   {                          # -                           --> @ ~ID|@ID
+sub list_types   {                             # -                           --> @ ~ID|@ID
     my ($self) = @_;
     values %{$self->{'basic_type'}},
     map {values %$_} values %{$self->{'param_type'}}
@@ -226,48 +237,64 @@ sub list_type_names   {                        # - ~kind ~ptype              -->
     sort keys %{$self->{$kind.'_type'}};
 }
 sub _key_from_kind_ {
-    return 'basic' if not defined $_[0] or index($_[0], 'bas') > -1;
+    return 'basic' if not defined $_[0] or or not $_[0] index($_[0], 'bas') > -1;
     return 'param' if index($_[0], 'para') > -1;
 }
 
 #### type symbols ##############################################################
-sub list_type_symbols    {                            # _                    --> @~symbols
-    my ($self, $kind) = @_;
-    ($kind = _key_from_kind_($kind)) or return;
-    sort keys( %{$self->{$kind.'_symbol_name'}});
+sub add_symbol {                                     # _ ~symbol, ~base_name, ~param_name --> ~errormsg
+    my ($self, $symbol, $base_name, $param_name) = @_;
+    my $kind = Kephra::Base::Data::Type::Factory::full_name_kind( $name );
+    return " '$name' is no valid type"
+type_ID_kind
+
+_key_from_kind_($kind)) or return;
+    my $error = $self->_check_symbol($kind, $symbol)
+    $self->{$kind.'_symbol'}{$name};
 }
-sub type_name_from_symbol {                          # ~symbolt -- ~kind     --> ~name|undef
+sub remove_symbol {                                  # _ ~kind ~symbol       --> ~errormsg
     my ($self, $symbol, $kind) = @_;
     ($kind = _key_from_kind_($kind)) or return;
     $self->{$kind.'_symbol_name'}{$symbol};
 }
-sub type_symbol_from_name {                          # ~name --  ~kind       --> ~symbol|undef
+sub symbol_from_full_name {                          # _ ~name - ~kind       --> ~symbol|undef
     my ($self, $name, $kind) = @_;
     ($kind = _key_from_kind_($kind)) or return;
     $self->{$kind.'_symbol'}{$name};
 }
-sub list_forbidden_symbols { sort keys %{$_[0]->{'forbid_symbol'}} }     # _ --> @~symbols
-sub allow_symbols  {                                 # _ @~shortcut          --> ~errormsg
-    my ($self) = shift;
-    return 'can not change a closed type namespace' unless $self->{'open'};
-    map {delete $self->{'forbid_symbol'}{$_}} grep {exists $self->{'forbid_symbol'}{$_}} @_;
+sub full_name_from_symbol {                          # _ ~symbolt - ~kind    --> ?~full_name
+    my ($self, $symbol, $kind) = @_;
+    ($kind = _key_from_kind_($kind)) or return;
+    $self->{$kind.'_symbol_name'}{$symbol};
 }
-sub forbid_symbols  {                                # _ @~shortcut          --> ~errormsg
+
+
+sub list_symbols    {                                # _ - ~kind             --> @~symbol
+    my ($self, $kind) = @_;
+    ($kind = _key_from_kind_($kind)) or return;
+    sort keys %{$self->{$kind.'_symbol_name'}};
+}
+sub list_forbidden_symbols { sort keys %{$_[0]->{'forbid_symbol'}} } # _     --> @~symbol
+sub allow_symbols  {                                 # _ @~shortcut          --> @~symbol
     my ($self) = shift;
-    return 'can not change a closed type namespace' unless $self->{'open'};
-    map {$self->{'forbid_symbol'}{$_}++} grep {not exists $self->{'forbid_symbol'}{$_}} grep { _is_symbol($_) } @_;
+    return 'can not change a closed type set' unless $self->{'open'};
+    grep {$_} map { delete $self->{'forbid_symbol'}{$_} } @_;
+}
+sub forbid_symbols  {                                # _ @~shortcut          --> @~symbol
+    my ($self) = shift;
+    return 'can not change a closed type set' unless $self->{'open'};
+    map {$self->{'forbid_symbol'}{$_}++; $_} grep {not exists $self->{'forbid_symbol'}{$_}} grep { _is_symbol($_) } @_;
 }
 sub _check_symbol {
     my ($self, $symbol, $kind) = @_;
     ($kind = _key_from_kind_($kind)) or return;
     return "type symbol is undefined" unless defined $symbol;
     return "type symbol '$symbol' is not allowed (check list_forbidden_symbols)" if exists $self->{'forbid_symbol'}{$symbol};
-    return "type symbol '$symbol' has to be one none id char (not a-z0-9_)" unless _is_symbol($symbol);
-    return "$kind type symbol '$symbol' is already taked" if exists $self->{$kind.'_symbol_name'}{$symbol};
+    return "type symbol '$symbol' has to be one char (not a-z0-9_)" unless _is_symbol($symbol);
+    return "$kind type symbol '$symbol' is already taken" if exists $self->{$kind.'_symbol_name'}{$symbol};
     '';
 }
-
-sub is_symbol {length $_[1] == 1 and $_[1] !~ /[a-z0-9_]/ }  # _ ~symbol  --> ?
+sub _is_symbol {length $_[0] == 1 and $_[0] !~ /[a-z0-9_]/ }  # _ ~symbol  --> ?
 
 5;
 
@@ -281,21 +308,22 @@ sub is_open                  {} # _                                  --> ?
 sub close                    {} # _                                  --> ?
 
 
-sub add_type                 {} # _ .type|%typedef - ~symbol         --> ~errormsg
-sub remove_type              {} # _ ~type - ~param                   --> .type|~errormsg
-sub get_type                 {} # _ ~type - ~param                   --> .type|~errormsg
-sub list_type_names          {} # _  - ~kind ~param_type             --> @~btype|@~ptype|@~param # ~name     == a-z,(a-z0-9_)*
+sub add_type                 {} # _ .type|%typedef - ~symbol         --> .type|~!
+sub remove_type              {} # _ ~full_name                       --> .type|~!
+sub get_type                 {} # _ ~full_name                       --> .type|~!
+sub list_type_names          {} # _ - ~kind ~param_name              --> @~btype|@~ptype|@~param # ~name     == a-z,(a-z0-9_)*
  
-sub is_type_known            {} # _ ~type - ~param                   --> ?
-sub is_type_owned            {} # _ ~type - ~param                   --> ?
+sub is_type_known            {} # _ ~full_name                       --> ?
+sub is_type_owned            {} # _ ~full_name                       --> ?
 
 
-sub add_symbol               {} # _ ~kind ~type ~symbol              --> ~errormsg
-sub remove_symbol            {} # _ ~kind ~symbol                    --> ~errormsg
-sub get_symbol               {} # _ ~kind ~type                      --> ~symbol|~errormsg       # ~kind = 'simple'|'para[meter]'
-sub resolve_symbol           {} # _ ~kind ~symbol                    --> ~full_name|undef
+sub add_symbol               {} # _ ~symbol ~full_name               --> ~!
+sub remove_symbol            {} # _ ~symbol ~full_name               --> ~!
+sub symbol_from_full_name    {} # _ ~full_name                       --> ~symbol|~!              # ~kind = 'simple'|'para[meter]'
+sub full_name_from_symbol    {} # _ ~symbol - ~kind                  --> ?~full_name
 
-sub list_symbols             {} # _  - ~kind                         --> @~symbol                # ~shortcut == [^a-z0-9_]
+sub list_symbols             {} # _ - ~kind                          --> @~symbol                # shortcuts for basic (default) or params
 sub list_forbidden_symbols   {} # _                                  --> @~symbol
-sub allow_symbols            {} # _ @~symbol                         --> @~symbol                # already allowed shortcuts
-sub forbid_symbols           {} # _ @~symbol                         --> @~symbol                # already forbidden shortcuts
+sub allow_symbols            {} # _ @~symbol                         --> @~symbol                # now allowed shortcuts
+sub forbid_symbols           {} # _ @~symbol                         --> @~symbol                # now forbidden shortcuts
+ 
