@@ -86,9 +86,11 @@ sub set_margin {
 sub is_empty { not shift->GetTextLength }
 
 sub insert_text {
-	my ($self, $text, $pos) = @_;
-	$pos = $self->GetCurrentPos unless defined $pos;
-	$self->InsertText($pos, $text);
+    my ($self, $text, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    $self->InsertText($pos, $text);
+    $pos += length $text;
+    $self->SetSelection( $pos, $pos );
 }
 
 sub set_tab_size {

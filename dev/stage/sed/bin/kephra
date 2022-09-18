@@ -1,7 +1,8 @@
 #!usr/bin/perl
 use v5.12;
 use warnings;
-BEGIN { unshift @INC, '.' }
+use lib '../lib', 'lib', '.';
+
 use Wx;
 use Kephra::App::Window;
 

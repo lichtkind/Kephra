@@ -1,6 +1,6 @@
 use v5.12;
 use warnings;
-
+#
 package Kephra::App::Window;
 use base qw(Wx::Frame);
 
@@ -20,18 +20,23 @@ sub new {
 	Wx::Event::EVT_KEY_DOWN($ed , sub {
 		my ($ed, $event) = @_;
 		my $code = $event->GetUnicodeKey;
-		if   ($event->ControlDown and $code == ord('O')){ open_file( Kephra::App::Dialog::get_file_open() ) }
-		elsif($event->ControlDown and $code == ord('Q')){ $self->Close }
-		elsif($event->ControlDown and $code == ord('S')){
+		my $mod = $event->GetModifiers();
+        if (($mod == 1 or $mod == 3) and $code == ord('Q'))  { $ed->insert_text('@')}
+		elsif ($event->ControlDown and $code == ord('O')){ open_file( Kephra::App::Dialog::get_file_open() ) }
+		elsif ($event->ControlDown and $code == ord('S')){
 				Kephra::IO::LocalFile::write( $file, $encoding, $ed->GetText() );
 				$ed->SetSavePoint;
 		} 
+		elsif($event->ControlDown and $code == ord('Q')){ $self->Close; say 'close' }
 		else { $event->Skip }
+        return if $mod == 3;
+
 	});
+    
 	Wx::Event::EVT_STC_UPDATEUI($ed, -1, sub {
 		$self->SetStatusText( $ed->GetCurrentPos, 0);
 	});
-	
+
 	open_file(__FILE__);
 	return $self;
 }
