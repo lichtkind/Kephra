@@ -27,34 +27,87 @@ sub mount_events {
 	$self->DragAcceptFiles(1) if $^O eq 'MSWin32'; # enable drop files on win
 	#$self->SetDropTarget( Kephra::App::Editor::TextDropTarget->new($self) );
 
-	Wx::Event::EVT_STC_CHANGE       ($self, -1, sub {
-		my ($ed, $event) = @_;
-		$ed->{'change_pos'} = $ed->GetCurrentPos;
-		$event->Skip;
-	} );
+    Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {
+        my ($ed, $event) = @_;
+        $ed->{'change_pos'} = $ed->GetCurrentPos;
+        $event->Skip;
+    } );
 
-	Wx::Event::EVT_KEY_DOWN ($self, sub {
-		my ($ed, $event) = @_;
-		$event->Skip
-	});
-	Wx::Event::EVT_STC_SAVEPOINTREACHED($self, -1, sub {
-		$self->GetParent->set_title(0);
-	});
-	Wx::Event::EVT_STC_SAVEPOINTLEFT($self, -1, sub {
-		$self->GetParent->set_title(1);
-	});
-	Wx::Event::EVT_SET_FOCUS( $self, sub {
-		my ($ed, $event ) = @_;
-		$event->Skip;
-	});
-	#Wx::Event::EVT_DROP_FILES       ($ep, sub{});
-	#Wx::Event::EVT_STC_START_DRAG   ($ep, -1, sub {
-	#Wx::Event::EVT_STC_DRAG_OVER    ($ep, -1, sub { $droppos = $_[1]->GetPosition });
-	#Wx::Event::EVT_STC_DO_DROP   
+    Wx::Event::EVT_KEY_DOWN( $self, sub {
+        my ($ed, $event) = @_;
+        my $code = $event->GetKeyCode ; # my $raw = $event->GetRawKeyCode;
+        my $mod = $event->GetModifiers; # say "$mod : ", $code, " ($raw) ",  &Wx::WXK_LEFT;
+        if (($mod == 1 or $mod == 3) and $code == ord('Q'))  { $ed->insert_text('@') }
+#        elsif($event->ControlDown and $code == ord('F'))     {   }
+         else { $event->Skip }
+    });
+    
+    Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub { $self->GetParent->SetStatusText( $self->GetCurrentPos, 0) });
+    Wx::Event::EVT_STC_SAVEPOINTREACHED( $self, -1, sub { $self->GetParent->set_title(0) });
+    Wx::Event::EVT_STC_SAVEPOINTLEFT(    $self, -1, sub { $self->GetParent->set_title(1) });
+    Wx::Event::EVT_SET_FOCUS(            $self,     sub { my ($ed, $event ) = @_;        $event->Skip;   });
+    Wx::Event::EVT_DROP_FILES       ($self, sub { 
+         #say $_[0], $_[1];    #$self->GetParent->open_file()  
+    });
+    Wx::Event::EVT_STC_DO_DROP  ($self, -1, sub { 
+        my ($ed, $event ) = @_; # StyledTextEvent=SCALAR
+        my $str = $event->GetDragText;
+        chomp $str;
+        if (substr( $str, 0, 7) eq 'file://'){
+            $self->GetParent->open_file( substr $str, 7 );
+        }
+        return; # $event->Skip;
+    });
+    # Wx::Event::EVT_STC_START_DRAG   ($ep, -1, sub {
+    # Wx::Event::EVT_STC_DRAG_OVER    ($ep, -1, sub { $droppos = $_[1]->GetPosition });
 }
 
 
+sub new_file { 
+    my $self = shift;
+    $self->GetParent->{'file'} = '';
+    $self->ClearAll;
+    $self->SetSavePoint;
+}
+
+sub open_file   { $_[0]->GetParent->open_file( Kephra::App::Dialog::get_file_open() ) }
+sub reopen_file { $_[0]->GetParent->open_file( $_[0]->GetParent->{'file'} ) }
+sub save_file {
+    my $self = shift;
+    $self->GetParent->{'file'} = Kephra::App::Dialog::get_file_save() unless $self->GetParent->{'file'};
+    Kephra::IO::LocalFile::write( $self->GetParent->{'file'},  $self->GetParent->{'encoding'}, $self->GetText() );
+    $self->SetSavePoint;
+}
+sub save_as_file {
+    my $self = shift;
+    $self->GetParent->{'file'} = Kephra::App::Dialog::get_file_save();
+    Kephra::IO::LocalFile::write( $self->GetParent->{'file'},  $self->GetParent->{'encoding'}, $self->GetText() );
+    $self->SetSavePoint;
+}
+
+sub Replace {
+    my $self = shift;
+    my $sel = $self->GetSelectedText();
+    return unless $sel;
+    my $old_start = $self->GetSelectionStart( );
+    my $old_end = $self->GetSelectionEnd( );
+    $self->BeginUndoAction();
+    $self->SetSelectionEnd( $old_start );
+    $self->Paste;
+    my $new_start = $self->GetSelectionStart( );
+    my $new_end = $self->GetSelectionEnd( );
+    $self->SetSelection( $new_end, $new_end + $old_end - $old_start);
+    $self->Cut;
+    $self->SetSelection( $new_start, $new_end);
+    $self->EndUndoAction();
+}
+
 sub create_color { Wx::Colour->new(@_) }
+
+sub goto_last_edit {
+    my $self = shift;
+    $self->SetSelection( $self->{'change_pos'}+1, $self->{'change_pos'}+1 );
+}
 
 sub set_margin {
 	my ($self, $style) = @_;
@@ -71,9 +124,9 @@ sub set_margin {
 		$self->SetMarginSensitive( 2, 1 );
 		$self->StyleSetForeground(&Wx::wxSTC_STYLE_LINENUMBER, create_color(123,123,137));
 		$self->StyleSetBackground(&Wx::wxSTC_STYLE_LINENUMBER, create_color(226,226,222));
-		$self->SetMarginWidth(0,  0);
-		$self->SetMarginWidth(1, 41);
-		$self->SetMarginWidth(2,  0);
+		$self->SetMarginWidth(0,  1);
+		$self->SetMarginWidth(1, 43);
+		$self->SetMarginWidth(2,  2);
 		# extra text margin
 	}
 	elsif ($style eq 'no') { $self->SetMarginWidth($_, 0) for 1..3 }
@@ -100,6 +153,7 @@ sub set_tab_size {
 	$self->SetIndent($size);
 	$self->SetHighlightGuide($size);
 }
+
 sub set_tab_usage {
 	my ($self, $usage) = @_;
 	$self->SetUseTabs($usage);
@@ -144,7 +198,7 @@ sub load_font {
 	$self->StyleSetFont( &Wx::wxSTC_STYLE_DEFAULT, $wx_font ) if $wx_font->Ok > 0;
 }
 
-sub focus {  Kephra::API::focus( $_[0] ) }
+#sub focus {  Kephra::API::focus( $_[0] ) }
 
 sub set_perlhighlight {
 	my ($self) = @_;

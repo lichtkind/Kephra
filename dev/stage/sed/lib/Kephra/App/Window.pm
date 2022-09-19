@@ -1,62 +1,108 @@
 use v5.12;
 use warnings;
-#
+
 package Kephra::App::Window;
 use base qw(Wx::Frame);
 
 use Kephra::App::Dialog;
 use Kephra::App::Editor;
+use Kephra::App::SearchBar;
 use Kephra::IO::LocalFile;
-our ($file, $encoding, $content, $ed);
+our $VERSION = 0.41;
 
 sub new {
-	my($class, $parent) = @_;
-	my $self = $class->SUPER::new( undef, -1, '', [-1,-1], [1000,800] );
-	$self->CreateStatusBar(3);
-	$self->SetStatusWidths(100, 50, -1);
-	$ed = Kephra::App::Editor->new($self, -1);
-	Wx::Window::SetFocus( $ed );
-
-	Wx::Event::EVT_KEY_DOWN($ed , sub {
-		my ($ed, $event) = @_;
-		my $code = $event->GetUnicodeKey;
-		my $mod = $event->GetModifiers();
-        if (($mod == 1 or $mod == 3) and $code == ord('Q'))  { $ed->insert_text('@')}
-		elsif ($event->ControlDown and $code == ord('O')){ open_file( Kephra::App::Dialog::get_file_open() ) }
-		elsif ($event->ControlDown and $code == ord('S')){
-				Kephra::IO::LocalFile::write( $file, $encoding, $ed->GetText() );
-				$ed->SetSavePoint;
-		} 
-		elsif($event->ControlDown and $code == ord('Q')){ $self->Close; say 'close' }
-		else { $event->Skip }
-        return if $mod == 3;
-
-	});
+    my($class, $parent) = @_;
+    my $self = $class->SUPER::new( undef, -1, '', [-1,-1], [1000,800] );
+    $self->CreateStatusBar(3);
+    $self->SetStatusWidths(100, 50, -1);
+    my $ed = $self->{'ed'} = Kephra::App::Editor->new($self, -1);
+    my $sb = $self->{'sb'} = Kephra::App::SearchBar->new($self, -1);
     
-	Wx::Event::EVT_STC_UPDATEUI($ed, -1, sub {
-		$self->SetStatusText( $ed->GetCurrentPos, 0);
-	});
+    my $sizer = Wx::BoxSizer->new( &Wx::wxVERTICAL );
+    $sizer->Add( $self->{'ed'}, 1, &Wx::wxEXPAND, 0);
+    $sizer->Add( $self->{'sb'}, 0, &Wx::wxGROW, 0);
 
-	open_file(__FILE__);
-	return $self;
+    $self->SetSizer($sizer);
+    Wx::Window::SetFocus( $ed );
+
+    Wx::Event::EVT_MENU( $self, 11100, sub { $self->{'ed'}->new_file });
+    Wx::Event::EVT_MENU( $self, 11200, sub { $self->{'ed'}->open_file });
+    Wx::Event::EVT_MENU( $self, 11300, sub { $self->{'ed'}->reopen_file });
+    Wx::Event::EVT_MENU( $self, 11400, sub { $self->{'ed'}->save_file });
+    Wx::Event::EVT_MENU( $self, 11500, sub { $self->{'ed'}->save_as_file });
+    Wx::Event::EVT_MENU( $self, 11900, sub { $self->Close });
+    Wx::Event::EVT_CLOSE( $self, sub {  $_[1]->Skip(1) });
+    Wx::Event::EVT_MENU( $self, 12100, sub { $self->{'ed'}->Undo });
+    Wx::Event::EVT_MENU( $self, 12110, sub { $self->{'ed'}->Redo });
+    Wx::Event::EVT_MENU( $self, 12200, sub { $self->{'ed'}->Cut });
+    Wx::Event::EVT_MENU( $self, 12210, sub { $self->{'ed'}->Copy });
+    Wx::Event::EVT_MENU( $self, 12220, sub { $self->{'ed'}->Paste });
+    Wx::Event::EVT_MENU( $self, 12230, sub { $self->{'ed'}->Replace });
+    Wx::Event::EVT_MENU( $self, 12240, sub { $self->{'ed'}->Clear });
+    Wx::Event::EVT_MENU( $self, 12300, sub { $self->{'ed'}->SelectAll () });
+    Wx::Event::EVT_MENU( $self, 12400, sub { $self->{'ed'}->goto_last_edit });
+    Wx::Event::EVT_MENU( $self, 12410, sub { $self->{'sb'}{'text'}->SetFocus; });
+
+    my $file_menu = Wx::Menu->new();
+    $file_menu->Append( 11100, "&New\tCtrl+N", "complete a sketch drawing" );
+    $file_menu->AppendSeparator();
+    $file_menu->Append( 11200, "&Open\tCtrl+O", "save currently displayed image" );
+    $file_menu->Append( 11300, "&Reload\tCtrl+Shift+O", "save currently displayed image" );
+    $file_menu->AppendSeparator();
+    $file_menu->Append( 11400, "&Save\tCtrl+S", "save currently displayed image" );
+    $file_menu->Append( 11500, "&Save As\tCtrl+Shift+S", "save currently displayed image" );
+    $file_menu->AppendSeparator();
+    $file_menu->Append( 11900, "&Quit\tCtrl+Q", "close program" );
+    
+    my $edit_menu = Wx::Menu->new();
+    $edit_menu->Append( 12100, "&Undo\tCtrl+Z",    "undo last text change" );
+    $edit_menu->Append( 12110, "&Redo\tCtrl+Y",    "undo last undo" );
+    $edit_menu->AppendSeparator();
+    $edit_menu->Append( 12200, "&Cut\tCtrl+X",     "delete selected text and move it into clipboard" );
+    $edit_menu->Append( 12210, "&Copy\tCtrl+C",    "move selected text into clipboard" );
+    $edit_menu->Append( 12220, "&Paste\tCtrl+V",   "insert clipboard content at cursor position" );
+    $edit_menu->Append( 12230, "&Replace\tCtrl+R", "replace selected text with clipboard content" );
+    $edit_menu->Append( 12240, "&Delete\tDel",     "delete selected text" );
+    $edit_menu->AppendSeparator();
+    $edit_menu->Append( 12300, "&Select All\tCtrl+A", "select entire text" );
+    $edit_menu->AppendSeparator();
+    $edit_menu->Append( 12400, "&Goto Edit\tCtrl+G", "move cursor position of last change" );
+    $edit_menu->Append( 12410, "&Find\tCtrl+F",      "move focus in or out the search bar" );
+    
+    my $help_menu = Wx::Menu->new();
+    $help_menu->Append( 13100, "&Usage\tAlt+U", "Dialog with information usage" );
+    $help_menu->Append( 13200, "&About\tAlt+A",    "Dialog with some general information" );
+
+    my $menu_bar = Wx::MenuBar->new();
+    $menu_bar->Append( $file_menu, '&File' );
+    $menu_bar->Append( $edit_menu, '&Edit' );
+    $menu_bar->Append( $help_menu, '&Help' );
+    $self->SetMenuBar($menu_bar);
+
+    $self->set_title();
+    #$self->open_file(__FILE__);
+    return $self;
 }
 
 
 sub open_file {
-	my $candidate = shift;
-	return unless $candidate and -r $candidate;
-	($content, $encoding) = Kephra::IO::LocalFile::read( $file = $candidate );
-	$ed->SetText( $content );
-	$ed->EmptyUndoBuffer;
-	$ed->SetSavePoint;
-	$ed->GetParent->SetStatusText( $encoding, 1);
+    my ($self, $file) = @_;
+    return unless defined $file and -r $file;
+    my ($content, $encoding) = Kephra::IO::LocalFile::read( $file );
+    $self->{'file'} = $file;
+    $self->{'encoding'} = $encoding;
+    $self->{'ed'}->SetText( $content );
+    $self->{'ed'}->EmptyUndoBuffer;
+    $self->{'ed'}->SetSavePoint;
+    $self->SetStatusText( $encoding, 1);
 }
 
 sub set_title {
-	my ($self, $status) = @_;
-	my $title = 'Single Edit - KephraCP stage 1 - ' . $file;
-	$title .= ' *' if $status;
-	$self->SetTitle($title);
+    my ($self) = @_;
+    my $title = 'Single Edit - KephraCP stage 1  -  ';
+    $title .=  $self->{'file'} ? $self->{'file'} : '<unnamed>';
+    $title .= ' *' if $self->{'ed'}->GetModify();
+    $self->SetTitle($title);
 }
 
 1;

@@ -5,8 +5,6 @@ use Wx;
 package Kephra::App::Dialog;
 
 
-
-
 sub _parent { undef }
 
 # standard dialogs
