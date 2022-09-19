@@ -17,15 +17,15 @@ sub new {
 	$self->set_margin();
 	$self->mount_events();
 	$self->set_tab_size(4);
-	$self->set_tab_usage(1);
+	$self->set_tab_usage(0);
 	$self->SetScrollWidth(300);
 	return $self;
 }
 
 sub mount_events {
-	my ($self, @which) = @_;
-	$self->DragAcceptFiles(1) if $^O eq 'MSWin32'; # enable drop files on win
-	#$self->SetDropTarget( Kephra::App::Editor::TextDropTarget->new($self) );
+    my ($self, @which) = @_;
+    $self->DragAcceptFiles(1) if $^O eq 'MSWin32'; # enable drop files on win
+    #$self->SetDropTarget( Kephra::App::Editor::TextDropTarget->new($self) );
 
     Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {
         my ($ed, $event) = @_;
@@ -106,7 +106,12 @@ sub create_color { Wx::Colour->new(@_) }
 
 sub goto_last_edit {
     my $self = shift;
-    $self->SetSelection( $self->{'change_pos'}+1, $self->{'change_pos'}+1 );
+    $self->goto_pos( $self->{'change_pos'}+1 );
+}
+
+sub goto_pos {
+    my ($self, $pos) = @_;
+    $self->SetSelection( $pos, $pos );
 }
 
 sub set_margin {

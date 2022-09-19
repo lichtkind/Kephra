@@ -41,7 +41,7 @@ sub new {
     Wx::Event::EVT_MENU( $self, 12240, sub { $self->{'ed'}->Clear });
     Wx::Event::EVT_MENU( $self, 12300, sub { $self->{'ed'}->SelectAll () });
     Wx::Event::EVT_MENU( $self, 12400, sub { $self->{'ed'}->goto_last_edit });
-    Wx::Event::EVT_MENU( $self, 12410, sub { $self->{'sb'}{'text'}->SetFocus; });
+    Wx::Event::EVT_MENU( $self, 12410, sub { $self->{'sb'}->enter });
 
     my $file_menu = Wx::Menu->new();
     $file_menu->Append( 11100, "&New\tCtrl+N", "complete a sketch drawing" );
@@ -66,8 +66,11 @@ sub new {
     $edit_menu->AppendSeparator();
     $edit_menu->Append( 12300, "&Select All\tCtrl+A", "select entire text" );
     $edit_menu->AppendSeparator();
-    $edit_menu->Append( 12400, "&Goto Edit\tCtrl+G", "move cursor position of last change" );
+    $edit_menu->Append( 12400, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
+    $edit_menu->AppendSeparator();
     $edit_menu->Append( 12410, "&Find\tCtrl+F",      "move focus in or out the search bar" );
+    $edit_menu->Append( 12410, "&Find Prev\tCtrl+Shift+G",   "jump to previous finding of search text" );
+    $edit_menu->Append( 12410, "&Find Next\tCtrl+G",         "jump to next finding of search text" );
     
     my $help_menu = Wx::Menu->new();
     $help_menu->Append( 13100, "&Usage\tAlt+U", "Dialog with information usage" );
