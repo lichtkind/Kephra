@@ -10,9 +10,9 @@ sub new {
     my $self = $class->SUPER::new( $parent, -1 );
     $self->{'text'} = Wx::TextCtrl->new( $self, -1, '', [-1, -1], [200, 25], &Wx::wxTE_PROCESS_ENTER);
     $self->{'close'} = Wx::Button->new( $self, -1, 'X',     [-1, -1], [30, 20] );
-    $self->{'first'} = Wx::Button->new( $self, -1, 'Find',  [-1, -1], [-1, -1] );
-    $self->{'prev'}  = Wx::Button->new( $self, -1, '<',     [-1, -1], [-1, -1] );
-    $self->{'next'}  = Wx::Button->new( $self, -1, '>',     [-1, -1], [-1, -1] );
+    $self->{'first'} = Wx::Button->new( $self, -1, 'Find',  [-1, -1], [50, -1] );
+    $self->{'prev'}  = Wx::Button->new( $self, -1, '<',     [-1, -1], [30, -1] );
+    $self->{'next'}  = Wx::Button->new( $self, -1, '>',     [-1, -1], [30, -1] );
     $self->{'close'}->SetToolTip('close search bar');
 
     Wx::Event::EVT_BUTTON( $self, $self->{'close'},  sub { $self->close     });
@@ -20,28 +20,32 @@ sub new {
     Wx::Event::EVT_BUTTON( $self, $self->{'prev'},   sub { $self->find_prev });
     Wx::Event::EVT_BUTTON( $self, $self->{'next'},   sub { $self->find_next });
 
-    Wx::Event::EVT_TEXT_ENTER( $self, $self->{'text'}, sub { $self->find  });
+    Wx::Event::EVT_TEXT_ENTER( $self, $self->{'text'}, sub { $self->find_next  });
     
     Wx::Event::EVT_KEY_DOWN( $self->{'text'}, sub {
         my ($ed, $event) = @_;
         my $code = $event->GetKeyCode;
         my $mod = $event->GetModifiers();
-        if   ( $code == &Wx::WXK_UP )     { $self->find_prev  }
-        elsif( $code == &Wx::WXK_DOWN )   { $self->find_next  }
+        if   ( $code == &Wx::WXK_UP )                     { $self->find_prev  }
+        elsif( $code == &Wx::WXK_DOWN )                   { $self->find_next  }
         elsif( $event->ControlDown and $code == ord('Q')) { $self->close  }
         elsif( $event->ControlDown and $code == ord('F')) { $parent->{'ed'}->SetFocus  }
         else { $event->Skip }
     });
     
+    my $attr = &Wx::wxGROW | &Wx::wxTOP|&Wx::wxDOWN;
     my $sizer = Wx::BoxSizer->new( &Wx::wxHORIZONTAL );
-    $sizer->AddSpacer( 5);
-    $sizer->Add( $self->{'close'}, 0, &Wx::wxGROW | &Wx::wxTOP|&Wx::wxDOWN, 15);
-    $sizer->Add( $self->{'text'}, 0, &Wx::wxGROW | &Wx::wxALL, 10);
     $sizer->AddSpacer( 10);
-    $sizer->Add( $self->{'first'}, 0, &Wx::wxGROW | &Wx::wxALL, 10);
-    $sizer->Add( $self->{'prev'}, 0, &Wx::wxGROW | &Wx::wxALL, 10);
-    $sizer->Add( $self->{'next'}, 0, &Wx::wxGROW | &Wx::wxALL, 10);
-    $sizer->Add( 0, 1, &Wx::wxEXPAND, 10);
+    $sizer->Add( $self->{'close'}, 0, $attr, 15);
+    $sizer->AddSpacer( 15);
+    $sizer->Add( $self->{'text'},  0, $attr, 10);
+    $sizer->AddSpacer( 15);
+    $sizer->Add( $self->{'first'}, 0, $attr, 10);
+    $sizer->AddSpacer( 5);
+    $sizer->Add( $self->{'prev'},  0, $attr, 10);
+    $sizer->AddSpacer( 5);
+    $sizer->Add( $self->{'next'},  0, $attr, 10);
+    $sizer->Add( 0, 1, &Wx::wxEXPAND, 0);
     $self->SetSizer($sizer);
     $self;
 }

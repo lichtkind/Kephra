@@ -1,25 +1,23 @@
 use v5.12;
 use warnings;
 
+# comment, rect edit, move line goto block
+
 package Kephra::App::Editor;
+our @ISA = 'Wx::StyledTextCtrl';
 use Wx qw/ :everything /;
 use Wx::STC;
 use Wx::DND;
 #use Wx::Scintilla;
-our @ISA = 'Wx::StyledTextCtrl';
+use Kephra::App::Editor::SyntaxMode;
 
 sub new {
-	my( $class, $parent, $style) = @_;
-	my $self = $class->SUPER::new($parent, -1,[-1,-1],[-1,-1]);
-	$self->load_font();  # before setting highlighting
-	$self->set_perlhighlight();
-	$self->set_colors(); # after highlight
-	$self->set_margin();
-	$self->mount_events();
-	$self->set_tab_size(4);
-	$self->set_tab_usage(0);
-	$self->SetScrollWidth(300);
-	return $self;
+    my( $class, $parent, $style) = @_;
+    my $self = $class->SUPER::new( $parent, -1,[-1,-1],[-1,-1] );
+    Kephra::App::Editor::SyntaxMode::apply( $self );  # before setting highlighting
+    $self->SetScrollWidth(300);
+    $self->mount_events();
+    return $self;
 }
 
 sub mount_events {
@@ -29,20 +27,48 @@ sub mount_events {
 
     Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {
         my ($ed, $event) = @_;
-        $ed->{'change_pos'} = $ed->GetCurrentPos;
+        $ed->{'change_pos'} = $ed->GetCurrentPos; # say 'skip';
         $event->Skip;
-    } );
+    });
 
     Wx::Event::EVT_KEY_DOWN( $self, sub {
         my ($ed, $event) = @_;
         my $code = $event->GetKeyCode ; # my $raw = $event->GetRawKeyCode;
         my $mod = $event->GetModifiers; # say "$mod : ", $code, " ($raw) ",  &Wx::WXK_LEFT;
-        if (($mod == 1 or $mod == 3) and $code == ord('Q'))  { $ed->insert_text('@') }
-#        elsif($event->ControlDown and $code == ord('F'))     {   }
-         else { $event->Skip }
+        if (($mod == 1 or $mod == 3) and $code == ord('Q'))    { $ed->insert_text('@') }
+        elsif($event->ControlDown and $event->ShiftDown and $code == &Wx::WXK_UP)   { $ed->select_prev_block  }
+        elsif($event->ControlDown and $event->ShiftDown and $code == &Wx::WXK_DOWN) { $ed->select_next_block  }
+        elsif($event->ControlDown and $code == &Wx::WXK_UP)    { $ed->goto_prev_block  }
+        elsif($event->ControlDown and $code == &Wx::WXK_DOWN)  { $ed->goto_next_block  }
+#        elsif($event->AltDown and $code == &Wx::WXK_PAGEUP )  {   }
+#        elsif($event->AltDown and $code == &Wx::WXK_PAGEDOWN ){   }
+#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_UP)       {   }
+#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_DOWN)     {   }
+#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_DOWN)     {   }
+#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_LEFT)     {   }
+#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_RIGHT)    {   }
+#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_PAGEUP)   {   }
+#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_PAGEDOWN) {   }
+#        elsif($event->ControlDown and $code == ord('K'))    {   }
+        elsif($event->AltDown     and $code == &Wx::WXK_UP)    { $ed->move_text_up     }
+        elsif($event->AltDown     and $code == &Wx::WXK_DOWN)  { $ed->move_text_down   }
+        elsif($event->AltDown     and $code == &Wx::WXK_LEFT)  { $ed->move_text_left   }
+        elsif($event->AltDown     and $code == &Wx::WXK_RIGHT) { $ed->move_text_right  }
+        else { $event->Skip }
+    });
+
+    Wx::Event::EVT_KEY_UP( $self, sub {
+        my ($ed, $event) = @_;
+        my $code = $event->GetKeyCode;
+        my $mod = $event->GetModifiers;
     });
     
-    Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub { $self->GetParent->SetStatusText( $self->GetCurrentPos, 0) });
+    Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub { 
+        $self->GetParent->SetStatusText( $self->GetCurrentPos, 0); # say 'ui';
+        delete $self->{'sel_head'} if exists $self->{'sel_head'} 
+                                         and $self->{'sel_head'} != $self->GetSelectionStart()
+                                         and $self->{'sel_head'} != $self->GetSelectionEnd(); 
+    });
     Wx::Event::EVT_STC_SAVEPOINTREACHED( $self, -1, sub { $self->GetParent->set_title(0) });
     Wx::Event::EVT_STC_SAVEPOINTLEFT(    $self, -1, sub { $self->GetParent->set_title(1) });
     Wx::Event::EVT_SET_FOCUS(            $self,     sub { my ($ed, $event ) = @_;        $event->Skip;   });
@@ -62,6 +88,7 @@ sub mount_events {
     # Wx::Event::EVT_STC_DRAG_OVER    ($ep, -1, sub { $droppos = $_[1]->GetPosition });
 }
 
+sub is_empty { not shift->GetTextLength }
 
 sub new_file { 
     my $self = shift;
@@ -89,8 +116,7 @@ sub Replace {
     my $self = shift;
     my $sel = $self->GetSelectedText();
     return unless $sel;
-    my $old_start = $self->GetSelectionStart( );
-    my $old_end = $self->GetSelectionEnd( );
+    my ($old_start, $old_end) = $self->GetSelection;
     $self->BeginUndoAction();
     $self->SetSelectionEnd( $old_start );
     $self->Paste;
@@ -102,47 +128,6 @@ sub Replace {
     $self->EndUndoAction();
 }
 
-sub create_color { Wx::Colour->new(@_) }
-
-sub goto_last_edit {
-    my $self = shift;
-    $self->goto_pos( $self->{'change_pos'}+1 );
-}
-
-sub goto_pos {
-    my ($self, $pos) = @_;
-    $self->SetSelection( $pos, $pos );
-}
-
-sub set_margin {
-	my ($self, $style) = @_;
-
-	if (not defined $style or not $style or $style eq 'default') {
-		$self->SetMarginType( 0, &Wx::wxSTC_MARGIN_SYMBOL );
-		$self->SetMarginType( 1, &Wx::wxSTC_MARGIN_NUMBER );
-		$self->SetMarginType( 2, &Wx::wxSTC_MARGIN_SYMBOL );
-		$self->SetMarginMask( 0, 0x01FFFFFF );
-		$self->SetMarginMask( 1, 0 );
-		$self->SetMarginMask( 2, &Wx::wxSTC_MASK_FOLDERS );
-		$self->SetMarginSensitive( 0, 1 );
-		$self->SetMarginSensitive( 1, 1 );
-		$self->SetMarginSensitive( 2, 1 );
-		$self->StyleSetForeground(&Wx::wxSTC_STYLE_LINENUMBER, create_color(123,123,137));
-		$self->StyleSetBackground(&Wx::wxSTC_STYLE_LINENUMBER, create_color(226,226,222));
-		$self->SetMarginWidth(0,  1);
-		$self->SetMarginWidth(1, 43);
-		$self->SetMarginWidth(2,  2);
-		# extra text margin
-	}
-	elsif ($style eq 'no') { $self->SetMarginWidth($_, 0) for 1..3 }
-
-	# extra margin left and right inside the white text area
-	$self->SetMargins(2, 2);
-	$self;
-}
-
-sub is_empty { not shift->GetTextLength }
-
 sub insert_text {
     my ($self, $text, $pos) = @_;
     $pos = $self->GetCurrentPos unless defined $pos;
@@ -151,168 +136,193 @@ sub insert_text {
     $self->SetSelection( $pos, $pos );
 }
 
-sub set_tab_size {
-	my ($self, $size) = @_;
-	#$size *= 2 if $^O eq 'darwin';
-	$self->SetTabWidth($size);
-	$self->SetIndent($size);
-	$self->SetHighlightGuide($size);
+sub move_text_up {
+    my ($self) = @_;
+    my ($old_start, $old_end) = $self->GetSelection;
+    my $old_start_line = $self->LineFromPosition( $old_start );
+    my $old_end_line = $self->LineFromPosition( $old_end );
+    $self->BeginUndoAction();
+    if ($old_start == $old_end) {
+        return unless $old_start_line; # need space above
+        my $col_pos = $old_start - $self->PositionFromLine( $old_start_line );
+        $self->LineTranspose;
+        $self->GotoPos ( $self->PositionFromLine( $old_start_line - 1 ) + $col_pos);
+    } elsif ($old_start_line != $old_end_line) {
+    }
+    $self->EndUndoAction();
 }
 
-sub set_tab_usage {
-	my ($self, $usage) = @_;
-	$self->SetUseTabs($usage);
+sub move_text_down {
+    my ($self) = @_;
+    my ($old_start, $old_end) = $self->GetSelection;
+    my $old_start_line = $self->LineFromPosition( $old_start );
+    my $old_end_line = $self->LineFromPosition( $old_end );
+    $self->BeginUndoAction();
+    if ($old_start == $old_end) {
+        return unless $old_start_line < $self->GetLineCount; # need space above
+        my $col_pos = $old_start - $self->PositionFromLine( $old_start_line );
+        $self->GotoLine( $old_start_line + 1 );
+        $self->LineTranspose;
+        $self->GotoPos ( $self->PositionFromLine( $old_start_line + 1 ) + $col_pos);
+    } elsif ($old_start_line != $old_end_line) {
+    }
+    $self->EndUndoAction();
 }
 
-sub set_colors {
-	my $self = shift;
-	$self->SetCaretLineBack( create_color(250,245,185) );
-	#$self->SetCaretPeriod( 500 );
-	#$self->SetCaretWidth( 2 );
-	$self->SetCaretForeground( create_color(0,0,255) );
-	$self->SetCaretLineVisible(1);
-	$self->SetSelForeground( 1, create_color(243,243,243) );
-	$self->SetSelBackground( 1, create_color(0, 17, 119) );
-	$self->SetWhitespaceForeground( 1, create_color(204, 204, 153) );
-	$self->SetViewWhiteSpace(1);
+sub move_text_left {
+    my ($self) = @_;
+    
+    #$self->SetCurrentPos(1);
+    $self->SetSelection(1, 5);
+# say $self->GetSelectionStart();
+# say $self->GetSelectionEnd();
 
-	$self->SetEdgeColour( create_color(200,200,255) );
-	$self->SetEdgeColumn( 80 );
-	$self->SetEdgeMode( &Wx::wxSTC_EDGE_LINE );
 }
 
-sub load_font {
-	my ($self, $font) = @_;
-	my ( $fontweight, $fontstyle ) = ( &Wx::wxNORMAL, &Wx::wxNORMAL );
-	$font = {
-		family => $^O eq 'darwin' ? 'Andale Mono' : 'Courier New', # old default
-                # Courier New
-		#family => 'DejaVu Sans Mono', # new
-		size => $^O eq 'darwin' ? 13 : 11,
-		style => 'normal',
-		weight => 'normal',    
-	} unless defined $font;
-	#my $font = _config()->{font};
-	$fontweight = &Wx::wxLIGHT  if $font->{weight} eq 'light';
-	$fontweight = &Wx::wxBOLD   if $font->{weight} eq 'bold';
-	$fontstyle  = &Wx::wxSLANT  if $font->{style}  eq 'slant';
-	$fontstyle  = &Wx::wxITALIC if $font->{style}  eq 'italic';
-	my $wx_font = Wx::Font->new( 
-		$font->{size}, &Wx::wxDEFAULT, $fontstyle, $fontweight, 0, $font->{family}
-	);
-	$self->StyleSetFont( &Wx::wxSTC_STYLE_DEFAULT, $wx_font ) if $wx_font->Ok > 0;
+sub move_text_right {
+    my ($self) = @_;
+
 }
 
-#sub focus {  Kephra::API::focus( $_[0] ) }
 
-sub set_perlhighlight {
-	my ($self) = @_;
-	$self->StyleClearAll;
-	$self->SetLexer( &Wx::wxSTC_LEX_PERL );         # Set Lexers to use
-	$self->SetKeyWords(0, 'NULL 
-__FILE__ __LINE__ __PACKAGE__ __DATA__ __END__ __WARN__ __DIE__
-AUTOLOAD BEGIN CHECK CORE DESTROY END EQ GE GT INIT LE LT NE UNITCHECK 
-abs accept alarm and atan2 bind binmode bless break
-caller chdir chmod chomp chop chown chr chroot close closedir cmp connect
-continue cos crypt
-dbmclose dbmopen default defined delete die do dump
-each else elsif endgrent endhostent endnetent endprotoent endpwent endservent 
-eof eq eval exec exists exit exp 
-fcntl fileno flock for foreach fork format formline 
-ge getc getgrent getgrgid getgrnam gethostbyaddr gethostbyname gethostent 
-getlogin getnetbyaddr getnetbyname getnetent getpeername getpgrp getppid 
-getpriority getprotobyname getprotobynumber getprotoent getpwent getpwnam 
-getpwuid getservbyname getservbyport getservent getsockname getsockopt given 
-glob gmtime goto grep gt 
-hex if index int ioctl join keys kill 
-last lc lcfirst le length link listen local localtime lock log lstat lt 
-m map mkdir msgctl msgget msgrcv msgsnd my ne next no not 
-oct open opendir or ord our pack package pipe pop pos print printf prototype push 
-q qq qr quotemeta qu qw qx 
-rand read readdir readline readlink readpipe recv redo ref rename require reset 
-return reverse rewinddir rindex rmdir
-s say scalar seek seekdir select semctl semget semop send setgrent sethostent 
-setnetent setpgrp setpriority setprotoent setpwent setservent setsockopt shift 
-shmctl shmget shmread shmwrite shutdown sin sleep socket socketpair sort splice 
-split sprintf sqrt srand stat state study sub substr symlink syscall sysopen 
-sysread sysseek system syswrite 
-tell telldir tie tied time times tr truncate
-uc ucfirst umask undef unless unlink unpack unshift untie until use utime 
-values vec wait waitpid wantarray warn when while write x xor y');
-# Add new keyword.
-# $_[0]->StyleSetSpec( &Wx::wxSTC_H_TAG, "fore:#000055" ); # Apply tag style for selected lexer (blue)
+sub goto_last_edit { $_[0]->GotoPos( $_[0]->{'change_pos'}+1 ) }
 
-	 $self->StyleSetSpec(1,"fore:#ff0000");                                     # Error
-	 $self->StyleSetSpec(2,"fore:#aaaaaa");                                     # Comment
-	 $self->StyleSetSpec(3,"fore:#004000,back:#E0FFE0,$(font.text),eolfilled"); # POD: = at beginning of line
-	 $self->StyleSetSpec(&Wx::wxSTC_PL_NUMBER,"fore:#007f7f");                                     # Number
-	 $self->StyleSetSpec(5,"fore:#000077,bold");                                # Keywords #
-	 $self->StyleSetSpec(6,"fore:#ee7b00,back:#fff8f8");                        # Doublequoted string
-	 $self->StyleSetSpec(7,"fore:#f36600,back:#fffcff");                        # Single quoted string
-	 $self->StyleSetSpec(8,"fore:#555555");                                     # Symbols / Punctuation. Currently not used by LexPerl.
-	 $self->StyleSetSpec(9,"");                                                 # Preprocessor. Currently not used by LexPerl.
-	 $self->StyleSetSpec(10,"fore:#002200");                                    # Operators
-	 $self->StyleSetSpec(11,"fore:#3355bb");                                    # Identifiers (functions, etc.)
-	 $self->StyleSetSpec(12,"fore:#228822");                                    # Scalars: $var
-	 $self->StyleSetSpec(13,"fore:#339933");                                    # Array: @var
-	 $self->StyleSetSpec(14,"fore:#44aa44");                                    # Hash: %var
-	 $self->StyleSetSpec(15,"fore:#55bb55");                                    # Symbol table: *var
-	 $self->StyleSetSpec(17,"fore:#000000,back:#A0FFA0");                       # Regex: /re/ or m{re}
-	 $self->StyleSetSpec(18,"fore:#000000,back:#F0E080");                       # Substitution: s/re/ore/
-	 $self->StyleSetSpec(19,"fore:#000000,back:#8080A0");                       # Long Quote (qq, qr, qw, qx) -- obsolete: replaced by qq, qx, qr, qw
-	 $self->StyleSetSpec(20,"fore:#ff7700,back:#f9f9d7");                       # Back Ticks
-	 $self->StyleSetSpec(21,"fore:#600000,back:#FFF0D8,eolfilled");             # Data Section: __DATA__ or __END__ at beginning of line
-	 $self->StyleSetSpec(22,"fore:#000000,back:#DDD0DD");                       # Here-doc (delimiter)
-	 $self->StyleSetSpec(23,"fore:#7F007F,back:#DDD0DD,eolfilled,notbold");     # Here-doc (single quoted, q)
-	 $self->StyleSetSpec(24,"fore:#7F007F,back:#DDD0DD,eolfilled,bold");        # Here-doc (double quoted, qq)
-	 $self->StyleSetSpec(25,"fore:#7F007F,back:#DDD0DD,eolfilled,italics");     # Here-doc (back ticks, qx)
-	 $self->StyleSetSpec(26,"fore:#7F007F,$(font.monospace),notbold");          # Single quoted string, generic 
-	 $self->StyleSetSpec(27,"fore:#ee7b00,back:#fff8f8");                       # qq = Double quoted string
-	 $self->StyleSetSpec(28,"fore:#ff7700,back:#f9f9d7");                       # qx = Back ticks
-	 $self->StyleSetSpec(29,"fore:#000000,back:#A0FFA0");                       # qr = Regex
-	 $self->StyleSetSpec(30,"fore:#f36600,back:#fff8f8");                       # qw = Array
+sub goto_prev_block {
+    my ($self) = @_;
+    my $line = $self->get_prev_block_start( $self->GetSelectionStart );
+    $self->GotoLine( $line ) if defined $line;
 }
+
+sub goto_next_block {
+    my ($self) = @_;
+    my $line = $self->get_next_block_start( $self->GetSelectionEnd );
+    $self->GotoLine( $line ) if defined $line;
+}
+
+
+sub get_prev_block_start {
+    my ($self, $pos) = @_;
+    my $line_nr = $self->LineFromPosition( $pos );
+    return if $line_nr == 0;
+    unless ( $self->GetLine( --$line_nr ) =~ /\S/ ){
+         while ($line_nr > 0){
+             last if $self->GetLine( $line_nr ) =~ /\S/;
+             $line_nr--;
+    } }
+    while ($line_nr > 0){
+        last unless $self->GetLine( $line_nr - 1 ) =~ /\S/;
+        $line_nr--;
+    }
+    $line_nr;    
+}
+sub get_next_block_start {
+    my ($self, $pos) = @_;
+    my $line_nr = $self->LineFromPosition( $pos );
+    my $last_line_nr = $self->GetLineCount - 1;
+    return if $line_nr == $last_line_nr;
+    if ( $self->GetLine( ++$line_nr ) =~ /\S/ ){
+         while ($line_nr < $last_line_nr){
+             last unless $self->GetLine( ++$line_nr ) =~ /\S/;
+    } }
+    while ($line_nr < $last_line_nr){
+        last if $self->GetLine( ++$line_nr ) =~ /\S/;
+    }
+    $line_nr;
+}
+sub get_prev_block_end {
+    my ($self, $pos) = @_;
+    my $line_nr = $self->LineFromPosition( $pos );
+    return if $line_nr == 0;
+    if ( $self->GetLine( --$line_nr ) =~ /\S/ ){
+         while ($line_nr > 0){
+             last unless $self->GetLine( --$line_nr ) =~ /\S/;
+    } }
+    while ($line_nr > 0){
+        last if $self->GetLine( --$line_nr ) =~ /\S/;
+    }
+    $line_nr;
+}
+sub get_next_block_end {
+    my ($self, $pos) = @_;
+    my $line_nr = $self->LineFromPosition( $pos );
+    my $last_line_nr = $self->GetLineCount - 1;
+    return if $line_nr == $last_line_nr;
+    unless ( $self->GetLine( ++$line_nr ) =~ /\S/ ){
+         while ($line_nr < $last_line_nr){
+             last if $self->GetLine( ++$line_nr ) =~ /\S/;
+    } }
+    while ($line_nr < $last_line_nr){
+        last unless $self->GetLine( $line_nr + 1 ) =~ /\S/;
+        $line_nr++;
+    }
+    $line_nr;
+}
+
+
+sub select_prev_block {
+    my ($self) = @_;
+    my ($start, $end) = $self->GetSelection;
+    $self->{'sel_head'} = $start unless exists $self->{'sel_head'};
+    if ($self->{'sel_head'} == $start) {
+        my $line = $self->get_prev_block_start( $start );
+        return unless defined $line;
+        $self->{'sel_head'} = $start = $self->PositionFromLine( $line );
+    } else {
+        my $line = $self->get_prev_block_end( $end );
+        return unless defined $line;
+        $self->{'sel_head'} = $end = $self->GetLineEndPosition( $line ); 
+        if ($end < $start) {
+            my $line = $self->get_prev_block_start( $end );
+            return unless defined $line;
+            $self->{'sel_head'} = $end = $self->PositionFromLine( $line );
+            ($start, $end) = ($end, $start);
+        }
+    }
+    $self->SetSelection( $start, $end );
+}
+sub select_next_block {
+    my ($self) = @_;
+    my ($start, $end) = $self->GetSelection;
+    $self->{'sel_head'} = $end unless exists $self->{'sel_head'};
+    if ($self->{'sel_head'} == $end) {
+        my $line = $self->get_next_block_end( $end );
+        return unless defined $line;
+        $self->{'sel_head'} = $start = $self->GetLineEndPosition( $line );
+    } else {
+        my $line = $self->get_next_block_start( $start );
+        return unless defined $line;
+        $self->{'sel_head'} = $start = $self->PositionFromLine( $line ); 
+        if ($end < $start) {
+            my $line = $self->get_next_block_end( $start );
+            return unless defined $line;
+            $self->{'sel_head'} = $start = $self->GetLineEndPosition( $line );
+            ($start, $end) = ($end, $start);
+        }
+    }
+    $self->SetSelection( $start, $end );
+}
+
+
+sub toggle_comment_line {
+    my ($self, $line_nr) = @_;
+    return unless defined $line_nr;
+    $self->SetSelection( $self->PositionFromLine( $line_nr ),
+                         $self->GetLineEndPosition( $line_nr )  );
+    $self->GetSelectedText( ) =~ /^(\s*)(#\s+)?(.*)$/;
+    return unless $3;
+    $2 ? $self->ReplaceSelection( $1. $3     ) 
+       : $self->ReplaceSelection( $1.'# '.$3 );
+}
+sub toggle_comment {
+    my ($self) = @_;
+    my ($old_start, $old_end) = $self->GetSelection;
+    $self->BeginUndoAction();
+
+    $self->toggle_comment_line( $_ ) for $self->LineFromPosition( $old_start ) ..
+                                         $self->LineFromPosition( $old_end );
+    $self->GotoPos( $old_end );
+    $self->EndUndoAction();
+}
+
 
 1;
-
-__END__
-
-$self->SetIndicatorCurrent( $c);
-$self->IndicatorFillRange( $start, $len );
-$self->IndicatorClearRange( 0, $len )
-	#Wx::Event::EVT_STC_STYLENEEDED($self, sub{}) 
-	#Wx::Event::EVT_STC_CHARADDED($self, sub {});
-	#Wx::Event::EVT_STC_ROMODIFYATTEMPT($self, sub{}) 
-	#Wx::Event::EVT_STC_KEY($self, sub{}) 
-	#Wx::Event::EVT_STC_DOUBLECLICK($self, sub{}) 
-	Wx::Event::EVT_STC_UPDATEUI($self, -1, sub { 
-		#my ($ed, $event) = @_; $event->Skip; print "change \n"; 
-	});
-	#Wx::Event::EVT_STC_MODIFIED($self, sub {});
-	#Wx::Event::EVT_STC_MACRORECORD($self, sub{}) 
-	#Wx::Event::EVT_STC_MARGINCLICK($self, sub{}) 
-	#Wx::Event::EVT_STC_NEEDSHOWN($self, sub {});
-	#Wx::Event::EVT_STC_PAINTED($self, sub{}) 
-	#Wx::Event::EVT_STC_USERLISTSELECTION($self, sub{}) 
-	#Wx::Event::EVT_STC_UR$selfROPPED($self, sub {});
-	#Wx::Event::EVT_STC_DWELLSTART($self, sub{}) 
-	#Wx::Event::EVT_STC_DWELLEND($self, sub{}) 
-	#Wx::Event::EVT_STC_START_DRAG($self, sub{}) 
-	#Wx::Event::EVT_STC_DRAG_OVER($self, sub{}) 
-	#Wx::Event::EVT_STC_DO_DROP($self, sub {});
-	#Wx::Event::EVT_STC_ZOOM($self, sub{}) 
-	#Wx::Event::EVT_STC_HOTSPOT_CLICK($self, sub{}) 
-	#Wx::Event::EVT_STC_HOTSPOT_DCLICK($self, sub{}) 
-	#Wx::Event::EVT_STC_CALLTIP_CLICK($self, sub{}) 
-	#Wx::Event::EVT_STC_AUTOCOMP_SELECTION($self, sub{})
-	#$self->SetAcceleratorTable( Wx::AcceleratorTable->new() );
-	#Wx::Event::EVT_MENU( $self, 1000, sub { $_[1]->Skip; } );
-	#Wx::Event::EVT_STC_SAVEPOINTREACHED($self, -1, \&Kephra::File::savepoint_reached);
-	#Wx::Event::EVT_STC_SAVEPOINTLEFT($self, -1, \&Kephra::File::savepoint_left);
-	$self->SetAcceleratorTable(
-		Wx::AcceleratorTable->new(
-			[&Wx::wxACCEL_CTRL, ord 'n', 1000],
-	));
-
-
-

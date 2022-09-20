@@ -24,18 +24,18 @@ sub warning {
 	splice @_, 2, 0, &Wx::wxOK | &Wx::wxICON_WARNING | &Wx::wxSTAY_ON_TOP;
 	_box( @_ );
 }
-sub yes_no     { 
+sub yes_no  { 
 	$_[1] = $_[1] || 'Kephra Question'; 
 	splice @_, 2, 0, &Wx::wxYES_NO | &Wx::wxICON_QUESTION | &Wx::wxSTAY_ON_TOP;
 	_box( @_ );
 }
-sub yes_no_cancel{
+sub yes_no_cancel {
 	$_[1] = $_[1] || 'Kephra Question'; 
 	splice @_, 2, 0, &Wx::wxYES_NO | &Wx::wxCANCEL | &Wx::wxICON_QUESTION | &Wx::wxSTAY_ON_TOP;
 	_box( @_ );
 }
 sub _box {                                   # $message, $title, $style, $parent
-	Kephra::Log::warning('need at least a message as first parameter', 2) unless $_[0];
+	#Kephra::Log::warning('need at least a message as first parameter', 2) unless $_[0];
 	$_[3] = $_[3] || _parent(); 
 	Wx::MessageBox( @_ );
 }

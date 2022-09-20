@@ -8,13 +8,15 @@ use Kephra::App::Dialog;
 use Kephra::App::Editor;
 use Kephra::App::SearchBar;
 use Kephra::IO::LocalFile;
-our $VERSION = 0.41;
+our $VERSION = 0.5;
 
 sub new {
     my($class, $parent) = @_;
     my $self = $class->SUPER::new( undef, -1, '', [-1,-1], [1000,800] );
     $self->CreateStatusBar(3);
     $self->SetStatusWidths(100, 50, -1);
+    $self->SetStatusBarPane(2);
+    
     my $ed = $self->{'ed'} = Kephra::App::Editor->new($self, -1);
     my $sb = $self->{'sb'} = Kephra::App::SearchBar->new($self, -1);
     
@@ -23,7 +25,18 @@ sub new {
     $sizer->Add( $self->{'sb'}, 0, &Wx::wxGROW, 0);
 
     $self->SetSizer($sizer);
+
     Wx::Window::SetFocus( $ed );
+    Wx::Event::EVT_CLOSE( $self, sub {
+        my ($self, $event) = @_;
+        if ($self->{'ed'}->GetModify()){
+            my $ret = Kephra::App::Dialog::yes_no_cancel( "\n".' save file ?  ');
+            return                   if $ret ==  &Wx::wxCANCEL;
+            $self->{'ed'}->save_file if $ret ==  &Wx::wxYES;
+        }
+        $event->Skip(1) 
+    });
+
 
     Wx::Event::EVT_MENU( $self, 11100, sub { $self->{'ed'}->new_file });
     Wx::Event::EVT_MENU( $self, 11200, sub { $self->{'ed'}->open_file });
@@ -39,9 +52,12 @@ sub new {
     Wx::Event::EVT_MENU( $self, 12220, sub { $self->{'ed'}->Paste });
     Wx::Event::EVT_MENU( $self, 12230, sub { $self->{'ed'}->Replace });
     Wx::Event::EVT_MENU( $self, 12240, sub { $self->{'ed'}->Clear });
-    Wx::Event::EVT_MENU( $self, 12300, sub { $self->{'ed'}->SelectAll () });
-    Wx::Event::EVT_MENU( $self, 12400, sub { $self->{'ed'}->goto_last_edit });
-    Wx::Event::EVT_MENU( $self, 12410, sub { $self->{'sb'}->enter });
+    Wx::Event::EVT_MENU( $self, 12300, sub { $self->{'ed'}->SelectAll });
+    Wx::Event::EVT_MENU( $self, 12400, sub { $self->{'ed'}->toggle_comment() });
+    Wx::Event::EVT_MENU( $self, 13110, sub { $self->{'sb'}->enter });
+    Wx::Event::EVT_MENU( $self, 13120, sub { $self->{'sb'}->find_prev });
+    Wx::Event::EVT_MENU( $self, 13130, sub { $self->{'sb'}->find_next });
+    Wx::Event::EVT_MENU( $self, 13200, sub { $self->{'ed'}->goto_last_edit });
 
     my $file_menu = Wx::Menu->new();
     $file_menu->Append( 11100, "&New\tCtrl+N", "complete a sketch drawing" );
@@ -61,29 +77,34 @@ sub new {
     $edit_menu->Append( 12200, "&Cut\tCtrl+X",     "delete selected text and move it into clipboard" );
     $edit_menu->Append( 12210, "&Copy\tCtrl+C",    "move selected text into clipboard" );
     $edit_menu->Append( 12220, "&Paste\tCtrl+V",   "insert clipboard content at cursor position" );
-    $edit_menu->Append( 12230, "&Replace\tCtrl+R", "replace selected text with clipboard content" );
+    $edit_menu->Append( 12230, "&Swap\tAlt+S", "replace selected text with clipboard content" );
     $edit_menu->Append( 12240, "&Delete\tDel",     "delete selected text" );
     $edit_menu->AppendSeparator();
     $edit_menu->Append( 12300, "&Select All\tCtrl+A", "select entire text" );
+    $edit_menu->Append( 12310, "&Double\tCtrl+D", "copy and paste selected text or current line" );
     $edit_menu->AppendSeparator();
-    $edit_menu->Append( 12400, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
-    $edit_menu->AppendSeparator();
-    $edit_menu->Append( 12410, "&Find\tCtrl+F",      "move focus in or out the search bar" );
-    $edit_menu->Append( 12410, "&Find Prev\tCtrl+Shift+G",   "jump to previous finding of search text" );
-    $edit_menu->Append( 12410, "&Find Next\tCtrl+G",         "jump to next finding of search text" );
+    $edit_menu->Append( 12400, "&Toggle Comment\tCtrl+K", "insert or remove script comment" );
+
+    my $search_menu = Wx::Menu->new();
+    $search_menu->Append( 13110, "&Find\tCtrl+F",      "move focus in or out the search bar" );
+    $search_menu->Append( 13120, "&Find Prev\tCtrl+Shift+G",   "jump to previous finding of search text" );
+    $search_menu->Append( 13130, "&Find Next\tCtrl+G",         "jump to next finding of search text" );
+    $search_menu->AppendSeparator();
+    $search_menu->Append( 13200, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
     
     my $help_menu = Wx::Menu->new();
-    $help_menu->Append( 13100, "&Usage\tAlt+U", "Dialog with information usage" );
-    $help_menu->Append( 13200, "&About\tAlt+A",    "Dialog with some general information" );
+    $help_menu->Append( 14100, "&Usage\tAlt+U",  "Dialog with information usage" );
+    $help_menu->Append( 14200, "&About\tAlt+A",  "Dialog with some general information" );
 
     my $menu_bar = Wx::MenuBar->new();
-    $menu_bar->Append( $file_menu, '&File' );
-    $menu_bar->Append( $edit_menu, '&Edit' );
-    $menu_bar->Append( $help_menu, '&Help' );
+    $menu_bar->Append( $file_menu,   '&File' );
+    $menu_bar->Append( $edit_menu,   '&Edit' );
+    $menu_bar->Append( $search_menu, '&Search' );
+    $menu_bar->Append( $help_menu,   '&Help' );
     $self->SetMenuBar($menu_bar);
 
     $self->set_title();
-    #$self->open_file(__FILE__);
+    $self->open_file( __FILE__);
     return $self;
 }
 

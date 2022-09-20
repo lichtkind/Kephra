@@ -1,5 +1,16 @@
 
           ==[[ stage 0 : Single document EDitor]]==
+
+
+File
+
+
+Edit
+
+
+Tool
+
+Search
    
 sed     I        single file editor: simplest possible useful editor
                  feat: read, writes files, utf safe, perl highlighting, searchbar 
