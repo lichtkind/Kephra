@@ -37,20 +37,19 @@ sub new {
         $event->Skip(1) 
     });
 
-
-    Wx::Event::EVT_MENU( $self, 11100, sub { $self->{'ed'}->new_file });
-    Wx::Event::EVT_MENU( $self, 11200, sub { $self->{'ed'}->open_file });
-    Wx::Event::EVT_MENU( $self, 11300, sub { $self->{'ed'}->reopen_file });
-    Wx::Event::EVT_MENU( $self, 11400, sub { $self->{'ed'}->save_file });
-    Wx::Event::EVT_MENU( $self, 11500, sub { $self->{'ed'}->save_as_file });
+    Wx::Event::EVT_CLOSE( $self,       sub { $_[1]->Skip(1) });
+    Wx::Event::EVT_MENU( $self, 11100, sub { $self->new_file });
+    Wx::Event::EVT_MENU( $self, 11200, sub { $self->open_file });
+    Wx::Event::EVT_MENU( $self, 11300, sub { $self->reopen_file });
+    Wx::Event::EVT_MENU( $self, 11400, sub { $self->save_file });
+    Wx::Event::EVT_MENU( $self, 11500, sub { $self->save_as_file });
     Wx::Event::EVT_MENU( $self, 11900, sub { $self->Close });
-    Wx::Event::EVT_CLOSE( $self, sub {  $_[1]->Skip(1) });
     Wx::Event::EVT_MENU( $self, 12100, sub { $self->{'ed'}->Undo });
     Wx::Event::EVT_MENU( $self, 12110, sub { $self->{'ed'}->Redo });
-    Wx::Event::EVT_MENU( $self, 12200, sub { $self->{'ed'}->Cut });
-    Wx::Event::EVT_MENU( $self, 12210, sub { $self->{'ed'}->Copy });
+    Wx::Event::EVT_MENU( $self, 12200, sub { $self->{'ed'}->cut });
+    Wx::Event::EVT_MENU( $self, 12210, sub { $self->{'ed'}->copy });
     Wx::Event::EVT_MENU( $self, 12220, sub { $self->{'ed'}->Paste });
-    Wx::Event::EVT_MENU( $self, 12230, sub { $self->{'ed'}->Replace });
+    Wx::Event::EVT_MENU( $self, 12230, sub { $self->{'ed'}->replace });
     Wx::Event::EVT_MENU( $self, 12240, sub { $self->{'ed'}->Clear });
     Wx::Event::EVT_MENU( $self, 12300, sub { $self->{'ed'}->SelectAll });
     Wx::Event::EVT_MENU( $self, 12400, sub { $self->{'ed'}->toggle_comment() });
@@ -71,24 +70,24 @@ sub new {
     $file_menu->Append( 11900, "&Quit\tCtrl+Q", "close program" );
     
     my $edit_menu = Wx::Menu->new();
-    $edit_menu->Append( 12100, "&Undo\tCtrl+Z",    "undo last text change" );
-    $edit_menu->Append( 12110, "&Redo\tCtrl+Y",    "undo last undo" );
-    $edit_menu->AppendSeparator();
-    $edit_menu->Append( 12200, "&Cut\tCtrl+X",     "delete selected text and move it into clipboard" );
-    $edit_menu->Append( 12210, "&Copy\tCtrl+C",    "move selected text into clipboard" );
-    $edit_menu->Append( 12220, "&Paste\tCtrl+V",   "insert clipboard content at cursor position" );
-    $edit_menu->Append( 12230, "&Swap\tAlt+S", "replace selected text with clipboard content" );
-    $edit_menu->Append( 12240, "&Delete\tDel",     "delete selected text" );
+    $edit_menu->Append( 12100, "&Undo\tCtrl+Z",       "undo last text change" );
+    $edit_menu->Append( 12110, "&Redo\tCtrl+Y",       "undo last undo" );
+    $edit_menu->AppendSeparator();                    
+    $edit_menu->Append( 12200, "&Cut\tCtrl+X",        "delete selected text and move it into clipboard" );
+    $edit_menu->Append( 12210, "&Copy\tCtrl+C",       "move selected text into clipboard" );
+    $edit_menu->Append( 12220, "&Paste\tCtrl+V",      "insert clipboard content at cursor position" );
+    $edit_menu->Append( 12230, "&Swap\tCtrl+Shift+V", "replace selected text with clipboard content" );
+    $edit_menu->Append( 12240, "&Delete\tDel",        "delete selected text" );
     $edit_menu->AppendSeparator();
     $edit_menu->Append( 12300, "&Select All\tCtrl+A", "select entire text" );
-    $edit_menu->Append( 12310, "&Double\tCtrl+D", "copy and paste selected text or current line" );
+    $edit_menu->Append( 12310, "&Double\tCtrl+D",     "copy and paste selected text or current line" );
     $edit_menu->AppendSeparator();
     $edit_menu->Append( 12400, "&Toggle Comment\tCtrl+K", "insert or remove script comment" );
 
     my $search_menu = Wx::Menu->new();
-    $search_menu->Append( 13110, "&Find\tCtrl+F",      "move focus in or out the search bar" );
-    $search_menu->Append( 13120, "&Find Prev\tCtrl+Shift+G",   "jump to previous finding of search text" );
-    $search_menu->Append( 13130, "&Find Next\tCtrl+G",         "jump to next finding of search text" );
+    $search_menu->Append( 13110, "&Find\tCtrl+F",            "move focus in or out the search bar" );
+    $search_menu->Append( 13120, "&Find Prev\tCtrl+Shift+G", "jump to previous finding of search text" );
+    $search_menu->Append( 13130, "&Find Next\tCtrl+G",       "jump to next finding of search text" );
     $search_menu->AppendSeparator();
     $search_menu->Append( 13200, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
     
@@ -104,22 +103,44 @@ sub new {
     $self->SetMenuBar($menu_bar);
 
     $self->set_title();
-    $self->open_file( __FILE__);
+    $self->read_file( __FILE__);
     return $self;
 }
 
 
-sub open_file {
-    my ($self, $file) = @_;
+sub new_file { 
+    my $self = shift;
+    $self->{'file'} = '';
+    $self->{'ed'}->new_text( '' );
+    $self->{'encoding'} = 'utf-8';
+    $self->set_title();
+    $self->SetStatusText(  $self->{'encoding'}, 1);
+}
+sub open_file   { $_[0]->read_file( Kephra::App::Dialog::get_file_open() ) }
+sub reopen_file { $_[0]->read_file( $_[0]->{'file'}, 1) }
+
+sub read_file {
+    my ($self, $file, $soft) = @_;
     return unless defined $file and -r $file;
     my ($content, $encoding) = Kephra::IO::LocalFile::read( $file );
     $self->{'file'} = $file;
     $self->{'encoding'} = $encoding;
-    $self->{'ed'}->SetText( $content );
-    $self->{'ed'}->EmptyUndoBuffer;
-    $self->{'ed'}->SetSavePoint;
-    $self->SetStatusText( $encoding, 1);
+    $self->{'ed'}->new_text( $content, $soft );
+    $self->set_title();
+    $self->SetStatusText(  $self->{'encoding'}, 1);
 }
+sub save_file {
+    my $self = shift;
+    $self->{'file'} = Kephra::App::Dialog::get_file_save() unless $self->{'file'};
+    Kephra::IO::LocalFile::write( $self->{'file'},  $self->{'encoding'}, $self->{'ed'}->GetText() );
+    $self->{'ed'}->SetSavePoint;
+}
+sub save_as_file {
+    my $self = shift;
+    $self->{'file'} = Kephra::App::Dialog::get_file_save();
+    $self->save_file;
+}
+
 
 sub set_title {
     my ($self) = @_;

@@ -1,7 +1,10 @@
 use v5.12;
 use warnings;
 
-# comment, rect edit, move line goto block
+# move line /page / block
+# rect edit, 
+# rot select
+# auto indent
 
 package Kephra::App::Editor;
 our @ISA = 'Wx::StyledTextCtrl';
@@ -14,8 +17,10 @@ use Kephra::App::Editor::SyntaxMode;
 sub new {
     my( $class, $parent, $style) = @_;
     my $self = $class->SUPER::new( $parent, -1,[-1,-1],[-1,-1] );
-    Kephra::App::Editor::SyntaxMode::apply( $self );  # before setting highlighting
+    $self->{'tab_size'} = 4;
+    $self->{'tab_space'} = ' ' x $self->{'tab_size'};
     $self->SetScrollWidth(300);
+    Kephra::App::Editor::SyntaxMode::apply( $self );
     $self->mount_events();
     return $self;
 }
@@ -28,7 +33,10 @@ sub mount_events {
     Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {
         my ($ed, $event) = @_;
         $ed->{'change_pos'} = $ed->GetCurrentPos; # say 'skip';
-        $event->Skip;
+        if ($self->SelectionIsRectangle){
+            #say $event;
+        } else { $event->Skip }
+
     });
 
     Wx::Event::EVT_KEY_DOWN( $self, sub {
@@ -36,32 +44,32 @@ sub mount_events {
         my $code = $event->GetKeyCode ; # my $raw = $event->GetRawKeyCode;
         my $mod = $event->GetModifiers; # say "$mod : ", $code, " ($raw) ",  &Wx::WXK_LEFT;
         if (($mod == 1 or $mod == 3) and $code == ord('Q'))    { $ed->insert_text('@') }
+        elsif($event->ControlDown    and $code == ord('C'))    { $ed->copy()           }
+        elsif($event->ControlDown    and $code == ord('X'))    { $ed->cut()            }
+        elsif($event->ControlDown    and $code == ord('L'))    { $ed->move_line( $self->GetLineCount-1, $self->GetLineCount-2 )
+        }
         elsif($event->ControlDown and $event->ShiftDown and $code == &Wx::WXK_UP)   { $ed->select_prev_block  }
         elsif($event->ControlDown and $event->ShiftDown and $code == &Wx::WXK_DOWN) { $ed->select_next_block  }
         elsif($event->ControlDown and $code == &Wx::WXK_UP)    { $ed->goto_prev_block  }
         elsif($event->ControlDown and $code == &Wx::WXK_DOWN)  { $ed->goto_next_block  }
-#        elsif($event->AltDown and $code == &Wx::WXK_PAGEUP )  {   }
-#        elsif($event->AltDown and $code == &Wx::WXK_PAGEDOWN ){   }
-#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_UP)       {   }
-#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_DOWN)     {   }
-#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_DOWN)     {   }
-#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_LEFT)     {   }
-#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_RIGHT)    {   }
+        elsif($event->ControlDown and $code == &Wx::WXK_PAGEUP )  { $ed->goto_prev_sub  }
+        elsif($event->ControlDown and $code == &Wx::WXK_PAGEDOWN ){ $ed->goto_next_sub  }
+        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_UP)       { $event->Skip  }
+        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_DOWN)     { $event->Skip  }
+        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_LEFT)     { $event->Skip  }
+        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_RIGHT)    { $event->Skip  }
 #        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_PAGEUP)   {   }
 #        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_PAGEDOWN) {   }
-#        elsif($event->ControlDown and $code == ord('K'))    {   }
         elsif($event->AltDown     and $code == &Wx::WXK_UP)    { $ed->move_text_up     }
         elsif($event->AltDown     and $code == &Wx::WXK_DOWN)  { $ed->move_text_down   }
         elsif($event->AltDown     and $code == &Wx::WXK_LEFT)  { $ed->move_text_left   }
         elsif($event->AltDown     and $code == &Wx::WXK_RIGHT) { $ed->move_text_right  }
-        else { $event->Skip }
+        else {$event->Skip}
     });
 
-    Wx::Event::EVT_KEY_UP( $self, sub {
-        my ($ed, $event) = @_;
-        my $code = $event->GetKeyCode;
-        my $mod = $event->GetModifiers;
-    });
+
+    # Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {});
+    # Wx::Event::EVT_KEY_UP( $self, sub { my ($ed, $event) = @_; my $code = $event->GetKeyCode;  my $mod = $event->GetModifiers; });
     
     Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub { 
         $self->GetParent->SetStatusText( $self->GetCurrentPos, 0); # say 'ui';
@@ -72,9 +80,7 @@ sub mount_events {
     Wx::Event::EVT_STC_SAVEPOINTREACHED( $self, -1, sub { $self->GetParent->set_title(0) });
     Wx::Event::EVT_STC_SAVEPOINTLEFT(    $self, -1, sub { $self->GetParent->set_title(1) });
     Wx::Event::EVT_SET_FOCUS(            $self,     sub { my ($ed, $event ) = @_;        $event->Skip;   });
-    Wx::Event::EVT_DROP_FILES       ($self, sub { 
-         #say $_[0], $_[1];    #$self->GetParent->open_file()  
-    });
+    # Wx::Event::EVT_DROP_FILES       ($self, sub { say $_[0], $_[1];    $self->GetParent->open_file()  });
     Wx::Event::EVT_STC_DO_DROP  ($self, -1, sub { 
         my ($ed, $event ) = @_; # StyledTextEvent=SCALAR
         my $str = $event->GetDragText;
@@ -90,29 +96,35 @@ sub mount_events {
 
 sub is_empty { not shift->GetTextLength }
 
-sub new_file { 
-    my $self = shift;
-    $self->GetParent->{'file'} = '';
-    $self->ClearAll;
+sub new_text {
+    my ($self, $content, $soft) = @_;
+    return unless defined $content;
+    $self->SetText( $content );
+    $self->EmptyUndoBuffer unless defined $soft;
     $self->SetSavePoint;
 }
 
-sub open_file   { $_[0]->GetParent->open_file( Kephra::App::Dialog::get_file_open() ) }
-sub reopen_file { $_[0]->GetParent->open_file( $_[0]->GetParent->{'file'} ) }
-sub save_file {
-    my $self = shift;
-    $self->GetParent->{'file'} = Kephra::App::Dialog::get_file_save() unless $self->GetParent->{'file'};
-    Kephra::IO::LocalFile::write( $self->GetParent->{'file'},  $self->GetParent->{'encoding'}, $self->GetText() );
-    $self->SetSavePoint;
-}
-sub save_as_file {
-    my $self = shift;
-    $self->GetParent->{'file'} = Kephra::App::Dialog::get_file_save();
-    Kephra::IO::LocalFile::write( $self->GetParent->{'file'},  $self->GetParent->{'encoding'}, $self->GetText() );
-    $self->SetSavePoint;
+sub insert_text {
+    my ($self, $text, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    $self->InsertText($pos, $text);
+    $pos += length $text;
+    $self->SetSelection( $pos, $pos );
 }
 
-sub Replace {
+sub copy {
+    my $self = shift;
+    my ($start_pos, $end_pos) = $self->GetSelection;
+    $start_pos == $end_pos ? $self->LineCopy : $self->Copy;
+}
+
+sub cut {
+    my $self = shift;
+    my ($start_pos, $end_pos) = $self->GetSelection;
+    $start_pos == $end_pos ? $self->LineCut : $self->Cut;
+}
+    
+sub replace {
     my $self = shift;
     my $sel = $self->GetSelectedText();
     return unless $sel;
@@ -128,60 +140,128 @@ sub Replace {
     $self->EndUndoAction();
 }
 
-sub insert_text {
-    my ($self, $text, $pos) = @_;
-    $pos = $self->GetCurrentPos unless defined $pos;
-    $self->InsertText($pos, $text);
-    $pos += length $text;
-    $self->SetSelection( $pos, $pos );
-}
-
 sub move_text_up {
     my ($self) = @_;
-    my ($old_start, $old_end) = $self->GetSelection;
-    my $old_start_line = $self->LineFromPosition( $old_start );
-    my $old_end_line = $self->LineFromPosition( $old_end );
+    my ($start_pos, $end_pos) = $self->GetSelection;
+    my $start_line = $self->LineFromPosition( $start_pos );
+    my $end_line = $self->LineFromPosition( $end_pos );
+    my $start_col =  $start_pos - $self->PositionFromLine( $start_line );
+    return unless $start_line; # need space above
     $self->BeginUndoAction();
-    if ($old_start == $old_end) {
-        return unless $old_start_line; # need space above
-        my $col_pos = $old_start - $self->PositionFromLine( $old_start_line );
+    if ($start_pos == $end_pos) {
         $self->LineTranspose;
-        $self->GotoPos ( $self->PositionFromLine( $old_start_line - 1 ) + $col_pos);
-    } elsif ($old_start_line != $old_end_line) {
-    }
+        $self->GotoPos ( $self->PositionFromLine( $start_line - 1 ) + $start_col);
+    } elsif ($start_line != $end_line) {
+        my $end_col =  $end_pos - $self->PositionFromLine( $end_line );
+        $self->move_line( $start_line - 1, $end_line);
+        $self->SetSelection( $self->PositionFromLine( $start_line - 1 ) + $start_col,
+                             $self->PositionFromLine( $end_line - 1 ) + $end_col );
+    } else {}
     $self->EndUndoAction();
 }
 
 sub move_text_down {
     my ($self) = @_;
-    my ($old_start, $old_end) = $self->GetSelection;
-    my $old_start_line = $self->LineFromPosition( $old_start );
-    my $old_end_line = $self->LineFromPosition( $old_end );
+    my ($start_pos, $end_pos) = $self->GetSelection;
+    my $start_line = $self->LineFromPosition( $start_pos );
+    my $end_line = $self->LineFromPosition( $end_pos );
+    my $start_col =  $start_pos - $self->PositionFromLine( $start_line );
+    my $end_col = $end_pos - $self->PositionFromLine( $end_line );
     $self->BeginUndoAction();
-    if ($old_start == $old_end) {
-        return unless $old_start_line < $self->GetLineCount; # need space above
-        my $col_pos = $old_start - $self->PositionFromLine( $old_start_line );
-        $self->GotoLine( $old_start_line + 1 );
+    if ( $end_line + 1 == $self->GetLineCount ) {
+        $self->GotoLine( $start_line );
+        $self->NewLine;
+    } elsif ($start_pos == $end_pos) {
+        $self->GotoLine( $start_line + 1 );
         $self->LineTranspose;
-        $self->GotoPos ( $self->PositionFromLine( $old_start_line + 1 ) + $col_pos);
-    } elsif ($old_start_line != $old_end_line) {
-    }
+        $self->GotoPos ( $self->PositionFromLine( $start_line + 1 ) + $start_col);
+    } elsif ($start_line != $end_line) {
+        $self->move_line( $end_line + 1, $start_line);
+    } else { return }
+    $self->SetSelection( $self->PositionFromLine( $start_line + 1 ) + $start_col,
+                         $self->PositionFromLine( $end_line + 1 ) + $end_col );
     $self->EndUndoAction();
+}
+
+sub move_line {
+    my ($self, $from, $to) = @_;
+    return unless defined $to and $from < $self->GetLineCount and $to < $self->GetLineCount;
+    $from = $self->GetLineCount + $from if $from < 0;
+    $to =   $self->GetLineCount + $to   if $to < 0;
+    return if $from == $to;
+    my $last_line_nr = $self->GetLineCount - 1;
+    if ($from  == $last_line_nr) {
+        $self->GotoLine( $from );
+        $self->LineTranspose;
+        $from--;
+    }
+    $self->SetSelection( $self->PositionFromLine( $from ),
+                         $self->PositionFromLine( $from + 1 ) );
+    my $line = $self->GetSelectedText( );
+    $self->ReplaceSelection( '' );
+    if ($to == $last_line_nr) {
+        $self->InsertText( $self->PositionFromLine($to - 1), $line );
+        $self->GotoLine( $to );
+        $self->LineTranspose;
+    } else { $self->InsertText( $self->PositionFromLine($to), $line ) }
+}
+
+sub move_line_left {
+    my ($self, $line_nr) = @_;
+    return unless defined $line_nr;
+    $self->SetSelection( $self->PositionFromLine( $line_nr ),
+                         $self->PositionFromLine( $line_nr ) + 1  );
+    my $s = $self->GetSelectedText;
+    $s = $self->{tab_space} if $s eq "\t";
+    if (substr( $s, 0, 1 ) eq ' '){ chop $s }
+    else                          { return 0 }
+    $self->ReplaceSelection( $s );
+    return 1;
+}
+
+sub move_line_right {
+    my ($self, $line_nr) = @_;
+    return unless defined $line_nr;
+    $self->SetSelection( $self->PositionFromLine( $line_nr ),
+                         $self->GetLineEndPosition( $line_nr )  );
+    my $line = $self->GetSelectedText( );
+    $line =~ s/\t/$self->{tab_space}/g if $line =~ /\t/;
+    $self->ReplaceSelection( ' '.$line );
 }
 
 sub move_text_left {
     my ($self) = @_;
-    
-    #$self->SetCurrentPos(1);
-    $self->SetSelection(1, 5);
-# say $self->GetSelectionStart();
-# say $self->GetSelectionEnd();
-
+    my ($start_pos, $end_pos) = $self->GetSelection;
+    my $start_line = $self->LineFromPosition( $start_pos );
+    my $end_line = $self->LineFromPosition( $end_pos );
+    $self->BeginUndoAction();
+    if ($start_pos == $end_pos) {
+        $start_pos-- if $self->move_line_left( $start_line );
+        $self->GotoPos ( $start_pos );
+    } elsif ($start_line != $end_line) {
+        my $end_col = $end_pos - $self->PositionFromLine( $end_line );
+        $start_pos-- if $self->move_line_left( $start_line );
+        $end_col-- if $self->move_line_left( $end_line );
+        $self->move_line_left( $_ ) for $start_line + 1 .. $end_line - 1;
+        $self->SetSelection( $start_pos, $self->PositionFromLine( $end_line ) + $end_col );
+    } else {}
+    $self->EndUndoAction();
 }
 
 sub move_text_right {
     my ($self) = @_;
-
+    my ($start_pos, $end_pos) = $self->GetSelection;
+    my $start_line = $self->LineFromPosition( $start_pos );
+    my $end_line = $self->LineFromPosition( $end_pos );
+    $self->BeginUndoAction();
+    if ($start_pos == $end_pos) {
+        $self->move_line_right( $start_line );
+        $self->GotoPos ( $start_pos + 1);
+    } elsif ($start_line != $end_line) {
+        $self->move_line_right( $_ ) for $start_line .. $end_line;
+        $self->SetSelection( $start_pos + 1, $end_pos + 1 + $end_line -  $start_line);
+    }  else {}
+    $self->EndUndoAction();
 }
 
 
@@ -189,21 +269,40 @@ sub goto_last_edit { $_[0]->GotoPos( $_[0]->{'change_pos'}+1 ) }
 
 sub goto_prev_block {
     my ($self) = @_;
-    my $line = $self->get_prev_block_start( $self->GetSelectionStart );
-    $self->GotoLine( $line ) if defined $line;
+    my $line_nr = $self->get_prev_block_start( $self->GetSelectionStart );
+    $self->GotoLine( $line_nr ) if defined $line_nr;
 }
 
 sub goto_next_block {
     my ($self) = @_;
-    my $line = $self->get_next_block_start( $self->GetSelectionEnd );
-    $self->GotoLine( $line ) if defined $line;
+    my $line_nr = $self->get_next_block_start( $self->GetSelectionEnd );
+    $self->GotoLine( $line_nr ) if defined $line_nr;
+}
+
+sub goto_prev_sub {
+    my ($self) = @_;
+    my $pos = $self->GetCurrentPos;
+    $self->GotoPos( $pos-1 );
+    $self->SearchAnchor;
+    my $new_pos = $self->SearchPrev( &Wx::wxSTC_FIND_REGEXP, '^sub ');
+    if ($new_pos > -1) { $self->GotoPos( $self->GetCurrentPos ) }
+    else               { $self->GotoPos( $pos )  }
+}
+sub goto_next_sub {
+    my ($self) = @_;
+    my $pos = $self->GetCurrentPos;
+    $self->GotoPos( $pos+1 );
+    $self->SearchAnchor;
+    my $new_pos = $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '^sub ');
+    if ($new_pos > -1) { $self->GotoPos( $self->GetCurrentPos ) }
+    else               { $self->GotoPos( $pos )  }
 }
 
 
 sub get_prev_block_start {
     my ($self, $pos) = @_;
     my $line_nr = $self->LineFromPosition( $pos );
-    return if $line_nr == 0;
+    return 0 if $line_nr == 0;
     unless ( $self->GetLine( --$line_nr ) =~ /\S/ ){
          while ($line_nr > 0){
              last if $self->GetLine( $line_nr ) =~ /\S/;
@@ -219,7 +318,7 @@ sub get_next_block_start {
     my ($self, $pos) = @_;
     my $line_nr = $self->LineFromPosition( $pos );
     my $last_line_nr = $self->GetLineCount - 1;
-    return if $line_nr == $last_line_nr;
+    return $line_nr if $line_nr == $last_line_nr;
     if ( $self->GetLine( ++$line_nr ) =~ /\S/ ){
          while ($line_nr < $last_line_nr){
              last unless $self->GetLine( ++$line_nr ) =~ /\S/;
@@ -232,7 +331,7 @@ sub get_next_block_start {
 sub get_prev_block_end {
     my ($self, $pos) = @_;
     my $line_nr = $self->LineFromPosition( $pos );
-    return if $line_nr == 0;
+    return 0 if $line_nr == 0;
     if ( $self->GetLine( --$line_nr ) =~ /\S/ ){
          while ($line_nr > 0){
              last unless $self->GetLine( --$line_nr ) =~ /\S/;
@@ -246,7 +345,7 @@ sub get_next_block_end {
     my ($self, $pos) = @_;
     my $line_nr = $self->LineFromPosition( $pos );
     my $last_line_nr = $self->GetLineCount - 1;
-    return if $line_nr == $last_line_nr;
+    return $line_nr if $line_nr == $last_line_nr;
     unless ( $self->GetLine( ++$line_nr ) =~ /\S/ ){
          while ($line_nr < $last_line_nr){
              last if $self->GetLine( ++$line_nr ) =~ /\S/;
@@ -265,40 +364,40 @@ sub select_prev_block {
     $self->{'sel_head'} = $start unless exists $self->{'sel_head'};
     if ($self->{'sel_head'} == $start) {
         my $line = $self->get_prev_block_start( $start );
-        return unless defined $line;
         $self->{'sel_head'} = $start = $self->PositionFromLine( $line );
     } else {
         my $line = $self->get_prev_block_end( $end );
-        return unless defined $line;
-        $self->{'sel_head'} = $end = $self->GetLineEndPosition( $line ); 
+        $end = $self->GetLineEndPosition( $line ); 
         if ($end < $start) {
-            my $line = $self->get_prev_block_start( $end );
-            return unless defined $line;
+            my $line = $self->get_prev_block_start( $self->{'sel_head'} );
             $self->{'sel_head'} = $end = $self->PositionFromLine( $line );
             ($start, $end) = ($end, $start);
-        }
+        } else { $self->{'sel_head'} = $end }
+        
     }
+    $self->GotoPos( $self->{'sel_head'} );
+    $self->EnsureCaretVisible();
     $self->SetSelection( $start, $end );
 }
+
 sub select_next_block {
     my ($self) = @_;
     my ($start, $end) = $self->GetSelection;
     $self->{'sel_head'} = $end unless exists $self->{'sel_head'};
     if ($self->{'sel_head'} == $end) {
         my $line = $self->get_next_block_end( $end );
-        return unless defined $line;
-        $self->{'sel_head'} = $start = $self->GetLineEndPosition( $line );
+        $self->{'sel_head'} = $end = $self->GetLineEndPosition( $line );
     } else {
         my $line = $self->get_next_block_start( $start );
-        return unless defined $line;
-        $self->{'sel_head'} = $start = $self->PositionFromLine( $line ); 
+        $start = $self->PositionFromLine( $line ); 
         if ($end < $start) {
-            my $line = $self->get_next_block_end( $start );
-            return unless defined $line;
+            my $line = $self->get_next_block_end( $self->{'sel_head'} );
             $self->{'sel_head'} = $start = $self->GetLineEndPosition( $line );
             ($start, $end) = ($end, $start);
-        }
+        } else {$self->{'sel_head'} = $start }
     }
+    $self->GotoPos( $self->{'sel_head'} );
+    $self->EnsureCaretVisible();
     $self->SetSelection( $start, $end );
 }
 

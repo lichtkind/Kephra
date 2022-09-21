@@ -13,7 +13,7 @@ sub apply {
     load_font( $self );  # before setting highlighting
     set_perlhighlight( $self );
     set_colors( $self ); # after highlight
-    set_tab_size( $self, 4 );
+    set_tab_size( $self, $self->{'tab_size'} );
     set_tab_usage( $self, 0 );
     set_margin( $self );
 

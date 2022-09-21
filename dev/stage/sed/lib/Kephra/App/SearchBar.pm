@@ -13,6 +13,9 @@ sub new {
     $self->{'first'} = Wx::Button->new( $self, -1, 'Find',  [-1, -1], [50, -1] );
     $self->{'prev'}  = Wx::Button->new( $self, -1, '<',     [-1, -1], [30, -1] );
     $self->{'next'}  = Wx::Button->new( $self, -1, '>',     [-1, -1], [30, -1] );
+    $self->{'first'}->SetToolTip('goto first occurance of sarch term');
+    $self->{'prev'}->SetToolTip('goto previous occurance of sarch term');
+    $self->{'next'}->SetToolTip('goto next occurance of sarch term');
     $self->{'close'}->SetToolTip('close search bar');
 
     Wx::Event::EVT_BUTTON( $self, $self->{'close'},  sub { $self->close     });
@@ -28,6 +31,7 @@ sub new {
         my $mod = $event->GetModifiers();
         if   ( $code == &Wx::WXK_UP )                     { $self->find_prev  }
         elsif( $code == &Wx::WXK_DOWN )                   { $self->find_next  }
+        elsif( $code == &Wx::WXK_ESCAPE)                  { $self->close  }
         elsif( $event->ControlDown and $code == ord('Q')) { $self->close  }
         elsif( $event->ControlDown and $code == ord('F')) { $parent->{'ed'}->SetFocus  }
         else { $event->Skip }
