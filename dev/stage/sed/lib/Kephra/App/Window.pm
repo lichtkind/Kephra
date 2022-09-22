@@ -7,6 +7,7 @@ use base qw(Wx::Frame);
 use Kephra::App::Dialog;
 use Kephra::App::Editor;
 use Kephra::App::SearchBar;
+use Kephra::App::ReplaceBar;
 use Kephra::IO::LocalFile;
 our $VERSION = 0.5;
 
@@ -17,16 +18,18 @@ sub new {
     $self->SetStatusWidths(100, 50, -1);
     $self->SetStatusBarPane(2);
     
-    my $ed = $self->{'ed'} = Kephra::App::Editor->new($self, -1);
-    my $sb = $self->{'sb'} = Kephra::App::SearchBar->new($self, -1);
+    $self->{'ed'} = Kephra::App::Editor->new($self, -1);
+    $self->{'sb'} = Kephra::App::SearchBar->new($self, -1);
+    $self->{'rb'} = Kephra::App::ReplaceBar->new($self, -1);
     
     my $sizer = Wx::BoxSizer->new( &Wx::wxVERTICAL );
     $sizer->Add( $self->{'ed'}, 1, &Wx::wxEXPAND, 0);
     $sizer->Add( $self->{'sb'}, 0, &Wx::wxGROW, 0);
+    $sizer->Add( $self->{'rb'}, 0, &Wx::wxGROW, 0);
 
     $self->SetSizer($sizer);
 
-    Wx::Window::SetFocus( $ed );
+    Wx::Window::SetFocus( $self->{'ed'} );
     Wx::Event::EVT_CLOSE( $self, sub {
         my ($self, $event) = @_;
         if ($self->{'ed'}->GetModify()){
@@ -56,7 +59,10 @@ sub new {
     Wx::Event::EVT_MENU( $self, 13110, sub { $self->{'sb'}->enter });
     Wx::Event::EVT_MENU( $self, 13120, sub { $self->{'sb'}->find_prev });
     Wx::Event::EVT_MENU( $self, 13130, sub { $self->{'sb'}->find_next });
-    Wx::Event::EVT_MENU( $self, 13200, sub { $self->{'ed'}->goto_last_edit });
+    Wx::Event::EVT_MENU( $self, 13210, sub { $self->{'rb'}->enter });
+    Wx::Event::EVT_MENU( $self, 13220, sub { $self->{'rb'}->replace_prev });
+    Wx::Event::EVT_MENU( $self, 13230, sub { $self->{'rb'}->replace_next });
+    Wx::Event::EVT_MENU( $self, 13300, sub { $self->{'ed'}->goto_last_edit });
 
     my $file_menu = Wx::Menu->new();
     $file_menu->Append( 11100, "&New\tCtrl+N", "complete a sketch drawing" );
@@ -85,11 +91,15 @@ sub new {
     $edit_menu->Append( 12400, "&Toggle Comment\tCtrl+K", "insert or remove script comment" );
 
     my $search_menu = Wx::Menu->new();
-    $search_menu->Append( 13110, "&Find\tCtrl+F",            "move focus in or out the search bar" );
-    $search_menu->Append( 13120, "&Find Prev\tCtrl+Shift+G", "jump to previous finding of search text" );
-    $search_menu->Append( 13130, "&Find Next\tCtrl+G",       "jump to next finding of search text" );
+    $search_menu->Append( 13110, "&Find\tCtrl+F",            "enter search phrase into search bar" );
+    $search_menu->Append( 13120, "&Find Prev\tCtrl+Shift+G", "jump to previous match of search term" );
+    $search_menu->Append( 13130, "&Find Next\tCtrl+G",       "jump to next match of search text" );
     $search_menu->AppendSeparator();
-    $search_menu->Append( 13200, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
+    $search_menu->Append( 13210, "&Replace\tCtrl+Shift+F",            "enter replace term into replace bar" );
+    $search_menu->Append( 13220, "&Replace Prev\tCtrl+Shift+H", "replace selection and go to previous match" );
+    $search_menu->Append( 13230, "&Replace Next\tCtrl+H",       "replace selection and go to next match" );
+    $search_menu->AppendSeparator();
+    $search_menu->Append( 13300, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
     
     my $help_menu = Wx::Menu->new();
     $help_menu->Append( 14100, "&Usage\tAlt+U",  "Dialog with information usage" );
@@ -101,9 +111,11 @@ sub new {
     $menu_bar->Append( $search_menu, '&Search' );
     $menu_bar->Append( $help_menu,   '&Help' );
     $self->SetMenuBar($menu_bar);
-
     $self->set_title();
+    $self->{'rb'}->show(0);
+    
     $self->read_file( __FILE__);
+    
     return $self;
 }
 
@@ -116,7 +128,9 @@ sub new_file {
     $self->set_title();
     $self->SetStatusText(  $self->{'encoding'}, 1);
 }
+
 sub open_file   { $_[0]->read_file( Kephra::App::Dialog::get_file_open() ) }
+
 sub reopen_file { $_[0]->read_file( $_[0]->{'file'}, 1) }
 
 sub read_file {
@@ -129,12 +143,14 @@ sub read_file {
     $self->set_title();
     $self->SetStatusText(  $self->{'encoding'}, 1);
 }
+
 sub save_file {
     my $self = shift;
     $self->{'file'} = Kephra::App::Dialog::get_file_save() unless $self->{'file'};
     Kephra::IO::LocalFile::write( $self->{'file'},  $self->{'encoding'}, $self->{'ed'}->GetText() );
     $self->{'ed'}->SetSavePoint;
 }
+
 sub save_as_file {
     my $self = shift;
     $self->{'file'} = Kephra::App::Dialog::get_file_save();

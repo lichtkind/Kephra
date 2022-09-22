@@ -46,20 +46,19 @@ sub mount_events {
         if (($mod == 1 or $mod == 3) and $code == ord('Q'))    { $ed->insert_text('@') }
         elsif($event->ControlDown    and $code == ord('C'))    { $ed->copy()           }
         elsif($event->ControlDown    and $code == ord('X'))    { $ed->cut()            }
-        elsif($event->ControlDown    and $code == ord('L'))    { $ed->move_line( $self->GetLineCount-1, $self->GetLineCount-2 )
-        }
+        elsif($event->ControlDown    and $code == ord('L'))    { }
         elsif($event->ControlDown and $event->ShiftDown and $code == &Wx::WXK_UP)   { $ed->select_prev_block  }
         elsif($event->ControlDown and $event->ShiftDown and $code == &Wx::WXK_DOWN) { $ed->select_next_block  }
-        elsif($event->ControlDown and $code == &Wx::WXK_UP)    { $ed->goto_prev_block  }
-        elsif($event->ControlDown and $code == &Wx::WXK_DOWN)  { $ed->goto_next_block  }
+        elsif($event->ControlDown and $code == &Wx::WXK_UP)       { $ed->goto_prev_block  }
+        elsif($event->ControlDown and $code == &Wx::WXK_DOWN)     { $ed->goto_next_block  }
         elsif($event->ControlDown and $code == &Wx::WXK_PAGEUP )  { $ed->goto_prev_sub  }
         elsif($event->ControlDown and $code == &Wx::WXK_PAGEDOWN ){ $ed->goto_next_sub  }
-        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_UP)       { $event->Skip  }
-        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_DOWN)     { $event->Skip  }
-        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_LEFT)     { $event->Skip  }
-        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_RIGHT)    { $event->Skip  }
-#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_PAGEUP)   {   }
-#        elsif($event->AltDown and $event->ShiftDown and $code == &Wx::WXK_PAGEDOWN) {   }
+        elsif($event->AltDown     and $event->ShiftDown and $code == &Wx::WXK_UP)       { $event->Skip  }
+        elsif($event->AltDown     and $event->ShiftDown and $code == &Wx::WXK_DOWN)     { $event->Skip  }
+        elsif($event->AltDown     and $event->ShiftDown and $code == &Wx::WXK_LEFT)     { $event->Skip  }
+        elsif($event->AltDown     and $event->ShiftDown and $code == &Wx::WXK_RIGHT)    { $event->Skip  }
+#        elsif($event->AltDown    and $event->ShiftDown and $code == &Wx::WXK_PAGEUP)   {   }
+#        elsif($event->AltDown    and $event->ShiftDown and $code == &Wx::WXK_PAGEDOWN) {   }
         elsif($event->AltDown     and $code == &Wx::WXK_UP)    { $ed->move_text_up     }
         elsif($event->AltDown     and $code == &Wx::WXK_DOWN)  { $ed->move_text_down   }
         elsif($event->AltDown     and $code == &Wx::WXK_LEFT)  { $ed->move_text_left   }
@@ -68,8 +67,12 @@ sub mount_events {
     });
 
 
-    # Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {});
     # Wx::Event::EVT_KEY_UP( $self, sub { my ($ed, $event) = @_; my $code = $event->GetKeyCode;  my $mod = $event->GetModifiers; });
+    # Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {});
+    
+    # Wx::Event::EVT_LEFT_DOWN( $self, sub {});
+    # Wx::Event::EVT_RIGHT_DOWN( $self, sub {});
+    # Wx::Event::EVT_MIDDLE_UP( $self, sub { say 'right';  $_[1]->Skip;  });
     
     Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub { 
         $self->GetParent->SetStatusText( $self->GetCurrentPos, 0); # say 'ui';
@@ -81,15 +84,15 @@ sub mount_events {
     Wx::Event::EVT_STC_SAVEPOINTLEFT(    $self, -1, sub { $self->GetParent->set_title(1) });
     Wx::Event::EVT_SET_FOCUS(            $self,     sub { my ($ed, $event ) = @_;        $event->Skip;   });
     # Wx::Event::EVT_DROP_FILES       ($self, sub { say $_[0], $_[1];    $self->GetParent->open_file()  });
-    Wx::Event::EVT_STC_DO_DROP  ($self, -1, sub { 
-        my ($ed, $event ) = @_; # StyledTextEvent=SCALAR
-        my $str = $event->GetDragText;
-        chomp $str;
-        if (substr( $str, 0, 7) eq 'file://'){
-            $self->GetParent->open_file( substr $str, 7 );
-        }
-        return; # $event->Skip;
-    });
+#    Wx::Event::EVT_STC_DO_DROP  ($self, -1, sub { 
+#        my ($ed, $event ) = @_; # StyledTextEvent=SCALAR
+#        my $str = $event->GetDragText;
+#        chomp $str;
+#        if (substr( $str, 0, 7) eq 'file://'){
+#            $self->GetParent->open_file( substr $str, 7 );
+#        }
+#        return; # $event->Skip;
+#    });
     # Wx::Event::EVT_STC_START_DRAG   ($ep, -1, sub {
     # Wx::Event::EVT_STC_DRAG_OVER    ($ep, -1, sub { $droppos = $_[1]->GetPosition });
 }
