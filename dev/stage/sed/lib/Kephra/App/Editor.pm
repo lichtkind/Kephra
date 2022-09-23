@@ -143,6 +143,52 @@ sub replace {
     $self->EndUndoAction();
 }
 
+sub move_line {
+    my ($self, $from, $to) = @_;
+    return unless defined $to and $from < $self->GetLineCount and $to < $self->GetLineCount;
+    $from = $self->GetLineCount + $from if $from < 0;
+    $to =   $self->GetLineCount + $to   if $to < 0;
+    return if $from == $to;
+    my $last_line_nr = $self->GetLineCount - 1;
+    if ($from  == $last_line_nr) {
+        $self->GotoLine( $from );
+        $self->LineTranspose;
+        $from--;
+    }
+    $self->SetSelection( $self->PositionFromLine( $from ),
+                         $self->PositionFromLine( $from + 1 ) );
+    my $line = $self->GetSelectedText( );
+    $self->ReplaceSelection( '' );
+    if ($to == $last_line_nr) {
+        $self->InsertText( $self->PositionFromLine($to - 1), $line );
+        $self->GotoLine( $to );
+        $self->LineTranspose;
+    } else { $self->InsertText( $self->PositionFromLine($to), $line ) }
+}
+
+sub move_lines {
+    my ($self, $begin, $end, $newbegin) = @_;
+    #~ return unless defined $to and $from < $self->GetLineCount and $to < $self->GetLineCount;
+    #~ $from = $self->GetLineCount + $from if $from < 0;
+    #~ $to =   $self->GetLineCount + $to   if $to < 0;
+    #~ return if $from == $to;
+    #~ my $last_line_nr = $self->GetLineCount - 1;
+    #~ if ($from  == $last_line_nr) {
+        #~ $self->GotoLine( $from );
+        #~ $self->LineTranspose;
+        #~ $from--;
+    #~ }
+    #~ $self->SetSelection( $self->PositionFromLine( $from ),
+                         #~ $self->PositionFromLine( $from + 1 ) );
+    #~ my $line = $self->GetSelectedText( );
+    #~ $self->ReplaceSelection( '' );
+    #~ if ($to == $last_line_nr) {
+        #~ $self->InsertText( $self->PositionFromLine($to - 1), $line );
+        #~ $self->GotoLine( $to );
+        #~ $self->LineTranspose;
+    #~ } else { $self->InsertText( $self->PositionFromLine($to), $line ) }
+}
+
 sub move_text_up {
     my ($self) = @_;
     my ($start_pos, $end_pos) = $self->GetSelection;
@@ -184,29 +230,6 @@ sub move_text_down {
     $self->SetSelection( $self->PositionFromLine( $start_line + 1 ) + $start_col,
                          $self->PositionFromLine( $end_line + 1 ) + $end_col );
     $self->EndUndoAction();
-}
-
-sub move_line {
-    my ($self, $from, $to) = @_;
-    return unless defined $to and $from < $self->GetLineCount and $to < $self->GetLineCount;
-    $from = $self->GetLineCount + $from if $from < 0;
-    $to =   $self->GetLineCount + $to   if $to < 0;
-    return if $from == $to;
-    my $last_line_nr = $self->GetLineCount - 1;
-    if ($from  == $last_line_nr) {
-        $self->GotoLine( $from );
-        $self->LineTranspose;
-        $from--;
-    }
-    $self->SetSelection( $self->PositionFromLine( $from ),
-                         $self->PositionFromLine( $from + 1 ) );
-    my $line = $self->GetSelectedText( );
-    $self->ReplaceSelection( '' );
-    if ($to == $last_line_nr) {
-        $self->InsertText( $self->PositionFromLine($to - 1), $line );
-        $self->GotoLine( $to );
-        $self->LineTranspose;
-    } else { $self->InsertText( $self->PositionFromLine($to), $line ) }
 }
 
 sub move_line_left {
@@ -410,10 +433,10 @@ sub toggle_comment_line {
     return unless defined $line_nr;
     $self->SetSelection( $self->PositionFromLine( $line_nr ),
                          $self->GetLineEndPosition( $line_nr )  );
-    $self->GetSelectedText( ) =~ /^(\s*)(#\s+)?(.*)$/;
-    return unless $3;
-    $2 ? $self->ReplaceSelection( $1. $3     ) 
-       : $self->ReplaceSelection( $1.'# '.$3 );
+    $self->GetSelectedText( ) =~ /^(\s*)(#?)(~\s)?(.*)$/;
+    return if (not $4) or ($2 and not $3);
+    $2 ? $self->ReplaceSelection( $1. $4     ) 
+       : $self->ReplaceSelection( $1.'#~ '.$4 );
 }
 sub toggle_comment {
     my ($self) = @_;
