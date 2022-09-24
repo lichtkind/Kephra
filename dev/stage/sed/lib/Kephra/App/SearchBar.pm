@@ -73,7 +73,8 @@ sub new {
     $sizer->Add( $self->{'prev'},  0, $attr, 10);
     $sizer->AddSpacer( 10);
     $sizer->Add( $self->{'next'},  0, $attr, 10);
-    $sizer->AddSpacer( 140);
+    $sizer->Add( 0, 1, &Wx::wxEXPAND, 0);
+    #$sizer->AddSpacer( 140);
     $sizer->Add( $self->{'case'},  0, $attr, 10);
     $sizer->AddSpacer( 15);
     $sizer->Add( $self->{'word'},  0, $attr, 10);

@@ -9,7 +9,7 @@ use Kephra::App::Editor;
 use Kephra::App::SearchBar;
 use Kephra::App::ReplaceBar;
 use Kephra::IO::LocalFile;
-our $VERSION = 0.5;
+our $VERSION = 0.51;
 
 sub new {
     my($class, $parent) = @_;
@@ -55,7 +55,8 @@ sub new {
     Wx::Event::EVT_MENU( $self, 12230, sub { $self->{'ed'}->replace });
     Wx::Event::EVT_MENU( $self, 12240, sub { $self->{'ed'}->Clear });
     Wx::Event::EVT_MENU( $self, 12300, sub { $self->{'ed'}->SelectAll });
-    Wx::Event::EVT_MENU( $self, 12400, sub { $self->{'ed'}->toggle_comment() });
+    Wx::Event::EVT_MENU( $self, 12400, sub { $self->{'ed'}->toggle_block_comment() });
+    Wx::Event::EVT_MENU( $self, 12410, sub { $self->{'ed'}->toggle_comment() });
     Wx::Event::EVT_MENU( $self, 13110, sub { $self->{'sb'}->enter });
     Wx::Event::EVT_MENU( $self, 13120, sub { $self->{'sb'}->find_prev });
     Wx::Event::EVT_MENU( $self, 13130, sub { $self->{'sb'}->find_next });
@@ -88,7 +89,8 @@ sub new {
     $edit_menu->Append( 12300, "&Select All\tCtrl+A", "select entire text" );
     $edit_menu->Append( 12310, "&Double\tCtrl+D",     "copy and paste selected text or current line" );
     $edit_menu->AppendSeparator();
-    $edit_menu->Append( 12400, "&Toggle Comment\tCtrl+K", "insert or remove script comment" );
+    $edit_menu->Append( 12400, "&Toggle Block Comment\tCtrl+K", "insert or remove script comment with #~" );
+    $edit_menu->Append( 12410, "&Toggle Comment\tCtrl+Shift+K", "insert or remove script comment with #" );
 
     my $search_menu = Wx::Menu->new();
     $search_menu->Append( 13110, "&Find\tCtrl+F",            "enter search phrase into search bar" );
@@ -137,9 +139,9 @@ sub read_file {
     my ($self, $file, $soft) = @_;
     return unless defined $file and -r $file;
     my ($content, $encoding) = Kephra::IO::LocalFile::read( $file );
-    $self->{'file'} = $file;
     $self->{'encoding'} = $encoding;
     $self->{'ed'}->new_text( $content, $soft );
+    $self->{'file'} = $file;
     $self->set_title();
     $self->SetStatusText(  $self->{'encoding'}, 1);
 }
@@ -160,7 +162,7 @@ sub save_as_file {
 
 sub set_title {
     my ($self) = @_;
-    my $title = 'Single Edit - KephraCP stage 1  -  ';
+    my $title = "Kephra $VERSION  -  ";
     $title .=  $self->{'file'} ? $self->{'file'} : '<unnamed>';
     $title .= ' *' if $self->{'ed'}->GetModify();
     $self->SetTitle($title);
