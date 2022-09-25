@@ -58,7 +58,7 @@ sub mount_events {
                 } else {
                     if    ($code == ord('C'))          { $ed->copy()  }
                     elsif ($code == ord('X'))          { $ed->cut()   }
-                   # elsif ($code == ord('L'))          { }
+                  # elsif ($code == ord('L'))          { }
                     elsif ($code == &Wx::WXK_UP)       { $ed->goto_prev_block }
                     elsif ($code == &Wx::WXK_DOWN)     { $ed->goto_next_block }
                     elsif ($code == &Wx::WXK_PAGEUP )  { $ed->goto_prev_sub   }
@@ -68,16 +68,21 @@ sub mount_events {
             }
         } else {
             if ($event->AltDown) {
-                if ($event->ShiftDown){  $event->Skip
+                if ($event->ShiftDown){ 
+                    if    ($code == &Wx::WXK_UP)      {  }
+                    elsif ($code == &Wx::WXK_DOWN)    {  }
+                    elsif ($code == &Wx::WXK_LEFT)    {  }
+                    elsif ($code == &Wx::WXK_RIGHT)   {  }
+                    else                              { $event->Skip }
                 } else {
-                    if    ($code == &Wx::WXK_UP)      { Kephra::App::Editor::MoveText::up( $ed )    }
-                    elsif ($code == &Wx::WXK_DOWN)    { Kephra::App::Editor::MoveText::down( $ed )  }
+                    if    ($code == &Wx::WXK_UP)      { Kephra::App::Editor::MoveText::up( $ed )     }
+                    elsif ($code == &Wx::WXK_DOWN)    { Kephra::App::Editor::MoveText::down( $ed )   }
                     elsif ($code == &Wx::WXK_LEFT)    { Kephra::App::Editor::MoveText::left( $ed )   }
                     elsif ($code == &Wx::WXK_RIGHT)   { Kephra::App::Editor::MoveText::right( $ed )  }
-                    elsif ($code == &Wx::WXK_PAGEUP)  { Kephra::App::Editor::MoveText::page_up( $ed )   }
-                    elsif ($code == &Wx::WXK_PAGEDOWN){ Kephra::App::Editor::MoveText::page_down( $ed ) }
-                    elsif ($code == &Wx::WXK_HOME)    { Kephra::App::Editor::MoveText::start( $ed )   }
-                    elsif ($code == &Wx::WXK_END )    { Kephra::App::Editor::MoveText::end( $ed ) }
+                    elsif ($code == &Wx::WXK_PAGEUP)  { Kephra::App::Editor::MoveText::page_up($ed)  }
+                    elsif ($code == &Wx::WXK_PAGEDOWN){ Kephra::App::Editor::MoveText::page_down($ed)}
+                    elsif ($code == &Wx::WXK_HOME)    { Kephra::App::Editor::MoveText::start( $ed )  }
+                    elsif ($code == &Wx::WXK_END )    { Kephra::App::Editor::MoveText::end( $ed )    }
                     else                              { $event->Skip }
                 }
             } else { $event->Skip }
@@ -114,6 +119,15 @@ sub mount_events {
     # Wx::Event::EVT_STC_START_DRAG   ($ep, -1, sub {
     # Wx::Event::EVT_STC_DRAG_OVER    ($ep, -1, sub { $droppos = $_[1]->GetPosition });
 }
+
+
+# ->SelectionIsRectangle
+# ->LineDownRectExtend
+# ->LineUpRectExtend
+# ->LineLeftRectExtend
+# ->HomeRectExtend ()
+# ->VCHomeRectExtend 
+
 
 sub is_empty { not $_[0]->GetTextLength }
 

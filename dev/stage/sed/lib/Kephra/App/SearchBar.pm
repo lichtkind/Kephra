@@ -30,7 +30,7 @@ sub new {
     $self->{'start'}->SetToolTip('search term has to be beginning of a word');
     $self->{'regex'}->SetToolTip('view search term as regular expression');
     $self->{'wrap'}->SetToolTip('after last match go to first again and vice versa');
-    $self->{'expand'}->SetToolTip('toggle replace bar visibility');
+    $self->{'expand'}->SetToolTip('blend replace bar in or out');
     $self->{'close'}->SetToolTip('close search bar');
     $self->{'wrap'}->SetValue( $self->{'data'}{'wrap'} );
 
@@ -107,14 +107,16 @@ sub show {
 sub enter {
     my ($self) = @_;
     $self->show(1);
+    my $sel = $self->editor->GetSelectedText;
+    $self->{'text'}->SetValue( $sel )  if $sel;
     $self->{'text'}->SetFocus();
 }
 
 sub close {
     my ($self) = @_;
     $self->show(0);
-    $self->GetParent->{'rb'}->show(0);
-    $self->GetParent->{'ed'}->SetFocus;
+    $self->replace_bar->show(0);
+    $self->editor->SetFocus;
 }
 
 sub find_first {

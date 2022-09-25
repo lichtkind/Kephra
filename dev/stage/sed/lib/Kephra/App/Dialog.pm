@@ -85,7 +85,7 @@ sub get_number {Wx::GetNumberFromUser( $_[0], '', $_[1],$_[2], 0, 100000, _paren
 #}
 sub about {
 	require Kephra::App::Dialog::About;
-	Kephra::App::Dialog::About::create( )->ShowModal;
+	Kephra::App::Dialog::About->new( shift )->ShowModal;
 }
 sub config {
 	require Kephra::App::Dialog::Config;
@@ -93,11 +93,11 @@ sub config {
 }
 sub documentation {
 	require Kephra::App::Dialog::Documentation;
-	Kephra::App::Dialog::Documentation::create( )->ShowModal;
+	Kephra::App::Dialog::Documentation:->new( shift )->ShowModal;
 }
 sub keymap {
 	require Kephra::App::Dialog::Keymap;
-	Kephra::App::Dialog::Keymap::create( )->ShowModal;
+	Kephra::App::Dialog::Keymap->new( shift )->ShowModal;
 }
 
 #sub notify_file_changed {

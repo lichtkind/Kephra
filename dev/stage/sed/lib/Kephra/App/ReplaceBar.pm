@@ -37,7 +37,7 @@ sub new {
     Wx::Event::EVT_BUTTON( $self, $self->{'prev'},   sub { $self->replace_prev });
     Wx::Event::EVT_BUTTON( $self, $self->{'next'},   sub { $self->replace_next });
     Wx::Event::EVT_BUTTON( $self, $self->{'once'},   sub { $self->replace_once });
-    Wx::Event::EVT_BUTTON( $self, $self->{'sel'},    sub { $self->replace_selection });
+    Wx::Event::EVT_BUTTON( $self, $self->{'sel'},    sub { $self->replace_in_selection });
     Wx::Event::EVT_BUTTON( $self, $self->{'all'},    sub { $self->replace_all  });
     Wx::Event::EVT_BUTTON( $self, $self->{'fprev'},  sub { $self->find_prev    });
     Wx::Event::EVT_BUTTON( $self, $self->{'fnext'},  sub { $self->find_next    });
@@ -201,7 +201,7 @@ sub replace_all {
     $ed->EndUndoAction();
 }
 
-sub replace_selection {
+sub replace_in_selection {
     my ($self) = @_;
     my $ed = $self->editor;
     my ($start, $end) = $ed->GetSelection;

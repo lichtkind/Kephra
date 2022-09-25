@@ -58,11 +58,17 @@ sub up {
         $ed->LineTranspose;
         $ed->GotoPos ( $ed->PositionFromLine( $start_line - 1 ) + $start_col);
     } elsif ($start_line != $end_line) {
-        my $end_col =  $end_pos - $ed->PositionFromLine( $end_line );
         move_line( $ed, $start_line - 1, $end_line);
-        $ed->SetSelection( $ed->PositionFromLine( $start_line - 1 ) + $start_col,
-                             $ed->PositionFromLine( $end_line - 1 ) + $end_col );
-    } else {}
+        $ed->SetSelection( $ed->PositionFromLine( $start_line - 1 ),
+                           $ed->GetLineEndPosition( $end_line - 1 ) );
+    } else {
+        my $target_pos = $ed->PositionFromLine( $start_line - 1 ) + $start_col;
+        $target_pos = $ed->GetLineEndPosition( $start_line - 1 ) if $ed->GetLineEndPosition( $start_line - 1 ) < $target_pos;
+        my $text = $ed->GetSelectedText( );
+        $ed->ReplaceSelection( '' );
+        $ed->InsertText( $target_pos, $text );
+        $ed->SetSelection( $target_pos, $target_pos + length $text);
+    }
     $ed->EndUndoAction();
 }
 
@@ -70,22 +76,34 @@ sub down {
     my ($ed) = @_;
     my ($start_pos, $end_pos) = $ed->GetSelection;
     my $start_line = $ed->LineFromPosition( $start_pos );
-    my $end_line = $ed->LineFromPosition( $end_pos );
+    my $end_line  = $ed->LineFromPosition( $end_pos );
     my $start_col =  $start_pos - $ed->PositionFromLine( $start_line );
-    my $end_col = $end_pos - $ed->PositionFromLine( $end_line );
+    my $end_col   =  $end_pos - $ed->PositionFromLine( $end_line );
     $ed->BeginUndoAction();
     if ( $end_line + 1 == $ed->GetLineCount ) {
         $ed->GotoLine( $start_line );
         $ed->NewLine;
+        if     ($start_pos == $end_pos)  { $ed->GotoPos ( $ed->PositionFromLine( $start_line + 1 ) + $start_col) }
+        elsif ($start_line != $end_line) { $ed->SetSelection( $ed->PositionFromLine( $start_line + 1 ) ,
+                                                              $ed->GetLineEndPosition( $end_line + 1 )  ) }
+        else                             { my $next_line_pos = $ed->PositionFromLine( $start_line + 1 );
+                                           $ed->SetSelection( $next_line_pos + $start_col, $next_line_pos + $end_col) }
     } elsif ($start_pos == $end_pos) {
         $ed->GotoLine( $start_line + 1 );
         $ed->LineTranspose;
         $ed->GotoPos ( $ed->PositionFromLine( $start_line + 1 ) + $start_col);
     } elsif ($start_line != $end_line) {
         move_line( $ed, $end_line + 1, $start_line);
-    } else { return }
-    $ed->SetSelection( $ed->PositionFromLine( $start_line + 1 ) + $start_col,
-                         $ed->PositionFromLine( $end_line + 1 ) + $end_col );
+        $ed->SetSelection( $ed->PositionFromLine( $start_line + 1 ) ,
+                           $ed->GetLineEndPosition( $end_line + 1 )  );
+    } else {
+        my $text = $ed->GetSelectedText( );
+        $ed->ReplaceSelection( '' );
+        my $target_pos = $ed->PositionFromLine( $start_line + 1 ) + $start_col;
+        $target_pos = $ed->GetLineEndPosition( $start_line + 1 ) if $ed->GetLineEndPosition( $start_line + 1 ) < $target_pos;
+        $ed->InsertText( $target_pos, $text );
+        $ed->SetSelection( $target_pos, $target_pos + length $text);
+    }
     $ed->EndUndoAction();
 }
 
@@ -107,9 +125,16 @@ sub page_up {
     } elsif ($start_line != $end_line) {
         my $end_col =  $end_pos - $ed->PositionFromLine( $end_line );
         move_block( $ed,  $start_line, $end_line - $start_line + 1, $target_line);
-        $ed->SetSelection( $ed->PositionFromLine( $target_line ) + $start_col,
-                           $ed->PositionFromLine( $target_line - $start_line + $end_line ) + $end_col );
-    } else {}
+        $ed->SetSelection( $ed->PositionFromLine( $target_line ),
+                           $ed->GetLineEndPosition( $target_line - $start_line + $end_line ) );
+    } else {
+        my $text = $ed->GetSelectedText( );
+        $ed->ReplaceSelection( '' );
+        my $target_pos = $ed->PositionFromLine( $target_line ) + $start_col;
+        $target_pos = $ed->GetLineEndPosition( $target_line ) if $ed->GetLineEndPosition( $target_line ) < $target_pos;
+        $ed->InsertText( $target_pos, $text );
+        $ed->SetSelection( $target_pos, $target_pos + length $text);
+    }
     $ed->EndUndoAction();
     $ed->ScrollToLine( $target_line - $start_line + $end_line + 5 );
     $ed->ScrollToLine( $target_line - 5 );
@@ -132,9 +157,16 @@ sub page_down {
     } elsif ($start_line != $end_line) {
         my $end_col =  $end_pos - $ed->PositionFromLine( $end_line );
         move_block( $ed,  $start_line, $end_line - $start_line + 1, $target_line);
-        $ed->SetSelection( $ed->PositionFromLine( $target_line ) + $start_col,
-                           $ed->PositionFromLine( $target_line - $start_line + $end_line ) + $end_col );
-    } else {  }
+        $ed->SetSelection( $ed->PositionFromLine( $target_line ),
+                           $ed->GetLineEndPosition( $target_line - $start_line + $end_line ) );
+    } else {  
+        my $text = $ed->GetSelectedText( );
+        $ed->ReplaceSelection( '' );
+        my $target_pos = $ed->PositionFromLine( $target_line ) + $start_col;
+        $target_pos = $ed->GetLineEndPosition( $target_line ) if $ed->GetLineEndPosition( $target_line ) < $target_pos;
+        $ed->InsertText( $target_pos, $text );
+        $ed->SetSelection( $target_pos, $target_pos + length $text);
+    }
     $ed->EndUndoAction();
     $ed->ScrollToLine( $target_line - $start_line + $end_line + 5 );
     $ed->ScrollToLine( $target_line - 5 );
@@ -157,9 +189,16 @@ sub start {
     } elsif ($start_line != $end_line) {
         my $end_col =  $end_pos - $ed->PositionFromLine( $end_line );
         move_block( $ed,  $start_line, $end_line - $start_line + 1, $target_line);
-        $ed->SetSelection( $ed->PositionFromLine( $target_line ) + $start_col,
-                           $ed->PositionFromLine( $target_line - $start_line + $end_line ) + $end_col );
-    } else {}
+        $ed->SetSelection( $ed->PositionFromLine( $target_line ),
+                           $ed->GetLineEndPosition( $target_line - $start_line + $end_line )  );
+    } else {
+        my $text = $ed->GetSelectedText( );
+        $ed->ReplaceSelection( '' );
+        my $target_pos = $ed->PositionFromLine( 0 ) + $start_col;
+        $target_pos = $ed->GetLineEndPosition( 0 ) if $ed->GetLineEndPosition( 0 ) < $target_pos;
+        $ed->InsertText( $target_pos, $text );
+        $ed->SetSelection( $target_pos, $target_pos + length $text);
+    }
     $ed->EndUndoAction();
     $ed->ScrollToLine( 0 );
 }
@@ -180,9 +219,16 @@ sub end {
                            $ed->PositionFromLine( $target_line ) + $start_col );
     } elsif ($start_line != $end_line) {
         move_block( $ed,  $start_line, $end_line - $start_line + 1, $target_line);
-        $ed->SetSelection( $ed->PositionFromLine( $target_line ) + $start_col,
-                           $ed->PositionFromLine( $target_line - $start_line + $end_line ) + $end_col );
-    } else { }
+        $ed->SetSelection( $ed->PositionFromLine( $target_line ),
+                           $ed->GetLineEndPosition( $target_line - $start_line + $end_line ) );
+    } else { 
+        my $text = $ed->GetSelectedText( );
+        $ed->ReplaceSelection( '' );
+        my $target_pos = $ed->PositionFromLine( $target_line ) + $start_col;
+        $target_pos = $ed->GetLineEndPosition( $target_line ) if $ed->GetLineEndPosition( $target_line ) < $target_pos;
+        $ed->InsertText( $target_pos, $text );
+        $ed->SetSelection( $target_pos, $target_pos + length $text);
+    }
     $ed->EndUndoAction();
     $ed->ScrollToLine( $last_line );
 }
@@ -215,17 +261,24 @@ sub left {
     my ($start_pos, $end_pos) = $ed->GetSelection;
     my $start_line = $ed->LineFromPosition( $start_pos );
     my $end_line = $ed->LineFromPosition( $end_pos );
+    my $start_col =  $start_pos - $ed->PositionFromLine( $start_line );
     $ed->BeginUndoAction();
     if ($start_pos == $end_pos) {
-        $start_pos-- if line_left( $ed, $start_line );
+        $start_pos-- if line_left( $ed, $start_line ) and $start_col;
         $ed->GotoPos ( $start_pos );
     } elsif ($start_line != $end_line) {
         my $end_col = $end_pos - $ed->PositionFromLine( $end_line );
-        $start_pos-- if line_left( $ed, $start_line );
+        $start_pos-- if line_left( $ed, $start_line ) and $end_col;
         $end_col-- if line_left( $ed, $end_line );
         line_left( $ed, $_ ) for $start_line + 1 .. $end_line - 1;
-        $ed->SetSelection( $start_pos, $ed->PositionFromLine( $end_line ) + $end_col );
-    } else {}
+        $ed->SetSelection( $ed->PositionFromLine( $start_line ), $ed->GetLineEndPosition( $end_line ) );
+    } else {
+        return unless $start_col;      
+        my $text = $ed->GetSelectedText( );
+        $ed->ReplaceSelection( '' );
+        $ed->InsertText( $start_pos - 1, $text );
+        $ed->SetSelection( $start_pos - 1, $end_pos - 1);
+    }
     $ed->EndUndoAction();
 }
 
@@ -240,8 +293,15 @@ sub right {
         $ed->GotoPos ( $start_pos + 1);
     } elsif ($start_line != $end_line) {
         line_right( $ed, $_ ) for $start_line .. $end_line;
-        $ed->SetSelection( $start_pos + 1, $end_pos + 1 + $end_line -  $start_line);
-    }  else {}
+        $ed->SetSelection( $ed->PositionFromLine( $start_line ), $ed->GetLineEndPosition( $end_line ) );
+    }  else {
+        my $end_col = $end_pos - $ed->PositionFromLine( $end_line );
+        return if $end_pos == $ed->GetLineEndPosition( $end_line );
+        my $text = $ed->GetSelectedText( );
+        $ed->ReplaceSelection( '' );
+        $ed->InsertText( $start_pos + 1, $text );
+        $ed->SetSelection( $start_pos + 1, $end_pos + 1);
+    }
     $ed->EndUndoAction();
 }
 

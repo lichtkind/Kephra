@@ -9,7 +9,8 @@ use Kephra::App::Editor;
 use Kephra::App::SearchBar;
 use Kephra::App::ReplaceBar;
 use Kephra::IO::LocalFile;
-our $VERSION = 0.51;
+our $VERSION = 0.52;
+our $NAME = 'Kephra';
 
 sub new {
     my($class, $parent) = @_;
@@ -57,13 +58,21 @@ sub new {
     Wx::Event::EVT_MENU( $self, 12300, sub { $self->{'ed'}->SelectAll });
     Wx::Event::EVT_MENU( $self, 12400, sub { $self->{'ed'}->toggle_block_comment() });
     Wx::Event::EVT_MENU( $self, 12410, sub { $self->{'ed'}->toggle_comment() });
+    Wx::Event::EVT_MENU( $self, 12500, sub { $self->{'ed'}->toggle_block_comment() });
+    Wx::Event::EVT_MENU( $self, 12510, sub { $self->{'ed'}->toggle_comment() });
     Wx::Event::EVT_MENU( $self, 13110, sub { $self->{'sb'}->enter });
     Wx::Event::EVT_MENU( $self, 13120, sub { $self->{'sb'}->find_prev });
     Wx::Event::EVT_MENU( $self, 13130, sub { $self->{'sb'}->find_next });
     Wx::Event::EVT_MENU( $self, 13210, sub { $self->{'rb'}->enter });
     Wx::Event::EVT_MENU( $self, 13220, sub { $self->{'rb'}->replace_prev });
     Wx::Event::EVT_MENU( $self, 13230, sub { $self->{'rb'}->replace_next });
+    Wx::Event::EVT_MENU( $self, 13240, sub { $self->{'rb'}->replace_in_selection });
+    Wx::Event::EVT_MENU( $self, 13250, sub { $self->{'rb'}->replace_all  });
     Wx::Event::EVT_MENU( $self, 13300, sub { $self->{'ed'}->goto_last_edit });
+    Wx::Event::EVT_MENU( $self, 14100, sub { Kephra::App::Dialog::documentation( $self ) });
+    Wx::Event::EVT_MENU( $self, 14200, sub { Kephra::App::Dialog::keymap( $self ) });
+    Wx::Event::EVT_MENU( $self, 14300, sub { Kephra::App::Dialog::about( $self ) });
+    
 
     my $file_menu = Wx::Menu->new();
     $file_menu->Append( 11100, "&New\tCtrl+N", "complete a sketch drawing" );
@@ -89,23 +98,29 @@ sub new {
     $edit_menu->Append( 12300, "&Select All\tCtrl+A", "select entire text" );
     $edit_menu->Append( 12310, "&Double\tCtrl+D",     "copy and paste selected text or current line" );
     $edit_menu->AppendSeparator();
-    $edit_menu->Append( 12400, "&Toggle Block Comment\tCtrl+K", "insert or remove script comment with #~" );
-    $edit_menu->Append( 12410, "&Toggle Comment\tCtrl+Shift+K", "insert or remove script comment with #" );
+    $edit_menu->Append( 12400, "&Indent\tTab", "move current line or selected block one tab to right" );
+    $edit_menu->Append( 12410, "&Dedent\tShift+Tab", "move current line or selected block one tab to left" );
+    $edit_menu->AppendSeparator();
+    $edit_menu->Append( 12500, "&Toggle Block Comment\tCtrl+K", "insert or remove script comment with #~" );
+    $edit_menu->Append( 12510, "&Toggle Comment\tCtrl+Shift+K", "insert or remove script comment with #" );
 
     my $search_menu = Wx::Menu->new();
-    $search_menu->Append( 13110, "&Find\tCtrl+F",            "enter search phrase into search bar" );
-    $search_menu->Append( 13120, "&Find Prev\tCtrl+Shift+G", "jump to previous match of search term" );
-    $search_menu->Append( 13130, "&Find Next\tCtrl+G",       "jump to next match of search text" );
+    $search_menu->Append( 13110, "&Find\tCtrl+F",        "enter search phrase into search bar" );
+    $search_menu->Append( 13120, "&Find Prev\tShift+F3", "jump to previous match of search term" );
+    $search_menu->Append( 13130, "&Find Next\tF3",       "jump to next match of search text" );
     $search_menu->AppendSeparator();
-    $search_menu->Append( 13210, "&Replace\tCtrl+Shift+F",            "enter replace term into replace bar" );
-    $search_menu->Append( 13220, "&Replace Prev\tCtrl+Shift+H", "replace selection and go to previous match" );
-    $search_menu->Append( 13230, "&Replace Next\tCtrl+H",       "replace selection and go to next match" );
+    $search_menu->Append( 13210, "&Replace\tCtrl+Shift+F",      "enter replace term into replace bar" );
+    $search_menu->Append( 13220, "&Replace Prev\tAlt+Shift+F3", "replace selection and go to previous match" );
+    $search_menu->Append( 13230, "&Replace Next\tAlt+F3",       "replace selection and go to next match" );
+    $search_menu->Append( 13240, "&Replace Selection\tAlt+Shift+F", "replace all search term matches inside selected text" );
+    $search_menu->Append( 13250, "&Replace All\tAlt+F",         "replace all search term matches in the document" );
     $search_menu->AppendSeparator();
     $search_menu->Append( 13300, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
     
     my $help_menu = Wx::Menu->new();
-    $help_menu->Append( 14100, "&Usage\tAlt+U",  "Dialog with information usage" );
-    $help_menu->Append( 14200, "&About\tAlt+A",  "Dialog with some general information" );
+    $help_menu->Append( 14100, "&Usage",  "Explaining the user interface" );
+    $help_menu->Append( 14200, "&Keymap\tAlt+K",  "listings with all key kombination from all widgets" );
+    $help_menu->Append( 14300, "&About",  "Dialog with some general information" );
 
     my $menu_bar = Wx::MenuBar->new();
     $menu_bar->Append( $file_menu,   '&File' );
@@ -162,10 +177,10 @@ sub save_as_file {
 
 sub set_title {
     my ($self) = @_;
-    my $title = "Kephra $VERSION  -  ";
-    $title .=  $self->{'file'} ? $self->{'file'} : '<unnamed>';
-    $title .= ' *' if $self->{'ed'}->GetModify();
-    $self->SetTitle($title);
+    my $title .=  $self->{'file'} ? $self->{'file'} : '<unnamed>';
+    $title .= "  - Kephra";
+    $title = '* '.$title if $self->{'ed'}->GetModify();
+    $self->SetTitle( $title );
 }
 
 1;
