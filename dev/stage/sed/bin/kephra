@@ -3,20 +3,6 @@ use v5.12;
 use warnings;
 use lib '../lib', 'lib', '.';
 
-use Wx;
-use Kephra::App::Window;
+use Kephra;
 
-
-SingleEdit->new->MainLoop;
-
-package SingleEdit;
-use base qw(Wx::App);
-
-sub OnInit {
-    my $app   = shift;
-    my $frame = Kephra::App::Window->new();
-    $frame->Center();
-    $frame->Show(1);
-    $app->SetTopWindow($frame);
-    1;
-}
+Kephra->new->MainLoop;

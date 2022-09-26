@@ -38,7 +38,7 @@ sub new {
             return                   if $ret ==  &Wx::wxCANCEL;
             $self->{'ed'}->save_file if $ret ==  &Wx::wxYES;
         }
-        $event->Skip(1) 
+        $event->Skip(1);
     });
 
     Wx::Event::EVT_CLOSE( $self,       sub { $_[1]->Skip(1) });

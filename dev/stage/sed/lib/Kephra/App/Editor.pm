@@ -120,13 +120,14 @@ sub mount_events {
     # Wx::Event::EVT_STC_DRAG_OVER    ($ep, -1, sub { $droppos = $_[1]->GetPosition });
 }
 
-
+#say $self->GetRect;
 # ->SelectionIsRectangle
 # ->LineDownRectExtend
 # ->LineUpRectExtend
 # ->LineLeftRectExtend
 # ->HomeRectExtend ()
 # ->VCHomeRectExtend 
+# SetInsertionPoint
 
 
 sub is_empty { not $_[0]->GetTextLength }
@@ -339,6 +340,16 @@ sub select_next_block {
     $self->GotoPos( $self->{'sel_head'} );
     $self->EnsureCaretVisible();
     $self->SetSelection( $start, $end );
+}
+
+sub expand_selecton {
+    my ($self) = @_;
+    
+}
+
+sub shrink_selecton {
+    my ($self) = @_;
+    
 }
 
 sub toggle_comment_line {

@@ -93,7 +93,7 @@ sub config {
 }
 sub documentation {
 	require Kephra::App::Dialog::Documentation;
-	Kephra::App::Dialog::Documentation:->new( shift )->ShowModal;
+	Kephra::App::Dialog::Documentation->new( shift )->ShowModal;
 }
 sub keymap {
 	require Kephra::App::Dialog::Keymap;
