@@ -18,7 +18,7 @@ sub new {
     $self->CreateStatusBar(3);
     $self->SetStatusWidths(100, 50, -1);
     $self->SetStatusBarPane(2);
-    
+
     $self->{'ed'} = Kephra::App::Editor->new($self, -1);
     $self->{'sb'} = Kephra::App::SearchBar->new($self, -1);
     $self->{'rb'} = Kephra::App::ReplaceBar->new($self, -1);
@@ -56,22 +56,26 @@ sub new {
     Wx::Event::EVT_MENU( $self, 12230, sub { $self->{'ed'}->replace });
     Wx::Event::EVT_MENU( $self, 12240, sub { $self->{'ed'}->Clear });
     Wx::Event::EVT_MENU( $self, 12300, sub { $self->{'ed'}->SelectAll });
-    Wx::Event::EVT_MENU( $self, 12400, sub { $self->{'ed'}->toggle_block_comment() });
-    Wx::Event::EVT_MENU( $self, 12410, sub { $self->{'ed'}->toggle_comment() });
-    Wx::Event::EVT_MENU( $self, 12500, sub { $self->{'ed'}->toggle_block_comment() });
-    Wx::Event::EVT_MENU( $self, 12510, sub { $self->{'ed'}->toggle_comment() });
-    Wx::Event::EVT_MENU( $self, 13110, sub { $self->{'sb'}->enter });
-    Wx::Event::EVT_MENU( $self, 13120, sub { $self->{'sb'}->find_prev });
-    Wx::Event::EVT_MENU( $self, 13130, sub { $self->{'sb'}->find_next });
-    Wx::Event::EVT_MENU( $self, 13210, sub { $self->{'rb'}->enter });
-    Wx::Event::EVT_MENU( $self, 13220, sub { $self->{'rb'}->replace_prev });
-    Wx::Event::EVT_MENU( $self, 13230, sub { $self->{'rb'}->replace_next });
-    Wx::Event::EVT_MENU( $self, 13240, sub { $self->{'rb'}->replace_in_selection });
-    Wx::Event::EVT_MENU( $self, 13250, sub { $self->{'rb'}->replace_all  });
-    Wx::Event::EVT_MENU( $self, 13300, sub { $self->{'ed'}->goto_last_edit });
-    Wx::Event::EVT_MENU( $self, 14100, sub { Kephra::App::Dialog::documentation( $self ) });
-    Wx::Event::EVT_MENU( $self, 14200, sub { Kephra::App::Dialog::keymap( $self ) });
-    Wx::Event::EVT_MENU( $self, 14300, sub { Kephra::App::Dialog::about( $self ) });
+    Wx::Event::EVT_MENU( $self, 13100, sub { Kephra::App::Editor::MoveText::left( $self->{'ed'} ) });
+    Wx::Event::EVT_MENU( $self, 13110, sub { Kephra::App::Editor::MoveText::right( $self->{'ed'} ) });
+    Wx::Event::EVT_MENU( $self, 13120, sub { Kephra::App::Editor::MoveText::up( $self->{'ed'} ) });
+    Wx::Event::EVT_MENU( $self, 13130, sub { Kephra::App::Editor::MoveText::down( $self->{'ed'} ) });
+    Wx::Event::EVT_MENU( $self, 13200, sub { $self->{'ed'}->toggle_block_comment });
+    Wx::Event::EVT_MENU( $self, 13210, sub { $self->{'ed'}->toggle_comment });
+    Wx::Event::EVT_MENU( $self, 13300, sub { $self->{'ed'}->toggle_block_comment });
+    Wx::Event::EVT_MENU( $self, 13310, sub { $self->{'ed'}->toggle_comment });
+    Wx::Event::EVT_MENU( $self, 14110, sub { $self->{'sb'}->enter });
+    Wx::Event::EVT_MENU( $self, 14120, sub { $self->{'sb'}->find_prev });
+    Wx::Event::EVT_MENU( $self, 14130, sub { $self->{'sb'}->find_next });
+    Wx::Event::EVT_MENU( $self, 14210, sub { $self->{'rb'}->enter });
+    Wx::Event::EVT_MENU( $self, 14220, sub { $self->{'rb'}->replace_prev });
+    Wx::Event::EVT_MENU( $self, 14230, sub { $self->{'rb'}->replace_next });
+    Wx::Event::EVT_MENU( $self, 14240, sub { $self->{'rb'}->replace_in_selection });
+    Wx::Event::EVT_MENU( $self, 14250, sub { $self->{'rb'}->replace_all  });
+    Wx::Event::EVT_MENU( $self, 14300, sub { $self->{'ed'}->goto_last_edit });
+    Wx::Event::EVT_MENU( $self, 15100, sub { Kephra::App::Dialog::documentation( $self ) });
+    Wx::Event::EVT_MENU( $self, 15200, sub { Kephra::App::Dialog::keymap( $self ) });
+    Wx::Event::EVT_MENU( $self, 15300, sub { Kephra::App::Dialog::about( $self ) });
     
 
     my $file_menu = Wx::Menu->new();
@@ -97,34 +101,41 @@ sub new {
     $edit_menu->AppendSeparator();
     $edit_menu->Append( 12300, "&Select All\tCtrl+A", "select entire text" );
     $edit_menu->Append( 12310, "&Double\tCtrl+D",     "copy and paste selected text or current line" );
-    $edit_menu->AppendSeparator();
-    $edit_menu->Append( 12400, "&Indent\tTab", "move current line or selected block one tab to right" );
-    $edit_menu->Append( 12410, "&Dedent\tShift+Tab", "move current line or selected block one tab to left" );
-    $edit_menu->AppendSeparator();
-    $edit_menu->Append( 12500, "&Toggle Block Comment\tCtrl+K", "insert or remove script comment with #~" );
-    $edit_menu->Append( 12510, "&Toggle Comment\tCtrl+Shift+K", "insert or remove script comment with #" );
 
+    my $format_menu = Wx::Menu->new();
+    $format_menu->Append( 13100, "Move &Left\tAlt+Left",  "move current line or selected lines one character to the left" );
+    $format_menu->Append( 13110, "Move &Right\tAlt+Right","move current line or selected lines one character to right" );
+    $format_menu->Append( 13120, "Move &Up\tAlt+Up",      "move current line or selected lines one row up" );
+    $format_menu->Append( 13130, "Move &Down\tAlt+Down",  "move current line or selected lines one row down" );
+    $format_menu->AppendSeparator();
+    $format_menu->Append( 13200, "&Indent\tTab", "move current line or selected block one tab to right" );
+    $format_menu->Append( 13210, "&Dedent\tShift+Tab", "move current line or selected block one tab to left" );
+    $format_menu->AppendSeparator();
+    $format_menu->Append( 13300, "&Block Comment\tCtrl+K", "insert or remove (toggle) script comment with #~" );
+    $format_menu->Append( 13310, "&Comment\tCtrl+Shift+K", "insert or remove (toggle) script comment with #" );
+    
     my $search_menu = Wx::Menu->new();
-    $search_menu->Append( 13110, "&Find\tCtrl+F",        "enter search phrase into search bar" );
-    $search_menu->Append( 13120, "&Find Prev\tShift+F3", "jump to previous match of search term" );
-    $search_menu->Append( 13130, "&Find Next\tF3",       "jump to next match of search text" );
+    $search_menu->Append( 14110, "&Find\tCtrl+F",        "enter search phrase into search bar" );
+    $search_menu->Append( 14120, "&Find Prev\tShift+F3", "jump to previous match of search term" );
+    $search_menu->Append( 14130, "&Find Next\tF3",       "jump to next match of search text" );
     $search_menu->AppendSeparator();
-    $search_menu->Append( 13210, "&Replace\tCtrl+Shift+F",      "enter replace term into replace bar" );
-    $search_menu->Append( 13220, "&Replace Prev\tAlt+Shift+F3", "replace selection and go to previous match" );
-    $search_menu->Append( 13230, "&Replace Next\tAlt+F3",       "replace selection and go to next match" );
-    $search_menu->Append( 13240, "&Replace Selection\tAlt+Shift+F", "replace all search term matches inside selected text" );
-    $search_menu->Append( 13250, "&Replace All\tAlt+F",         "replace all search term matches in the document" );
+    $search_menu->Append( 14210, "&Replace\tCtrl+Shift+F",      "enter replace term into replace bar" );
+    $search_menu->Append( 14220, "&Replace Prev\tAlt+Shift+F3", "replace selection and go to previous match" );
+    $search_menu->Append( 14230, "&Replace Next\tAlt+F3",       "replace selection and go to next match" );
+    $search_menu->Append( 14240, "&Replace Selection\tAlt+Shift+F", "replace all search term matches inside selected text" );
+    $search_menu->Append( 14250, "&Replace All\tAlt+F",         "replace all search term matches in the document" );
     $search_menu->AppendSeparator();
-    $search_menu->Append( 13300, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
+    $search_menu->Append( 14300, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
     
     my $help_menu = Wx::Menu->new();
-    $help_menu->Append( 14100, "&Usage",  "Explaining the user interface" );
-    $help_menu->Append( 14200, "&Keymap\tAlt+K",  "listings with all key kombination from all widgets" );
-    $help_menu->Append( 14300, "&About",  "Dialog with some general information" );
+    $help_menu->Append( 15100, "&Usage",  "Explaining the user interface" );
+    $help_menu->Append( 15200, "&Keymap\tAlt+K",  "listings with all key kombination from all widgets" );
+    $help_menu->Append( 15300, "&About",  "Dialog with some general information" );
 
     my $menu_bar = Wx::MenuBar->new();
     $menu_bar->Append( $file_menu,   '&File' );
     $menu_bar->Append( $edit_menu,   '&Edit' );
+    $menu_bar->Append( $format_menu, 'F&ormat' );
     $menu_bar->Append( $search_menu, '&Search' );
     $menu_bar->Append( $help_menu,   '&Help' );
     $self->SetMenuBar($menu_bar);

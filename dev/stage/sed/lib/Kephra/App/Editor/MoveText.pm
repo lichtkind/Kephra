@@ -52,7 +52,7 @@ sub up {
     my $start_line = $ed->LineFromPosition( $start_pos );
     return unless $start_line; # need space above
     my $end_line = $ed->LineFromPosition( $end_pos );
-    my $start_col =  $start_pos - $ed->PositionFromLine( $start_line );
+    my $start_col =  $ed->GetColumn( $start_pos );
     $ed->BeginUndoAction();
     if ($start_pos == $end_pos) {
         $ed->LineTranspose;
@@ -77,8 +77,8 @@ sub down {
     my ($start_pos, $end_pos) = $ed->GetSelection;
     my $start_line = $ed->LineFromPosition( $start_pos );
     my $end_line  = $ed->LineFromPosition( $end_pos );
-    my $start_col =  $start_pos - $ed->PositionFromLine( $start_line );
-    my $end_col   =  $end_pos - $ed->PositionFromLine( $end_line );
+    my $start_col = $ed->GetColumn( $start_pos );
+    my $end_col   = $ed->GetColumn( $end_pos );
     $ed->BeginUndoAction();
     if ( $end_line + 1 == $ed->GetLineCount ) {
         $ed->GotoLine( $start_line );

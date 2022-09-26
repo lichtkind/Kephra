@@ -1,7 +1,7 @@
 use v5.12;
 use warnings;
 
-# move line /page / block
+# highlight goto braces
 # rect edit 
 # copy word
 # rot select
@@ -21,6 +21,7 @@ sub new {
     my $self = $class->SUPER::new( $parent, -1,[-1,-1],[-1,-1] );
     $self->{'tab_size'} = 4;
     $self->{'tab_space'} = ' ' x $self->{'tab_size'};
+    $self->SetWordChars('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_$@%&\\');
     $self->SetScrollWidth(300);
     Kephra::App::Editor::SyntaxMode::apply( $self );
     $self->mount_events();
@@ -75,11 +76,11 @@ sub mount_events {
                     elsif ($code == &Wx::WXK_RIGHT)   {  }
                     else                              { $event->Skip }
                 } else {
-                    if    ($code == &Wx::WXK_UP)      { Kephra::App::Editor::MoveText::up( $ed )     }
-                    elsif ($code == &Wx::WXK_DOWN)    { Kephra::App::Editor::MoveText::down( $ed )   }
-                    elsif ($code == &Wx::WXK_LEFT)    { Kephra::App::Editor::MoveText::left( $ed )   }
-                    elsif ($code == &Wx::WXK_RIGHT)   { Kephra::App::Editor::MoveText::right( $ed )  }
-                    elsif ($code == &Wx::WXK_PAGEUP)  { Kephra::App::Editor::MoveText::page_up($ed)  }
+                    #elsif ($code == &Wx::WXK_UP)      { Kephra::App::Editor::MoveText::up( $ed )     }
+                    #elsif ($code == &Wx::WXK_DOWN)    { Kephra::App::Editor::MoveText::down( $ed )   }
+                    #elsif ($code == &Wx::WXK_LEFT)    { Kephra::App::Editor::MoveText::left( $ed )   }
+                    #elsif ($code == &Wx::WXK_RIGHT)   { Kephra::App::Editor::MoveText::right( $ed )  }
+                    if    ($code == &Wx::WXK_PAGEUP)  { Kephra::App::Editor::MoveText::page_up($ed)  }
                     elsif ($code == &Wx::WXK_PAGEDOWN){ Kephra::App::Editor::MoveText::page_down($ed)}
                     elsif ($code == &Wx::WXK_HOME)    { Kephra::App::Editor::MoveText::start( $ed )  }
                     elsif ($code == &Wx::WXK_END )    { Kephra::App::Editor::MoveText::end( $ed )    }
@@ -127,7 +128,10 @@ sub mount_events {
 # ->LineLeftRectExtend
 # ->HomeRectExtend ()
 # ->VCHomeRectExtend 
-# SetInsertionPoint
+# ->SetInsertionPoint
+# ->GetMultipleSelection
+# ->GetRectangularSelectionAnchor()
+# ->GetRectangularSelectionCaret()
 
 
 sub is_empty { not $_[0]->GetTextLength }
