@@ -7,9 +7,9 @@ use base qw/Wx::Dialog/;
 
 sub new {
     my ( $class, $parent) = @_;
-    my $self = $class->SUPER::new( $parent, -1, "About $Kephra::App::Window::NAME $Kephra::App::Window::VERSION" );
+    my $self = $class->SUPER::new( $parent, -1, "About $Kephra::NAME $Kephra::VERSION" );
     my @lblb_pro = ( [-1,-1], [-1,-1], &Wx::wxALIGN_CENTRE_HORIZONTAL );
-    my $version = Wx::StaticText->new( $self, -1, $Kephra::App::Window::NAME . '    version '.$Kephra::App::Window::VERSION , @lblb_pro);
+    my $version = Wx::StaticText->new( $self, -1, $Kephra::NAME . '    version '.$Kephra::VERSION , @lblb_pro);
     my $author  = Wx::StaticText->new( $self, -1, ' by Herbert Breunung ', @lblb_pro);
     my $license = Wx::StaticText->new( $self, -1, ' licensed under the GPL 3 ', @lblb_pro);
     my $libs    = Wx::StaticText->new( $self, -1, 'using Perl '.$^V.'    and    WxPerl '. $Wx::VERSION . '  ( '. &Wx::wxVERSION_STRING. ' )', @lblb_pro);

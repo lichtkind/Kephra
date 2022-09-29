@@ -6,8 +6,6 @@ use Wx qw/ :everything /;
 use Wx::STC;
 #use Wx::Scintilla;
 
-sub create_color { Wx::Colour->new(@_) }
-
 sub apply {
     my ($self) = @_;
     load_font( $self );  # before setting highlighting
@@ -39,17 +37,21 @@ sub set_margin {
         $self->SetMarginType( 0, &Wx::wxSTC_MARGIN_SYMBOL );
         $self->SetMarginType( 1, &Wx::wxSTC_MARGIN_NUMBER );
         $self->SetMarginType( 2, &Wx::wxSTC_MARGIN_SYMBOL );
+        $self->SetMarginType( 3, &Wx::wxSTC_MARGIN_SYMBOL );
         $self->SetMarginMask( 0, 0x01FFFFFF );
         $self->SetMarginMask( 1, 0 );
-        $self->SetMarginMask( 2, &Wx::wxSTC_MASK_FOLDERS );
+        $self->SetMarginMask( 2, 0x01FFFFFF); #  | &Wx::wxSTC_MASK_FOLDERS
+        $self->SetMarginMask( 3, &Wx::wxSTC_MASK_FOLDERS );
         $self->SetMarginSensitive( 0, 1 );
         $self->SetMarginSensitive( 1, 1 );
         $self->SetMarginSensitive( 2, 1 );
-        $self->StyleSetForeground(&Wx::wxSTC_STYLE_LINENUMBER, create_color(123,123,137));
-        $self->StyleSetBackground(&Wx::wxSTC_STYLE_LINENUMBER, create_color(226,226,222));
+        $self->SetMarginSensitive( 3, 0 );
+        $self->StyleSetForeground(&Wx::wxSTC_STYLE_LINENUMBER, create_color(93,93,97));
+        $self->StyleSetBackground(&Wx::wxSTC_STYLE_LINENUMBER, create_color(206,206,202));
         $self->SetMarginWidth(0,  1);
-        $self->SetMarginWidth(1, 43);
-        $self->SetMarginWidth(2,  2);
+        $self->SetMarginWidth(1, 47);
+        $self->SetMarginWidth(2, 12);
+        $self->SetMarginWidth(3,  2);
         # extra text margin
     }
     elsif ($style eq 'no') { $self->SetMarginWidth($_, 0) for 1..3 }
@@ -61,20 +63,21 @@ sub set_margin {
 
 sub set_colors {
     my $self = shift;
-    $self->SetCaretLineBack( create_color(250,245,185) );
-    #$self->SetCaretPeriod( 500 );
-    #$self->SetCaretWidth( 2 );
-    $self->SetCaretForeground( create_color(0,0,255) );
+    $self->SetCaretPeriod( 600 );
+    $self->SetCaretWidth( 2 );
+    $self->SetCaretForeground( create_color( 0, 0, 100) ); #140, 160, 255
     $self->SetCaretLineVisible(1);
+    $self->SetCaretLineBack( create_color(235, 235, 235) );
     $self->SetSelForeground( 1, create_color(243,243,243) );
     $self->SetSelBackground( 1, create_color(0, 17, 119) );
-    $self->SetWhitespaceForeground( 1, create_color(204, 204, 153) );
+    $self->SetWhitespaceForeground( 1, create_color(200, 200, 153) );
     $self->SetViewWhiteSpace(1);
     
     $self->SetEdgeColour( create_color(200,200,255) );
     $self->SetEdgeColumn( 80 );
     $self->SetEdgeMode( &Wx::wxSTC_EDGE_LINE );
 }
+sub create_color { Wx::Colour->new(@_) }
 
 sub load_font {
     my ($self, $font) = @_;
@@ -199,7 +202,6 @@ $self->IndicatorClearRange( 0, $len )
 	#Wx::Event::EVT_STC_CALLTIP_CLICK($self, sub{}) 
 	#Wx::Event::EVT_STC_AUTOCOMP_SELECTION($self, sub{})
 	#$self->SetAcceleratorTable( Wx::AcceleratorTable->new() );
-	#Wx::Event::EVT_MENU( $self, 1000, sub { $_[1]->Skip; } );
 	#Wx::Event::EVT_STC_SAVEPOINTREACHED($self, -1, \&Kephra::File::savepoint_reached);
 	#Wx::Event::EVT_STC_SAVEPOINTLEFT($self, -1, \&Kephra::File::savepoint_left);
 	$self->SetAcceleratorTable(

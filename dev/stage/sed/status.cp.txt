@@ -1,11 +1,10 @@
 
           ==[[ stage 0 : Single document EDitor]]==
 
+File  new open reopen save save_as
 
-File
 
-
-Edit
+Edit 
 
 
 Tool

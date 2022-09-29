@@ -1,12 +1,6 @@
 use v5.12;
 use warnings;
 
-# highlight goto braces
-# rect edit 
-# copy word
-# rot select
-# auto indent
-
 package Kephra::App::Editor;
 our @ISA = 'Wx::StyledTextCtrl';
 use Wx qw/ :everything /;
@@ -14,14 +8,17 @@ use Wx::STC;
 use Wx::DND;
 #use Wx::Scintilla;
 use Kephra::App::Editor::SyntaxMode;
+use Kephra::App::Editor::Edit;
 use Kephra::App::Editor::MoveText;
+use Kephra::App::Editor::Tool;
 
 sub new {
     my( $class, $parent, $style) = @_;
     my $self = $class->SUPER::new( $parent, -1,[-1,-1],[-1,-1] );
     $self->{'tab_size'} = 4;
     $self->{'tab_space'} = ' ' x $self->{'tab_size'};
-    $self->SetWordChars('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_$@%&\\');
+    $self->SetWordChars('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._$@%&\\');
+    #$self->BraceHighlightIndicator( 1, 1);
     $self->SetScrollWidth(300);
     Kephra::App::Editor::SyntaxMode::apply( $self );
     $self->mount_events();
@@ -33,73 +30,80 @@ sub mount_events {
     $self->DragAcceptFiles(1) if $^O eq 'MSWin32'; # enable drop files on win
     #$self->SetDropTarget( Kephra::App::Editor::TextDropTarget->new($self) );
 
+    # Wx::Event::EVT_KEY_UP( $self, sub { my ($ed, $event) = @_; my $code = $event->GetKeyCode;  my $mod = $event->GetModifiers; });
+    Wx::Event::EVT_KEY_DOWN( $self, sub {
+        my ($ed, $event) = @_;
+        my $code = $event->GetKeyCode; # my $raw = $event->GetRawKeyCode;
+        my $mod = $event->GetModifiers; #
+        if (($mod == 1 or $mod == 3) and $code == 81)    { $ed->insert_text('@') } # Q
+        elsif ( $event->ControlDown){
+            if ($event->AltDown) {$event->Skip
+            } else {
+                if ($event->ShiftDown){
+                    if    ($code == 65)                { $ed->shrink_selecton   } # A
+                    elsif ($code == &Wx::WXK_UP)       { $ed->select_prev_block }
+                    elsif ($code == &Wx::WXK_DOWN)     { $ed->select_next_block }
+                    elsif ($code == &Wx::WXK_PAGEUP )  { $ed->select_prev_sub   }
+                    elsif ($code == &Wx::WXK_PAGEDOWN ){ $ed->select_next_sub   }
+                    else                               { $event->Skip           }
+                } else {
+                    if    ($code == 65)                { $ed->expand_selecton   } # A
+                    elsif ($code == 67)                { Kephra::App::Editor::Edit::copy( $ed )  } # C
+                    elsif ($code == 76)                { $ed->sel               } # L
+                    elsif ($code == 88)                { Kephra::App::Editor::Edit::cut( $ed )   } # X
+                    elsif ($code == &Wx::WXK_UP)       { $ed->goto_prev_block   }
+                    elsif ($code == &Wx::WXK_DOWN)     { $ed->goto_next_block   }
+                    elsif ($code == &Wx::WXK_PAGEUP )  { $ed->goto_prev_sub     }
+                    elsif ($code == &Wx::WXK_PAGEDOWN ){ $ed->goto_next_sub     }
+                    else                               { $event->Skip }
+                }
+            }
+        } else {
+            if ($event->AltDown) {
+                if ($event->ShiftDown){
+                    if    ($code == &Wx::WXK_UP)       {  }
+                    elsif ($code == &Wx::WXK_DOWN)     {  }
+                    elsif ($code == &Wx::WXK_LEFT)     {  }
+                    elsif ($code == &Wx::WXK_RIGHT)    {  }
+                    else                               { $event->Skip }
+                } else {
+                    #elsif ($code == &Wx::WXK_UP)      { Kephra::App::Editor::MoveText::up( $ed )     }
+                    #elsif ($code == &Wx::WXK_DOWN)    { Kephra::App::Editor::MoveText::down( $ed )   }
+                    #elsif ($code == &Wx::WXK_LEFT)    { Kephra::App::Editor::MoveText::left( $ed )   }
+                    #elsif ($code == &Wx::WXK_RIGHT)   { Kephra::App::Editor::MoveText::right( $ed )  }
+                    if    ($code == &Wx::WXK_PAGEUP)   { Kephra::App::Editor::MoveText::page_up($ed)  }
+                    elsif ($code == &Wx::WXK_PAGEDOWN) { Kephra::App::Editor::MoveText::page_down($ed)}
+                    elsif ($code == &Wx::WXK_HOME)     { Kephra::App::Editor::MoveText::start( $ed )  }
+                    elsif ($code == &Wx::WXK_END )     { Kephra::App::Editor::MoveText::end( $ed )    }
+                    else                               { $event->Skip }
+                }
+            } else { 
+                if ($code == &Wx::WXK_F11)             { $self->GetParent->ShowFullScreen( not $self->GetParent->IsFullScreen ) }
+                else                                   { $event->Skip }
+            }
+        }    
+    });
+  
+    # Wx::Event::EVT_LEFT_DOWN( $self, sub {});
+    # Wx::Event::EVT_RIGHT_DOWN( $self, sub {});
+    # Wx::Event::EVT_MIDDLE_UP( $self, sub { say 'right';  $_[1]->Skip;  });
+ 
+    Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {  });
     Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {
         my ($ed, $event) = @_;
         $ed->{'change_pos'} = $ed->GetCurrentPos; # say 'skip';
         if ($self->SelectionIsRectangle){
             #say $event;
         } else { $event->Skip }
-
     });
-
-    Wx::Event::EVT_KEY_DOWN( $self, sub {
-        my ($ed, $event) = @_;
-        my $code = $event->GetKeyCode ; # my $raw = $event->GetRawKeyCode;
-        my $mod = $event->GetModifiers; #
-        if (($mod == 1 or $mod == 3) and $code == ord('Q'))    { $ed->insert_text('@') }
-        elsif ( $event->ControlDown){
-            if ($event->AltDown) {$event->Skip
-            } else {
-                if ($event->ShiftDown){
-                    if   ($code == &Wx::WXK_UP)        { $ed->select_prev_block  }
-                    elsif($code == &Wx::WXK_DOWN)      { $ed->select_next_block  }
-                    elsif ($code == &Wx::WXK_PAGEUP )  { $ed->select_prev_sub   }
-                    elsif ($code == &Wx::WXK_PAGEDOWN ){ $ed->select_next_sub   }
-                    else                               { $event->Skip }
-                } else {
-                    if    ($code == ord('C'))          { $ed->copy()  }
-                    elsif ($code == ord('X'))          { $ed->cut()   }
-                  # elsif ($code == ord('L'))          { }
-                    elsif ($code == &Wx::WXK_UP)       { $ed->goto_prev_block }
-                    elsif ($code == &Wx::WXK_DOWN)     { $ed->goto_next_block }
-                    elsif ($code == &Wx::WXK_PAGEUP )  { $ed->goto_prev_sub   }
-                    elsif ($code == &Wx::WXK_PAGEDOWN ){ $ed->goto_next_sub   }
-                    else                               { $event->Skip }
-                }
-            }
-        } else {
-            if ($event->AltDown) {
-                if ($event->ShiftDown){ 
-                    if    ($code == &Wx::WXK_UP)      {  }
-                    elsif ($code == &Wx::WXK_DOWN)    {  }
-                    elsif ($code == &Wx::WXK_LEFT)    {  }
-                    elsif ($code == &Wx::WXK_RIGHT)   {  }
-                    else                              { $event->Skip }
-                } else {
-                    #elsif ($code == &Wx::WXK_UP)      { Kephra::App::Editor::MoveText::up( $ed )     }
-                    #elsif ($code == &Wx::WXK_DOWN)    { Kephra::App::Editor::MoveText::down( $ed )   }
-                    #elsif ($code == &Wx::WXK_LEFT)    { Kephra::App::Editor::MoveText::left( $ed )   }
-                    #elsif ($code == &Wx::WXK_RIGHT)   { Kephra::App::Editor::MoveText::right( $ed )  }
-                    if    ($code == &Wx::WXK_PAGEUP)  { Kephra::App::Editor::MoveText::page_up($ed)  }
-                    elsif ($code == &Wx::WXK_PAGEDOWN){ Kephra::App::Editor::MoveText::page_down($ed)}
-                    elsif ($code == &Wx::WXK_HOME)    { Kephra::App::Editor::MoveText::start( $ed )  }
-                    elsif ($code == &Wx::WXK_END )    { Kephra::App::Editor::MoveText::end( $ed )    }
-                    else                              { $event->Skip }
-                }
-            } else { $event->Skip }
-        }    
-    });
-
-
-    # Wx::Event::EVT_KEY_UP( $self, sub { my ($ed, $event) = @_; my $code = $event->GetKeyCode;  my $mod = $event->GetModifiers; });
-    Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {  });
     
-    # Wx::Event::EVT_LEFT_DOWN( $self, sub {});
-    # Wx::Event::EVT_RIGHT_DOWN( $self, sub {});
-    # Wx::Event::EVT_MIDDLE_UP( $self, sub { say 'right';  $_[1]->Skip;  });
-    
-    Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub { 
-        $self->GetParent->SetStatusText( $self->GetCurrentPos, 0); # say 'ui';
+    Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub {
+        my $p = $self->GetCurrentPos;
+        my $psrt = $self->GetCurrentLine.':'.$self->GetColumn( $p );
+        my ($start_pos, $end_pos) = $self->GetSelection;
+        $self->bracelight( $p );
+        $psrt .= ' ('.($end_pos - $start_pos).')' if $start_pos != $end_pos;
+        $self->GetParent->SetStatusText( $psrt , 0); # say 'ui';
         delete $self->{'sel_head'} if exists $self->{'sel_head'} 
                                          and $self->{'sel_head'} != $self->GetSelectionStart()
                                          and $self->{'sel_head'} != $self->GetSelectionEnd(); 
@@ -152,32 +156,19 @@ sub insert_text {
     $self->SetSelection( $pos, $pos );
 }
 
-sub copy {
-    my $self = shift;
-    my ($start_pos, $end_pos) = $self->GetSelection;
-    $start_pos == $end_pos ? $self->LineCopy : $self->Copy;
+sub sel {
+    my ($self) = @_;
+    
+    my $pos = $self->GetCurrentPos;
+
 }
 
-sub cut {
-    my $self = shift;
-    my ($start_pos, $end_pos) = $self->GetSelection;
-    $start_pos == $end_pos ? $self->LineCut : $self->Cut;
-}
+sub bracelight{
+    my ($self, $pos) = @_;
+    my $before = $self->GetTextRange( $pos-1, $pos );
+    my $after = $self->GetTextRange( $pos, $pos + 1);
+    say "before $before after $after"; # () { } [ ]
     
-sub replace {
-    my $self = shift;
-    my $sel = $self->GetSelectedText();
-    return unless $sel;
-    my ($old_start, $old_end) = $self->GetSelection;
-    $self->BeginUndoAction();
-    $self->SetSelectionEnd( $old_start );
-    $self->Paste;
-    my $new_start = $self->GetSelectionStart( );
-    my $new_end = $self->GetSelectionEnd( );
-    $self->SetSelection( $new_end, $new_end + $old_end - $old_start);
-    $self->Cut;
-    $self->SetSelection( $new_start, $new_end);
-    $self->EndUndoAction();
 }
 
 sub goto_last_edit { $_[0]->GotoPos( $_[0]->{'change_pos'}+1 ) }
@@ -305,100 +296,73 @@ sub get_next_block_end {
 
 sub select_prev_block {
     my ($self) = @_;
-    my ($start, $end) = $self->GetSelection;
-    $self->{'sel_head'} = $start unless exists $self->{'sel_head'};
-    if ($self->{'sel_head'} == $start) {
-        my $line = $self->get_prev_block_start( $start );
-        $self->{'sel_head'} = $start = $self->PositionFromLine( $line );
+    my ($start_pos, $end_pos) = $self->GetSelection;
+    $self->{'sel_head'} = $start_pos unless exists $self->{'sel_head'};
+    if ($self->{'sel_head'} == $start_pos) {
+        my $line = $self->get_prev_block_start( $start_pos );
+        $self->{'sel_head'} = $start_pos = $self->PositionFromLine( $line );
     } else {
-        my $line = $self->get_prev_block_end( $end );
-        $end = $self->GetLineEndPosition( $line ); 
-        if ($end < $start) {
+        my $line = $self->get_prev_block_end( $end_pos );
+        $end_pos = $self->GetLineEndPosition( $line ); 
+        if ($end_pos < $start_pos) {
             my $line = $self->get_prev_block_start( $self->{'sel_head'} );
-            $self->{'sel_head'} = $end = $self->PositionFromLine( $line );
-            ($start, $end) = ($end, $start);
-        } else { $self->{'sel_head'} = $end }
+            $self->{'sel_head'} = $end_pos = $self->PositionFromLine( $line );
+            ($start_pos, $end_pos) = ($end_pos, $start_pos);
+        } else { $self->{'sel_head'} = $end_pos }
         
     }
     $self->GotoPos( $self->{'sel_head'} );
     $self->EnsureCaretVisible();
-    $self->SetSelection( $start, $end );
+    $self->SetSelection( $start_pos, $end_pos );
 }
 
+# # [\w\.\\\$@%&]
 sub select_next_block {
     my ($self) = @_;
-    my ($start, $end) = $self->GetSelection;
-    $self->{'sel_head'} = $end unless exists $self->{'sel_head'};
-    if ($self->{'sel_head'} == $end) {
-        my $line = $self->get_next_block_end( $end );
-        $self->{'sel_head'} = $end = $self->GetLineEndPosition( $line );
+    my ($start_pos, $end_pos) = $self->GetSelection;
+    $self->{'sel_head'} = $end_pos unless exists $self->{'sel_head'};
+    if ($self->{'sel_head'} == $end_pos) {
+        my $line = $self->get_next_block_end( $end_pos );
+        $self->{'sel_head'} = $end_pos = $self->GetLineEndPosition( $line );
     } else {
-        my $line = $self->get_next_block_start( $start );
-        $start = $self->PositionFromLine( $line ); 
-        if ($end < $start) {
+        my $line = $self->get_next_block_start( $start_pos );
+        $start_pos = $self->PositionFromLine( $line ); 
+        if ($end_pos < $start_pos) {
             my $line = $self->get_next_block_end( $self->{'sel_head'} );
-            $self->{'sel_head'} = $start = $self->GetLineEndPosition( $line );
-            ($start, $end) = ($end, $start);
-        } else {$self->{'sel_head'} = $start }
+            $self->{'sel_head'} = $start_pos = $self->GetLineEndPosition( $line );
+            ($start_pos, $end_pos) = ($end_pos, $start_pos);
+        } else {$self->{'sel_head'} = $start_pos }
     }
     $self->GotoPos( $self->{'sel_head'} );
     $self->EnsureCaretVisible();
-    $self->SetSelection( $start, $end );
+    $self->SetSelection( $start_pos, $end_pos );
 }
 
 sub expand_selecton {
     my ($self) = @_;
+    my ($start_pos, $end_pos) = $self->GetSelection;
+    my $start_line = $self->LineFromPosition( $start_pos );
+    my $end_line = $self->LineFromPosition( $end_pos );
+
+    if ($start_line == $end_line) {
+        if ($start_pos == $end_pos){
+            $self->WordLeft;
+            $self->WordRightExtend;
+        } else {
+        }
+    } else {
+        
+    }
     
 }
 
 sub shrink_selecton {
     my ($self) = @_;
+    my ($start_pos, $end_pos) = $self->GetSelection;
+    return if $start_pos == $end_pos;
+    my $start_line = $self->LineFromPosition( $start_pos );
+    my $end_line = $self->LineFromPosition( $end_pos );
     
 }
-
-sub toggle_comment_line {
-    my ($self, $line_nr) = @_;
-    return unless defined $line_nr;
-    $self->SetSelection( $self->PositionFromLine( $line_nr ),
-                         $self->GetLineEndPosition( $line_nr )  );
-    $self->GetSelectedText( ) =~ /^(\s*)((?:#\s)|(?:#~\s))?(.*)$/;
-    return unless $3;
-    $2 ? $self->ReplaceSelection( $1. $3 ) 
-       : $self->ReplaceSelection( $1.'# '.$3 );
-}
-
-sub toggle_block_comment_line {
-    my ($self, $line_nr) = @_;
-    return unless defined $line_nr;
-    $self->SetSelection( $self->PositionFromLine( $line_nr ),
-                         $self->GetLineEndPosition( $line_nr )  );
-    $self->GetSelectedText( ) =~ /^(\s*)(#?)(~\s)?(.*)$/;
-    return if (not $4) or ($2 and not $3);
-    $2 ? $self->ReplaceSelection( $1. $4     ) 
-       : $self->ReplaceSelection( $1.'#~ '.$4 );
-}
-
-sub toggle_comment {
-    my ($self) = @_;
-    my ($old_start, $old_end) = $self->GetSelection;
-    $self->BeginUndoAction();
-
-    $self->toggle_comment_line( $_ ) for $self->LineFromPosition( $old_start ) ..
-                                         $self->LineFromPosition( $old_end );
-    $self->GotoPos( $old_end );
-    $self->EndUndoAction();
-}
-
-sub toggle_block_comment {
-    my ($self) = @_;
-    my ($old_start, $old_end) = $self->GetSelection;
-    $self->BeginUndoAction();
-
-    $self->toggle_block_comment_line( $_ ) for $self->LineFromPosition( $old_start ) ..
-                                               $self->LineFromPosition( $old_end );
-    $self->GotoPos( $old_end );
-    $self->EndUndoAction();
-}
-
 
 1;

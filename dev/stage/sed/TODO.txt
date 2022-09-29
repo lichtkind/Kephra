@@ -1,0 +1,13 @@
+
+- goto braces
+- highlight  braces
+- select ++ --
+- rect edit 
+- auto indent and outdent
+- marker 
+- goto line
+- about dialog
+- GUI dialog
+- keymap dialog
+- copy word
+- F11 full screen from everywhere

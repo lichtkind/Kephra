@@ -8,9 +8,8 @@ use Kephra::App::Dialog;
 use Kephra::App::Editor;
 use Kephra::App::SearchBar;
 use Kephra::App::ReplaceBar;
+use Kephra::App::Window::Menu;
 use Kephra::IO::LocalFile;
-our $VERSION = 0.52;
-our $NAME = 'Kephra';
 
 sub new {
     my($class, $parent) = @_;
@@ -22,7 +21,7 @@ sub new {
     $self->{'ed'} = Kephra::App::Editor->new($self, -1);
     $self->{'sb'} = Kephra::App::SearchBar->new($self, -1);
     $self->{'rb'} = Kephra::App::ReplaceBar->new($self, -1);
-    
+
     my $sizer = Wx::BoxSizer->new( &Wx::wxVERTICAL );
     $sizer->Add( $self->{'ed'}, 1, &Wx::wxEXPAND, 0);
     $sizer->Add( $self->{'sb'}, 0, &Wx::wxGROW, 0);
@@ -31,6 +30,12 @@ sub new {
     $self->SetSizer($sizer);
 
     Wx::Window::SetFocus( $self->{'ed'} );
+    Wx::Event::EVT_KEY_DOWN( $self, sub {
+        my ($self, $event) = @_;
+        my $code = $event->GetKeyCode ;
+        if   ($code == &Wx::WXK_F11)        {  $self->ShowFullScreen( not $self->IsFullScreen ); say  "F11"  }
+        else { $event->Skip }
+    });
     Wx::Event::EVT_CLOSE( $self, sub {
         my ($self, $event) = @_;
         if ($self->{'ed'}->GetModify()){
@@ -40,110 +45,14 @@ sub new {
         }
         $event->Skip(1);
     });
-
     Wx::Event::EVT_CLOSE( $self,       sub { $_[1]->Skip(1) });
-    Wx::Event::EVT_MENU( $self, 11100, sub { $self->new_file });
-    Wx::Event::EVT_MENU( $self, 11200, sub { $self->open_file });
-    Wx::Event::EVT_MENU( $self, 11300, sub { $self->reopen_file });
-    Wx::Event::EVT_MENU( $self, 11400, sub { $self->save_file });
-    Wx::Event::EVT_MENU( $self, 11500, sub { $self->save_as_file });
-    Wx::Event::EVT_MENU( $self, 11900, sub { $self->Close });
-    Wx::Event::EVT_MENU( $self, 12100, sub { $self->{'ed'}->Undo });
-    Wx::Event::EVT_MENU( $self, 12110, sub { $self->{'ed'}->Redo });
-    Wx::Event::EVT_MENU( $self, 12200, sub { $self->{'ed'}->cut });
-    Wx::Event::EVT_MENU( $self, 12210, sub { $self->{'ed'}->copy });
-    Wx::Event::EVT_MENU( $self, 12220, sub { $self->{'ed'}->Paste });
-    Wx::Event::EVT_MENU( $self, 12230, sub { $self->{'ed'}->replace });
-    Wx::Event::EVT_MENU( $self, 12240, sub { $self->{'ed'}->Clear });
-    Wx::Event::EVT_MENU( $self, 12300, sub { $self->{'ed'}->SelectAll });
-    Wx::Event::EVT_MENU( $self, 13100, sub { Kephra::App::Editor::MoveText::left( $self->{'ed'} ) });
-    Wx::Event::EVT_MENU( $self, 13110, sub { Kephra::App::Editor::MoveText::right( $self->{'ed'} ) });
-    Wx::Event::EVT_MENU( $self, 13120, sub { Kephra::App::Editor::MoveText::up( $self->{'ed'} ) });
-    Wx::Event::EVT_MENU( $self, 13130, sub { Kephra::App::Editor::MoveText::down( $self->{'ed'} ) });
-    Wx::Event::EVT_MENU( $self, 13200, sub { $self->{'ed'}->toggle_block_comment });
-    Wx::Event::EVT_MENU( $self, 13210, sub { $self->{'ed'}->toggle_comment });
-    Wx::Event::EVT_MENU( $self, 13300, sub { $self->{'ed'}->toggle_block_comment });
-    Wx::Event::EVT_MENU( $self, 13310, sub { $self->{'ed'}->toggle_comment });
-    Wx::Event::EVT_MENU( $self, 14110, sub { $self->{'sb'}->enter });
-    Wx::Event::EVT_MENU( $self, 14120, sub { $self->{'sb'}->find_prev });
-    Wx::Event::EVT_MENU( $self, 14130, sub { $self->{'sb'}->find_next });
-    Wx::Event::EVT_MENU( $self, 14210, sub { $self->{'rb'}->enter });
-    Wx::Event::EVT_MENU( $self, 14220, sub { $self->{'rb'}->replace_prev });
-    Wx::Event::EVT_MENU( $self, 14230, sub { $self->{'rb'}->replace_next });
-    Wx::Event::EVT_MENU( $self, 14240, sub { $self->{'rb'}->replace_in_selection });
-    Wx::Event::EVT_MENU( $self, 14250, sub { $self->{'rb'}->replace_all  });
-    Wx::Event::EVT_MENU( $self, 14300, sub { $self->{'ed'}->goto_last_edit });
-    Wx::Event::EVT_MENU( $self, 15100, sub { Kephra::App::Dialog::documentation( $self ) });
-    Wx::Event::EVT_MENU( $self, 15200, sub { Kephra::App::Dialog::keymap( $self ) });
-    Wx::Event::EVT_MENU( $self, 15300, sub { Kephra::App::Dialog::about( $self ) });
-    
 
-    my $file_menu = Wx::Menu->new();
-    $file_menu->Append( 11100, "&New\tCtrl+N", "complete a sketch drawing" );
-    $file_menu->AppendSeparator();
-    $file_menu->Append( 11200, "&Open\tCtrl+O", "save currently displayed image" );
-    $file_menu->Append( 11300, "&Reload\tCtrl+Shift+O", "save currently displayed image" );
-    $file_menu->AppendSeparator();
-    $file_menu->Append( 11400, "&Save\tCtrl+S", "save currently displayed image" );
-    $file_menu->Append( 11500, "&Save As\tCtrl+Shift+S", "save currently displayed image" );
-    $file_menu->AppendSeparator();
-    $file_menu->Append( 11900, "&Quit\tCtrl+Q", "close program" );
-    
-    my $edit_menu = Wx::Menu->new();
-    $edit_menu->Append( 12100, "&Undo\tCtrl+Z",       "undo last text change" );
-    $edit_menu->Append( 12110, "&Redo\tCtrl+Y",       "undo last undo" );
-    $edit_menu->AppendSeparator();                    
-    $edit_menu->Append( 12200, "&Cut\tCtrl+X",        "delete selected text and move it into clipboard" );
-    $edit_menu->Append( 12210, "&Copy\tCtrl+C",       "move selected text into clipboard" );
-    $edit_menu->Append( 12220, "&Paste\tCtrl+V",      "insert clipboard content at cursor position" );
-    $edit_menu->Append( 12230, "&Swap\tCtrl+Shift+V", "replace selected text with clipboard content" );
-    $edit_menu->Append( 12240, "&Delete\tDel",        "delete selected text" );
-    $edit_menu->AppendSeparator();
-    $edit_menu->Append( 12300, "&Select All\tCtrl+A", "select entire text" );
-    $edit_menu->Append( 12310, "&Double\tCtrl+D",     "copy and paste selected text or current line" );
-
-    my $format_menu = Wx::Menu->new();
-    $format_menu->Append( 13100, "Move &Left\tAlt+Left",  "move current line or selected lines one character to the left" );
-    $format_menu->Append( 13110, "Move &Right\tAlt+Right","move current line or selected lines one character to right" );
-    $format_menu->Append( 13120, "Move &Up\tAlt+Up",      "move current line or selected lines one row up" );
-    $format_menu->Append( 13130, "Move &Down\tAlt+Down",  "move current line or selected lines one row down" );
-    $format_menu->AppendSeparator();
-    $format_menu->Append( 13200, "&Indent\tTab", "move current line or selected block one tab to right" );
-    $format_menu->Append( 13210, "&Dedent\tShift+Tab", "move current line or selected block one tab to left" );
-    $format_menu->AppendSeparator();
-    $format_menu->Append( 13300, "&Block Comment\tCtrl+K", "insert or remove (toggle) script comment with #~" );
-    $format_menu->Append( 13310, "&Comment\tCtrl+Shift+K", "insert or remove (toggle) script comment with #" );
-    
-    my $search_menu = Wx::Menu->new();
-    $search_menu->Append( 14110, "&Find\tCtrl+F",        "enter search phrase into search bar" );
-    $search_menu->Append( 14120, "&Find Prev\tShift+F3", "jump to previous match of search term" );
-    $search_menu->Append( 14130, "&Find Next\tF3",       "jump to next match of search text" );
-    $search_menu->AppendSeparator();
-    $search_menu->Append( 14210, "&Replace\tCtrl+Shift+F",      "enter replace term into replace bar" );
-    $search_menu->Append( 14220, "&Replace Prev\tAlt+Shift+F3", "replace selection and go to previous match" );
-    $search_menu->Append( 14230, "&Replace Next\tAlt+F3",       "replace selection and go to next match" );
-    $search_menu->Append( 14240, "&Replace Selection\tAlt+Shift+F", "replace all search term matches inside selected text" );
-    $search_menu->Append( 14250, "&Replace All\tAlt+F",         "replace all search term matches in the document" );
-    $search_menu->AppendSeparator();
-    $search_menu->Append( 14300, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
-    
-    my $help_menu = Wx::Menu->new();
-    $help_menu->Append( 15100, "&Usage",  "Explaining the user interface" );
-    $help_menu->Append( 15200, "&Keymap\tAlt+K",  "listings with all key kombination from all widgets" );
-    $help_menu->Append( 15300, "&About",  "Dialog with some general information" );
-
-    my $menu_bar = Wx::MenuBar->new();
-    $menu_bar->Append( $file_menu,   '&File' );
-    $menu_bar->Append( $edit_menu,   '&Edit' );
-    $menu_bar->Append( $format_menu, 'F&ormat' );
-    $menu_bar->Append( $search_menu, '&Search' );
-    $menu_bar->Append( $help_menu,   '&Help' );
-    $self->SetMenuBar($menu_bar);
+    Kephra::App::Window::Menu::mount( $self );
     $self->set_title();
     $self->{'rb'}->show(0);
     
     $self->read_file( __FILE__);
-    
+
     return $self;
 }
 

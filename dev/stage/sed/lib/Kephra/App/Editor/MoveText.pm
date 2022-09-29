@@ -48,6 +48,7 @@ sub move_block {
 
 sub up {
     my ($ed) = @_;
+    return if $ed->SelectionIsRectangle;
     my ($start_pos, $end_pos) = $ed->GetSelection;
     my $start_line = $ed->LineFromPosition( $start_pos );
     return unless $start_line; # need space above
@@ -74,6 +75,7 @@ sub up {
 
 sub down {
     my ($ed) = @_;
+    return if $ed->SelectionIsRectangle;
     my ($start_pos, $end_pos) = $ed->GetSelection;
     my $start_line = $ed->LineFromPosition( $start_pos );
     my $end_line  = $ed->LineFromPosition( $end_pos );
@@ -109,11 +111,12 @@ sub down {
 
 sub page_up {
     my ($ed) = @_;
+    return if $ed->SelectionIsRectangle;
     my ($start_pos, $end_pos) = $ed->GetSelection;
     my $start_line = $ed->LineFromPosition( $start_pos );
     return unless $start_line; # need space above
     my $end_line = $ed->LineFromPosition( $end_pos );
-    my $start_col =  $start_pos - $ed->PositionFromLine( $start_line );
+    my $start_col =  $ed->GetColumn( $start_pos );
     my $target_line = $start_line - 50;
     $target_line = 0 if $target_line < 0;
     $ed->BeginUndoAction();
@@ -123,7 +126,7 @@ sub page_up {
                            $ed->PositionFromLine( $target_line ) + $start_col );
 
     } elsif ($start_line != $end_line) {
-        my $end_col =  $end_pos - $ed->PositionFromLine( $end_line );
+        my $end_col = $ed->GetColumn( $end_pos );
         move_block( $ed,  $start_line, $end_line - $start_line + 1, $target_line);
         $ed->SetSelection( $ed->PositionFromLine( $target_line ),
                            $ed->GetLineEndPosition( $target_line - $start_line + $end_line ) );
@@ -142,10 +145,11 @@ sub page_up {
 
 sub page_down {
     my ($ed) = @_;
+    return if $ed->SelectionIsRectangle;
     my ($start_pos, $end_pos) = $ed->GetSelection;
     my $start_line = $ed->LineFromPosition( $start_pos );
     my $end_line = $ed->LineFromPosition( $end_pos );
-    my $start_col =  $start_pos - $ed->PositionFromLine( $start_line );
+    my $start_col =  $ed->GetColumn( $start_pos );
     my $target_line = $start_line + 50;
     my $last_possible_line = $ed->GetLineCount - 1 - $end_line + $start_line;
     $target_line = $last_possible_line if $target_line > $last_possible_line;
@@ -155,7 +159,7 @@ sub page_down {
         $ed->SetSelection( $ed->PositionFromLine( $target_line ) + $start_col,
                            $ed->PositionFromLine( $target_line ) + $start_col );
     } elsif ($start_line != $end_line) {
-        my $end_col =  $end_pos - $ed->PositionFromLine( $end_line );
+        my $end_col = $ed->GetColumn( $end_pos );
         move_block( $ed,  $start_line, $end_line - $start_line + 1, $target_line);
         $ed->SetSelection( $ed->PositionFromLine( $target_line ),
                            $ed->GetLineEndPosition( $target_line - $start_line + $end_line ) );
@@ -174,11 +178,12 @@ sub page_down {
 
 sub start {
     my ($ed) = @_;
+    return if $ed->SelectionIsRectangle;
     my ($start_pos, $end_pos) = $ed->GetSelection;
     my $start_line = $ed->LineFromPosition( $start_pos );
     my $end_line = $ed->LineFromPosition( $end_pos );
-    my $start_col =  $start_pos - $ed->PositionFromLine( $start_line );
-    my $end_col = $end_pos - $ed->PositionFromLine( $end_line );
+    my $start_col =  $ed->GetColumn( $start_pos );
+    my $end_col = $ed->GetColumn( $end_pos );
     return unless $start_line; # need space above    GetFirstVisibleLine
     my $target_line = 0;
     $ed->BeginUndoAction();
@@ -187,7 +192,6 @@ sub start {
         $ed->SetSelection( $ed->PositionFromLine( $target_line ) + $start_col,
                            $ed->PositionFromLine( $target_line ) + $start_col );
     } elsif ($start_line != $end_line) {
-        my $end_col =  $end_pos - $ed->PositionFromLine( $end_line );
         move_block( $ed,  $start_line, $end_line - $start_line + 1, $target_line);
         $ed->SetSelection( $ed->PositionFromLine( $target_line ),
                            $ed->GetLineEndPosition( $target_line - $start_line + $end_line )  );
@@ -205,11 +209,12 @@ sub start {
 
 sub end {
     my ($ed) = @_;
+    return if $ed->SelectionIsRectangle;
     my ($start_pos, $end_pos) = $ed->GetSelection;
     my $start_line = $ed->LineFromPosition( $start_pos );
     my $end_line = $ed->LineFromPosition( $end_pos );
-    my $start_col =  $start_pos - $ed->PositionFromLine( $start_line );
-    my $end_col = $end_pos - $ed->PositionFromLine( $end_line );
+    my $start_col =  $ed->GetColumn( $start_pos );
+    my $end_col = $ed->GetColumn( $end_pos );
     my $last_line = $ed->GetLineCount - 1;
     my $target_line = $last_line - $end_line + $start_line;
     $ed->BeginUndoAction();
@@ -235,9 +240,9 @@ sub end {
 
 sub line_left {
     my ($ed, $line_nr) = @_;
-    return unless defined $line_nr;
+    return 0 unless defined $line_nr;
     $ed->SetSelection( $ed->PositionFromLine( $line_nr ),
-                         $ed->PositionFromLine( $line_nr ) + 1  );
+                       $ed->PositionFromLine( $line_nr ) + 1  );
     my $s = $ed->GetSelectedText;
     $s = $ed->{tab_space} if $s eq "\t";
     if (substr( $s, 0, 1 ) eq ' '){ chop $s }
@@ -258,16 +263,17 @@ sub line_right {
 
 sub left {
     my ($ed) = @_;
+    return if $ed->SelectionIsRectangle;
     my ($start_pos, $end_pos) = $ed->GetSelection;
     my $start_line = $ed->LineFromPosition( $start_pos );
     my $end_line = $ed->LineFromPosition( $end_pos );
-    my $start_col =  $start_pos - $ed->PositionFromLine( $start_line );
+    my $start_col =  $ed->GetColumn( $start_pos );
     $ed->BeginUndoAction();
     if ($start_pos == $end_pos) {
         $start_pos-- if line_left( $ed, $start_line ) and $start_col;
         $ed->GotoPos ( $start_pos );
     } elsif ($start_line != $end_line) {
-        my $end_col = $end_pos - $ed->PositionFromLine( $end_line );
+        my $end_col = $ed->GetColumn( $end_pos );
         $start_pos-- if line_left( $ed, $start_line ) and $end_col;
         $end_col-- if line_left( $ed, $end_line );
         line_left( $ed, $_ ) for $start_line + 1 .. $end_line - 1;
@@ -284,6 +290,7 @@ sub left {
 
 sub right {
     my ($ed) = @_;
+    return if $ed->SelectionIsRectangle;
     my ($start_pos, $end_pos) = $ed->GetSelection;
     my $start_line = $ed->LineFromPosition( $start_pos );
     my $end_line = $ed->LineFromPosition( $end_pos );
@@ -295,7 +302,7 @@ sub right {
         line_right( $ed, $_ ) for $start_line .. $end_line;
         $ed->SetSelection( $ed->PositionFromLine( $start_line ), $ed->GetLineEndPosition( $end_line ) );
     }  else {
-        my $end_col = $end_pos - $ed->PositionFromLine( $end_line );
+        my $end_col = $ed->GetColumn( $end_pos );
         return if $end_pos == $ed->GetLineEndPosition( $end_line );
         my $text = $ed->GetSelectedText( );
         $ed->ReplaceSelection( '' );
