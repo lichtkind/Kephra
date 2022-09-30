@@ -1,6 +1,5 @@
 
 - goto braces
-- highlight  braces
 - select ++ --
 - rect edit 
 - auto indent and outdent

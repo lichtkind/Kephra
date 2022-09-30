@@ -12,7 +12,7 @@ use Kephra::App::Window::Menu;
 use Kephra::IO::LocalFile;
 
 sub new {
-    my($class, $parent) = @_;
+    my ($class, $parent) = @_;
     my $self = $class->SUPER::new( undef, -1, '', [-1,-1], [1000,800] );
     $self->CreateStatusBar(3);
     $self->SetStatusWidths(100, 50, -1);
@@ -55,7 +55,6 @@ sub new {
 
     return $self;
 }
-
 
 sub new_file { 
     my $self = shift;

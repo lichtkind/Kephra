@@ -104,9 +104,9 @@ sub mount_events {
         $self->bracelight( $p );
         $psrt .= ' ('.($end_pos - $start_pos).')' if $start_pos != $end_pos;
         $self->GetParent->SetStatusText( $psrt , 0); # say 'ui';
-        delete $self->{'sel_head'} if exists $self->{'sel_head'} 
-                                         and $self->{'sel_head'} != $self->GetSelectionStart()
-                                         and $self->{'sel_head'} != $self->GetSelectionEnd(); 
+#        delete $self->{'sel_head'} if exists $self->{'sel_head'} 
+#                                         and $self->{'sel_head'} != $self->GetSelectionStart()
+#                                         and $self->{'sel_head'} != $self->GetSelectionEnd(); 
     });
     Wx::Event::EVT_STC_SAVEPOINTREACHED( $self, -1, sub { $self->GetParent->set_title(0) });
     Wx::Event::EVT_STC_SAVEPOINTLEFT(    $self, -1, sub { $self->GetParent->set_title(1) });
@@ -137,6 +137,26 @@ sub mount_events {
 # ->GetRectangularSelectionAnchor()
 # ->GetRectangularSelectionCaret()
 
+sub bracelight{
+    my ($self, $pos) = @_;
+    my $char_before = $self->GetTextRange( $pos-1, $pos );
+    my $char_after = $self->GetTextRange( $pos, $pos + 1);
+    if (    $char_before eq '(' or $char_before eq ')'
+         or $char_before eq '{' or $char_before eq '}'
+         or $char_before eq '[' or $char_before eq ']' ) {
+        my $mpos = $self->BraceMatch( $pos - 1 );
+        $mpos != &Wx::wxSTC_INVALID_POSITION
+            ? $self->BraceHighlight($pos - 1, $mpos)
+            : $self->BraceBadLight($pos - 1);
+    } elsif ($char_after eq '(' or $char_after eq ')' 
+          or $char_after eq '{' or $char_after eq '}' 
+          or $char_after eq '[' or $char_after eq ']'){
+        my $mpos = $self->BraceMatch( $pos );
+        $mpos != &Wx::wxSTC_INVALID_POSITION
+            ? $self->BraceHighlight($pos, $mpos)
+            : $self->BraceBadLight($pos);
+    } else  { $self->BraceHighlight(-1, -1); $self->BraceBadLight( -1 ) }
+}
 
 sub is_empty { not $_[0]->GetTextLength }
 
@@ -158,21 +178,10 @@ sub insert_text {
 
 sub sel {
     my ($self) = @_;
-    
     my $pos = $self->GetCurrentPos;
-
-}
-
-sub bracelight{
-    my ($self, $pos) = @_;
-    my $before = $self->GetTextRange( $pos-1, $pos );
-    my $after = $self->GetTextRange( $pos, $pos + 1);
-    #say "before $before after $after"; # () { } [ ]
-    # $self->BraceMatch 
-    # $self->BraceHighlight 
-    # $self->BraceBadLight
-    # $self->BraceBadLight
-    
+    $self->SetCurrentPos(1);
+    $self->SetAnchor(3);
+    #$self->SetSelection( 1,3);
 }
 
 sub goto_last_edit { $_[0]->GotoPos( $_[0]->{'change_pos'}+1 ) }
@@ -190,19 +199,19 @@ sub goto_next_block {
 }
 
 sub prev_sub_line_nr {
-    my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
     $self->GotoPos( $pos-1 );
     $self->SearchAnchor;
-    $self->SearchPrev( &Wx::wxSTC_FIND_REGEXP, '^sub ');
+    $self->SearchPrev( &Wx::wxSTC_FIND_REGEXP, '^\s*sub ');
 }
 
 sub next_sub_line_nr {
-    my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
     $self->GotoPos( $pos+1 );
     $self->SearchAnchor;
-    $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '^sub ');
+    $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '^\s*sub ');
 }
 
 sub goto_prev_sub {
@@ -211,6 +220,7 @@ sub goto_prev_sub {
     my $new_pos = $self->prev_sub_line_nr;
     if ($new_pos > -1) { $self->GotoPos( $self->GetCurrentPos ) }
     else               { $self->GotoPos( $pos )  }
+    
 }
 sub goto_next_sub {
     my ($self) = @_;
@@ -223,19 +233,22 @@ sub goto_next_sub {
 
 sub select_prev_sub {
     my ($self) = @_;
-    my ($start, $end) = $self->GetSelection;
-    my $new_pos = $self->prev_sub_line_nr;
-    if ($new_pos > -1) { $self->SetSelection( $new_pos, $end ) }
-    else               { $self->SetSelection( $start,   $end ) }
+    my $pos = $self->GetCurrentPos;
+    my $anchor = $self->GetAnchor;
+    my $new_pos = $self->prev_sub_line_nr( $pos );
+    if ($new_pos > -1) { $self->SetCurrentPos(  $new_pos ) }
+    else               { $self->SetCurrentPos(  $pos ) }
+    $self->SetAnchor( $anchor );
     $self->EnsureCaretVisible();
 }
-
 sub select_next_sub {
     my ($self) = @_;
-    my ($start, $end) = $self->GetSelection;
-    my $new_pos = $self->next_sub_line_nr;
-    if ($new_pos > -1) { $self->SetSelection( $start, $new_pos ) }
-    else               { $self->SetSelection( $start, $end     ) }
+    my $pos = $self->GetCurrentPos;
+    my $anchor = $self->GetAnchor;
+    my $new_pos = $self->next_sub_line_nr( $pos );
+    if ($new_pos > -1) { $self->SetCurrentPos(  $new_pos ) }
+    else               { $self->SetCurrentPos(  $pos ) }
+    $self->SetAnchor($anchor);
     $self->EnsureCaretVisible();
 }
 
@@ -297,49 +310,33 @@ sub get_next_block_end {
     $line_nr;
 }
 
-
+# # [\w\.\\\$@%&]
 sub select_prev_block {
     my ($self) = @_;
-    my ($start_pos, $end_pos) = $self->GetSelection;
-    $self->{'sel_head'} = $start_pos unless exists $self->{'sel_head'};
-    if ($self->{'sel_head'} == $start_pos) {
-        my $line = $self->get_prev_block_start( $start_pos );
-        $self->{'sel_head'} = $start_pos = $self->PositionFromLine( $line );
-    } else {
-        my $line = $self->get_prev_block_end( $end_pos );
-        $end_pos = $self->GetLineEndPosition( $line ); 
-        if ($end_pos < $start_pos) {
-            my $line = $self->get_prev_block_start( $self->{'sel_head'} );
-            $self->{'sel_head'} = $end_pos = $self->PositionFromLine( $line );
-            ($start_pos, $end_pos) = ($end_pos, $start_pos);
-        } else { $self->{'sel_head'} = $end_pos }
-        
+    my $pos = $self->GetCurrentPos;
+    my $anchor = $self->GetAnchor;
+    my $new_pos;
+    if ($pos <= $anchor) { $new_pos = $self->PositionFromLine( $self->get_prev_block_start( $pos ) ) }
+    else                 { $new_pos = $self->GetLineEndPosition( $self->get_prev_block_end( $pos ) );
+                           $new_pos = $self->PositionFromLine( $self->get_prev_block_start( $pos ) ) if $new_pos < $anchor;
     }
-    $self->GotoPos( $self->{'sel_head'} );
-    $self->EnsureCaretVisible();
-    $self->SetSelection( $start_pos, $end_pos );
+    $new_pos = 0 if $new_pos < 0;
+    $self->SetCurrentPos( $new_pos );
+    $self->SetAnchor($anchor);
+    $self->EnsureCaretVisible;
 }
-
-# # [\w\.\\\$@%&]
 sub select_next_block {
     my ($self) = @_;
-    my ($start_pos, $end_pos) = $self->GetSelection;
-    $self->{'sel_head'} = $end_pos unless exists $self->{'sel_head'};
-    if ($self->{'sel_head'} == $end_pos) {
-        my $line = $self->get_next_block_end( $end_pos );
-        $self->{'sel_head'} = $end_pos = $self->GetLineEndPosition( $line );
-    } else {
-        my $line = $self->get_next_block_start( $start_pos );
-        $start_pos = $self->PositionFromLine( $line ); 
-        if ($end_pos < $start_pos) {
-            my $line = $self->get_next_block_end( $self->{'sel_head'} );
-            $self->{'sel_head'} = $start_pos = $self->GetLineEndPosition( $line );
-            ($start_pos, $end_pos) = ($end_pos, $start_pos);
-        } else {$self->{'sel_head'} = $start_pos }
+    my $pos = $self->GetCurrentPos;
+    my $anchor = $self->GetAnchor;
+    my $new_pos;
+    if ($pos >= $anchor) { $new_pos = $self->GetLineEndPosition( $self->get_next_block_end( $pos ) )  } 
+    else                 { $new_pos = $self->PositionFromLine( $self->get_next_block_start( $pos ) );
+                           $new_pos = $self->GetLineEndPosition( $self->get_next_block_end( $pos ) ) if $new_pos > $anchor;
     }
-    $self->GotoPos( $self->{'sel_head'} );
-    $self->EnsureCaretVisible();
-    $self->SetSelection( $start_pos, $end_pos );
+    $self->SetCurrentPos( $new_pos );
+    $self->SetAnchor($anchor);
+    $self->EnsureCaretVisible;
 }
 
 sub expand_selecton {

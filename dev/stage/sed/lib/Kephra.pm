@@ -41,38 +41,8 @@ Kephra - small but effective and beautiful coding editor
 
 =head1 SYNOPSIS 
 
-    use Chart::type;   (type is one of: Points, Lines, Bars, LinesPoints, Composite,
-    StackedBars, Mountain, Pie, HorizontalBars, Split, ErrorBars, Pareto, Direction) 
+    kephra [file_name]
 
-    $obj = Chart::type->new;
-    $obj = Chart::type->new ( $png_width, $png_height );
-
-    $obj->set ( $key_1, $val_1, ... ,$key_n, $val_n );
-    $obj->set ( $key_1 => $val_1,
-            ...
-            $key_n => $val_n );
-    $obj->set ( %hash );
-
-    # GIFgraph.pm-style API to produce png formatted charts
-    @data = ( \@x_tick_labels, \@dataset1, ... , \@dataset_n );
-    $obj->png ( "filename", \@data );
-    $obj->png ( $filehandle, \@data );
-    $obj->png ( FILEHANDLE, \@data );
-    $obj->cgi_png ( \@data );
-
-    # Graph.pm-style API
-    $obj->add_pt ($label, $val_1, ... , $val_n);
-    $obj->add_dataset ($val_1, ... , $val_n);
-    $obj->png ( "filename" );
-    $obj->png ( $filehandle );
-    $obj->png ( FILEHANDLE );
-    $obj->cgi_png ();
-
-    The similar functions are available for j-peg
-
-    # Retrieve image map information
-    $obj->set ( 'imagemap' => 'true' );
-    $imagemap_ref = $obj->imagemap_dump ();
 
 
 =head1 DESCRIPTION
