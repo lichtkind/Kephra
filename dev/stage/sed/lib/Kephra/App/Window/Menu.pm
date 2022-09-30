@@ -14,6 +14,7 @@ sub mount {
     Wx::Event::EVT_MENU( $win, 11400, sub { $win->save_file });
     Wx::Event::EVT_MENU( $win, 11500, sub { $win->save_as_file });
     Wx::Event::EVT_MENU( $win, 11900, sub { $win->Close });
+    Wx::Event::EVT_MENU( $win, 11910, sub { $win->{'done'} = 1; $win->Close });
     Wx::Event::EVT_MENU( $win, 12100, sub { $win->{'ed'}->Undo });
     Wx::Event::EVT_MENU( $win, 12110, sub { $win->{'ed'}->Redo });
     Wx::Event::EVT_MENU( $win, 12200, sub { Kephra::App::Editor::Edit::cut( $win->{'ed'} ) });
@@ -56,6 +57,7 @@ sub mount {
     $file_menu->Append( 11500, "Save &As\tCtrl+Shift+S", "save currently displayed image" );
     $file_menu->AppendSeparator();
     $file_menu->Append( 11900, "&Quit\tCtrl+Q", "close program" );
+    $file_menu->Append( 11910, "No Ask Qui&t\tCtrl+Shift+Q", "close program without file dialog" );
     
     my $edit_menu = Wx::Menu->new();
     $edit_menu->Append( 12100, "&Undo\tCtrl+Z",       "undo last text change" );

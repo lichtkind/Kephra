@@ -38,7 +38,7 @@ sub new {
     });
     Wx::Event::EVT_CLOSE( $self, sub {
         my ($self, $event) = @_;
-        if ($self->{'ed'}->GetModify()){
+        if ($self->{'ed'}->GetModify() and not exists $self->{'done'}){
             my $ret = Kephra::App::Dialog::yes_no_cancel( "\n".' save file ?  ');
             return                   if $ret ==  &Wx::wxCANCEL;
             $self->{'ed'}->save_file if $ret ==  &Wx::wxYES;

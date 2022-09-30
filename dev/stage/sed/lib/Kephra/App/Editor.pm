@@ -167,7 +167,11 @@ sub bracelight{
     my ($self, $pos) = @_;
     my $before = $self->GetTextRange( $pos-1, $pos );
     my $after = $self->GetTextRange( $pos, $pos + 1);
-    say "before $before after $after"; # () { } [ ]
+    #say "before $before after $after"; # () { } [ ]
+    # $self->BraceMatch 
+    # $self->BraceHighlight 
+    # $self->BraceBadLight
+    # $self->BraceBadLight
     
 }
 

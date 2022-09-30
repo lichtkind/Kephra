@@ -23,6 +23,7 @@ sub set_tab_size {
     $self->SetTabWidth($size);
     $self->SetIndent($size);
     $self->SetHighlightGuide($size);
+    $self->SetIndentationGuides(1);
 }
 
 sub set_tab_usage {
@@ -48,6 +49,8 @@ sub set_margin {
         $self->SetMarginSensitive( 3, 0 );
         $self->StyleSetForeground(&Wx::wxSTC_STYLE_LINENUMBER, create_color(93,93,97));
         $self->StyleSetBackground(&Wx::wxSTC_STYLE_LINENUMBER, create_color(206,206,202));
+        $self->StyleSetForeground(&Wx::wxSTC_STYLE_INDENTGUIDE,create_color(206,206,202)); # 37
+
         $self->SetMarginWidth(0,  1);
         $self->SetMarginWidth(1, 47);
         $self->SetMarginWidth(2, 12);
@@ -139,13 +142,13 @@ values vec wait waitpid wantarray warn when while write x xor y');
 # $_[0]->StyleSetSpec( &Wx::wxSTC_H_TAG, "fore:#000055" ); # Apply tag style for selected lexer (blue)
 
      $self->StyleSetSpec(1,"fore:#ff0000");                                     # Error
-     $self->StyleSetSpec(2,"fore:#aaaaaa");                                     # Comment
-     $self->StyleSetSpec(3,"fore:#004000,back:#E0FFE0,$(font.text),eolfilled"); # POD: = at beginning of line
-     $self->StyleSetSpec(&Wx::wxSTC_PL_NUMBER,"fore:#007f7f");                                     # Number
+     $self->StyleSetSpec(&Wx::wxSTC_PL_COMMENTLINE,"fore:#aaaaaa");                                     # Comment
+     $self->StyleSetSpec(&Wx::wxSTC_PL_POD,        "fore:#004000,back:#E0FFE0,$(font.text),eolfilled"); # POD: = at beginning of line
+     $self->StyleSetSpec(&Wx::wxSTC_PL_NUMBER,     "fore:#007f7f");                                     # Number
      $self->StyleSetSpec(5,"fore:#000077,bold");                                # Keywords #
      $self->StyleSetSpec(6,"fore:#ee7b00,back:#fff8f8");                        # Doublequoted string
      $self->StyleSetSpec(7,"fore:#f36600,back:#fffcff");                        # Single quoted string
-     $self->StyleSetSpec(8,"fore:#555555");                                     # Symbols / Punctuation. Currently not used by LexPerl.
+     $self->StyleSetSpec(8,"fore:#ff5555,bold");                                # Symbols / Punctuation. Currently not used by LexPerl.
      $self->StyleSetSpec(9,"");                                                 # Preprocessor. Currently not used by LexPerl.
      $self->StyleSetSpec(10,"fore:#002200");                                    # Operators
      $self->StyleSetSpec(11,"fore:#3355bb");                                    # Identifiers (functions, etc.)
