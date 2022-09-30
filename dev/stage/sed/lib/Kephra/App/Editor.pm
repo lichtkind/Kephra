@@ -179,23 +179,68 @@ sub insert_text {
 sub sel {
     my ($self) = @_;
     my $pos = $self->GetCurrentPos;
-    $self->SetCurrentPos(1);
-    $self->SetAnchor(3);
-    #$self->SetSelection( 1,3);
 }
 
 sub goto_last_edit { $_[0]->GotoPos( $_[0]->{'change_pos'}+1 ) }
 
 sub goto_prev_block {
     my ($self) = @_;
-    my $line_nr = $self->get_prev_block_start( $self->GetSelectionStart );
-    $self->GotoLine( $line_nr ) if defined $line_nr;
+    $self->GotoPos( $self->smart_up_pos );
+    $self->EnsureCaretVisible;
 }
 
 sub goto_next_block {
     my ($self) = @_;
-    my $line_nr = $self->get_next_block_start( $self->GetSelectionEnd );
-    $self->GotoLine( $line_nr ) if defined $line_nr;
+    $self->GotoPos( $self->smart_down_pos );
+    $self->EnsureCaretVisible;
+}
+
+sub smart_up_pos {
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    my $bpos = $self->prev_brace_pos( $pos );
+    return $bpos if $bpos != $pos;
+    my $line_nr = $self->get_prev_block_start( $pos );
+    defined $line_nr ? $self->PositionFromLine( $line_nr ) : $pos;
+}
+
+sub smart_down_pos {
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    my $bpos = $self->next_brace_pos( $pos );
+    return $bpos if $bpos != $pos;
+    my $line_nr = $self->get_next_block_start( $pos );
+    defined $line_nr ? $self->PositionFromLine( $line_nr ) : $pos;
+}
+
+sub prev_brace_pos {
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    my $char_before = $self->GetTextRange( $pos-1, $pos );
+    my $char_after = $self->GetTextRange( $pos, $pos + 1);
+    if ( $char_before eq ')' or $char_before eq '}' or $char_before eq ']' ) {
+        my $mpos = $self->BraceMatch( $pos - 1 );
+        return $mpos if $mpos != &Wx::wxSTC_INVALID_POSITION;
+    } elsif ($char_after eq ')' or $char_after eq '}' or $char_after eq ']'){
+        my $mpos = $self->BraceMatch( $pos );
+        return $mpos + 1 if $mpos != &Wx::wxSTC_INVALID_POSITION;
+    }
+    $pos;
+}
+
+sub next_brace_pos {
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    my $char_before = $self->GetTextRange( $pos-1, $pos );
+    my $char_after = $self->GetTextRange( $pos, $pos + 1);
+    if ( $char_before eq '(' or $char_before eq '{' or $char_before eq '[' ) {
+        my $mpos = $self->BraceMatch( $pos - 1 );
+        return $mpos if $mpos != &Wx::wxSTC_INVALID_POSITION;
+    } elsif ($char_after eq '(' or $char_after eq '{' or $char_after eq '['){
+        my $mpos = $self->BraceMatch( $pos );
+        return $mpos + 1 if $mpos != &Wx::wxSTC_INVALID_POSITION;
+    }
+    $pos;
 }
 
 sub prev_sub_line_nr {
@@ -239,7 +284,7 @@ sub select_prev_sub {
     if ($new_pos > -1) { $self->SetCurrentPos(  $new_pos ) }
     else               { $self->SetCurrentPos(  $pos ) }
     $self->SetAnchor( $anchor );
-    $self->EnsureCaretVisible();
+    $self->EnsureCaretVisible;
 }
 sub select_next_sub {
     my ($self) = @_;
@@ -249,7 +294,7 @@ sub select_next_sub {
     if ($new_pos > -1) { $self->SetCurrentPos(  $new_pos ) }
     else               { $self->SetCurrentPos(  $pos ) }
     $self->SetAnchor($anchor);
-    $self->EnsureCaretVisible();
+    $self->EnsureCaretVisible;
 }
 
 sub get_prev_block_start {
@@ -315,10 +360,14 @@ sub select_prev_block {
     my ($self) = @_;
     my $pos = $self->GetCurrentPos;
     my $anchor = $self->GetAnchor;
+    my $bpos = $self->prev_brace_pos( $pos );
     my $new_pos;
-    if ($pos <= $anchor) { $new_pos = $self->PositionFromLine( $self->get_prev_block_start( $pos ) ) }
-    else                 { $new_pos = $self->GetLineEndPosition( $self->get_prev_block_end( $pos ) );
-                           $new_pos = $self->PositionFromLine( $self->get_prev_block_start( $pos ) ) if $new_pos < $anchor;
+    if ($bpos != $pos) { $new_pos = $bpos }
+    else {
+        if ($pos <= $anchor) { $new_pos = $self->PositionFromLine( $self->get_prev_block_start( $pos ) ) }
+        else                 { $new_pos = $self->GetLineEndPosition( $self->get_prev_block_end( $pos ) );
+                               $new_pos = $self->PositionFromLine( $self->get_prev_block_start( $pos ) ) if $new_pos < $anchor;
+        }
     }
     $new_pos = 0 if $new_pos < 0;
     $self->SetCurrentPos( $new_pos );
@@ -329,10 +378,14 @@ sub select_next_block {
     my ($self) = @_;
     my $pos = $self->GetCurrentPos;
     my $anchor = $self->GetAnchor;
+    my $bpos = $self->next_brace_pos( $pos );
     my $new_pos;
-    if ($pos >= $anchor) { $new_pos = $self->GetLineEndPosition( $self->get_next_block_end( $pos ) )  } 
-    else                 { $new_pos = $self->PositionFromLine( $self->get_next_block_start( $pos ) );
-                           $new_pos = $self->GetLineEndPosition( $self->get_next_block_end( $pos ) ) if $new_pos > $anchor;
+    if ($bpos != $pos) { $new_pos = $bpos }
+    else {
+        if ($pos >= $anchor) { $new_pos = $self->GetLineEndPosition( $self->get_next_block_end( $pos ) )  } 
+        else                 { $new_pos = $self->PositionFromLine( $self->get_next_block_start( $pos ) );
+                               $new_pos = $self->GetLineEndPosition( $self->get_next_block_end( $pos ) ) if $new_pos > $anchor;
+        }
     }
     $self->SetCurrentPos( $new_pos );
     $self->SetAnchor($anchor);
