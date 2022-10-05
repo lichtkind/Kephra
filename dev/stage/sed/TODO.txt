@@ -1,12 +1,12 @@
-- select even smarter ?
-
-- marker 
+- rect select edit 
 - select ++ --
-- rect edit 
 - auto indent and outdent
+- insert braces and comment '' ""
+- marker 
 - goto line
 - about dialog
 - GUI dialog
 - keymap dialog
 - copy word
+- strg + dir  goto select even smarter ?
 - F11 full screen from everywhere

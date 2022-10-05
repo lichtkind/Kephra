@@ -9,7 +9,8 @@ use Wx::DND;
 #use Wx::Scintilla;
 use Kephra::App::Editor::SyntaxMode;
 use Kephra::App::Editor::Edit;
-use Kephra::App::Editor::MoveText;
+use Kephra::App::Editor::Move;
+use Kephra::App::Editor::Select;
 use Kephra::App::Editor::Tool;
 
 sub new {
@@ -48,9 +49,9 @@ sub mount_events {
                     else                               { $event->Skip           }
                 } else {
                     if    ($code == 65)                { $ed->expand_selecton   } # A
-                    elsif ($code == 67)                { Kephra::App::Editor::Edit::copy( $ed )  } # C
+                    elsif ($code == 67)                { $ed->move_copy         } # C
                     elsif ($code == 76)                { $ed->sel               } # L
-                    elsif ($code == 88)                { Kephra::App::Editor::Edit::cut( $ed )   } # X
+                    elsif ($code == 88)                { $ed->cut               } # X
                     elsif ($code == &Wx::WXK_UP)       { $ed->goto_prev_block   }
                     elsif ($code == &Wx::WXK_DOWN)     { $ed->goto_next_block   }
                     elsif ($code == &Wx::WXK_PAGEUP )  { $ed->goto_prev_sub     }
@@ -61,24 +62,25 @@ sub mount_events {
         } else {
             if ($event->AltDown) {
                 if ($event->ShiftDown){
-                    if    ($code == &Wx::WXK_UP)       {  }
-                    elsif ($code == &Wx::WXK_DOWN)     {  }
-                    elsif ($code == &Wx::WXK_LEFT)     {  }
-                    elsif ($code == &Wx::WXK_RIGHT)    {  }
+                    if    ($code == &Wx::WXK_UP)       { $ed->select_rect_up    }
+                    elsif ($code == &Wx::WXK_DOWN)     { $ed->select_rect_down  }
+                    elsif ($code == &Wx::WXK_LEFT)     { $ed->select_rect_left  }
+                    elsif ($code == &Wx::WXK_RIGHT)    { $ed->select_rect_right }
                     else                               { $event->Skip }
                 } else {
-                    #elsif ($code == &Wx::WXK_UP)      { Kephra::App::Editor::MoveText::up( $ed )     }
-                    #elsif ($code == &Wx::WXK_DOWN)    { Kephra::App::Editor::MoveText::down( $ed )   }
-                    #elsif ($code == &Wx::WXK_LEFT)    { Kephra::App::Editor::MoveText::left( $ed )   }
-                    #elsif ($code == &Wx::WXK_RIGHT)   { Kephra::App::Editor::MoveText::right( $ed )  }
-                    if    ($code == &Wx::WXK_PAGEUP)   { Kephra::App::Editor::MoveText::page_up($ed)  }
-                    elsif ($code == &Wx::WXK_PAGEDOWN) { Kephra::App::Editor::MoveText::page_down($ed)}
-                    elsif ($code == &Wx::WXK_HOME)     { Kephra::App::Editor::MoveText::start( $ed )  }
-                    elsif ($code == &Wx::WXK_END )     { Kephra::App::Editor::MoveText::end( $ed )    }
+                    #elsif ($code == &Wx::WXK_UP)      { $ed->move_up           }
+                    #elsif ($code == &Wx::WXK_DOWN)    { $ed->move_down         }
+                    #elsif ($code == &Wx::WXK_LEFT)    { $ed->move_left         }
+                    #elsif ($code == &Wx::WXK_RIGHT)   { $ed->move_right        }
+                    if    ($code == &Wx::WXK_PAGEUP)   { $ed->move_page_up      }
+                    elsif ($code == &Wx::WXK_PAGEDOWN) { $ed->move_page_down    }
+                    elsif ($code == &Wx::WXK_HOME)     { $ed->move_to_start     }
+                    elsif ($code == &Wx::WXK_END )     { $ed->move_to_end       }
                     else                               { $event->Skip }
                 }
             } else { 
-                if ($code == &Wx::WXK_F11)             { $self->GetParent->ShowFullScreen( not $self->GetParent->IsFullScreen ) }
+                if    ($code == &Wx::WXK_F11)          { $self->GetParent->ShowFullScreen( not $self->GetParent->IsFullScreen ) }
+                # elsif ($code == &Wx::WXK_RETURN)       { $self->new_line }
                 else                                   { $event->Skip }
             }
         }    
@@ -88,7 +90,9 @@ sub mount_events {
     # Wx::Event::EVT_RIGHT_DOWN( $self, sub {});
     # Wx::Event::EVT_MIDDLE_UP( $self, sub { say 'right';  $_[1]->Skip;  });
  
-    Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {  });
+    Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {
+        say $_[1];
+    });
     Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {
         my ($ed, $event) = @_;
         $ed->{'change_pos'} = $ed->GetCurrentPos; # say 'skip';
@@ -125,18 +129,6 @@ sub mount_events {
     # Wx::Event::EVT_STC_DRAG_OVER    ($ep, -1, sub { $droppos = $_[1]->GetPosition });
 }
 
-#say $self->GetRect;
-# ->SelectionIsRectangle
-# ->LineDownRectExtend
-# ->LineUpRectExtend
-# ->LineLeftRectExtend
-# ->HomeRectExtend ()
-# ->VCHomeRectExtend 
-# ->SetInsertionPoint
-# ->GetMultipleSelection
-# ->GetRectangularSelectionAnchor()
-# ->GetRectangularSelectionCaret()
-
 sub bracelight{
     my ($self, $pos) = @_;
     my $char_before = $self->GetTextRange( $pos-1, $pos );
@@ -156,6 +148,11 @@ sub bracelight{
             ? $self->BraceHighlight($pos, $mpos)
             : $self->BraceBadLight($pos);
     } else  { $self->BraceHighlight(-1, -1); $self->BraceBadLight( -1 ) }
+}
+
+sub new_line {
+    my ($self) = @_;
+    
 }
 
 sub is_empty { not $_[0]->GetTextLength }
@@ -276,27 +273,6 @@ sub goto_next_sub {
 }
 
 
-sub select_prev_sub {
-    my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
-    my $anchor = $self->GetAnchor;
-    my $new_pos = $self->prev_sub_line_nr( $pos );
-    if ($new_pos > -1) { $self->SetCurrentPos(  $new_pos ) }
-    else               { $self->SetCurrentPos(  $pos ) }
-    $self->SetAnchor( $anchor );
-    $self->EnsureCaretVisible;
-}
-sub select_next_sub {
-    my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
-    my $anchor = $self->GetAnchor;
-    my $new_pos = $self->next_sub_line_nr( $pos );
-    if ($new_pos > -1) { $self->SetCurrentPos(  $new_pos ) }
-    else               { $self->SetCurrentPos(  $pos ) }
-    $self->SetAnchor($anchor);
-    $self->EnsureCaretVisible;
-}
-
 sub get_prev_block_start {
     my ($self, $pos) = @_;
     my $line_nr = $self->LineFromPosition( $pos );
@@ -355,67 +331,17 @@ sub get_next_block_end {
     $line_nr;
 }
 
-# # [\w\.\\\$@%&]
-sub select_prev_block {
+sub marker_toggle {
     my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
-    my $anchor = $self->GetAnchor;
-    my $bpos = $self->prev_brace_pos( $pos );
-    my $new_pos;
-    if ($bpos != $pos) { $new_pos = $bpos }
-    else {
-        if ($pos <= $anchor) { $new_pos = $self->PositionFromLine( $self->get_prev_block_start( $pos ) ) }
-        else                 { $new_pos = $self->GetLineEndPosition( $self->get_prev_block_end( $pos ) );
-                               $new_pos = $self->PositionFromLine( $self->get_prev_block_start( $pos ) ) if $new_pos < $anchor;
-        }
-    }
-    $new_pos = 0 if $new_pos < 0;
-    $self->SetCurrentPos( $new_pos );
-    $self->SetAnchor($anchor);
-    $self->EnsureCaretVisible;
-}
-sub select_next_block {
-    my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
-    my $anchor = $self->GetAnchor;
-    my $bpos = $self->next_brace_pos( $pos );
-    my $new_pos;
-    if ($bpos != $pos) { $new_pos = $bpos }
-    else {
-        if ($pos >= $anchor) { $new_pos = $self->GetLineEndPosition( $self->get_next_block_end( $pos ) )  } 
-        else                 { $new_pos = $self->PositionFromLine( $self->get_next_block_start( $pos ) );
-                               $new_pos = $self->GetLineEndPosition( $self->get_next_block_end( $pos ) ) if $new_pos > $anchor;
-        }
-    }
-    $self->SetCurrentPos( $new_pos );
-    $self->SetAnchor($anchor);
-    $self->EnsureCaretVisible;
-}
-
-sub expand_selecton {
-    my ($self) = @_;
-    my ($start_pos, $end_pos) = $self->GetSelection;
-    my $start_line = $self->LineFromPosition( $start_pos );
-    my $end_line = $self->LineFromPosition( $end_pos );
-
-    if ($start_line == $end_line) {
-        if ($start_pos == $end_pos){
-            $self->WordLeft;
-            $self->WordRightExtend;
-        } else {
-        }
-    } else {
-        
-    }
     
 }
 
-sub shrink_selecton {
+sub marker_prev {
     my ($self) = @_;
-    my ($start_pos, $end_pos) = $self->GetSelection;
-    return if $start_pos == $end_pos;
-    my $start_line = $self->LineFromPosition( $start_pos );
-    my $end_line = $self->LineFromPosition( $end_pos );
+    
+}
+sub marker_next {
+    my ($self) = @_;
     
 }
 

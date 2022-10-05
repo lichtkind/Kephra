@@ -3,6 +3,8 @@ use warnings;
 
 package Kephra::App::Editor::Tool;
 
+package Kephra::App::Editor;
+
 sub toggle_comment_line {
     my ($self, $line_nr) = @_;
     return unless defined $line_nr;

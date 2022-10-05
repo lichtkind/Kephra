@@ -3,8 +3,9 @@ use warnings;
 
 package Kephra::App::Editor::Edit;
 
+package Kephra::App::Editor;
+
 sub copy {
-say "copy";
     my $self = shift;
     my ($start_pos, $end_pos) = $self->GetSelection;
     $start_pos == $end_pos ? $self->LineCopy : $self->Copy;
