@@ -1,6 +1,6 @@
 use v5.12;
 use warnings;
-
+   
 package Kephra::App::Window;
 use base qw(Wx::Frame);
 

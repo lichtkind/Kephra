@@ -37,6 +37,8 @@ sub mount_events {
         my $code = $event->GetKeyCode; # my $raw = $event->GetRawKeyCode;
         my $mod = $event->GetModifiers; #
         if (($mod == 1 or $mod == 3) and $code == 81)    { $ed->insert_text('@') } # Q
+        elsif ($code == 55 )                   { $ed->insert_brace('{', '}') }
+        elsif ($code == 56 )                   { $ed->insert_brace('[', ']') }
         elsif ( $event->ControlDown){
             if ($event->AltDown) {$event->Skip
             } else {
@@ -49,7 +51,7 @@ sub mount_events {
                     else                               { $event->Skip           }
                 } else {
                     if    ($code == 65)                { $ed->expand_selecton   } # A
-                    elsif ($code == 67)                { $ed->move_copy         } # C
+                    elsif ($code == 67)                { $ed->copy              } # C
                     elsif ($code == 76)                { $ed->sel               } # L
                     elsif ($code == 88)                { $ed->cut               } # X
                     elsif ($code == &Wx::WXK_UP)       { $ed->goto_prev_block   }
@@ -78,10 +80,13 @@ sub mount_events {
                     elsif ($code == &Wx::WXK_END )     { $ed->move_to_end       }
                     else                               { $event->Skip }
                 }
-            } else { 
+            } else {
                 if    ($code == &Wx::WXK_F11)          { $self->GetParent->ShowFullScreen( not $self->GetParent->IsFullScreen ) }
-                # elsif ($code == &Wx::WXK_RETURN)       { $self->new_line }
-                else                                   { $event->Skip }
+                elsif ($code == 35 )                   { $ed->insert_brace("'", "'") }
+                elsif ($code == 40 )                   { $ed->insert_brace('(', ')') }
+                elsif ($code == 50 )                   { $ed->insert_brace('"', '"') }
+                elsif ($code == &Wx::WXK_RETURN)       { $self->new_line             }
+                else                                   { $event->Skip                }
             }
         }    
     });
@@ -90,14 +95,12 @@ sub mount_events {
     # Wx::Event::EVT_RIGHT_DOWN( $self, sub {});
     # Wx::Event::EVT_MIDDLE_UP( $self, sub { say 'right';  $_[1]->Skip;  });
  
-    Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {
-        say $_[1];
-    });
+    # Wx::Event::EVT_STC_CHARADDED( $self, $self, sub { $self->complete_brace( chr $_[1]->GetKey ) });
     Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {
         my ($ed, $event) = @_;
         $ed->{'change_pos'} = $ed->GetCurrentPos; # say 'skip';
-        if ($self->SelectionIsRectangle){
-            #say $event;
+        if ($self->SelectionIsRectangle) {
+                 #say $event;
         } else { $event->Skip }
     });
     
@@ -108,9 +111,6 @@ sub mount_events {
         $self->bracelight( $p );
         $psrt .= ' ('.($end_pos - $start_pos).')' if $start_pos != $end_pos;
         $self->GetParent->SetStatusText( $psrt , 0); # say 'ui';
-#        delete $self->{'sel_head'} if exists $self->{'sel_head'} 
-#                                         and $self->{'sel_head'} != $self->GetSelectionStart()
-#                                         and $self->{'sel_head'} != $self->GetSelectionEnd(); 
     });
     Wx::Event::EVT_STC_SAVEPOINTREACHED( $self, -1, sub { $self->GetParent->set_title(0) });
     Wx::Event::EVT_STC_SAVEPOINTLEFT(    $self, -1, sub { $self->GetParent->set_title(1) });
@@ -125,8 +125,7 @@ sub mount_events {
 #        }
 #        return; # $event->Skip;
 #    });
-    # Wx::Event::EVT_STC_START_DRAG   ($ep, -1, sub {
-    # Wx::Event::EVT_STC_DRAG_OVER    ($ep, -1, sub { $droppos = $_[1]->GetPosition });
+
 }
 
 sub bracelight{
@@ -152,7 +151,36 @@ sub bracelight{
 
 sub new_line {
     my ($self) = @_;
-    
+    my $pos = $self->GetCurrentPos;
+    my $char_before = $self->GetTextRange( $pos-1, $pos );
+    my $char_after = $self->GetTextRange( $pos, $pos + 1);
+    $self->NewLine;
+    my $l = $self->GetCurrentLine;
+    my $i = $self->GetLineIndentation( $l - 1 );
+
+    if ($char_before eq '{' and $char_after eq '}'){ # postion braces when around caret
+        $self->NewLine;
+        $self->SetLineIndentation( $self->GetCurrentLine, $i );
+        $i+= $self->{'tab_size'}
+    } else {
+        # ignore white space left of caret
+        while ($char_before eq ' ' and $self->LineFromPosition( $pos ) == $l-1){
+            $pos--;
+            $char_before = $self->GetTextRange( $pos-1, $pos );
+        }
+        if ($char_before eq '{')    { $i+= $self->{'tab_size'} }
+        elsif ($char_before eq '}') { 
+            my $mpos = $self->BraceMatch( $pos - 1 );
+            if ($mpos != &Wx::wxSTC_INVALID_POSITION){
+                $i = $self->GetLineIndentation( $self->LineFromPosition( $mpos ) );
+            } else {
+                $i-= $self->{'tab_size'};
+                $i = 0 if $i < 0;
+            }
+        }
+    }
+    $self->SetLineIndentation( $l, $i );
+    $self->GotoPos( $self->GetLineEndPosition( $l ) ); 
 }
 
 sub is_empty { not $_[0]->GetTextLength }
@@ -164,7 +192,8 @@ sub new_text {
     $self->EmptyUndoBuffer unless defined $soft;
     $self->SetSavePoint;
 }
-
+           
+           
 sub insert_text {
     my ($self, $text, $pos) = @_;
     $pos = $self->GetCurrentPos unless defined $pos;

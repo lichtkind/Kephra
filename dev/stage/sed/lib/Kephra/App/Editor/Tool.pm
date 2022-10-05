@@ -5,6 +5,22 @@ package Kephra::App::Editor::Tool;
 
 package Kephra::App::Editor;
 
+
+sub insert_brace {
+    my ($self, $left, $right) = @_;
+    my ($start_pos, $end_pos) = $self->GetSelection;
+
+    if ($start_pos == $end_pos) { 
+        $self->InsertText( $start_pos, $left.$right ); 
+        $self->SetSelection( $start_pos+1, $end_pos+1 );
+    }
+    else {
+        $self->InsertText( $end_pos, $right );
+        $self->InsertText( $start_pos, $left ); 
+        $self->SetSelection( $start_pos, $end_pos+2 );
+    }
+}
+
 sub toggle_comment_line {
     my ($self, $line_nr) = @_;
     return unless defined $line_nr;
