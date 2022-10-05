@@ -8,7 +8,7 @@ use Scalar::Util qw(blessed);
 BEGIN {  # because API is called first at start, to even work when mutually recursive included
     require Exporter;
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw( app_window doc_bar editor document 
+    our @EXPORT_OK = qw( app_window doc_bar editor document
                          is_widget is_panel is_sizer is_color is_font is_editor is_document is_doc_bar
     );
     our %EXPORT_TAGS = (cmp => [qw(is_widget is_panel is_sizer is_color is_font is_editor is_document is_doc_bar)],

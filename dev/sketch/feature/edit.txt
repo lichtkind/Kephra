@@ -6,6 +6,8 @@ goto: char, word, brace - left right
       bookmarks ((un)set)
       last edit pos, goto pos
         
+expand selection word selection
+
 
 
 bar: goto bookmark/marker classs, find, replace
