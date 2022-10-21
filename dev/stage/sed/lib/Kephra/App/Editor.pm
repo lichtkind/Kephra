@@ -20,6 +20,9 @@ sub new {
     $self->{'tab_space'} = ' ' x $self->{'tab_size'};
     $self->SetWordChars('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._$@%&\\');
     #$self->BraceHighlightIndicator( 1, 1);
+    $self->SetAdditionalCaretsBlink( 1 );
+    $self->SetAdditionalCaretsVisible( 1 );
+    # $self->SetAdditionalSelAlpha( 1 );
     $self->SetScrollWidth(300);
     Kephra::App::Editor::SyntaxMode::apply( $self );
     $self->mount_events();
@@ -35,12 +38,13 @@ sub mount_events {
     Wx::Event::EVT_KEY_DOWN( $self, sub {
         my ($ed, $event) = @_;
         my $code = $event->GetKeyCode; # my $raw = $event->GetRawKeyCode;
-        my $mod = $event->GetModifiers; #
+        my $mod = $event->GetModifiers; #  say $code;
         if (($mod == 1 or $mod == 3) and $code == 81)    { $ed->insert_text('@') } # Q
         elsif ($code == 55 )                   { $ed->insert_brace('{', '}') }
         elsif ($code == 56 )                   { $ed->insert_brace('[', ']') }
         elsif ( $event->ControlDown){
-            if ($event->AltDown) {$event->Skip
+            if ($event->AltDown) {
+                $event->Skip
             } else {
                 if ($event->ShiftDown){
                     if    ($code == 65)                { $ed->shrink_selecton   } # A
@@ -70,11 +74,11 @@ sub mount_events {
                     elsif ($code == &Wx::WXK_RIGHT)    { $ed->select_rect_right }
                     else                               { $event->Skip }
                 } else {
-                    #elsif ($code == &Wx::WXK_UP)      { $ed->move_up           }
-                    #elsif ($code == &Wx::WXK_DOWN)    { $ed->move_down         }
-                    #elsif ($code == &Wx::WXK_LEFT)    { $ed->move_left         }
-                    #elsif ($code == &Wx::WXK_RIGHT)   { $ed->move_right        }
-                    if    ($code == &Wx::WXK_PAGEUP)   { $ed->move_page_up      }
+                    if    ($code == &Wx::WXK_UP)       { $ed->move_up           }
+                    elsif ($code == &Wx::WXK_DOWN)     { $ed->move_down         }
+                    elsif ($code == &Wx::WXK_LEFT)     { $ed->move_left         }
+                    elsif ($code == &Wx::WXK_RIGHT)    { $ed->move_right        }
+                    elsif ($code == &Wx::WXK_PAGEUP)   { $ed->move_page_up      }
                     elsif ($code == &Wx::WXK_PAGEDOWN) { $ed->move_page_down    }
                     elsif ($code == &Wx::WXK_HOME)     { $ed->move_to_start     }
                     elsif ($code == &Wx::WXK_END )     { $ed->move_to_end       }
@@ -82,6 +86,7 @@ sub mount_events {
                 }
             } else {
                 if    ($code == &Wx::WXK_F11)          { $self->GetParent->ShowFullScreen( not $self->GetParent->IsFullScreen ) }
+                elsif ($code == &Wx::WXK_ESCAPE )      { $ed->escape                 }
                 elsif ($code == 35 )                   { $ed->insert_brace("'", "'") }
                 elsif ($code == 40 )                   { $ed->insert_brace('(', ')') }
                 elsif ($code == 50 )                   { $ed->insert_brace('"', '"') }
@@ -182,6 +187,11 @@ sub new_line {
     $self->SetLineIndentation( $l, $i );
     $self->GotoPos( $self->GetLineEndPosition( $l ) ); 
 }
+
+sub escape {
+    my ($self) = @_;
+    say 'esc';
+}    
 
 sub is_empty { not $_[0]->GetTextLength }
 

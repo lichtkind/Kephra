@@ -15,9 +15,11 @@ sub insert_brace {
         $self->SetSelection( $start_pos+1, $end_pos+1 );
     }
     else {
+        $self->BeginUndoAction();
         $self->InsertText( $end_pos, $right );
         $self->InsertText( $start_pos, $left ); 
         $self->SetSelection( $start_pos, $end_pos+2 );
+        $self->EndUndoAction();
     }
 }
 
@@ -67,3 +69,4 @@ sub toggle_block_comment {
 
 
 1;
+

@@ -134,16 +134,16 @@ sub find_first {
 sub find_prev {
     my ($self) = @_;
     my $ed = $self->editor;
-    my ($start, $end) = $ed->GetSelection;
+    my ($start_pos, $end_pos) = $ed->GetSelection;
     my $wrap = $self->{'wrap'}->GetValue;
-    $ed->SetSelection( $start, $start );
+    $ed->SetSelection( $start_pos, $start_pos );
     $ed->SearchAnchor;
     my $pos = $ed->SearchPrev( $self->{'flags'},  $self->{'text'}->GetValue );
     if ($pos == -1){
         $ed->SetSelection( $ed->GetLength , $ed->GetLength );
         $ed->SearchAnchor();
         $pos = $ed->SearchPrev( $self->{'flags'},  $self->{'text'}->GetValue ) if $wrap;
-        $ed->SetSelection( $start, $end ) if $pos == -1;
+        $ed->SetSelection( $start_pos, $end_pos ) if $pos == -1;
     }
     $ed->EnsureCaretVisible;
     $pos > -1;
@@ -152,16 +152,16 @@ sub find_prev {
 sub find_next {
     my ($self) = @_;
     my $ed = $self->editor;
-    my ($start, $end) = $ed->GetSelection;
+    my ($start_pos, $end_pos) = $ed->GetSelection;
     my $wrap = $self->{'wrap'}->GetValue;
-    $ed->SetSelection( $end, $end );
+    $ed->SetSelection( $end_pos, $end_pos );
     $ed->SearchAnchor;
     my $pos = $ed->SearchNext( $self->{'flags'},  $self->{'text'}->GetValue );
     if ($pos == -1){
         $ed->SetSelection( 0, 0 );
         $ed->SearchAnchor;
         $pos = $ed->SearchNext( $self->{'flags'},  $self->{'text'}->GetValue ) if $wrap;
-        $ed->SetSelection( $start, $end ) if $pos == -1;
+        $ed->SetSelection( $start_pos, $end_pos ) if $pos == -1;
     }
     $ed->EnsureCaretVisible;
     $pos > -1;
