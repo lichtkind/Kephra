@@ -39,10 +39,9 @@ sub mount_events {
         my ($ed, $event) = @_;
         my $code = $event->GetKeyCode; # my $raw = $event->GetRawKeyCode;
         my $mod = $event->GetModifiers; #  say $code;
-        if (($mod == 1 or $mod == 3) and $code == 81)    { $ed->insert_text('@') } # Q
-        elsif ($code == 55 )                   { $ed->insert_brace('{', '}') }
-        elsif ($code == 56 )                   { $ed->insert_brace('[', ']') }
-        elsif ( $event->ControlDown){
+         #     say " mod  $mod ; alt ",$event->AltDown, " ; ctrl ",$event->ControlDown;
+        
+        if ( $event->ControlDown and $mod == 2) {
             if ($event->AltDown) {
                 $event->Skip
             } else {
@@ -66,7 +65,15 @@ sub mount_events {
                 }
             }
         } else {
-            if ($event->AltDown) {
+            if ($mod == 3) { # Alt Gr
+                if ($event->ShiftDown) {  $event->Skip 
+                } else {
+                    if    ($code == 81)                    { $ed->insert_text('@') } # Q
+                    elsif ($code == 55 )                   { $ed->insert_brace('{', '}') }
+                    elsif ($code == 56 )                   { $ed->insert_brace('[', ']') }
+                    else                                   { $event->Skip                }
+                }
+            } elsif ($event->AltDown) {
                 if ($event->ShiftDown){
                     if    ($code == &Wx::WXK_UP)       { $ed->select_rect_up    }
                     elsif ($code == &Wx::WXK_DOWN)     { $ed->select_rect_down  }
@@ -85,17 +92,21 @@ sub mount_events {
                     else                               { $event->Skip }
                 }
             } else {
-                if    ($code == &Wx::WXK_F11)          { $self->GetParent->ShowFullScreen( not $self->GetParent->IsFullScreen ) }
-                elsif ($code == &Wx::WXK_ESCAPE )      { $ed->escape                 }
-                elsif ($code == 35 )                   { $ed->insert_brace("'", "'") }
-                elsif ($code == 40 )                   { $ed->insert_brace('(', ')') }
-                elsif ($code == 50 )                   { $ed->insert_brace('"', '"') }
-                elsif ($code == &Wx::WXK_RETURN)       { $self->new_line             }
-                else                                   { $event->Skip                }
+                if ($event->ShiftDown){
+                    if    ($code == 35 )                   { $ed->insert_brace("'", "'") }
+                    elsif ($code == 40 )                   { $ed->insert_brace('(', ')') }
+                    elsif ($code == 50 )                   { $ed->insert_brace('"', '"') }
+                    else                                   { $event->Skip                }
+                } else {
+                    if    ($code == &Wx::WXK_F11)          { $self->GetParent->ShowFullScreen( not $self->GetParent->IsFullScreen ) }
+                    elsif ($code == &Wx::WXK_ESCAPE )      { $ed->escape                 }
+                    elsif ($code == &Wx::WXK_RETURN)       { $self->new_line             }
+                    else                                   { $event->Skip                }
+                }
             }
-        }    
+        }
     });
-  
+
     # Wx::Event::EVT_LEFT_DOWN( $self, sub {});
     # Wx::Event::EVT_RIGHT_DOWN( $self, sub {});
     # Wx::Event::EVT_MIDDLE_UP( $self, sub { say 'right';  $_[1]->Skip;  });
