@@ -41,7 +41,7 @@ sub mount_events {
         my $mod = $event->GetModifiers; #  say $code;
          #     say " mod  $mod ; alt ",$event->AltDown, " ; ctrl ",$event->ControlDown;
         
-        if ( $event->ControlDown and $mod == 2) {
+        if ( $mod == 2) { # $event->ControlDown and 
             if ($event->AltDown) {
                 $event->Skip
             } else {
@@ -66,14 +66,15 @@ sub mount_events {
             }
         } else {
             if ($mod == 3) { # Alt Gr
-                if ($event->ShiftDown) {  $event->Skip 
+                if ($event->ShiftDown) {  
+                    $event->Skip 
                 } else {
                     if    ($code == 81)                    { $ed->insert_text('@') } # Q
                     elsif ($code == 55 )                   { $ed->insert_brace('{', '}') }
                     elsif ($code == 56 )                   { $ed->insert_brace('[', ']') }
                     else                                   { $event->Skip                }
                 }
-            } elsif ($event->AltDown) {
+            } elsif ( $mod == 1 ) { #$event->AltDown
                 if ($event->ShiftDown){
                     if    ($code == &Wx::WXK_UP)       { $ed->select_rect_up    }
                     elsif ($code == &Wx::WXK_DOWN)     { $ed->select_rect_down  }
