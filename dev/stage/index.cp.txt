@@ -19,9 +19,11 @@ complete development model: /dev/goal/doc/meta/CompleteProgramming.pod
 
 --------------------------------------------------------------------------------
 sed     I        single file editor: simplest possible useful editor
-                 feat: read, writes files, utf safe, perl highlighting, searchbar 
+                 read, writes files, utf safe, perl highlighting, searchbar
+                 comfort editing: nav, move, select, autoindent
+                 
                                      
-ded    C         doc ed: simplest way to edit more than one file
+med    C         doc ed: simplest way to edit more than one file
                  feat:  stashed doc obj with file_path &more attr., docbar, finnd & replace
                                      
 bed         P    base ed: establish Krphra Base core structure object and type system

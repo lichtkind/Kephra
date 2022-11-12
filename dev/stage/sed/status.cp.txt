@@ -1,16 +1,21 @@
 
           ==[[ stage 0 : Single document EDitor]]==
+          
+ = read, writes files, utf safe, advanced editing, perl highlighting, search & replace bar 
+
 
 File  new open reopen save save_as
 
+Edit  undo redo, copy paste replace delete, grow shrink slection, duplicated
 
-Edit 
+Format  Move, indent, dedent, single block comment
 
 
-Tool
+Find   Find next prev, Replace prev next in selection all, 
 
-Search
+       Bar: All, find replacement, revert
+
+Goto    Edit, Marker
    
-sed     I        single file editor: simplest possible useful editor
-                 feat: read, writes files, utf safe, perl highlighting, searchbar 
-
+                
+autoindent, bracelight, brace/block/sub nav

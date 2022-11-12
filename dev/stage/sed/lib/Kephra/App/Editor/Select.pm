@@ -56,14 +56,16 @@ sub word_edges {
 
 sub expression_edges {
     my ($self, $start, $end, $line_start, $line_end) = @_;
+    my ($new_start, $new_rend);
     
+    ($start, $end)
     
 }
 
 sub construct_edges {
     my ($self, $start, $end) = @_;
     # 
-    
+    ($start, $end)
 }
 
 sub select_line {
