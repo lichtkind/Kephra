@@ -8,46 +8,62 @@ package Kephra::App::Editor;
 sub expand_selecton {
     my ($self) = @_;
     my ($start_pos, $end_pos) = $self->GetSelection;
-# say " $start_pos - $end_pos ", $self->GetCurrentPos;
     my $start_line = $self->LineFromPosition( $start_pos );
     my $end_line = $self->LineFromPosition( $end_pos );
-
+    my $line_start = $self->PositionFromLine( $start_line );
+    my $line_end = $self->GetLineEndPosition( $start_line );
+    my @selection;
     if ($start_line == $end_line) {
-        if ($start_pos == $end_pos){ $self->select_word( $start_pos )
-            
-
-        } else {
-            $self->SetSelection( $self->PositionFromLine( $start_line ), 
-                                 $self->GetLineEndPosition( $start_line ) );
-        }
-    } else {
-        $self->SetSelection( 0, $self->GetTextLength - 1 );
-    }
+        if ($start_pos == $end_pos)      { @selection = $self->word_edges( $start_pos ) }
+        elsif ($line_start != $start_pos 
+           or  $line_end != $end_pos)    { @selection = $self->expression_edges($start_pos, $end_pos, $line_start, $line_end) }
+        else                             { @selection = $self->construct_edges($start_pos, $end_pos) }
+    } else                               { @selection = $self->construct_edges($start_pos, $end_pos) }
+    # select all if no construct to be found
+    @selection = (0, $self->GetTextLength - 1 ) if $selection[0] == $start_pos and $selection[1] == $end_pos;
+    $self->SetSelection( @selection );
+    push @{ $self->{'select_stack'} }, \@selection;
     
 }
 
 sub shrink_selecton {
     my ($self) = @_;
     my ($start_pos, $end_pos) = $self->GetSelection;
+say "shrink $start_pos, $end_pos";
     return if $start_pos == $end_pos;
-    my $start_line = $self->LineFromPosition( $start_pos );
-    my $end_line = $self->LineFromPosition( $end_pos );
+    return unless exists $self->{'select_stack'};
+    my $pos = pop @{$self->{'select_stack'} };
+    delete $self->{'select_stack'} unless @{$self->{'select_stack'} };
+    $self->SetSelection( @$pos );
+}
+
+sub word_edges {
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    my $cursor = $self->PositionFromLine( $self->LineFromPosition( $pos ) );
+    $self->SetCurrentPos( $cursor );
+    $self->SearchAnchor;
+    my @word_pos = ();
+    while ($cursor <= $pos){
+        $word_pos[0] = $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '\w' );
+        $self->SearchAnchor;
+        $word_pos[1] = $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '\W' );
+        $self->SearchAnchor;
+        $cursor = $word_pos[1];
+    }
+    $word_pos[0] > $pos ? ($pos, $pos + 1) : @word_pos;
+}
+
+sub expression_edges {
+    my ($self, $start, $end, $line_start, $line_end) = @_;
+    
     
 }
 
-sub select_word {
-    my ($self, $pos) = @_;
-    $pos = $self->GetCurrentPos unless defined $pos;
-    $self->SetCurrentPos( $pos );
-    $self->SearchAnchor;
-say "pos $pos ";
-    my $word_start = $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '\w' );
-say 'W'  if $word_start == $pos;
-    $word_start = $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '\s' );
-say 's' if $word_start == $pos;
-            #~ $word_end = $self->SearchPrev( &Wx::wxSTC_FIND_REGEXP, '\w' );
-#~ # say " $start_pos > $word_end $word_start";
-            #~ $self->SetSelection( $word_start, $word_end );
+sub construct_edges {
+    my ($self, $start, $end) = @_;
+    # 
+    
 }
 
 sub select_line {

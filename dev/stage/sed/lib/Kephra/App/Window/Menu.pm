@@ -108,7 +108,7 @@ sub mount {
     $search_menu->Append( 14400, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
     
     my $help_menu = Wx::Menu->new();
-    $help_menu->Append( 15100, "&Usage",  "Explaining the user interface" );
+    #$help_menu->Append( 15100, "&Usage",  "Explaining the user interface" );
     $help_menu->Append( 15200, "&Keymap\tAlt+K",  "listings with all key kombination from all widgets" );
     $help_menu->Append( 15300, "&About",  "Dialog with some general information" );
 

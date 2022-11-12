@@ -112,16 +112,17 @@ sub mount_events {
     # Wx::Event::EVT_RIGHT_DOWN( $self, sub {});
     # Wx::Event::EVT_MIDDLE_UP( $self, sub { say 'right';  $_[1]->Skip;  });
  
-    # Wx::Event::EVT_STC_CHARADDED( $self, $self, sub { $self->complete_brace( chr $_[1]->GetKey ) });
-    Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {
+    # Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {  });
+    Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {  # edit event
         my ($ed, $event) = @_;
+        delete $ed->{'select_stack'} if exists $ed->{'select_stack'};
         $ed->{'change_pos'} = $ed->GetCurrentPos; # say 'skip';
+        #say $event;
         if ($self->SelectionIsRectangle) {
-                 #say $event;
         } else { $event->Skip }
     });
     
-    Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub {
+    Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub { # cursor move event
         my $p = $self->GetCurrentPos;
         my $psrt = $self->GetCurrentLine.':'.$self->GetColumn( $p );
         my ($start_pos, $end_pos) = $self->GetSelection;
@@ -145,6 +146,16 @@ sub mount_events {
 
 }
 
+sub is_empty { not $_[0]->GetTextLength }
+
+sub new_text {
+    my ($self, $content, $soft) = @_;
+    return unless defined $content;
+    $self->SetText( $content );
+    $self->EmptyUndoBuffer unless defined $soft;
+    $self->SetSavePoint;
+}
+           
 sub bracelight{
     my ($self, $pos) = @_;
     my $char_before = $self->GetTextRange( $pos-1, $pos );
@@ -202,27 +213,8 @@ sub new_line {
 
 sub escape {
     my ($self) = @_;
-    say 'esc';
+    #say 'esc';
 }    
-
-sub is_empty { not $_[0]->GetTextLength }
-
-sub new_text {
-    my ($self, $content, $soft) = @_;
-    return unless defined $content;
-    $self->SetText( $content );
-    $self->EmptyUndoBuffer unless defined $soft;
-    $self->SetSavePoint;
-}
-           
-           
-sub insert_text {
-    my ($self, $text, $pos) = @_;
-    $pos = $self->GetCurrentPos unless defined $pos;
-    $self->InsertText($pos, $text);
-    $pos += length $text;
-    $self->SetSelection( $pos, $pos );
-}
 
 sub sel {
     my ($self) = @_;

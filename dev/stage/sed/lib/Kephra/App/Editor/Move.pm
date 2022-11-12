@@ -145,7 +145,7 @@ sub move_page_up {
     $ed->ScrollToLine( $target_line - 5 );
 }
 
-sub page_down {
+sub move_page_down {
     my ($ed) = @_;
     return if $ed->SelectionIsRectangle;
     my ($start_pos, $end_pos) = $ed->GetSelection;

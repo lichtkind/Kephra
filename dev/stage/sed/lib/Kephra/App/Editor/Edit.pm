@@ -40,4 +40,12 @@ sub replace {
 }
 
 
+sub insert_text {
+    my ($self, $text, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    $self->InsertText($pos, $text);
+    $pos += length $text;
+    $self->SetSelection( $pos, $pos );
+}
+
 1;
