@@ -22,6 +22,7 @@ sub new {
     #$self->BraceHighlightIndicator( 1, 1);
     $self->SetAdditionalCaretsBlink( 1 );
     $self->SetAdditionalCaretsVisible( 1 );
+    $self->SetAdditionalSelectionTyping( 1 );
     # $self->SetAdditionalSelAlpha( 1 );
     $self->SetScrollWidth(300);
     Kephra::App::Editor::SyntaxMode::apply( $self );
@@ -40,7 +41,8 @@ sub mount_events {
         my $code = $event->GetKeyCode; # my $raw = $event->GetRawKeyCode;
         my $mod = $event->GetModifiers; #  say $code;
          #     say " mod  $mod ; alt ",$event->AltDown, " ; ctrl ",$event->ControlDown;
-        
+         # say "mod $mod";
+
         if ( $mod == 2) { # $event->ControlDown and 
             if ($event->AltDown) {
                 $event->Skip
@@ -74,7 +76,7 @@ sub mount_events {
                     elsif ($code == 56 )                   { $ed->insert_brace('[', ']') }
                     else                                   { $event->Skip                }
                 }
-            } elsif ( $mod == 1 ) { #$event->AltDown
+            } elsif ( $event->AltDown ) { # $mod == 1
                 if ($event->ShiftDown){
                     if    ($code == &Wx::WXK_UP)       { $ed->select_rect_up    }
                     elsif ($code == &Wx::WXK_DOWN)     { $ed->select_rect_down  }
