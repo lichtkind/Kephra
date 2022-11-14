@@ -43,7 +43,7 @@ sub mount_events {
          #     say " mod  $mod ; alt ",$event->AltDown, " ; ctrl ",$event->ControlDown;
          # say "mod $mod";
 
-        if ( $mod == 2) { # $event->ControlDown and 
+        if ( $event->ControlDown) { # $mod == 2 and 
             if ($event->AltDown) {
                 $event->Skip
             } else {
