@@ -164,35 +164,28 @@ sub select_next_block {
 sub select_rect_up {
     my ($self) = @_;
     $self->LineUpRectExtend;
-say "$_ : ", $self->GetSelectionNCaret($_) for 1..6;
-say '      '.$self->GetSelections();
+#say "$_ : ", $self->GetSelectionNCaret($_) for 1..6;
+#say '      '.$self->GetSelections();
 }
 
 
 sub select_rect_down {
     my ($self) = @_;
     $self->LineDownRectExtend;
-say "$_ : ", $self->GetSelectionNCaret($_) for 1..6;
-say '      '.$self->GetSelections();
 }
 
 
 sub select_rect_left {
     my ($self) = @_;
     $self->CharLeftRectExtend;
-say "$_ : ", $self->GetSelectionNCaret($_) for 1..6;
-say '      '.$self->GetSelections();
 }
 
 
 sub select_rect_right {
     my ($self) = @_;
     $self->CharRightRectExtend;
-say "$_ : ", $self->GetSelectionNCaret($_) for 1..6;
-say '      '.$self->GetSelections();
 # $self->SetSelectionNCaret
 }
 # &Wx::wxSTC_MULTIPASTE_EACH
-# $self->SetAdditionalSelectionTyping( 1 );
 
 1;

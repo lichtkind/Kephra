@@ -1,9 +1,9 @@
-- rect select edit 
 - select ++ --
+- keymap dialog
+- POD docs
+
 - about dialog
 - GUI dialog
-- keymap dialog
-
 - marker 
 - goto line
 - copy word
