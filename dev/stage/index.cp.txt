@@ -23,8 +23,8 @@ sed     I        single file editor: simplest possible useful editor
                  comfort editing: nav, move, select, autoindent
                  
                                      
-med    C         doc ed: simplest way to edit more than one file
-                 feat:  stashed doc obj with file_path &more attr., docbar, finnd & replace
+med    C         multi file ed: max productivity on projects with lowes amount of code
+                 partial sessions file, docbar, file browser, config dialog
                                      
 bed         P    base ed: establish Krphra Base core structure object and type system
                  feat: doc objects, loging, event system, search bar, shell interface

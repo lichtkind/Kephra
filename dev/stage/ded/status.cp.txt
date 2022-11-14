@@ -1,7 +1,7 @@
 
           ==[[ stage 1 : Multi document EDitor]]==
           
- = sessions, partial, file, docbar, config dialog 
+ = partial sessions file, docbar, file browser, config dialog 
 
 
 Doc: coding, lang, tab, eol

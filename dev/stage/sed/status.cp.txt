@@ -4,14 +4,14 @@
  = read, writes files, utf safe, advanced editing, perl highlighting, search & replace bar 
 
 
-File  new open reopen save save_as
+File:  new open reopen save save_as
 
-Edit  undo redo, copy paste replace delete, grow shrink slection, duplicated
+Edit:  undo redo, cut copy paste replace delete, grow shrink slection, duplicated
 
-Format  Move, indent, dedent, single block comment
+Format:  move, indent dedent, single block comment
 
 
-Find   Find next prev, Replace prev next in selection all, 
+Find:   Find next prev, Replace prev next in selection all, 
 
        Bar: All, find replacement, revert
 
