@@ -1,8 +1,7 @@
 - select ++ --
-- keymap dialog
 - POD docs
 
-- about dialog
+- keymap dialog
 - GUI dialog
 - marker 
 - goto line

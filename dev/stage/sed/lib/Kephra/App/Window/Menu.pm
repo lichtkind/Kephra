@@ -68,15 +68,15 @@ sub mount {
     $edit_menu->Append( 12110, "&Redo\tCtrl+Y",       "undo last undo" );
     $edit_menu->AppendSeparator();                    
     $edit_menu->Append( 12200, "&Cut\tCtrl+X",        "delete selected text and move it into clipboard" );
-    $edit_menu->Append( 12210, "&Copy\tCtrl+C",       "move selected text into clipboard" );
+    $edit_menu->Append( 12210, "C&opy\tCtrl+C",       "move selected text into clipboard" );
     $edit_menu->Append( 12220, "&Paste\tCtrl+V",      "insert clipboard content at cursor position" );
-    $edit_menu->Append( 12230, "&Replace\tCtrl+Shift+V", "replace selected text with clipboard content" );
+    $edit_menu->Append( 12230, "S&wap\tCtrl+Shift+V", "replace selected text with clipboard content" );
     $edit_menu->Append( 12240, "&Delete\tDel",        "delete selected text" );
     $edit_menu->AppendSeparator();
     $edit_menu->Append( 12300, "&Grow Selection\tCtrl+A", "select entire text" );
     $edit_menu->Append( 12310, "&Shrink Selection\tCtrl+Shift+A", "select entire text" );
     $edit_menu->AppendSeparator();
-    $edit_menu->Append( 12400, "D&uplicate\tCtrl+D",     "copy and paste selected text or current line" );
+    $edit_menu->Append( 12400, "Du&plicate\tCtrl+D",     "copy and paste selected text or current line" );
 
     my $format_menu = Wx::Menu->new();
     $format_menu->Append( 13100, "Move &Left\tAlt+Left",  "move current line or selected lines one character to the left" );

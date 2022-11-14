@@ -43,11 +43,11 @@ Kephra - small but effective and beautiful coding editor
 
     kephra [file_name]
 
-
+Small single file editor for perl with max editing comfort.
 
 =head1 DESCRIPTION
 
-Kephra is an editor from and for programmers.
+Kephra is an editor from and for programmers, currently at start of rewrite.
 This page gives you a summary how to use it. 
 For a more thorough documentation and lots of example code please visit the L<Chart::Manual>.
 
@@ -58,7 +58,30 @@ For a more thorough documentation and lots of example code please visit the L<Ch
 
 =head2 File IO
 
+Currently just the basics: ASCII and UTF-8 coding. Open, reload, save and
+saving under different file name. See the menu for key kombos.
+
 =head2 Editing 
+
+Basic editing as expected: undo redo, cut copy paste delete. 
+When nothing is selected Ctrl+C copies current line.
+
+Slightly more advanced is swapping selection and clipboard (Ctrl+Shift+V)
+and duplicate current line or selection with Ctrl+D. Ctrl+A grows selection
+from word to expression to line, block, sub until all is selected and
+shrink selection is just the opposite (Ctrl+Shift+A).
+
+Holding Ctrl allows you no navigate with left and right as expected word
+wise, up and down block wise and page up and page down subroutine wise.
+If the cursor is next to round a brace character you will navigate the its
+partner.
+
+Holding Alt moves the selected or current line up or down. Left and right
+indent and dedents char wise in this mode. Normal indent/dedent listens
+to Tab and Shift+Tab.
+
+Bracing characters (including '' and "") are always created in pairs and
+will embrace the selection.
 
 =head2 Search and Replace
 
