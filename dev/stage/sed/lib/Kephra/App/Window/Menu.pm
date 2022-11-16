@@ -30,8 +30,6 @@ sub mount {
     Wx::Event::EVT_MENU( $win, 13110, sub { $win->{'ed'}->move_right           });
     Wx::Event::EVT_MENU( $win, 13120, sub { $win->{'ed'}->move_up              });
     Wx::Event::EVT_MENU( $win, 13130, sub { $win->{'ed'}->move_down            });
-    Wx::Event::EVT_MENU( $win, 13200, sub { $win->{'ed'}->toggle_block_comment });
-    Wx::Event::EVT_MENU( $win, 13210, sub { $win->{'ed'}->toggle_comment       });
     Wx::Event::EVT_MENU( $win, 13300, sub { $win->{'ed'}->toggle_block_comment });
     Wx::Event::EVT_MENU( $win, 13310, sub { $win->{'ed'}->toggle_comment       });
     Wx::Event::EVT_MENU( $win, 14110, sub { $win->{'sb'}->enter                });
@@ -45,10 +43,15 @@ sub mount {
     Wx::Event::EVT_MENU( $win, 14320, sub { $win->{'ed'}->marker_prev          });
     Wx::Event::EVT_MENU( $win, 14330, sub { $win->{'ed'}->marker_next          });
     Wx::Event::EVT_MENU( $win, 14250, sub { $win->{'rb'}->replace_all          });
+    Wx::Event::EVT_MENU( $win, 14310, sub { $win->{'ed'}->toggle_marker        });
+    Wx::Event::EVT_MENU( $win, 14340, sub { $win->{'ed'}->delete_all_marker    });
+    Wx::Event::EVT_MENU( $win, 14320, sub { $win->{'ed'}->goto_prev_marker     });
+    Wx::Event::EVT_MENU( $win, 14330, sub { $win->{'ed'}->goto_next_marker     });
     Wx::Event::EVT_MENU( $win, 14400, sub { $win->{'ed'}->goto_last_edit       });
     Wx::Event::EVT_MENU( $win, 15100, sub { Kephra::App::Dialog::documentation( $win ) });
     Wx::Event::EVT_MENU( $win, 15200, sub { Kephra::App::Dialog::keymap($win)  });
     Wx::Event::EVT_MENU( $win, 15300, sub { Kephra::App::Dialog::about( $win)  });
+    Wx::Event::EVT_MENU( $win, 15900, sub { $win->ShowFullScreen( not $win->IsFullScreen ) });
     
 
     my $file_menu = Wx::Menu->new();
@@ -101,7 +104,8 @@ sub mount {
     $search_menu->Append( 14240, "Replace In &Selection\tAlt+Shift+F", "replace all search term matches inside selected text" );
     $search_menu->Append( 14250, "Replace &All\tAlt+F",         "replace all search term matches in the document" );
     $search_menu->AppendSeparator();
-    $search_menu->Append( 14310, "&Toggle Marker\tAlt+F2", "set or remove marker on current line" );
+    $search_menu->Append( 14310, "&Toggle Marker\tCtrl+M", "set or remove marker on current line" );
+    $search_menu->Append( 14340, "&Delete All Marker\tCtrl+Shift+M", "remove all marker" );
     $search_menu->Append( 14320, "Prev Mar&ker\tShift+F2", "jump to previous marked line above current caret position " );
     $search_menu->Append( 14330, "Next &Marker\tF2",       "jump to next marked line below current caret position" );
     $search_menu->AppendSeparator();
@@ -109,7 +113,8 @@ sub mount {
     
     my $help_menu = Wx::Menu->new();
     #$help_menu->Append( 15100, "&Usage",  "Explaining the user interface" );
-    $help_menu->Append( 15200, "&Keymap\tAlt+K",  "listings with all key kombination from all widgets" );
+    #$help_menu->Append( 15200, "&Keymap\tAlt+K",  "listings with all key kombination from all widgets" );
+    $help_menu->Append( 15900, "&Fullscreen\tF11",  "switches to or from fullscreen mode" );
     $help_menu->Append( 15300, "&About",  "Dialog with some general information" );
 
     my $menu_bar = Wx::MenuBar->new();

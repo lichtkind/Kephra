@@ -51,7 +51,7 @@ sub set_margin {
         $self->StyleSetBackground(&Wx::wxSTC_STYLE_LINENUMBER, create_color(206,206,202));
         $self->SetMarginWidth(0,  1);
         $self->SetMarginWidth(1, 47);
-        $self->SetMarginWidth(2, 12);
+        $self->SetMarginWidth(2, 22);
         $self->SetMarginWidth(3,  2);
         # extra text margin
     }

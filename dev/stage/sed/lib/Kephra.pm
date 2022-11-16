@@ -80,12 +80,30 @@ Holding Alt moves the selected or current line up or down. Left and right
 indent and dedents char wise in this mode. Normal indent/dedent listens
 to Tab and Shift+Tab.
 
+Ctrl+K toggles comment status of current or selected lines (commented 
+becomes uncommented and vice versa). Ctrl+Shift+K does the same, but with
+one difference. Ladder are the normal perl comments you might know
+(called line comments). The first option adds another letter after the
+pound symbol so that such (block) comments stay commented, even after
+come actions with Ctrl+Shift+K.
+
 Bracing characters (including '' and "") are always created in pairs and
 will embrace the selection.
 
 =head2 Search and Replace
 
+Kephra provides all the usual search and replace functions you expect.
+We made sure all is accessable via menu, searchbar and keyboard.
+The searchbar expands to replacebar via Strg+Shift+F or the I<'='> button.
+There you can only search for the replace term and refert the current.
+Available options are: case sensitiv, words only, word starts, Regex, Wrap.
+
+F3 skips to next search findings, F2 to tnext marker.
+Ctrl+E jumps to position of last edit.
+
 =head1 PLAN
+
+
 
 For more please check the TODO file.
 

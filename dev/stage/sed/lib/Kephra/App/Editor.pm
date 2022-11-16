@@ -225,6 +225,32 @@ sub sel {
 
 sub goto_last_edit { $_[0]->GotoPos( $_[0]->{'change_pos'}+1 ) }
 
+
+sub toggle_marker {
+    my ($self) = @_;
+    my $line = 	$self->GetCurrentLine ();
+    $self->MarkerGet( $line ) ? $self->MarkerDelete( $line, 1) : $self->MarkerAdd( $line, 1);
+}
+sub delete_all_marker { $_[0]->MarkerDeleteAll(1) }
+
+sub goto_prev_marker {
+    my ($self) = @_;
+    my $line = 	$self->GetCurrentLine ();
+    $line-- if $self->MarkerGet( $line );
+    my $target = $self->MarkerPrevious ( $line, 2);
+    $target = $self->MarkerPrevious ( $self->GetLineCount, 2 ) if $target == -1;
+    $self->GotoLine( $target ) if $target > -1;
+}
+
+sub goto_next_marker { 
+    my ($self) = @_;
+    my $line = 	$self->GetCurrentLine ();
+    $line++ if $self->MarkerGet( $line );
+    my $target = $self->MarkerNext( $line, 2);
+    $target = $self->MarkerNext( 0, 2 ) if $target == -1;
+    $self->GotoLine( $target ) if $target > -1;
+}
+
 sub goto_prev_block {
     my ($self) = @_;
     $self->GotoPos( $self->smart_up_pos );
