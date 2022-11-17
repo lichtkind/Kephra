@@ -6,8 +6,9 @@ use Kephra::App::Window;
 
 package Kephra;
 
-our $VERSION = 0.41;
 our $NAME = 'Kephra';
+our $VERSION = 0.401;
+our $STAGE = 'sed';
 
 use base qw(Wx::App);
 
@@ -52,7 +53,7 @@ This page gives you a summary how to use it.
 For a more thorough documentation and lots of example code please visit the L<Chart::Manual>.
 
 =for HTML <p>
-<img src="https://raw.githubusercontent.com/lichtkind/Kephra/main/dev/img/sed.png"    alt="point chart"               width="300" height="225">
+<img src="https://raw.githubusercontent.com/lichtkind/Kephra/main/dev/img/sed.png"  alt="point chart"   width="300" height="225">
 </p>
 
 =head2 File IO
@@ -110,7 +111,11 @@ Ctrl+E jumps to position of last edit.
 
 =head1 PLAN
 
-
+Development is done is stages which are focused on different feature sets.
+Wer are in stage one called B<sed>, where its all about basic editing
+with comfort and effectiveness Next stage will be called B<med> and will
+be about having open several docs. Because I<Kephra> is mainly released 
+now on CPAN we will go on with versioningand choose 0.41 instead of 0.01.
 
 For more please check the TODO file.
 

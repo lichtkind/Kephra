@@ -40,11 +40,16 @@ say "shrink $start_pos, $end_pos";
 sub word_edges {
     my ($self, $pos) = @_;
     $pos = $self->GetCurrentPos unless defined $pos;
-    my $cursor = $self->PositionFromLine( $self->LineFromPosition( $pos ) );
+    my $line = $self->LineFromPosition( $pos );
+    my $cursor = $self->PositionFromLine( $line );
+    my @word_pos = ();
     $self->SetCurrentPos( $cursor );
     $self->SearchAnchor;
-    my @word_pos = ();
-    while ($cursor <= $pos){
+    if ($cursor == $pos){
+        $word_pos[1] = $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '\W' );
+        return ($self->LineFromPosition( $word_pos[1] ) != $line) ? ($pos, $pos + 1) : ($pos, $word_pos[1]);
+    }
+    while ($cursor <= $pos-1){
         $word_pos[0] = $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '\w' );
         $self->SearchAnchor;
         $word_pos[1] = $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '\W' );
