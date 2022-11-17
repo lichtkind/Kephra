@@ -50,8 +50,12 @@ sub new {
         my ($ed, $event) = @_;
         my $code = $event->GetKeyCode;  # my $mod = $event->GetModifiers();
         if   (                         $code == &Wx::WXK_ESCAPE)    { $self->search_bar->close  }
-        elsif(                         $code == &Wx::WXK_UP )       { $self->search_bar->find_prev  }
-        elsif(                         $code == &Wx::WXK_DOWN )     { $self->search_bar->find_next  }
+        elsif( $event->AltDown     and $code == &Wx::WXK_UP )       { $self->find_prev }
+        elsif( $event->AltDown     and $code == &Wx::WXK_DOWN )     { $self->find_next }
+        elsif( $event->AltDown and $event->ShiftDown and $code == &Wx::WXK_RETURN)    { $self->revert_prev }
+        elsif( $event->AltDown     and $code == &Wx::WXK_RETURN)    { $self->revert_next }
+        elsif(                         $code == &Wx::WXK_UP )       { $self->search_bar->_find_prev }
+        elsif(                         $code == &Wx::WXK_DOWN )     { $self->search_bar->_find_next }
         elsif( $event->ShiftDown   and $code == &Wx::WXK_RETURN)    { $self->replace_prev  }
         elsif( $event->ControlDown and $code == &Wx::WXK_RETURN)    { $self->replace_all  }
         elsif(                         $code == &Wx::WXK_RETURN )   { $self->replace_next  }
@@ -109,6 +113,8 @@ sub enter {
     my ($self) = @_;
     $self->search_bar->show(1); 
     $self->show(1);
+    my $sel = $self->editor->GetSelectedText;
+    $self->{'text'}->SetValue( $sel ) if $sel;
     $self->{'text'}->SetFocus();
 }
 
@@ -168,14 +174,14 @@ sub replace_prev {
     my $ed = $self->editor;
     my ($start, $end) = $ed->GetSelection;
     $self->replace;
-    $ed->SetSelection( $start, $start ) unless $self->search_bar->find_prev;
+    $ed->SetSelection( $start, $start ) unless $self->search_bar->_find_prev;
 }
 sub replace_next {
     my ($self) = @_;
     my $ed = $self->editor;
     my ($start, $end) = $ed->GetSelection;
     $self->replace;
-    $ed->SetSelection( $start, $start ) unless $self->search_bar->find_next;
+    $ed->SetSelection( $start, $start ) unless $self->search_bar->_find_next;
 }
 
 sub replace { $_[0]->editor->ReplaceSelection( $_[0]->{'text'}->GetValue ) }
@@ -195,7 +201,7 @@ sub replace_all {
     $ed->BeginUndoAction();
     $ed->SetSelection( 0, 0 );
     $ed->SearchAnchor;
-    $self->replace while $self->search_bar->find_next;
+    $self->replace while $self->search_bar->_find_next;
     $ed->SetSelection( $start, $start );
     $ed->EnsureCaretVisible;
     $ed->EndUndoAction();
@@ -208,7 +214,7 @@ sub replace_in_selection {
     $ed->BeginUndoAction();
     $ed->SetSelection( $end, $end );
     $ed->SearchAnchor();
-    $self->replace while $self->search_bar->find_prev and $ed->GetSelectionStart >= $start;
+    $self->replace while $self->search_bar->_find_prev and $ed->GetSelectionStart >= $start;
     $ed->SetSelection( $start, $start );
     $ed->EnsureCaretVisible;
     $ed->EndUndoAction();

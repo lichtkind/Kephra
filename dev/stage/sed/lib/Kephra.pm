@@ -51,7 +51,6 @@ Kephra is an editor from and for programmers, currently at start of rewrite.
 This page gives you a summary how to use it. 
 For a more thorough documentation and lots of example code please visit the L<Chart::Manual>.
 
-
 =for HTML <p>
 <img src="https://raw.githubusercontent.com/lichtkind/Kephra/main/dev/img/sed.png"    alt="point chart"               width="300" height="225">
 </p>
@@ -98,7 +97,15 @@ The searchbar expands to replacebar via Strg+Shift+F or the I<'='> button.
 There you can only search for the replace term and refert the current.
 Available options are: case sensitiv, words only, word starts, Regex, Wrap.
 
-F3 skips to next search findings, F2 to tnext marker.
+F3 skips to next search term (selection by default) findings, F2 to next
+marker. Adding shift searhes in reverse order (to previous finding).
+Alt+F3 replaces selection with replace term and goes to next finding.
+Adding Shift again reverses order. Ctrl+F takes selection as search term
+and enters the search bar. Adding Shift takes the selection as replace
+term and enters the input field for the replace term where you can easily
+navigate the findings of search (up and down) and replace term (Alt+up/down)
+and change it in both directions with (Alt+)Enter.
+
 Ctrl+E jumps to position of last edit.
 
 =head1 PLAN

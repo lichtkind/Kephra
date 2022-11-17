@@ -50,10 +50,10 @@ sub new {
     Wx::Event::EVT_KEY_DOWN( $self->{'text'}, sub {
         my ($ed, $event) = @_;
         my $code = $event->GetKeyCode; # my $mod = $event->GetModifiers();
-        if   (                         $code == &Wx::WXK_UP )     { $self->find_prev  }
-        elsif(                         $code == &Wx::WXK_DOWN )   { $self->find_next  }
-        elsif( $event->ShiftDown   and $code == &Wx::WXK_RETURN)  { $self->find_prev  }
-        elsif(                         $code == &Wx::WXK_RETURN ) { $self->find_next  }
+        if   (                         $code == &Wx::WXK_UP )     { $self->_find_prev  }
+        elsif(                         $code == &Wx::WXK_DOWN )   { $self->_find_next  }
+        elsif( $event->ShiftDown   and $code == &Wx::WXK_RETURN)  { $self->_find_prev  }
+        elsif(                         $code == &Wx::WXK_RETURN ) { $self->_find_next  }
         elsif(                         $code == &Wx::WXK_ESCAPE)  { $self->close  }
         elsif( $event->ControlDown and $code == ord('R'))         { $self->replace_bar->enter  }
         elsif( $event->ControlDown and $event->ShiftDown and $code == ord('F'))     { $self->replace_bar->enter  }
@@ -131,39 +131,56 @@ sub find_first {
     $pos > -1;
 }
 
-sub find_prev {
+sub find_prev {                                                       # key command
     my ($self) = @_;
+    $self->_find_prev( $self->editor->GetSelectedText  );
+}    
+sub _find_prev {                                                      # search bar command
+    my ($self, $term) = @_;
     my $ed = $self->editor;
-    my ($start_pos, $end_pos) = $ed->GetSelection;
     my $wrap = $self->{'wrap'}->GetValue;
+    my ($start_pos, $end_pos) = $ed->GetSelection;
+    
+    if (defined $term and $term){ $self->{'text'}->SetValue( $term ) }
+    else                        { $term = $self->{'text'}->GetValue  }
+
     $ed->SetSelection( $start_pos, $start_pos );
     $ed->SearchAnchor;
-    my $pos = $ed->SearchPrev( $self->{'flags'},  $self->{'text'}->GetValue );
+    my $pos = $ed->SearchPrev( $self->{'flags'},  $term );
     if ($pos == -1){
         $ed->SetSelection( $ed->GetLength , $ed->GetLength );
         $ed->SearchAnchor();
-        $pos = $ed->SearchPrev( $self->{'flags'},  $self->{'text'}->GetValue ) if $wrap;
+        $pos = $ed->SearchPrev( $self->{'flags'},  $term ) if $wrap;
         $ed->SetSelection( $start_pos, $end_pos ) if $pos == -1;
     }
     $ed->EnsureCaretVisible;
     $pos > -1;
 }
 
-sub find_next {
+sub find_next {                                                       # key command
     my ($self) = @_;
+    $self->_find_next( $self->editor->GetSelectedText  );
+}    
+sub _find_next {
+    my ($self, $term) = @_;
     my $ed = $self->editor;
-    my ($start_pos, $end_pos) = $ed->GetSelection;
     my $wrap = $self->{'wrap'}->GetValue;
+    my ($start_pos, $end_pos) = $ed->GetSelection;
+
+    if (defined $term and $term){ $self->{'text'}->SetValue( $term ) }
+    else                        { $term = $self->{'text'}->GetValue  }
+
     $ed->SetSelection( $end_pos, $end_pos );
     $ed->SearchAnchor;
-    my $pos = $ed->SearchNext( $self->{'flags'},  $self->{'text'}->GetValue );
+    my $pos = $ed->SearchNext( $self->{'flags'}, $term );
     if ($pos == -1){
         $ed->SetSelection( 0, 0 );
         $ed->SearchAnchor;
-        $pos = $ed->SearchNext( $self->{'flags'},  $self->{'text'}->GetValue ) if $wrap;
+        $pos = $ed->SearchNext( $self->{'flags'}, $term ) if $wrap;
         $ed->SetSelection( $start_pos, $end_pos ) if $pos == -1;
     }
     $ed->EnsureCaretVisible;
+    ($start_pos, $end_pos) = $ed->GetSelection;
     $pos > -1;
 }
 
