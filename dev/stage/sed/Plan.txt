@@ -1,0 +1,23 @@
+Releae
+
+- select ++ --
+
+Next
+
+TODO:
+
+- keymap dialog
+- coonfig dialog
+
+- GUI dialog
+
+
+later
+
+- goto line
+
+
+maybe
+
+
+- copy word 

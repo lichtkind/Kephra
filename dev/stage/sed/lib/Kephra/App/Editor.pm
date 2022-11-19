@@ -117,7 +117,6 @@ sub mount_events {
     # Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {  });
     Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {  # edit event
         my ($ed, $event) = @_;
-        delete $ed->{'select_stack'} if exists $ed->{'select_stack'};
         $ed->{'change_pos'} = $ed->GetCurrentPos; # say 'skip';
         #say $event;
         if ($self->SelectionIsRectangle) {
@@ -126,9 +125,9 @@ sub mount_events {
     
     Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub { # cursor move event
         my $p = $self->GetCurrentPos;
-        my $psrt = $self->GetCurrentLine.':'.$self->GetColumn( $p );
         my ($start_pos, $end_pos) = $self->GetSelection;
         $self->bracelight( $p );
+        my $psrt = $self->GetCurrentLine.':'.$self->GetColumn( $p );
         $psrt .= ' ('.($end_pos - $start_pos).')' if $start_pos != $end_pos;
         $self->GetParent->SetStatusText( $psrt , 0); # say 'ui';
     });

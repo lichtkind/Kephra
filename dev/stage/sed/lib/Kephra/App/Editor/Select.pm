@@ -14,27 +14,33 @@ sub expand_selecton {
     my $line_end = $self->GetLineEndPosition( $start_line );
     my @selection;
     if ($start_line == $end_line) {
-        if ($start_pos == $end_pos)      { @selection = $self->word_edges( $start_pos ) }
-        elsif ($line_start != $start_pos 
-           or  $line_end != $end_pos)    { @selection = $self->expression_edges($start_pos, $end_pos, $line_start, $line_end) }
-        else                             { @selection = $self->construct_edges($start_pos, $end_pos) }
-    } else                               { @selection = $self->construct_edges($start_pos, $end_pos) }
-    # select all if no construct to be found
-    @selection = (0, $self->GetTextLength - 1 ) if $selection[0] == $start_pos and $selection[1] == $end_pos;
+        my @word_edge = $self->word_edges( $start_pos );
+        if  ( $start_pos >= $word_edge[0] and $end_pos <= $word_edge[1]  and
+             ($start_pos != $word_edge[0] or  $end_pos != $word_edge[1])     )
+            { @selection = @word_edge }                                 # select word if got less
+        elsif ($start_pos == $line_start and $end_pos == $line_end) { } # skip if already got full line
+        else {
+            @selection = ($line_start, $line_end);
+# say "here";
+
+
+        }
+    } 
+    unless (@selection) { # select construct: sub for if
+        # @selection = $self->construct_edges($start_pos, $end_pos) 
+    }
+    @selection = (0, $self->GetTextLength - 1 ) unless @selection; # select all
     $self->SetSelection( @selection );
-    push @{ $self->{'select_stack'} }, \@selection;
     
 }
 
 sub shrink_selecton {
     my ($self) = @_;
     my ($start_pos, $end_pos) = $self->GetSelection;
-say "shrink $start_pos, $end_pos";
+# say "shrink $start_pos, $end_pos ", $self->{'select_stack'};
     return if $start_pos == $end_pos;
-    return unless exists $self->{'select_stack'};
-    my $pos = pop @{$self->{'select_stack'} };
-    delete $self->{'select_stack'} unless @{$self->{'select_stack'} };
-    $self->SetSelection( @$pos );
+    my @selection;
+    $self->SetSelection( $start_pos, $end_pos );
 }
 
 sub word_edges {
@@ -60,16 +66,15 @@ sub word_edges {
 }
 
 sub expression_edges {
-    my ($self, $start, $end, $line_start, $line_end) = @_;
+    my ($self, $start, $end, $line_start, $line_end, $line) = @_;
     my ($new_start, $new_rend);
-    
+    say $self->	GetLineState( $line );
     ($start, $end)
     
 }
 
 sub construct_edges {
     my ($self, $start, $end) = @_;
-    # 
     ($start, $end)
 }
 
