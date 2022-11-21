@@ -102,4 +102,20 @@ sub next_sub_line_nr {
     $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '^\s*sub ');
 }
 
+sub prev_construct_line_nr {
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    $self->GotoPos( $pos-1 );
+    $self->SearchAnchor;
+    $self->SearchPrev( &Wx::wxSTC_FIND_REGEXP, '^\s*sub ');
+}
+
+sub next_construct_line_nr {
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    $self->GotoPos( $pos+1 );
+    $self->SearchAnchor;
+    $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '^\s*sub ');
+}
+
 1;

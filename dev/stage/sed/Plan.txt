@@ -1,6 +1,7 @@
 Releae
 
 - select ++ --
+- mouse select
 
 Next
 

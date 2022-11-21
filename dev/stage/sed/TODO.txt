@@ -1,7 +1,0 @@
-- select ++ --
-
-- keymap dialog
-
-- GUI dialog
-- goto line
-- copy word

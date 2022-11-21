@@ -30,14 +30,19 @@ sub expand_selecton {
 # select / /
 
 
-# select sub () {} 
-
-# say "here";
 
 
         }
     } 
     unless (@selection) { # select construct: sub for if
+        my $block_start = $self->PositionFromLine( $self->get_prev_block_start( $end_pos ) );
+        my $block_end = $self->GetLineEndPosition( $self->get_next_block_end( $start_pos ) );
+say "start  $start_pos - $end_pos  block $block_start  $block_end";
+        
+        if (   $block_start <= $start_pos and $block_end >= $end_pos 
+         ){
+            @selection = ($block_start, $block_end);
+        }
         # @selection = $self->construct_edges($start_pos, $end_pos) 
     }
     @selection = (0, $self->GetTextLength - 1 ) unless @selection; # select all
@@ -49,6 +54,7 @@ sub expand_selecton {
 # select until () {} 
 # select for () {} 
 # select foreach () {} 
+# select sub () {} 
     
 }
 
