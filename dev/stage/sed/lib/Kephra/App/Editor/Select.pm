@@ -21,6 +21,17 @@ sub expand_selecton {
         elsif ($start_pos == $line_start and $end_pos == $line_end) { } # skip if already got full line
         else {
             @selection = ($line_start, $line_end);
+# select ' '
+# select " "
+# select ( )
+# select [ ]
+# select [ ]
+# select { }
+# select / /
+
+
+# select sub () {} 
+
 # say "here";
 
 
@@ -31,6 +42,13 @@ sub expand_selecton {
     }
     @selection = (0, $self->GetTextLength - 1 ) unless @selection; # select all
     $self->SetSelection( @selection );
+# select block
+# select if () {} 
+# select unless () {} 
+# select while () {} 
+# select until () {} 
+# select for () {} 
+# select foreach () {} 
     
 }
 
@@ -43,27 +61,6 @@ sub shrink_selecton {
     $self->SetSelection( $start_pos, $end_pos );
 }
 
-sub word_edges {
-    my ($self, $pos) = @_;
-    $pos = $self->GetCurrentPos unless defined $pos;
-    my $line = $self->LineFromPosition( $pos );
-    my $cursor = $self->PositionFromLine( $line );
-    my @word_pos = ();
-    $self->SetCurrentPos( $cursor );
-    $self->SearchAnchor;
-    if ($cursor == $pos){
-        $word_pos[1] = $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '\W' );
-        return ($self->LineFromPosition( $word_pos[1] ) != $line) ? ($pos, $pos + 1) : ($pos, $word_pos[1]);
-    }
-    while ($cursor <= $pos-1){
-        $word_pos[0] = $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '\w' );
-        $self->SearchAnchor;
-        $word_pos[1] = $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '\W' );
-        $self->SearchAnchor;
-        $cursor = $word_pos[1];
-    }
-    $word_pos[0] > $pos ? ($pos, $pos + 1) : @word_pos;
-}
 
 sub expression_edges {
     my ($self, $start, $end, $line_start, $line_end, $line) = @_;
