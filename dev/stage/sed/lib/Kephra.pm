@@ -6,8 +6,8 @@ use Kephra::App::Window;
 
 package Kephra;
 
+our $VERSION = '0.401_0';
 our $NAME = 'Kephra';
-our $VERSION = 0.401_0;
 our $STAGE = 'sed';
 
 use base qw(Wx::App);
