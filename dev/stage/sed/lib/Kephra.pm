@@ -6,7 +6,7 @@ use Kephra::App::Window;
 
 package Kephra;
 
-our $VERSION = '0.402';
+our $VERSION = '0.403';
 our $NAME = 'Kephra';
 our $STAGE = 'sed';
 
@@ -114,7 +114,7 @@ Development is done is stages which are focused on different feature sets.
 Wer are in stage one called B<sed>, where its all about basic editing
 with comfort and effectiveness Next stage will be called B<med> and will
 be about having open several docs. Because I<Kephra> is mainly released 
-now on CPAN we will go on with versioningand choose 0.41 instead of 0.01.
+now on CPAN we will go on with versioning and choose 0.401 instead of 0.01.
 
 For more please check the TODO file.
 
