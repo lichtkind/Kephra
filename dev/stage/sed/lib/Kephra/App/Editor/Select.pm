@@ -21,36 +21,34 @@ sub expand_selecton {
             { @selection = @word_edge }                                 # select word if got less
         elsif ($start_pos == $line_start and $end_pos == $line_end) { } # skip if already got full line
         else {
-            @selection = ($line_start, $line_end);
-# say $self->GetStyleAt( $start_pos), ' ', $self->GetStyleAt( $end_pos);
-# select ' '
-# select " "
-# select ( )
-# select [ ]
-# select [ ]
-# select { }
-# select / /
-
-
-
-
+            my ($begin_style, $end_style) = ( $self->GetStyleAt( $start_pos), $self->GetStyleAt( $end_pos) );
+            if ($begin_style == $end_style and (   ($begin_style >= 17 and $begin_style <= 30)
+                                                or  $begin_style == 6  or  $begin_style == 7   ) ){
+                my @style_edges = $self->style_edges($start_pos);
+                @selection = @style_edges if   $style_edges[0] <= $start_pos and $style_edges[1] >= $end_pos
+                                          and ($style_edges[0] != $start_pos or $style_edges[1] != $end_pos);
+            }
+            @selection = ($line_start, $line_end) unless @selection;
+# select ( )   # select [ ]   # select [ ]  # select { }
         }
     } 
     unless (@selection) { # select construct: sub for if
         my @block_edge = $self->block_edges( $start_pos, $end_pos );
-        @selection = @block_edge if @block_edge and ($start_pos != $block_edge[0] or $end_pos != $block_edge[1]);
+        my @sub_edge = $self->sub_edges( $start_pos, $end_pos );
+        if (@block_edge and @sub_edge){
+            if ($sub_edge[0] < $block_edge[0] or $sub_edge[1] > $block_edge[1]) { @sub_edge = () }
+            else                                                                { @block_edge = () }
+        }
+        @selection = @block_edge if @block_edge;
+        @selection = @sub_edge if @sub_edge;
     }
     @selection = (0, $self->GetTextLength - 1 ) unless @selection; # select all
     $self->SetSelection( @selection );
     1;
-# select block
-# select if () {} 
-# select unless () {} 
-# select while () {} 
-# select until () {} 
-# select for () {} 
-# select foreach () {} 
-# select sub () {} 
+
+# select if () {}     # select unless () {} 
+# select while () {}  # select until () {} 
+# select for () {}    # select foreach () {} 
     
 }
 
@@ -98,7 +96,7 @@ sub select_prev_sub {
     my ($self) = @_;
     my $pos = $self->GetCurrentPos;
     my $anchor = $self->GetAnchor;
-    my $new_pos = $self->prev_sub_line_nr( $pos );
+    my $new_pos = $self->prev_sub( $pos );
     if ($new_pos > -1) { $self->SetCurrentPos(  $new_pos ) }
     else               { $self->SetCurrentPos(  $pos ) }
     $self->SetAnchor( $anchor );
@@ -109,7 +107,7 @@ sub select_next_sub {
     my ($self) = @_;
     my $pos = $self->GetCurrentPos;
     my $anchor = $self->GetAnchor;
-    my $new_pos = $self->next_sub_line_nr( $pos );
+    my $new_pos = $self->next_sub( $pos );
     if ($new_pos > -1) { $self->SetCurrentPos(  $new_pos ) }
     else               { $self->SetCurrentPos(  $pos ) }
     $self->SetAnchor($anchor);

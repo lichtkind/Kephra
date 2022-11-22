@@ -19,7 +19,7 @@ sub new {
     my $self = $class->SUPER::new( $parent, -1,[-1,-1],[-1,-1] );
     $self->{'tab_size'} = 4;
     $self->{'tab_space'} = ' ' x $self->{'tab_size'};
-    $self->SetWordChars('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._$@%&\\');
+    $self->SetWordChars('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._$@%&*\\');
     #$self->BraceHighlightIndicator( 1, 1);
     $self->SetAdditionalCaretsBlink( 1 );
     $self->SetAdditionalCaretsVisible( 1 );
@@ -321,7 +321,7 @@ sub next_brace_pos {
 sub goto_prev_sub {
     my ($self) = @_;
     my $pos = $self->GetCurrentPos;
-    my $new_pos = $self->prev_sub_line_nr;
+    my $new_pos = $self->prev_sub;
     if ($new_pos > -1) { $self->GotoPos( $self->GetCurrentPos ) }
     else               { $self->GotoPos( $pos )  }
     
@@ -329,7 +329,7 @@ sub goto_prev_sub {
 sub goto_next_sub {
     my ($self) = @_;
     my $pos = $self->GetCurrentPos;
-    my $new_pos = $self->next_sub_line_nr;
+    my $new_pos = $self->next_sub;
     if ($new_pos > -1) { $self->GotoPos( $self->GetCurrentPos ) }
     else               { $self->GotoPos( $pos )  }
 }

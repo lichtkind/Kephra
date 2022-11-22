@@ -1,9 +1,14 @@
 Releae
 
+- select strings
+
+Next
+
+
+- config dialog
 - select ++ --
 - mouse select
 
-Next
 
 TODO:
 

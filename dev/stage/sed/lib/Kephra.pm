@@ -6,7 +6,7 @@ use Kephra::App::Window;
 
 package Kephra;
 
-our $VERSION = '0.401_0';
+our $VERSION = '0.402';
 our $NAME = 'Kephra';
 our $STAGE = 'sed';
 
@@ -20,7 +20,7 @@ sub OnInit {
     $app->SetTopWindow( $window );
     1;
 }
-
+    
 sub close  { $_[0]->{'frame'}->Close() }
 
 sub OnExit {
@@ -50,10 +50,9 @@ Small single file editor for perl with max editing comfort.
 
 Kephra is an editor from and for programmers, currently at start of rewrite.
 This page gives you a summary how to use it. 
-For a more thorough documentation and lots of example code please visit the L<Chart::Manual>.
 
 =for HTML <p>
-<img src="https://raw.githubusercontent.com/lichtkind/Kephra/main/dev/img/sed.png"  alt="point chart"   width="300" height="225">
+<img src="https://raw.githubusercontent.com/lichtkind/Kephra/master/dev/img/sed.png"  alt="point chart"   width="300" height="225">
 </p>
 
 =head2 File IO
@@ -122,8 +121,6 @@ For more please check the TODO file.
 =head1 AUTHOR
 
 Herbert Breunung (lichtkind@cpan.org)
-
-=back
 
 =head1 COPYRIGHT
 

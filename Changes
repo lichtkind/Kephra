@@ -1,5 +1,13 @@
 
-0.401  2022-11-19    lichtkind
+0.402  2022-11-23    lichtkind
+-------
+    * = minor fixes
+    * + expand selection knows '' "" and sub {}
+    * & added tests
+    * ? fixing POD
+
+
+0.401  2022-11-22    lichtkind
 -------
     * = relaunch with a rewrite code base
     * + single document
