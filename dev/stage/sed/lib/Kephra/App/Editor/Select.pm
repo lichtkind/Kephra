@@ -23,7 +23,6 @@ sub expand_selecton {
             my @brace_edges = $self->brace_edges( $start_pos, $end_pos, $start_line );
             
             my ($begin_style, $end_style) = ( $self->GetStyleAt( $start_pos), $self->GetStyleAt( $end_pos) );
-            
             my @style_edges = ($begin_style == $end_style and (($begin_style >= 17 and $begin_style <= 30)
                                                           or    $begin_style == 6  or  $begin_style == 7   )) 
                             ? $self->style_edges($start_pos, $end_pos) 
@@ -38,24 +37,18 @@ sub expand_selecton {
         }
     } 
     unless (@selection) { # select construct: sub for if
+        @selection = (0, $self->GetTextLength - 1 ); #  select all
         my @block_edges = $self->block_edges( $start_pos, $end_pos );
+        @selection = @block_edges if @block_edges and ($block_edges[0] >= $selection[0] or $block_edges[1] <= $selection[1]);
         my @sub_edges = $self->sub_edges( $start_pos, $end_pos );
-        # my @loop_edges = $self->loop_edges( $start_pos, $end_pos );
-        if (@block_edges and @sub_edges){
-            if ($sub_edges[0] < $block_edges[0] or $sub_edges[1] > $block_edges[1]) { @sub_edges = () }
-            else                                                                    { @block_edges = () }
-        }
-        @selection = @block_edges if @block_edges;
-        @selection = @sub_edges if @sub_edges;
+        @selection = @sub_edges   if @sub_edges   and ($sub_edges[0]   >= $selection[0] or $sub_edges[1]  <= $selection[1]);
+        my @loop_edges = $self->loop_edges( $start_pos, $end_pos );
+say "sel: @selection - @loop_edges";
+        @selection = @loop_edges  if @loop_edges  and ($loop_edges[0]  >= $selection[0] or $loop_edges[1] <= $selection[1]);
+        # select if () {}     # select unless () {} 
     }
-    @selection = (0, $self->GetTextLength - 1 ) unless @selection; # select all
     $self->SetSelection( @selection );
-    1;
-
-# select if () {}     # select unless () {} 
-# select while () {}  # select until () {} 
-# select for () {}    # select foreach () {} 
-    
+    1;    
 }
 
 sub shrink_selecton {

@@ -1,7 +1,11 @@
 
-0.403  2022-11-22    lichtkind
+0.403  2022-11-25    lichtkind
 -------
-    * = 
+    * = minor improvements
+    * + expand selection knows braces in line and loops
+    * + expand goto edit to two locations
+    * ! insert [] and {} works again
+    * ! fix smart new line
 
 0.402  2022-11-22    lichtkind
 -------

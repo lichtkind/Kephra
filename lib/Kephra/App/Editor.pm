@@ -28,6 +28,7 @@ sub new {
     $self->SetScrollWidth(300);
     Kephra::App::Editor::SyntaxMode::apply( $self );
     $self->mount_events();
+    $self->{'change_pos'} = $self->{'change_prev'} = -1;
     return $self;
 }
 
@@ -41,10 +42,10 @@ sub mount_events {
         my ($ed, $event) = @_;
         my $code = $event->GetKeyCode; # my $raw = $event->GetRawKeyCode;
         my $mod = $event->GetModifiers; #  say $code;
-         #     say " mod  $mod ; alt ",$event->AltDown, " ; ctrl ",$event->ControlDown;
-         # say "mod $mod";
+        #     say " mod  $mod ; alt ",$event->AltDown, " ; ctrl ",$event->ControlDown;
+        # say "mod $mod";
 
-        if ( $event->ControlDown) { # $mod == 2 and 
+        if ( $event->ControlDown and $mod != 3) { # $mod == 2 and 
             if ($event->AltDown) {
                 $event->Skip
             } else {
@@ -93,6 +94,8 @@ sub mount_events {
                     elsif ($code == &Wx::WXK_PAGEDOWN) { $ed->move_page_down    }
                     elsif ($code == &Wx::WXK_HOME)     { $ed->move_to_start     }
                     elsif ($code == &Wx::WXK_END )     { $ed->move_to_end       }
+                    elsif ($code == 55 )               { $ed->insert_brace('{', '}') }
+                    elsif ($code == 56 )               { $ed->insert_brace('[', ']') }
                     else                               { $event->Skip }
                 }
             } else {
@@ -113,7 +116,7 @@ sub mount_events {
 
     Wx::Event::EVT_LEFT_DOWN( $self, sub {
         my ($ed, $ev) = @_;
-        my $XY = $ev->GetLogicalPosition( Wx::MemoryDC->new( ) );
+        #my $XY = $ev->GetLogicalPosition( Wx::MemoryDC->new( ) );
         #my $pos = $ed->XYToPosition( $XY->x, $XY->y);
         # $ed->expand_selecton( $pos ) or 
         $ev->Skip;
@@ -124,9 +127,13 @@ sub mount_events {
     # Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {  });
     Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {  # edit event
         my ($ed, $event) = @_;
-        $ed->{'change_pos'} = $ed->GetCurrentPos; # # say "pos ",$ed->{'change_pos'};
-        if ($self->SelectionIsRectangle) {
-        } else { $event->Skip }
+        my $pos = $ed->GetCurrentPos;
+        unless ($ed->{'change_pos'} == $pos) { 
+            $ed->{'change_prev'} = $ed->{'change_pos'};
+            $ed->{'change_pos'} = $pos;
+        }
+        # if ($self->SelectionIsRectangle) { } else { }
+        $event->Skip;
     });
     
     Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub { # cursor move event
@@ -217,7 +224,7 @@ sub new_line {
         }
     }
     $self->SetLineIndentation( $l, $i );
-    $self->GotoPos( $self->GetLineEndPosition( $l ) ); 
+    $self->GotoPos( $self->GetLineIndentPosition( $l ) ); 
 }
 
 sub escape {
@@ -228,9 +235,14 @@ sub escape {
 sub sel {
     my ($self) = @_;
     my $pos = $self->GetCurrentPos;
+    #say $self->GetStyleAt( $pos);
 }
 
-sub goto_last_edit { $_[0]->GotoPos( $_[0]->{'change_pos'}+1 ) }
+sub goto_last_edit {
+    my ($self) = @_;
+    return $self->GotoPos( $self->{'change_pos'} ) unless $self->GetCurrentPos == $self->{'change_pos'};
+    $self->GotoPos( $self->{'change_prev'} );
+}
 
 
 sub toggle_marker {

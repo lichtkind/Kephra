@@ -42,10 +42,10 @@ sub mount_events {
         my ($ed, $event) = @_;
         my $code = $event->GetKeyCode; # my $raw = $event->GetRawKeyCode;
         my $mod = $event->GetModifiers; #  say $code;
-         #     say " mod  $mod ; alt ",$event->AltDown, " ; ctrl ",$event->ControlDown;
-         # say "mod $mod";
+        #     say " mod  $mod ; alt ",$event->AltDown, " ; ctrl ",$event->ControlDown;
+        # say "mod $mod";
 
-        if ( $event->ControlDown) { # $mod == 2 and 
+        if ( $event->ControlDown and $mod != 3) { # $mod == 2 and 
             if ($event->AltDown) {
                 $event->Skip
             } else {
@@ -94,6 +94,8 @@ sub mount_events {
                     elsif ($code == &Wx::WXK_PAGEDOWN) { $ed->move_page_down    }
                     elsif ($code == &Wx::WXK_HOME)     { $ed->move_to_start     }
                     elsif ($code == &Wx::WXK_END )     { $ed->move_to_end       }
+                    elsif ($code == 55 )               { $ed->insert_brace('{', '}') }
+                    elsif ($code == 56 )               { $ed->insert_brace('[', ']') }
                     else                               { $event->Skip }
                 }
             } else {
@@ -222,7 +224,7 @@ sub new_line {
         }
     }
     $self->SetLineIndentation( $l, $i );
-    $self->GotoPos( $self->GetLineEndPosition( $l ) ); 
+    $self->GotoPos( $self->GetLineIndentPosition( $l ) ); 
 }
 
 sub escape {
@@ -234,10 +236,6 @@ sub sel {
     my ($self) = @_;
     my $pos = $self->GetCurrentPos;
     #say $self->GetStyleAt( $pos);
-    $self->GotoPos( $pos - 1 );
-    $self->SearchAnchor;
-    my $npos = $self->SearchPrev( &Wx::wxSTC_FIND_REGEXP, '(for|foreach|until|while)');
-
 }
 
 sub goto_last_edit {

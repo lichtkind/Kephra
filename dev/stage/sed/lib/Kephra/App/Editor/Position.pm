@@ -66,8 +66,33 @@ sub loop_edges {
     my ($self, $sel_start, $sel_end) = @_;
     $sel_start = $self->GetCurrentPos unless defined $sel_start;
     $sel_end //= $sel_start; # $self->GetStyleAt( $pos); 5
-    # for foreach while until  --> ( --> ) --> { --> }
-    
+    my $loop_start = -1;
+    my $npos;
+    $self->GotoPos( $sel_start );
+    $self->SearchAnchor;
+    $npos = $self->SearchPrev( 0, 'for');
+    $loop_start = $npos if $npos > $loop_start and $self->GetStyleAt( $npos ) == 5;
+    $self->GotoPos( $sel_start );
+    $self->SearchAnchor;
+    $npos = $self->SearchPrev( 0, 'until');
+    $loop_start = $npos if $npos > $loop_start and $self->GetStyleAt( $npos ) == 5;
+    $self->GotoPos( $sel_start );
+    $self->SearchAnchor;
+    $npos = $self->SearchPrev( 0, 'while');
+    $loop_start = $npos if $npos > $loop_start and $self->GetStyleAt( $npos ) == 5;
+    return if $loop_start == -1;
+    $self->GotoPos( $loop_start );
+    $self->SearchAnchor;
+    $npos = $self->SearchNext( 0, '(');
+    return if $npos == -1;
+    my $match = $self->BraceMatch( $npos );
+    return if $match == -1;
+    $self->SearchAnchor;
+    $npos = $self->SearchNext( 0, '{');
+    return if $npos == -1;
+    $match = $self->BraceMatch( $npos );
+    return if $match == -1;
+    ($loop_start, $match+1); 
 }
 
 sub sub_edges {

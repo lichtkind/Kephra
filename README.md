@@ -4,7 +4,7 @@
 
 ### VERSION
 
-    0.401
+    0.403
 
 [Home on CPAN](https://metacpan.org/pod/Kephra)
 
