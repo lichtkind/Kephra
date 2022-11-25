@@ -1,21 +1,30 @@
 Releae
 
-- select strings
+- select braces
+  select loops
+  decrese select
+  cancel selection
 
 Next
 
-
 - config dialog
-- select ++ --
+   select eol
+   convert eol
+   tab size
+   soft tabs
+   default encoding
+   convert encoding
 - mouse select
+- mouse copy
+- mouse marker
 
 
 TODO:
 
 - keymap dialog
-- coonfig dialog
-
 - GUI dialog
+
+
 
 
 later
