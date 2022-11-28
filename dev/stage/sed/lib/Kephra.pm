@@ -108,6 +108,10 @@ and change it in both directions with (Alt+)Enter.
 
 Ctrl+E jumps to position of last edit.
 
+=head2 View
+
+F11 toggles full screen mode.
+
 =head1 PLAN
 
 Development is done is stages which are focused on different feature sets.

@@ -105,8 +105,7 @@ sub mount_events {
                     elsif ($code == 50 )                   { $ed->insert_brace('"', '"') }
                     else                                   { $event->Skip                }
                 } else {
-                    if    ($code == &Wx::WXK_F11)          { $self->GetParent->ShowFullScreen( not $self->GetParent->IsFullScreen ) }
-                    elsif ($code == &Wx::WXK_ESCAPE )      { $ed->escape                 }
+                    if    ($code == &Wx::WXK_ESCAPE )      { $ed->escape                 }
                     elsif ($code == &Wx::WXK_RETURN)       { $self->new_line             }
                     else                                   { $event->Skip                }
                 }
@@ -122,7 +121,7 @@ sub mount_events {
         $ev->Skip;
     });
     # Wx::Event::EVT_RIGHT_DOWN( $self, sub {});
-    # Wx::Event::EVT_MIDDLE_UP( $self, sub { say 'right';  $_[1]->Skip;  });
+    Wx::Event::EVT_MIDDLE_UP( $self, sub {  $_[1]->Skip;  });
  
     # Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {  });
     Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {  # edit event

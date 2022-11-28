@@ -1,38 +1,35 @@
-Releae
+Releae:
 
-- select braces
-  select loops
-  decrese select
+- decrese select
   cancel selection
+   tab size
+   soft tabs
 
 Next
 
-- config dialog
+combined esc for sel full screen
+   syntax mode
    select eol
    convert eol
-   tab size
-   soft tabs
    default encoding
    convert encoding
 - mouse select
-- mouse copy
 - mouse marker
 
 
-TODO:
+Near:
 
+- config dialog
 - keymap dialog
 - GUI dialog
 
 
-
-
-later
+Later:
 
 - goto line
 
 
-maybe
+Maybe:
 
 
 - copy word 

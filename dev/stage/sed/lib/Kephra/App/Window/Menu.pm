@@ -9,50 +9,6 @@ my $edit;
 sub mount {
     my ($win) = @_;
     my $ed = $win->{'ed'};
-    Wx::Event::EVT_MENU( $win, 11100, sub { $win->new_file                     });
-    Wx::Event::EVT_MENU( $win, 11200, sub { $win->open_file                    });
-    Wx::Event::EVT_MENU( $win, 11300, sub { $win->reopen_file                  });
-    Wx::Event::EVT_MENU( $win, 11400, sub { $win->save_file                    });
-    Wx::Event::EVT_MENU( $win, 11500, sub { $win->save_as_file                 });
-    Wx::Event::EVT_MENU( $win, 11900, sub { $win->Close                        });
-    Wx::Event::EVT_MENU( $win, 11910, sub { $win->{'dontask'} = 1; $win->Close });
-    Wx::Event::EVT_MENU( $win, 12100, sub { $win->{'ed'}->Undo                 });
-    Wx::Event::EVT_MENU( $win, 12110, sub { $win->{'ed'}->Redo                 });
-    Wx::Event::EVT_MENU( $win, 12200, sub { $win->{'ed'}->cut                  });
-    Wx::Event::EVT_MENU( $win, 12210, sub { $win->{'ed'}->copy                 });
-    Wx::Event::EVT_MENU( $win, 12220, sub { $win->{'ed'}->Paste                });
-    Wx::Event::EVT_MENU( $win, 12230, sub { $win->{'ed'}->replace              });
-    Wx::Event::EVT_MENU( $win, 12240, sub { $win->{'ed'}->Clear                });
-    Wx::Event::EVT_MENU( $win, 12300, sub { $win->{'ed'}->expand_selecton      });
-    Wx::Event::EVT_MENU( $win, 12310, sub { $win->{'ed'}->shrink_selecton      });
-    Wx::Event::EVT_MENU( $win, 12400, sub { $win->{'ed'}->duplicate            });
-    Wx::Event::EVT_MENU( $win, 13100, sub { $win->{'ed'}->move_left            });
-    Wx::Event::EVT_MENU( $win, 13110, sub { $win->{'ed'}->move_right           });
-    Wx::Event::EVT_MENU( $win, 13120, sub { $win->{'ed'}->move_up              });
-    Wx::Event::EVT_MENU( $win, 13130, sub { $win->{'ed'}->move_down            });
-    Wx::Event::EVT_MENU( $win, 13300, sub { $win->{'ed'}->toggle_block_comment });
-    Wx::Event::EVT_MENU( $win, 13310, sub { $win->{'ed'}->toggle_comment       });
-    Wx::Event::EVT_MENU( $win, 14110, sub { $win->{'sb'}->enter                });
-    Wx::Event::EVT_MENU( $win, 14120, sub { $win->{'sb'}->find_prev            });
-    Wx::Event::EVT_MENU( $win, 14130, sub { $win->{'sb'}->find_next            });
-    Wx::Event::EVT_MENU( $win, 14210, sub { $win->{'rb'}->enter                });
-    Wx::Event::EVT_MENU( $win, 14220, sub { $win->{'rb'}->replace_prev         });
-    Wx::Event::EVT_MENU( $win, 14230, sub { $win->{'rb'}->replace_next         });
-    Wx::Event::EVT_MENU( $win, 14240, sub { $win->{'rb'}->replace_in_selection });
-    Wx::Event::EVT_MENU( $win, 14310, sub { $win->{'ed'}->marker_toggle        });
-    Wx::Event::EVT_MENU( $win, 14320, sub { $win->{'ed'}->marker_prev          });
-    Wx::Event::EVT_MENU( $win, 14330, sub { $win->{'ed'}->marker_next          });
-    Wx::Event::EVT_MENU( $win, 14250, sub { $win->{'rb'}->replace_all          });
-    Wx::Event::EVT_MENU( $win, 14310, sub { $win->{'ed'}->toggle_marker        });
-    Wx::Event::EVT_MENU( $win, 14340, sub { $win->{'ed'}->delete_all_marker    });
-    Wx::Event::EVT_MENU( $win, 14320, sub { $win->{'ed'}->goto_prev_marker     });
-    Wx::Event::EVT_MENU( $win, 14330, sub { $win->{'ed'}->goto_next_marker     });
-    Wx::Event::EVT_MENU( $win, 14400, sub { $win->{'ed'}->goto_last_edit       });
-    Wx::Event::EVT_MENU( $win, 15100, sub { Kephra::App::Dialog::documentation( $win ) });
-    Wx::Event::EVT_MENU( $win, 15200, sub { Kephra::App::Dialog::keymap($win)  });
-    Wx::Event::EVT_MENU( $win, 15300, sub { Kephra::App::Dialog::about( $win)  });
-    Wx::Event::EVT_MENU( $win, 15900, sub { $win->ShowFullScreen( not $win->IsFullScreen ) });
-    
 
     my $file_menu = Wx::Menu->new();
     $file_menu->Append( 11100, "&New\tCtrl+N", "complete a sketch drawing" );
@@ -110,21 +66,88 @@ sub mount {
     $search_menu->Append( 14330, "Next &Marker\tF2",       "jump to next marked line below current caret position" );
     $search_menu->AppendSeparator();
     $search_menu->Append( 14400, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
+
+    my $doc_menu  = Wx::Menu->new();
+    $doc_menu->AppendCheckItem( 15100, "Soft Tabs",    "if active, several space character simulate a tab character" );
+    my $doc_tab_menu  = Wx::Menu->new();
+    $doc_tab_menu->AppendRadioItem( 15200+$_, $_ ,  ) for 1..10;
+    $doc_tab_menu->Check(15204, 1);
+    $doc_menu->Append( 15200, '&Tab Size', $doc_tab_menu, '' );
+    my $doc_encoding_menu  = Wx::Menu->new();
+    $doc_menu->Append( 15400, '&Encoding', $doc_encoding_menu, '' );
+    my $doc_mode_menu  = Wx::Menu->new();
+    $doc_menu->Append( 15500, '&Syntax Mode', $doc_mode_menu, '' );
+        
+    my $view_menu = Wx::Menu->new();
+    $view_menu->AppendCheckItem( 16110, "Whitespace",    "make white space and tabs visible by dots and arrows" );
+    $view_menu->AppendCheckItem( 16120, "Indent Guide",  "vertical lines on top of space at tab size distance" );
+    $view_menu->AppendCheckItem( 16130, "Right Margin",  "vertical line at the 80 (changeable) character mark" );
+    $view_menu->AppendSeparator();
+    $view_menu->AppendCheckItem( 16220, "Line Number Margin",  "" );
+    $view_menu->AppendCheckItem( 16230, "Marker Margin",       "" );
+    $view_menu->AppendSeparator();
+    $view_menu->AppendCheckItem( 16310, "&Fullscreen\tF11",  "switches to or from fullscreen mode" );
+    $view_menu->Check(16110, 1);
     
     my $help_menu = Wx::Menu->new();
     #$help_menu->Append( 15100, "&Usage",  "Explaining the user interface" );
     #$help_menu->Append( 15200, "&Keymap\tAlt+K",  "listings with all key kombination from all widgets" );
-    $help_menu->Append( 15900, "&Fullscreen\tF11",  "switches to or from fullscreen mode" );
-    $help_menu->Append( 15300, "&About",  "Dialog with some general information" );
+    $help_menu->Append( 17500, "&About",  "Dialog with some general information" );
 
     my $menu_bar = Wx::MenuBar->new();
     $menu_bar->Append( $file_menu,   '&File' );
     $menu_bar->Append( $edit_menu,   '&Edit' );
     $menu_bar->Append( $format_menu, 'F&ormat' );
     $menu_bar->Append( $search_menu, '&Search' );
+    $menu_bar->Append( $doc_menu,    '&Document' );
+    $menu_bar->Append( $view_menu,   '&View' );
     $menu_bar->Append( $help_menu,   '&Help' );
-    
     $win->SetMenuBar($menu_bar);
+    
+    Wx::Event::EVT_MENU( $win, 11100, sub { $win->new_file                     });
+    Wx::Event::EVT_MENU( $win, 11200, sub { $win->open_file                    });
+    Wx::Event::EVT_MENU( $win, 11300, sub { $win->reopen_file                  });
+    Wx::Event::EVT_MENU( $win, 11400, sub { $win->save_file                    });
+    Wx::Event::EVT_MENU( $win, 11500, sub { $win->save_as_file                 });
+    Wx::Event::EVT_MENU( $win, 11900, sub { $win->Close                        });
+    Wx::Event::EVT_MENU( $win, 11910, sub { $win->{'dontask'} = 1; $win->Close });
+    Wx::Event::EVT_MENU( $win, 12100, sub { $win->{'ed'}->Undo                 });
+    Wx::Event::EVT_MENU( $win, 12110, sub { $win->{'ed'}->Redo                 });
+    Wx::Event::EVT_MENU( $win, 12200, sub { $win->{'ed'}->cut                  });
+    Wx::Event::EVT_MENU( $win, 12210, sub { $win->{'ed'}->copy                 });
+    Wx::Event::EVT_MENU( $win, 12220, sub { $win->{'ed'}->Paste                });
+    Wx::Event::EVT_MENU( $win, 12230, sub { $win->{'ed'}->replace              });
+    Wx::Event::EVT_MENU( $win, 12240, sub { $win->{'ed'}->Clear                });
+    Wx::Event::EVT_MENU( $win, 12300, sub { $win->{'ed'}->expand_selecton      });
+    Wx::Event::EVT_MENU( $win, 12310, sub { $win->{'ed'}->shrink_selecton      });
+    Wx::Event::EVT_MENU( $win, 12400, sub { $win->{'ed'}->duplicate            });
+    Wx::Event::EVT_MENU( $win, 13100, sub { $win->{'ed'}->move_left            });
+    Wx::Event::EVT_MENU( $win, 13110, sub { $win->{'ed'}->move_right           });
+    Wx::Event::EVT_MENU( $win, 13120, sub { $win->{'ed'}->move_up              });
+    Wx::Event::EVT_MENU( $win, 13130, sub { $win->{'ed'}->move_down            });
+    Wx::Event::EVT_MENU( $win, 13300, sub { $win->{'ed'}->toggle_block_comment });
+    Wx::Event::EVT_MENU( $win, 13310, sub { $win->{'ed'}->toggle_comment       });
+    Wx::Event::EVT_MENU( $win, 14110, sub { $win->{'sb'}->enter                });
+    Wx::Event::EVT_MENU( $win, 14120, sub { $win->{'sb'}->find_prev            });
+    Wx::Event::EVT_MENU( $win, 14130, sub { $win->{'sb'}->find_next            });
+    Wx::Event::EVT_MENU( $win, 14210, sub { $win->{'rb'}->enter                });
+    Wx::Event::EVT_MENU( $win, 14220, sub { $win->{'rb'}->replace_prev         });
+    Wx::Event::EVT_MENU( $win, 14230, sub { $win->{'rb'}->replace_next         });
+    Wx::Event::EVT_MENU( $win, 14240, sub { $win->{'rb'}->replace_in_selection });
+    Wx::Event::EVT_MENU( $win, 14310, sub { $win->{'ed'}->marker_toggle        });
+    Wx::Event::EVT_MENU( $win, 14320, sub { $win->{'ed'}->marker_prev          });
+    Wx::Event::EVT_MENU( $win, 14330, sub { $win->{'ed'}->marker_next          });
+    Wx::Event::EVT_MENU( $win, 14250, sub { $win->{'rb'}->replace_all          });
+    Wx::Event::EVT_MENU( $win, 14310, sub { $win->{'ed'}->toggle_marker        });
+    Wx::Event::EVT_MENU( $win, 14340, sub { $win->{'ed'}->delete_all_marker    });
+    Wx::Event::EVT_MENU( $win, 14320, sub { $win->{'ed'}->goto_prev_marker     });
+    Wx::Event::EVT_MENU( $win, 14330, sub { $win->{'ed'}->goto_next_marker     });
+    Wx::Event::EVT_MENU( $win, 14400, sub { $win->{'ed'}->goto_last_edit       });
+    Wx::Event::EVT_MENU( $win, 16310, sub { $win->toggle_full_screen           });
+#    Wx::Event::EVT_MENU( $win, 15100, sub { Kephra::App::Dialog::documentation( $win ) });
+#    Wx::Event::EVT_MENU( $win, 15200, sub { Kephra::App::Dialog::keymap($win)  });
+    Wx::Event::EVT_MENU( $win, 17500, sub { Kephra::App::Dialog::about( $win)  });
+
 }
 
 
