@@ -1,32 +1,34 @@
-Releae:
+Release:
 
 - decrese select
-  cancel selection
-   tab size
-   soft tabs
+- cancel selection, combined esc for sel full screen
+7 view options in menu
 
-Next
+Next:
 
-combined esc for sel full screen
+- document
+- doc menu
+- encodings / convert encoding
+- select eol / convert eol
+ 
+
+
+After:
    syntax mode
-   select eol
-   convert eol
-   default encoding
-   convert encoding
-- mouse select
+- mouse expand select
 - mouse marker
 
 
 Near:
 
-- config dialog
 - keymap dialog
-- GUI dialog
 
 
 Later:
 
 - goto line
+- config dialog
+- GUI dialog
 
 
 Maybe:

@@ -36,7 +36,6 @@ sub style_edges {
     my ($self, $sel_start, $sel_end) = @_;
     $sel_start = $self->GetCurrentPos unless defined $sel_start;
     $sel_end //= $sel_start;
-    
     my ($style_start, $style_end) = ($sel_start, $sel_start);
     my $style = $self->GetStyleAt( $sel_start );
     $style_start-- while $style_start and $self->GetStyleAt( $style_start ) == $style;
@@ -44,6 +43,7 @@ sub style_edges {
     my $last_pos = $self->GetTextLength - 1;
     $style_end++ while $style_end < $last_pos and $self->GetStyleAt( $style_end ) == $style;
     # $style_end-- if $self->GetStyleAt( $style_end ) != $style;
+    return if $style_start == $sel_start and $style_end == $sel_end;
     return ($style_start, $style_end) if $style_end >= $sel_end;
 }
 

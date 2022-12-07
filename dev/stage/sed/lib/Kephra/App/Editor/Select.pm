@@ -21,12 +21,12 @@ sub expand_selecton {
 
         unless (@selection) {
             my @brace_edges = $self->brace_edges( $start_pos, $end_pos, $start_line );
-            
-            my ($begin_style, $end_style) = ( $self->GetStyleAt( $start_pos), $self->GetStyleAt( $end_pos) );
+            my ($begin_style, $end_style) = ( $self->GetStyleAt( $start_pos), $self->GetStyleAt( $end_pos - 1) );
             my @style_edges = ($begin_style == $end_style and (($begin_style >= 17 and $begin_style <= 30)
                                                           or    $begin_style == 6  or  $begin_style == 7   )) 
                             ? $self->style_edges($start_pos, $end_pos) 
                             : ();
+
             if (@brace_edges and @style_edges){ # delete the wider
                 if ($brace_edges[0] < $style_edges[0] or $brace_edges[1] > $style_edges[1]) { @brace_edges = () }
                 else                                                                        { @style_edges = () }
@@ -43,10 +43,10 @@ sub expand_selecton {
         my @sub_edges = $self->sub_edges( $start_pos, $end_pos );
         @selection = @sub_edges   if @sub_edges   and ($sub_edges[0]   >= $selection[0] or $sub_edges[1]  <= $selection[1]);
         my @loop_edges = $self->loop_edges( $start_pos, $end_pos );
-say "sel: @selection - @loop_edges";
         @selection = @loop_edges  if @loop_edges  and ($loop_edges[0]  >= $selection[0] or $loop_edges[1] <= $selection[1]);
         # select if () {}     # select unless () {} 
     }
+say "selected @selection";
     $self->SetSelection( @selection );
     1;    
 }

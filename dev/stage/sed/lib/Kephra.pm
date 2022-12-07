@@ -6,7 +6,7 @@ use Kephra::App::Window;
 
 package Kephra;
 
-our $VERSION = '0.403';
+our $VERSION = '0.404';
 our $NAME = 'Kephra';
 our $STAGE = 'sed';
 

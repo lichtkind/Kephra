@@ -13,6 +13,7 @@ use Kephra::App::Editor::Position;
 use Kephra::App::Editor::Select;
 use Kephra::App::Editor::SyntaxMode;
 use Kephra::App::Editor::Tool;
+use Kephra::App::Editor::View;
 
 sub new {
     my( $class, $parent, $style) = @_;
@@ -24,6 +25,7 @@ sub new {
     $self->SetAdditionalCaretsBlink( 1 );
     $self->SetAdditionalCaretsVisible( 1 );
     $self->SetAdditionalSelectionTyping( 1 );
+    $self->SetIndentationGuides( 2 );  # wxSTC_WS_VISIBLEAFTERINDENT   2   wxSTC_WS_VISIBLEALWAYS 1
     # $self->SetAdditionalSelAlpha( 1 );
     $self->SetScrollWidth(300);
     Kephra::App::Editor::SyntaxMode::apply( $self );
@@ -94,6 +96,7 @@ sub mount_events {
                     elsif ($code == &Wx::WXK_PAGEDOWN) { $ed->move_page_down    }
                     elsif ($code == &Wx::WXK_HOME)     { $ed->move_to_start     }
                     elsif ($code == &Wx::WXK_END )     { $ed->move_to_end       }
+                    elsif ($code == &Wx::WXK_DELETE)   { $ed->delete_line       }
                     elsif ($code == 55 )               { $ed->insert_brace('{', '}') }
                     elsif ($code == 56 )               { $ed->insert_brace('[', ']') }
                     else                               { $event->Skip }
@@ -228,6 +231,11 @@ sub new_line {
 
 sub escape {
     my ($self) = @_;
+    #my ($start_pos, $end_pos) = $self->GetSelection;
+    my $win = $self->GetParent;
+    #if ($start_pos != $end_pos) { return $self->GotoPos ( $self->GetCurrentPos ) }
+    if ($win->IsFullScreen) { return $win->toggle_full_screen};
+    # 3. focus  to edit field
     #say 'esc';
 }    
 
