@@ -44,8 +44,7 @@ sub mount_events {
         my ($ed, $event) = @_;
         my $code = $event->GetKeyCode; # my $raw = $event->GetRawKeyCode;
         my $mod = $event->GetModifiers; #  say $code;
-        #     say " mod  $mod ; alt ",$event->AltDown, " ; ctrl ",$event->ControlDown;
-        # say "mod $mod";
+        #   alt ",$event->AltDown, " ; ctrl ",$event->ControlDown; say "mod $mod code $code";
 
         if ( $event->ControlDown and $mod != 3) { # $mod == 2 and 
             if ($event->AltDown) {
@@ -59,7 +58,9 @@ sub mount_events {
                     elsif ($code == &Wx::WXK_PAGEDOWN ){ $ed->select_next_sub   }
                     else                               { $event->Skip           }
                 } else {
-                    if    ($code == 65)                { $ed->expand_selecton   } # A
+                    if    ($code == 43 or $code == 388){ $ed->zoom_in           } # +
+                    elsif ($code == 45 or $code == 390){ $ed->zoom_out          } # -
+                    elsif ($code == 65)                { $ed->expand_selecton   } # A
                     elsif ($code == 67)                { $ed->copy              } # C
                     elsif ($code == 76)                { $ed->sel               } # L
                     elsif ($code == 88)                { $ed->cut               } # X

@@ -48,4 +48,33 @@ sub toggle_view_marker_margin {
     $self->GetParent->GetMenuBar->Check(16220, $visible ? 1 : 0);
 }
 
+sub toggle_view_line_wrap {
+    my ($self) = @_;
+    my $on = $self->GetWrapMode ? 0 : 1;
+    $self->SetWrapMode( $on );
+    $self->GetParent->GetMenuBar->Check( 16420, $on );
+}
+
+
+sub set_zoom_level {
+    my ($self, $level) = @_;
+    $self->SetZoom( $level );
+    $self->GetParent->GetMenuBar->Check( 16340+$level, 1 );
+}
+
+sub zoom_in {
+    my ($self, $level) = @_;
+    my $lvl = $self->GetZoom();
+    $lvl++;
+    $lvl = 20 if $lvl > 20;
+    $self->set_zoom_level( $lvl );
+}
+sub zoom_out {
+    my ($self, $level) = @_;
+    my $lvl = $self->GetZoom( );
+    $lvl--;
+    $lvl = -10 if $lvl < -10;
+    $self->set_zoom_level( $lvl );
+}
+
 1;
