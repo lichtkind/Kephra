@@ -21,11 +21,11 @@ sub OnInit {
     1;
 }
     
-sub close  { $_[0]->{'frame'}->Close() }
+sub close  { $_[0]->{'win'}->Close() }
 
 sub OnExit {
     my $app = shift;
-    Wx::wxTheClipboard->Flush;
+   	Wx::wxTheClipboard->Flush;
     # $app->{'win'}->Destroy;
     1;
 }
