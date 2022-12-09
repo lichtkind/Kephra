@@ -51,8 +51,8 @@ sub mount_events {
                 $event->Skip
             } else {
                 if ($event->ShiftDown){
-                    if    ($code == 65)                { $ed->shrink_selecton   } # A
-                    elsif ($code == &Wx::WXK_UP)       { $ed->select_prev_block }
+                    #if    ($code == 65)                { $ed->shrink_selecton   } # A
+                    if    ($code == &Wx::WXK_UP)       { $ed->select_prev_block }
                     elsif ($code == &Wx::WXK_DOWN)     { $ed->select_next_block }
                     elsif ($code == &Wx::WXK_PAGEUP )  { $ed->select_prev_sub   }
                     elsif ($code == &Wx::WXK_PAGEDOWN ){ $ed->select_next_sub   }

@@ -33,7 +33,7 @@ sub mount {
     $edit_menu->Append( 12240, "&Delete\tDel",        "delete selected text" );
     $edit_menu->AppendSeparator();
     $edit_menu->Append( 12300, "&Grow Selection\tCtrl+A", "select entire text" );
-    $edit_menu->Append( 12310, "&Shrink Selection\tCtrl+Shift+A", "select entire text" );
+    #$edit_menu->Append( 12310, "&Shrink Selection\tCtrl+Shift+A", "select entire text" );
     $edit_menu->AppendSeparator();
     $edit_menu->Append( 12400, "Du&plicate\tCtrl+D",     "copy and paste selected text or current line" );
 

@@ -22,6 +22,10 @@ sed     I        single file editor: simplest possible useful editor
                  read, writes files, utf safe, perl highlighting, searchbar
                  comfort editing: nav, move, select, autoindent
                  
+ded              single doc editor: simplest possible useful editor
+                 read, writes files, utf safe, perl highlighting, searchbar
+                 comfort editing: nav, move, select, autoindent
+                 
                                      
 med    C         multi file ed: max productivity on projects with lowes amount of code
                  partial sessions file, docbar, file browser, config dialog
