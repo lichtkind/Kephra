@@ -1,5 +1,12 @@
 
-0.404  2022-11-25    lichtkind
+0.405  2022-12-12    lichtkind
+-------
+    * = more settings
+    * * config file
+    * + shrink selection (Ctrl+Shift+A)
+    * + document menu with 4 items
+
+0.404  2022-12-09    lichtkind
 -------
     * = flexible optics
     * + delete line (Alt+Del)
@@ -28,6 +35,3 @@
     * = relaunch with a rewrite code base
     * + single document
     * + rich editing capabilities
-
-
-    * + shrink selection (Ctrl+Shift+A)
