@@ -33,7 +33,7 @@ sub mount {
     $edit_menu->Append( 12240, "&Delete\tDel",        "delete selected text" );
     $edit_menu->AppendSeparator();
     $edit_menu->Append( 12300, "&Grow Selection\tCtrl+A", "select entire text" );
-    #$edit_menu->Append( 12310, "&Shrink Selection\tCtrl+Shift+A", "select entire text" );
+    $edit_menu->Append( 12310, "&Shrink Selection\tCtrl+Shift+A", "select entire text" );
     $edit_menu->AppendSeparator();
     $edit_menu->Append( 12400, "Du&plicate\tCtrl+D",     "copy and paste selected text or current line" );
 
@@ -67,26 +67,26 @@ sub mount {
     $search_menu->AppendSeparator();
     $search_menu->Append( 14400, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
 
-    #~ my $doc_menu  = Wx::Menu->new();
-    #~ $doc_menu->AppendCheckItem( 15100, "Soft Tabs",    "if active, several space character simulate a tab character" );
-    #~ my $doc_tab_menu  = Wx::Menu->new();
-    #~ $doc_tab_menu->AppendRadioItem( 15200+$_, $_ ,  ) for 1..10;
-    #~ $doc_tab_menu->Check(15204, 1);
-    #~ $doc_menu->Append( 15200, '&Tab Size', $doc_tab_menu, '' );
-    #~ my $doc_encoding_menu  = Wx::Menu->new();
-    #~ $doc_encoding_menu->AppendRadioItem( 15401, 'UTF-8' );
-    #~ $doc_encoding_menu->AppendRadioItem( 15402, 'ASCII' );
-    #~ $doc_menu->Append( 15400, '&Encoding', $doc_encoding_menu, '' );
-    #~ my $doc_mode_menu  = Wx::Menu->new();
-    #~ $doc_mode_menu->AppendRadioItem( 15501, 'no' );
-    #~ $doc_mode_menu->AppendRadioItem( 15502, 'Perl' );
-    #~ $doc_mode_menu->AppendRadioItem( 15503, 'Python' );
-    #~ $doc_mode_menu->AppendRadioItem( 15504, 'Ruby' );
-    #~ $doc_mode_menu->AppendRadioItem( 15505, 'C' );
-    #~ $doc_mode_menu->AppendRadioItem( 15506, 'Rust' );
-    #~ $doc_mode_menu->AppendRadioItem( 15507, 'Markdown' );
-    #~ $doc_mode_menu->AppendRadioItem( 15508, 'YAML' );
-    #~ $doc_menu->Append( 15500, '&Syntax Mode', $doc_mode_menu, '' );
+    my $doc_menu  = Wx::Menu->new();
+    $doc_menu->AppendCheckItem( 15100, "Soft Tabs",    "if active, several space character simulate a tab character" );
+    my $doc_tab_menu  = Wx::Menu->new();
+    $doc_tab_menu->AppendRadioItem( 15200+$_, $_ ,  ) for 1..10;
+    $doc_tab_menu->Check(15204, 1);
+    $doc_menu->Append( 15200, '&Tab Size', $doc_tab_menu, '' );
+    my $doc_encoding_menu  = Wx::Menu->new();
+    $doc_encoding_menu->AppendRadioItem( 15401, 'UTF-8' );
+    $doc_encoding_menu->AppendRadioItem( 15402, 'ASCII' );
+    $doc_menu->Append( 15400, '&Encoding', $doc_encoding_menu, '' );
+    my $doc_mode_menu  = Wx::Menu->new();
+    $doc_mode_menu->AppendRadioItem( 15501, 'no' );
+    $doc_mode_menu->AppendRadioItem( 15502, 'Perl' );
+    $doc_mode_menu->AppendRadioItem( 15503, 'Python' );
+    $doc_mode_menu->AppendRadioItem( 15504, 'Ruby' );
+    $doc_mode_menu->AppendRadioItem( 15505, 'C' );
+    $doc_mode_menu->AppendRadioItem( 15506, 'Rust' );
+    $doc_mode_menu->AppendRadioItem( 15507, 'Markdown' );
+    $doc_mode_menu->AppendRadioItem( 15508, 'YAML' );
+    $doc_menu->Append( 15500, '&Syntax Mode', $doc_mode_menu, '' );
         
     my $view_menu = Wx::Menu->new();
     $view_menu->AppendCheckItem( 16110, "&Whitespace",    "make white space and tabs visible by dots and arrows" );
@@ -123,7 +123,7 @@ sub mount {
     $menu_bar->Append( $edit_menu,   '&Edit' );
     $menu_bar->Append( $format_menu, 'F&ormat' );
     $menu_bar->Append( $search_menu, '&Search' );
-    #$menu_bar->Append( $doc_menu,    '&Document' );
+    $menu_bar->Append( $doc_menu,    '&Document' );
     $menu_bar->Append( $view_menu,   '&View' );
     $menu_bar->Append( $help_menu,   '&Help' );
     $win->SetMenuBar($menu_bar);

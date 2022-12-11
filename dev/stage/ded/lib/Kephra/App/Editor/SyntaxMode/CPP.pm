@@ -1,7 +1,7 @@
 use v5.12;
 use warnings;
 
-package Kephra::App::Editor::SyntaxMode::Perl;
+package Kephra::App::Editor::SyntaxMode::CPP;
 use Wx qw/ :everything /;
 use Wx::STC;
 #use Wx::Scintilla;
