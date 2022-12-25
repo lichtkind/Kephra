@@ -3,10 +3,11 @@ use v5.12;
 use warnings;
 use Wx;
 use Kephra::App::Window;
+use Kephra::Config;
 
 package Kephra;
 
-our $VERSION = '0.404';
+our $VERSION = '0.405';
 our $NAME = 'Kephra';
 our $STAGE = 'sed';
 
@@ -106,7 +107,8 @@ term and enters the input field for the replace term where you can easily
 navigate the findings of search (up and down) and replace term (Alt+up/down)
 and change it in both directions with (Alt+)Enter.
 
-Ctrl+E jumps to position of last edit.
+Ctrl+E jumps to position of last edit. If already there, the second last
+edit will be destination.
 
 =head2 View
 

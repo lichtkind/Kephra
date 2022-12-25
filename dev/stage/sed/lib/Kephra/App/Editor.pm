@@ -10,6 +10,7 @@ use Wx::DND;
 use Kephra::App::Editor::Edit;
 use Kephra::App::Editor::Move;
 use Kephra::App::Editor::Position;
+use Kephra::App::Editor::Property;
 use Kephra::App::Editor::Select;
 use Kephra::App::Editor::SyntaxMode;
 use Kephra::App::Editor::Tool;
@@ -145,7 +146,7 @@ sub mount_events {
         my ($start_pos, $end_pos) = $self->GetSelection;
         $ed->{'set_pos'} = $p if $start_pos == $end_pos; # say "move ",$ed->{'set_pos'};
         $self->bracelight( $p );
-        my $psrt = $self->GetCurrentLine.':'.$self->GetColumn( $p );
+        my $psrt = ($self->GetCurrentLine+1).':'.$self->GetColumn( $p );
         $psrt .= ' ('.($end_pos - $start_pos).')' if $start_pos != $end_pos;
         $self->GetParent->SetStatusText( $psrt , 0); # say 'ui';
     });

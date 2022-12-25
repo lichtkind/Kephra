@@ -5,6 +5,7 @@
     * * config file
     * + shrink selection (Ctrl+Shift+A)
     * + document menu with 4 items
+    * ! cursor pos in status bar shows correct line nr now
 
 0.404  2022-12-09    lichtkind
 -------

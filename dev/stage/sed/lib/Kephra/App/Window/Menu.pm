@@ -67,13 +67,13 @@ sub mount {
     $search_menu->AppendSeparator();
     $search_menu->Append( 14400, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
 
-    #~ my $doc_menu  = Wx::Menu->new();
-    #~ $doc_menu->AppendCheckItem( 15100, "Soft Tabs",    "if active, several space character simulate a tab character" );
-    #~ my $doc_tab_menu  = Wx::Menu->new();
-    #~ $doc_tab_menu->AppendRadioItem( 15200+$_, $_ ,  ) for 1..10;
-    #~ $doc_tab_menu->Check(15204, 1);
-    #~ $doc_menu->Append( 15200, '&Tab Size', $doc_tab_menu, '' );
-    #~ my $doc_encoding_menu  = Wx::Menu->new();
+    my $doc_menu  = Wx::Menu->new();
+    $doc_menu->AppendCheckItem( 15100, "Soft Tabs",    "if active, several space character simulate a tab character" );
+    my $doc_tab_menu  = Wx::Menu->new();
+    $doc_tab_menu->AppendRadioItem( 15200+$_, $_ ,  ) for 1..10;
+    $doc_tab_menu->Check(15204, 1);
+    $doc_menu->Append( 15200, '&Tab Size', $doc_tab_menu, '' );
+    # my $doc_encoding_menu  = Wx::Menu->new();
     #~ $doc_encoding_menu->AppendRadioItem( 15401, 'UTF-8' );
     #~ $doc_encoding_menu->AppendRadioItem( 15402, 'ASCII' );
     #~ $doc_menu->Append( 15400, '&Encoding', $doc_encoding_menu, '' );
@@ -87,6 +87,7 @@ sub mount {
     #~ $doc_mode_menu->AppendRadioItem( 15507, 'Markdown' );
     #~ $doc_mode_menu->AppendRadioItem( 15508, 'YAML' );
     #~ $doc_menu->Append( 15500, '&Syntax Mode', $doc_mode_menu, '' );
+    $doc_menu->Check(15100, 1);
         
     my $view_menu = Wx::Menu->new();
     $view_menu->AppendCheckItem( 16110, "&Whitespace",    "make white space and tabs visible by dots and arrows" );
@@ -123,7 +124,7 @@ sub mount {
     $menu_bar->Append( $edit_menu,   '&Edit' );
     $menu_bar->Append( $format_menu, 'F&ormat' );
     $menu_bar->Append( $search_menu, '&Search' );
-    #$menu_bar->Append( $doc_menu,    '&Document' );
+    $menu_bar->Append( $doc_menu,    '&Document' );
     $menu_bar->Append( $view_menu,   '&View' );
     $menu_bar->Append( $help_menu,   '&Help' );
     $win->SetMenuBar($menu_bar);
@@ -167,6 +168,7 @@ sub mount {
     Wx::Event::EVT_MENU( $win, 14320, sub { $win->{'ed'}->goto_prev_marker     });
     Wx::Event::EVT_MENU( $win, 14330, sub { $win->{'ed'}->goto_next_marker     });
     Wx::Event::EVT_MENU( $win, 14400, sub { $win->{'ed'}->goto_last_edit       });
+    Wx::Event::EVT_MENU( $win, 15100, sub { $win->{'ed'}->toggle_tab_usage     });
     Wx::Event::EVT_MENU( $win, 16110, sub { $win->{'ed'}->toggle_view_whitespace });
     Wx::Event::EVT_MENU( $win, 16120, sub { $win->{'ed'}->toggle_view_eol         });
     Wx::Event::EVT_MENU( $win, 16130, sub { $win->{'ed'}->toggle_view_inden_guide  });

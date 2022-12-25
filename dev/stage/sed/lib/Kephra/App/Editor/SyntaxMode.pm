@@ -11,24 +11,10 @@ sub apply {
     load_font( $self );  # before setting highlighting
     set_perlhighlight( $self );
     set_colors( $self ); # after highlight
-    set_tab_size( $self, $self->{'tab_size'} );
-    set_tab_usage( $self, 0 );
+    $self->set_tab_size( $self->{'tab_size'} );
+    $self->set_tab_usage( 0 );
     set_margin( $self );
-
-}
-
-sub set_tab_size {
-    my ($self, $size) = @_;
-    #$size *= 2 if $^O eq 'darwin';
-    $self->SetTabWidth($size);
-    $self->SetIndent($size);
-    $self->SetHighlightGuide($size);
     $self->SetIndentationGuides(1);
-}
-
-sub set_tab_usage {
-    my ($self, $usage) = @_;
-   $self->SetUseTabs($usage);
 }
 
 sub set_margin {
@@ -65,10 +51,11 @@ sub set_margin {
 sub set_colors {
     my $self = shift;
     $self->SetCaretPeriod( 600 );
-    $self->SetCaretWidth( 2 );
     $self->SetCaretForeground( create_color( 0, 0, 100) ); #140, 160, 255
+    $self->SetCaretLineBack( create_color(240, 240, 230) );
+    $self->SetCaretWidth( 2 );
     $self->SetCaretLineVisible(1);
-    $self->SetCaretLineBack( create_color(235, 235, 235) );
+    
     $self->SetSelForeground( 1, create_color(243,243,243) );
     $self->SetSelBackground( 1, create_color(0, 17, 119) );
     $self->SetWhitespaceForeground( 1, create_color(200, 200, 153) );
@@ -137,7 +124,7 @@ tell telldir tie tied time times tr truncate
 uc ucfirst umask undef unless unlink unpack unshift untie until use utime 
 values vec wait waitpid wantarray warn when while write x xor y');
 # Add new keyword.
-# $_[0]->StyleSetSpec( &Wx::wxSTC_H_TAG, "fore:#000055" ); # Apply tag style for selected lexer (blue)
+# $self->StyleSetSpec( &Wx::wxSTC_H_TAG, "fore:#000055" ); # Apply tag style for selected lexer (blue)
 
     $self->StyleSetSpec(1,"fore:#ff0000,back:#ffff00");                        # Error
     $self->StyleSetSpec(&Wx::wxSTC_PL_COMMENTLINE,"fore:#aaaaaa");                                     # Comment
@@ -170,7 +157,7 @@ values vec wait waitpid wantarray warn when while write x xor y');
     $self->StyleSetSpec(30,"fore:#f36600,back:#fff8f8");                       # qw = Array
     $self->StyleSetSpec(&Wx::wxSTC_STYLE_BRACELIGHT, "fore:#0000ff,back:#FFFFFF,bold");# 34
     $self->StyleSetSpec(&Wx::wxSTC_STYLE_BRACEBAD,   "fore:#ff0000,back:#FFFFFF,bold");# 35
-    $self->StyleSetForeground(&Wx::wxSTC_STYLE_INDENTGUIDE,create_color(206,206,202)); # 37
+    $self->StyleSetForeground(&Wx::wxSTC_STYLE_INDENTGUIDE, create_color(206,206,202)); # 37
 }
 
 1;
