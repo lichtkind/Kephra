@@ -9,10 +9,14 @@ package Kephra::App::Editor;
 
 sub set_tab_size {
     my ($self, $size) = @_;
+    return unless defined $size;
     #$size *= 2 if $^O eq 'darwin';
     $self->SetTabWidth($size);
     $self->SetIndent($size);
     $self->SetHighlightGuide($size);
+    my $menu = $self->GetParent->GetMenuBar;
+    $menu->Check( 15200 + $size, 1 ) if ref $menu;
+
 }
 
 sub set_tab_usage {

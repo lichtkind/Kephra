@@ -70,7 +70,8 @@ sub mount {
     my $doc_menu  = Wx::Menu->new();
     $doc_menu->AppendCheckItem( 15100, "Soft Tabs",    "if active, several space character simulate a tab character" );
     my $doc_tab_menu  = Wx::Menu->new();
-    $doc_tab_menu->AppendRadioItem( 15200+$_, $_ ,  ) for 1..10;
+    my @tab_range = 1..10;
+    $doc_tab_menu->AppendRadioItem( 15200+$_, $_ ,  ) for @tab_range;
     $doc_tab_menu->Check(15204, 1);
     $doc_menu->Append( 15200, '&Tab Size', $doc_tab_menu, '' );
     # my $doc_encoding_menu  = Wx::Menu->new();
@@ -169,6 +170,7 @@ sub mount {
     Wx::Event::EVT_MENU( $win, 14330, sub { $win->{'ed'}->goto_next_marker     });
     Wx::Event::EVT_MENU( $win, 14400, sub { $win->{'ed'}->goto_last_edit       });
     Wx::Event::EVT_MENU( $win, 15100, sub { $win->{'ed'}->toggle_tab_usage     });
+    Wx::Event::EVT_MENU( $win, 15200 + $_, eval 'sub { $win->{ed}->set_tab_size('.$_.')}' ) for @tab_range;
     Wx::Event::EVT_MENU( $win, 16110, sub { $win->{'ed'}->toggle_view_whitespace });
     Wx::Event::EVT_MENU( $win, 16120, sub { $win->{'ed'}->toggle_view_eol         });
     Wx::Event::EVT_MENU( $win, 16130, sub { $win->{'ed'}->toggle_view_inden_guide  });
@@ -177,7 +179,7 @@ sub mount {
     Wx::Event::EVT_MENU( $win, 16220, sub { $win->{'ed'}->toggle_view_marker_margin  });
     Wx::Event::EVT_MENU( $win, 16310, sub { $win->{'ed'}->zoom_in                    });
     Wx::Event::EVT_MENU( $win, 16320, sub { $win->{'ed'}->zoom_out                   });
-    Wx::Event::EVT_MENU( $win, 16340 + $_, sub { $win->{'ed'}->set_zoom_level(  $_) }) for @zoom_range;
+    Wx::Event::EVT_MENU( $win, 16340 + $_, eval 'sub { $win->{ed}->set_zoom_level('.$_.')}') for @zoom_range;
     Wx::Event::EVT_MENU( $win, 16420, sub { $win->{'ed'}->toggle_view_line_wrap      });
     Wx::Event::EVT_MENU( $win, 16410, sub { $win->toggle_full_screen           });
 #    Wx::Event::EVT_MENU( $win, 15100, sub { Kephra::App::Dialog::documentation( $win ) });
