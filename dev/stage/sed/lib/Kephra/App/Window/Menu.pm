@@ -179,7 +179,9 @@ sub mount {
     Wx::Event::EVT_MENU( $win, 14330, sub { $win->{'ed'}->goto_next_marker     });
     Wx::Event::EVT_MENU( $win, 14400, sub { $win->{'ed'}->goto_last_edit       });
     Wx::Event::EVT_MENU( $win, 15100, sub { $win->{'ed'}->toggle_tab_usage     });
-    Wx::Event::EVT_MENU( $win, 15200 + $_, eval 'sub { $win->{ed}->set_tab_size('.$_.')}' ) for @tab_range;
+    Wx::Event::EVT_MENU( $win, 15410, sub { $win->{'ed'}->set_EOL_lf   } );
+    Wx::Event::EVT_MENU( $win, 15420, sub { $win->{'ed'}->set_EOL_cr   } );
+    Wx::Event::EVT_MENU( $win, 15430, sub { $win->{'ed'}->set_EOL_crlf } );
     Wx::Event::EVT_MENU( $win, 16110, sub { $win->{'ed'}->toggle_view_whitespace });
     Wx::Event::EVT_MENU( $win, 16120, sub { $win->{'ed'}->toggle_view_eol         });
     Wx::Event::EVT_MENU( $win, 16130, sub { $win->{'ed'}->toggle_view_inden_guide  });

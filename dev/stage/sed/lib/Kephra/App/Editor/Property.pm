@@ -31,4 +31,26 @@ sub toggle_tab_usage {
     $self->GetParent->GetMenuBar->Check(15100, !$self->{'tab_usage'});
 }
 
+sub set_EOL_lf   {
+    my ($self) = @_;
+    $self->SetEOLMode( &Wx::wxSTC_EOL_LF );
+    $self->ConvertEOLs( &Wx::wxSTC_EOL_LF );
+    $self->GetParent->GetMenuBar->Check(15410, 1);
+}
+
+sub set_EOL_cr   {
+    my ($self) = @_;
+    $self->SetEOLMode( &Wx::wxSTC_EOL_CR );
+    $self->ConvertEOLs( &Wx::wxSTC_EOL_CR );
+    $self->GetParent->GetMenuBar->Check(15420, 1);
+}
+
+sub set_EOL_crlf {
+    my ($self) = @_;
+    $self->SetEOLMode( &Wx::wxSTC_EOL_CRLF );
+    $self->ConvertEOLs( &Wx::wxSTC_EOL_CRLF );
+    $self->GetParent->GetMenuBar->Check(15430, 1);
+}
+
+
 1;
