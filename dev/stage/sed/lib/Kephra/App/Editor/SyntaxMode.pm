@@ -52,7 +52,7 @@ sub set_colors {
     my $self = shift;
     $self->SetCaretPeriod( 600 );
     $self->SetCaretForeground( create_color( 0, 0, 100) ); #140, 160, 255
-    $self->SetCaretLineBack( create_color(240, 240, 230) );
+    $self->SetCaretLineBack( create_color(230, 230, 250) );
     $self->SetCaretWidth( 2 );
     $self->SetCaretLineVisible(1);
     

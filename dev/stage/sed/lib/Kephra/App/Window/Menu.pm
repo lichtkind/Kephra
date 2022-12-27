@@ -68,23 +68,20 @@ sub mount {
     $search_menu->Append( 14400, "&Goto Edit\tCtrl+E", "move cursor position of last change" );
 
     my $doc_menu  = Wx::Menu->new();
-    $doc_menu->AppendCheckItem( 15100, "&Soft Tabs",    "if active, several space character simulate a tab character" );
+    $doc_menu->AppendCheckItem( 15100, "&Soft Tabs",    "several space characters (see below) will inserted instead of one tab character" );
     $doc_menu->Check(15100, 1);
     my $doc_tab_menu  = Wx::Menu->new();
     my @tab_range = 1..10;
     $doc_tab_menu->AppendRadioItem( 15200+$_, $_ ,  ) for @tab_range;
     $doc_tab_menu->Check(15204, 1);
-    $doc_menu->Append( 15200, 'Tab &Size', $doc_tab_menu, '' );
-    $doc_menu->Append( 15300, "Convert &Tabs", "converting all tabs and space to current setting" );
+    $doc_menu->Append( 15200, '&Indention Size', $doc_tab_menu, 'size of tab character' );
     $doc_menu->AppendSeparator();
     my $doc_eol_menu  = Wx::Menu->new();
-    $doc_eol_menu->AppendRadioItem( 15410, '&Linux (LF)', '' );
-    $doc_eol_menu->AppendRadioItem( 15420, '&Mac (CR)', '' );
-    $doc_eol_menu->AppendRadioItem( 15430, '&Windows (CR+LF)', '' );
+    $doc_eol_menu->AppendRadioItem( 15410, '&Linux (LF)', 'use only LF as line end character and convert all line endings to it' );
+    $doc_eol_menu->AppendRadioItem( 15420, '&Mac (CR)', 'use only CR as line end character and convert all line endings to it' );
+    $doc_eol_menu->AppendRadioItem( 15430, '&Windows (CR+LF)', 'use CR and LF combination as line end character and convert all line endings to it' );
     $doc_menu->Check(15410, 1);
     $doc_menu->Append( 15400, '&Line Ending', $doc_eol_menu, '' );
-    $doc_menu->Append( 15500, "Convert EOL", "converting end of line character to current setting" );
-    $doc_menu->AppendSeparator();
     my $doc_encoding_menu  = Wx::Menu->new();
     $doc_encoding_menu->AppendRadioItem( 15601, 'UTF-8' );
     $doc_menu->Check(15601, 1);
