@@ -22,18 +22,73 @@ sub new {
     $self->{'tab_size'} = 4;
     $self->{'tab_space'} = ' ' x $self->{'tab_size'};
     $self->SetWordChars('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._$@%&*\\');
-    #$self->BraceHighlightIndicator( 1, 1);
     $self->SetAdditionalCaretsBlink( 1 );
     $self->SetAdditionalCaretsVisible( 1 );
     $self->SetAdditionalSelectionTyping( 1 );
     $self->SetIndentationGuides( 2 );  # wxSTC_WS_VISIBLEAFTERINDENT   2   wxSTC_WS_VISIBLEALWAYS 1
     # $self->SetAdditionalSelAlpha( 1 );
     $self->SetScrollWidth(300);
-    Kephra::App::Editor::SyntaxMode::apply( $self );
+    $self->set_margin;
+    $self->load_font;  # before setting highlighting
+    Kephra::App::Editor::SyntaxMode::apply( $self, 'perl' );
+    $self->set_tab_size( $self->{'tab_size'} );
+    $self->set_tab_usage( 0 );
     $self->mount_events();
     $self->{'change_pos'} = $self->{'change_prev'} = -1;
     return $self;
 }
+
+sub set_margin {
+    my ($self, $style) = @_;
+
+    if (not defined $style or not $style or $style eq 'default') {
+        $self->SetMarginType( 0, &Wx::wxSTC_MARGIN_SYMBOL );
+        $self->SetMarginType( 1, &Wx::wxSTC_MARGIN_NUMBER );
+        $self->SetMarginType( 2, &Wx::wxSTC_MARGIN_SYMBOL );
+        $self->SetMarginType( 3, &Wx::wxSTC_MARGIN_SYMBOL );
+        $self->SetMarginMask( 0, 0x01FFFFFF );
+        $self->SetMarginMask( 1, 0 );
+        $self->SetMarginMask( 2, 0x01FFFFFF); #  | &Wx::wxSTC_MASK_FOLDERS
+        $self->SetMarginMask( 3, &Wx::wxSTC_MASK_FOLDERS );
+        $self->SetMarginSensitive( 0, 1 );
+        $self->SetMarginSensitive( 1, 1 );
+        $self->SetMarginSensitive( 2, 1 );
+        $self->SetMarginSensitive( 3, 0 );
+        $self->SetMarginWidth(0,  1);
+        $self->SetMarginWidth(1, 47);
+        $self->SetMarginWidth(2, 22);
+        $self->SetMarginWidth(3,  2);
+        # extra text margin
+    }
+    elsif ($style eq 'no') { $self->SetMarginWidth($_, 0) for 1..3 }
+
+    # extra margin left and right inside the white text area
+    $self->SetMargins(2, 2);
+    $self;
+}
+
+sub load_font {
+    my ($self, $font) = @_;
+    my ( $fontweight, $fontstyle ) = ( &Wx::wxNORMAL, &Wx::wxNORMAL );
+    $font = {
+        family => $^O eq 'darwin' ? 'Andale Mono' : 'Courier New', # old default
+                # Courier New
+        #family => 'DejaVu Sans Mono', # new
+        size => $^O eq 'darwin' ? 13 : 11,
+        style => 'normal',
+        weight => 'normal',
+    } unless defined $font;
+    #my $font = _config()->{font};
+    $fontweight = &Wx::wxLIGHT  if $font->{weight} eq 'light';
+    $fontweight = &Wx::wxBOLD   if $font->{weight} eq 'bold';
+    $fontstyle  = &Wx::wxSLANT  if $font->{style}  eq 'slant';
+    $fontstyle  = &Wx::wxITALIC if $font->{style}  eq 'italic';
+    my $wx_font = Wx::Font->new(
+        $font->{size}, &Wx::wxDEFAULT, $fontstyle, $fontweight, 0, $font->{family}
+    );
+    $self->StyleSetFont( &Wx::wxSTC_STYLE_DEFAULT, $wx_font ) if $wx_font->Ok > 0;
+}
+
 
 sub mount_events {
     my ($self, @which) = @_;
@@ -47,7 +102,7 @@ sub mount_events {
         my $mod = $event->GetModifiers; #  say $code;
         #   alt ",$event->AltDown, " ; ctrl ",$event->ControlDown; say "mod $mod code $code";
 
-        if ( $event->ControlDown and $mod != 3) { # $mod == 2 and 
+        if ( $event->ControlDown and $mod != 3) { # $mod == 2 and
             if ($event->AltDown) {
                 $event->Skip
             } else {
@@ -74,8 +129,8 @@ sub mount_events {
             }
         } else {
             if ($mod == 3) { # Alt Gr
-                if ($event->ShiftDown) {  
-                    $event->Skip 
+                if ($event->ShiftDown) {
+                    $event->Skip
                 } else {
                     if    ($code == 81)                    { $ed->insert_text('@') } # Q
                     elsif ($code == 55 )                   { $ed->insert_brace('{', '}') }
@@ -122,24 +177,24 @@ sub mount_events {
         my ($ed, $ev) = @_;
         #my $XY = $ev->GetLogicalPosition( Wx::MemoryDC->new( ) );
         #my $pos = $ed->XYToPosition( $XY->x, $XY->y);
-        # $ed->expand_selecton( $pos ) or 
+        # $ed->expand_selecton( $pos ) or
         $ev->Skip;
     });
     # Wx::Event::EVT_RIGHT_DOWN( $self, sub {});
     Wx::Event::EVT_MIDDLE_UP( $self, sub {  $_[1]->Skip;  });
- 
+
     # Wx::Event::EVT_STC_CHARADDED( $self, $self, sub {  });
     Wx::Event::EVT_STC_CHANGE ( $self, -1, sub {  # edit event
         my ($ed, $event) = @_;
         my $pos = $ed->GetCurrentPos;
-        unless ($ed->{'change_pos'} == $pos) { 
+        unless ($ed->{'change_pos'} == $pos) {
             $ed->{'change_prev'} = $ed->{'change_pos'};
             $ed->{'change_pos'} = $pos;
         }
         # if ($self->SelectionIsRectangle) { } else { }
         $event->Skip;
     });
-    
+
     Wx::Event::EVT_STC_UPDATEUI(         $self, -1, sub { # cursor move event
         my ($ed, $event) = @_;
         my $p = $self->GetCurrentPos;
@@ -154,7 +209,7 @@ sub mount_events {
     Wx::Event::EVT_STC_SAVEPOINTLEFT(    $self, -1, sub { $self->GetParent->set_title(1) });
     Wx::Event::EVT_SET_FOCUS(            $self,     sub { my ($ed, $event ) = @_;        $event->Skip;   });
     # Wx::Event::EVT_DROP_FILES       ($self, sub { say $_[0], $_[1];    $self->GetParent->open_file()  });
-#    Wx::Event::EVT_STC_DO_DROP  ($self, -1, sub { 
+#    Wx::Event::EVT_STC_DO_DROP  ($self, -1, sub {
 #        my ($ed, $event ) = @_; # StyledTextEvent=SCALAR
 #        my $str = $event->GetDragText;
 #        chomp $str;
@@ -175,7 +230,7 @@ sub new_text {
     $self->EmptyUndoBuffer unless defined $soft;
     $self->SetSavePoint;
 }
-           
+
 sub bracelight{
     my ($self, $pos) = @_;
     my $char_before = $self->GetTextRange( $pos-1, $pos );
@@ -187,8 +242,8 @@ sub bracelight{
         $mpos != &Wx::wxSTC_INVALID_POSITION
             ? $self->BraceHighlight($pos - 1, $mpos)
             : $self->BraceBadLight($pos - 1);
-    } elsif ($char_after eq '(' or $char_after eq ')' 
-          or $char_after eq '{' or $char_after eq '}' 
+    } elsif ($char_after eq '(' or $char_after eq ')'
+          or $char_after eq '{' or $char_after eq '}'
           or $char_after eq '[' or $char_after eq ']'){
         my $mpos = $self->BraceMatch( $pos );
         $mpos != &Wx::wxSTC_INVALID_POSITION
@@ -217,7 +272,7 @@ sub new_line {
             $char_before = $self->GetTextRange( $pos-1, $pos );
         }
         if ($char_before eq '{')    { $i+= $self->{'tab_size'} }
-        elsif ($char_before eq '}') { 
+        elsif ($char_before eq '}') {
             my $mpos = $self->BraceMatch( $pos - 1 );
             if ($mpos != &Wx::wxSTC_INVALID_POSITION){
                 $i = $self->GetLineIndentation( $self->LineFromPosition( $mpos ) );
@@ -228,7 +283,7 @@ sub new_line {
         }
     }
     $self->SetLineIndentation( $l, $i );
-    $self->GotoPos( $self->GetLineIndentPosition( $l ) ); 
+    $self->GotoPos( $self->GetLineIndentPosition( $l ) );
 }
 
 sub escape {
@@ -239,7 +294,7 @@ sub escape {
     if ($win->IsFullScreen) { return $win->toggle_full_screen};
     # 3. focus  to edit field
     #say 'esc';
-}    
+}
 
 sub sel {
     my ($self) = @_;
@@ -270,7 +325,7 @@ sub goto_prev_marker {
     $self->GotoLine( $target ) if $target > -1;
 }
 
-sub goto_next_marker { 
+sub goto_next_marker {
     my ($self) = @_;
     my $line = 	$self->GetCurrentLine ();
     $line++ if $self->MarkerGet( $line );
@@ -345,7 +400,7 @@ sub goto_prev_sub {
     my $new_pos = $self->prev_sub;
     if ($new_pos > -1) { $self->GotoPos( $self->GetCurrentPos ) }
     else               { $self->GotoPos( $pos )  }
-    
+
 }
 sub goto_next_sub {
     my ($self) = @_;
@@ -358,16 +413,16 @@ sub goto_next_sub {
 
 sub marker_toggle {
     my ($self) = @_;
-    
+
 }
 
 sub marker_prev {
     my ($self) = @_;
-    
+
 }
 sub marker_next {
     my ($self) = @_;
-    
+
 }
 
 1;

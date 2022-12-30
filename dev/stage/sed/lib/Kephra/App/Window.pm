@@ -97,7 +97,7 @@ sub save_as_file {
 sub set_title {
     my ($self) = @_;
     my $title .=  $self->{'file'} ? $self->{'file'} : '<unnamed>';
-    $title .= "  - Kephra";
+    $title .= " - Kephra";
     $title = '* '.$title if $self->{'ed'}->GetModify();
     $self->SetTitle( $title );
 }

@@ -21,11 +21,11 @@ sub mount {
     $file_menu->AppendSeparator();
     $file_menu->Append( 11900, "&Quit\tCtrl+Q", "close program" );
     $file_menu->Append( 11910, "No Ask Qui&t\tCtrl+Shift+Q", "close program without file dialog" );
-    
+
     my $edit_menu = Wx::Menu->new();
     $edit_menu->Append( 12100, "&Undo\tCtrl+Z",       "undo last text change" );
     $edit_menu->Append( 12110, "&Redo\tCtrl+Y",       "undo last undo" );
-    $edit_menu->AppendSeparator();                    
+    $edit_menu->AppendSeparator();
     $edit_menu->Append( 12200, "&Cut\tCtrl+X",        "delete selected text and move it into clipboard" );
     $edit_menu->Append( 12210, "C&opy\tCtrl+C",       "move selected text into clipboard" );
     $edit_menu->Append( 12220, "&Paste\tCtrl+V",      "insert clipboard content at cursor position" );
@@ -48,7 +48,7 @@ sub mount {
     $format_menu->AppendSeparator();
     $format_menu->Append( 13300, "&Block Comment\tCtrl+K", "insert or remove (toggle) script comment with #~" );
     $format_menu->Append( 13310, "&Comment\tCtrl+Shift+K", "insert or remove (toggle) script comment with #" );
-    
+
     my $search_menu = Wx::Menu->new();
     $search_menu->Append( 14110, "&Find\tCtrl+F",        "enter search phrase into search bar" );
     $search_menu->Append( 14120, "Find &Prev\tShift+F3", "jump to previous match of search term" );
@@ -89,16 +89,16 @@ sub mount {
     $doc_menu->Append( 15600, '&Encoding', $doc_encoding_menu, '' );
     my $doc_mode_menu  = Wx::Menu->new();
     $doc_mode_menu->AppendRadioItem( 15701, 'no' );
+    $doc_mode_menu->AppendRadioItem( 15705, 'C / ++' );
+    $doc_mode_menu->AppendRadioItem( 15707, 'Markdown' );
     $doc_mode_menu->AppendRadioItem( 15702, 'Perl' );
     $doc_mode_menu->AppendRadioItem( 15703, 'Python' );
     $doc_mode_menu->AppendRadioItem( 15704, 'Ruby' );
-    $doc_mode_menu->AppendRadioItem( 15705, 'C' );
     $doc_mode_menu->AppendRadioItem( 15706, 'Rust' );
-    $doc_mode_menu->AppendRadioItem( 15707, 'Markdown' );
     $doc_mode_menu->AppendRadioItem( 15708, 'YAML' );
     $doc_menu->Append( 15700, '&Syntax Mode', $doc_mode_menu, '' );
     $doc_menu->Check(15702, 1);
-        
+
     my $view_menu = Wx::Menu->new();
     $view_menu->AppendCheckItem( 16110, "&Whitespace",    "make white space and tabs visible by dots and arrows" );
     $view_menu->AppendCheckItem( 16120, "&EOL Marker",    "show symbols marking the invisible end of line characters" );
@@ -123,7 +123,7 @@ sub mount {
     $view_menu->Append( 16300, '&Zoom', $zoom_menu, '' );
     $view_menu->AppendCheckItem( 16410, "&Fullscreen\tF11",  "switches to or from fullscreen mode" );
     $zoom_menu->Check(16340, 1);
-    
+
     my $help_menu = Wx::Menu->new();
     #$help_menu->Append( 15100, "&Usage",  "Explaining the user interface" );
     #$help_menu->Append( 15200, "&Keymap\tAlt+K",  "listings with all key kombination from all widgets" );
@@ -138,7 +138,7 @@ sub mount {
     $menu_bar->Append( $view_menu,   '&View' );
     $menu_bar->Append( $help_menu,   '&Help' );
     $win->SetMenuBar($menu_bar);
-    
+
     Wx::Event::EVT_MENU( $win, 11100, sub { $win->new_file                     });
     Wx::Event::EVT_MENU( $win, 11200, sub { $win->open_file                    });
     Wx::Event::EVT_MENU( $win, 11300, sub { $win->reopen_file                  });
