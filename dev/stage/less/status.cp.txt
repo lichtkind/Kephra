@@ -1,21 +1,20 @@
 
-          ==[[ stage 0 : Single document EDitor]]==
-          
- = read, writes files, utf safe, advanced editing, perl highlighting, search & replace bar 
+0.405
+
+  config for current file , mode , indention size, mode , coding 
+
+0.406
+
+ shrink selection, auto get indention and tab mode
 
 
-File:  new open reopen save save_as
+tab bar, move by mouse and keyboard
 
-Edit:  undo redo, cut copy paste replace delete, grow shrink slection, duplicated
+session files
 
-Format:  move, indent dedent, single block comment
+split view
 
+file browser
 
-Find:   Find next prev, Replace prev next in selection all, 
+project prowser
 
-       Bar: All, find replacement, revert
-
-Goto    Edit, Marker
-   
-                
-autoindent, bracelight, brace/block/sub nav
