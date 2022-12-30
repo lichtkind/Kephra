@@ -2,7 +2,7 @@ use v5.12;
 use warnings;
 use Wx;
 
-package Kephra::App::Editor::SyntaxMode::No;
+package Kephra::App::Editor::SyntaxMode::CPP;
 
 
 sub set {

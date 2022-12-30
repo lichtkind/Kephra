@@ -426,3 +426,46 @@ sub marker_next {
 }
 
 1;
+
+
+
+__END__
+
+$self->SetIndicatorCurrent( $c);
+$self->IndicatorFillRange( $start, $len );
+$self->IndicatorClearRange( 0, $len )
+#Wx::Event::EVT_STC_STYLENEEDED($self, sub{})
+#Wx::Event::EVT_STC_CHARADDED($self, sub {});
+#Wx::Event::EVT_STC_ROMODIFYATTEMPT($self, sub{})
+#Wx::Event::EVT_STC_KEY($self, sub{})
+#Wx::Event::EVT_STC_DOUBLECLICK($self, sub{})
+Wx::Event::EVT_STC_UPDATEUI($self, -1, sub {
+#my ($ed, $event) = @_; $event->Skip; print "change \n";
+});
+#Wx::Event::EVT_STC_MODIFIED($self, sub {});
+#Wx::Event::EVT_STC_MACRORECORD($self, sub{})
+#Wx::Event::EVT_STC_MARGINCLICK($self, sub{})
+#Wx::Event::EVT_STC_NEEDSHOWN($self, sub {});
+#Wx::Event::EVT_STC_PAINTED($self, sub{})
+#Wx::Event::EVT_STC_USERLISTSELECTION($self, sub{})
+#Wx::Event::EVT_STC_UR$selfROPPED($self, sub {});
+#Wx::Event::EVT_STC_DWELLSTART($self, sub{})
+#Wx::Event::EVT_STC_DWELLEND($self, sub{})
+#Wx::Event::EVT_STC_START_DRAG($self, sub{})
+#Wx::Event::EVT_STC_DRAG_OVER($self, sub{})
+#Wx::Event::EVT_STC_DO_DROP($self, sub {});
+#Wx::Event::EVT_STC_ZOOM($self, sub{})
+#Wx::Event::EVT_STC_HOTSPOT_CLICK($self, sub{})
+#Wx::Event::EVT_STC_HOTSPOT_DCLICK($self, sub{})
+#Wx::Event::EVT_STC_CALLTIP_CLICK($self, sub{})
+#Wx::Event::EVT_STC_AUTOCOMP_SELECTION($self, sub{})
+#$self->SetAcceleratorTable( Wx::AcceleratorTable->new() );
+#Wx::Event::EVT_STC_SAVEPOINTREACHED($self, -1, \&Kephra::File::savepoint_reached);
+#Wx::Event::EVT_STC_SAVEPOINTLEFT($self, -1, \&Kephra::File::savepoint_left);
+$self->SetAcceleratorTable(
+Wx::AcceleratorTable->new(
+[&Wx::wxACCEL_CTRL, ord 'n', 1000],
+));
+
+
+

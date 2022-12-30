@@ -8,7 +8,7 @@ package Kephra::App::Editor::SyntaxMode::Perl;
 sub set {
     my ($self) = @_;
     $self->StyleClearAll;
-    $self->SetLexer( &Wx::wxSTC_LEX_PERL );         # Set Lexers to use
+    $self->SetLexer( &Wx::wxSTC_LEX_PERL );
     $self->SetKeyWords(0, 'NULL
 __FILE__ __LINE__ __PACKAGE__ __DATA__ __END__ __WARN__ __DIE__
 AUTOLOAD BEGIN CHECK CORE DESTROY END EQ GE GT INIT LE LT NE UNITCHECK

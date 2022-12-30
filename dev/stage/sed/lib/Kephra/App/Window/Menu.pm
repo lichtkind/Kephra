@@ -88,16 +88,11 @@ sub mount {
     $doc_encoding_menu->AppendRadioItem( 15602, 'ASCII' );
     $doc_menu->Append( 15600, '&Encoding', $doc_encoding_menu, '' );
     my $doc_mode_menu  = Wx::Menu->new();
-    $doc_mode_menu->AppendRadioItem( 15701, 'no' );
-    $doc_mode_menu->AppendRadioItem( 15705, 'C / ++' );
-    $doc_mode_menu->AppendRadioItem( 15707, 'Markdown' );
-    $doc_mode_menu->AppendRadioItem( 15702, 'Perl' );
-    $doc_mode_menu->AppendRadioItem( 15703, 'Python' );
-    $doc_mode_menu->AppendRadioItem( 15704, 'Ruby' );
-    $doc_mode_menu->AppendRadioItem( 15706, 'Rust' );
-    $doc_mode_menu->AppendRadioItem( 15708, 'YAML' );
+    my @mode_label = (qw/no Bash C\/++ JSON Markdown Perl Python Ruby Rust YAML/);
+    my @modes      = (qw/no bash cpp json markdown perl python ruby rust yaml/);
+    $doc_mode_menu->AppendRadioItem( 15701+$_, $mode_label[$_] ) for 0 .. $#mode_label;
     $doc_menu->Append( 15700, '&Syntax Mode', $doc_mode_menu, '' );
-    $doc_menu->Check(15702, 1);
+    $doc_menu->Check(15706, 1);
 
     my $view_menu = Wx::Menu->new();
     $view_menu->AppendCheckItem( 16110, "&Whitespace",    "make white space and tabs visible by dots and arrows" );
@@ -182,6 +177,7 @@ sub mount {
     Wx::Event::EVT_MENU( $win, 15410, sub { $win->{'ed'}->set_EOL_lf   } );
     Wx::Event::EVT_MENU( $win, 15420, sub { $win->{'ed'}->set_EOL_cr   } );
     Wx::Event::EVT_MENU( $win, 15430, sub { $win->{'ed'}->set_EOL_crlf } );
+    Wx::Event::EVT_MENU( $win, 15701 + $_, eval 'sub { Kephra::App::Editor::SyntaxMode::set($win->{ed},"'.$modes[$_].'")}') for 0 .. $#modes;
     Wx::Event::EVT_MENU( $win, 16110, sub { $win->{'ed'}->toggle_view_whitespace });
     Wx::Event::EVT_MENU( $win, 16120, sub { $win->{'ed'}->toggle_view_eol         });
     Wx::Event::EVT_MENU( $win, 16130, sub { $win->{'ed'}->toggle_view_inden_guide  });
