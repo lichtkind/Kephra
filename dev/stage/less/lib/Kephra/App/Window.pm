@@ -50,13 +50,13 @@ sub new {
     Kephra::App::Window::Menu::mount( $self );
     $self->set_title();
     $self->{'rb'}->show(0);
-    
+
     $self->read_file( __FILE__);
 
     return $self;
 }
 
-sub new_file { 
+sub new_file {
     my $self = shift;
     $self->{'file'} = '';
     $self->{'ed'}->new_text( '' );
@@ -93,6 +93,11 @@ sub save_as_file {
     $self->save_file;
 }
 
+sub save_under_file {
+    my $self = shift;
+    my $file = Kephra::App::Dialog::get_file_save();
+    Kephra::IO::LocalFile::write( $file,  $self->{'encoding'}, $self->{'ed'}->GetText() );
+}
 
 sub set_title {
     my ($self) = @_;

@@ -11,23 +11,28 @@ sub mount {
     my $ed = $win->{'ed'};
 
     my $file_menu = Wx::Menu->new();
-    $file_menu->Append( 11100, "&New\tCtrl+N", "complete a sketch drawing" );
+    $file_menu->Append( 11100, "&New\tCtrl+N", "create new empty document" );
     $file_menu->AppendSeparator();
-    $file_menu->Append( 11200, "&Open\tCtrl+O", "save currently displayed image" );
-    $file_menu->Append( 11300, "&Reload\tCtrl+Shift+O", "save currently displayed image" );
+    $file_menu->Append( 11200, "&Open\tCtrl+O", "create document by loading a given (dialog) file" );
+    $file_menu->Append( 11300, "&Reload\tCtrl+Shift+O", "disregard current state of document and laod associated file" );
     $file_menu->AppendSeparator();
-    $file_menu->Append( 11400, "&Save\tCtrl+S", "save currently displayed image" );
-    $file_menu->Append( 11500, "Save &As\tCtrl+Shift+S", "save currently displayed image" );
+    $file_menu->Append( 11400, "&Save\tCtrl+S", "save current sate of document into associated file" );
+    $file_menu->Append( 11500, "Save &As\tCtrl+Shift+S", "save document into different file, which will be the new associated file" );
+    $file_menu->Append( 11600, "Save &Under\tAlt+Shift+S", "save document into different file, but keep the old associated file" );
     $file_menu->AppendSeparator();
     $file_menu->Append( 11900, "&Quit\tCtrl+Q", "close program" );
     $file_menu->Append( 11910, "No Ask Qui&t\tCtrl+Shift+Q", "close program without file dialog" );
 
     my $edit_menu = Wx::Menu->new();
-    $edit_menu->Append( 12100, "&Undo\tCtrl+Z",       "undo last text change" );
-    $edit_menu->Append( 12110, "&Redo\tCtrl+Y",       "undo last undo" );
+    $edit_menu->Append( 12110, "&Undo\tCtrl+Z",       "undo last text change" );
+    $edit_menu->Append( 12120, "&Redo\tCtrl+Y",       "undo last undo" );
+    $edit_menu->Append( 12130, "&fast Undo\tCtrl+Shift+Z",       "undo last five changes" );
+    $edit_menu->Append( 12140, "f&ast Redo\tCtrl+Shift+Y",       "undo last five undo" );
+    $edit_menu->Append( 12150, "&total Undo\tAlt+Shift+Z",       "undo all changes" );
+    $edit_menu->Append( 12160, "t&otal Redo\tAlt+Shift+Y",       "redo all changes" );
     $edit_menu->AppendSeparator();
     $edit_menu->Append( 12200, "&Cut\tCtrl+X",        "delete selected text and move it into clipboard" );
-    $edit_menu->Append( 12210, "C&opy\tCtrl+C",       "move selected text into clipboard" );
+    $edit_menu->Append( 12210, "Cop&y\tCtrl+C",       "move selected text into clipboard" );
     $edit_menu->Append( 12220, "&Paste\tCtrl+V",      "insert clipboard content at cursor position" );
     $edit_menu->Append( 12230, "S&wap\tCtrl+Shift+V", "replace selected text with clipboard content" );
     $edit_menu->Append( 12240, "&Delete\tDel",        "delete selected text" );
@@ -35,7 +40,7 @@ sub mount {
     $edit_menu->Append( 12300, "&Grow Selection\tCtrl+A", "select entire text" );
     #$edit_menu->Append( 12310, "&Shrink Selection\tCtrl+Shift+A", "select entire text" );
     $edit_menu->AppendSeparator();
-    $edit_menu->Append( 12400, "Du&plicate\tCtrl+D",     "copy and paste selected text or current line" );
+    $edit_menu->Append( 12400, "Dup&licate\tCtrl+D",     "copy and paste selected text or current line" );
 
     my $format_menu = Wx::Menu->new();
     $format_menu->Append( 13100, "Move &Left\tAlt+Left",  "move current line or selected lines one character to the left" );
@@ -139,10 +144,15 @@ sub mount {
     Wx::Event::EVT_MENU( $win, 11300, sub { $win->reopen_file                  });
     Wx::Event::EVT_MENU( $win, 11400, sub { $win->save_file                    });
     Wx::Event::EVT_MENU( $win, 11500, sub { $win->save_as_file                 });
+    Wx::Event::EVT_MENU( $win, 11600, sub { $win->save_under_file              });
     Wx::Event::EVT_MENU( $win, 11900, sub { $win->Close                        });
     Wx::Event::EVT_MENU( $win, 11910, sub { $win->{'dontask'} = 1; $win->Close });
-    Wx::Event::EVT_MENU( $win, 12100, sub { $win->{'ed'}->Undo                 });
-    Wx::Event::EVT_MENU( $win, 12110, sub { $win->{'ed'}->Redo                 });
+    Wx::Event::EVT_MENU( $win, 12110, sub { $win->{'ed'}->Undo                 });
+    Wx::Event::EVT_MENU( $win, 12120, sub { $win->{'ed'}->Redo                 });
+    Wx::Event::EVT_MENU( $win, 12130, sub { $win->{'ed'}->fast_undo            });
+    Wx::Event::EVT_MENU( $win, 12140, sub { $win->{'ed'}->fast_redo            });
+    Wx::Event::EVT_MENU( $win, 12150, sub { $win->{'ed'}->total_undo           });
+    Wx::Event::EVT_MENU( $win, 12160, sub { $win->{'ed'}->total_redo           });
     Wx::Event::EVT_MENU( $win, 12200, sub { $win->{'ed'}->cut                  });
     Wx::Event::EVT_MENU( $win, 12210, sub { $win->{'ed'}->copy                 });
     Wx::Event::EVT_MENU( $win, 12220, sub { $win->{'ed'}->Paste                });
