@@ -1,37 +1,51 @@
 use v5.12;
 use warnings;
-use File::HomeDir;
-use File::Spec;
-use Kephra::Config::Default;
-use YAML;
 
 package Kephra::Config;
 
-my $file = '.harmonograph';
+use File::HomeDir;
+use File::Spec;
+use YAML;
+
+use Kephra::Config::Default;
+
+my $file_name = File::Spec->catfile( File::HomeDir->my_home, '.config', 'kephra');
 
 sub new {
-    my $self = {}; 
-    bless $self;
-    
-    #~ for my $d ('.', File::HomeDir->my_home, File::HomeDir->my_documents){
-        #~ my $path = File::Spec->catfile( $d, $file );
-        #~ $dir = $d, last if -r $path;
-    #~ }
-    #~ my $data = $dir 
-             #~ ? load( $pkg, File::Spec->catfile( $dir, $file ) )
-             #~ : $default;
-    #~ $dir ||= File::HomeDir->my_home;
-    #~ bless { path => File::Spec->catfile( $dir, $file ), data => $data };
+    my $default = Kephra::Config::Default::get();
+    my $data = {};
+    if (-r $file_name){
+        $data = (YAML::LoadFile( $file_name ))[0];
+say $data;
+say $data->{'session'};
+        check( $data, $default);
+    } else { $data = $default; }
+    return bless {data => $data};
+}
 
+sub write {
+    my ($self) = @_;
+    YAML::DumpFile( $file_name, $self->{'data'} );
+}
+
+sub reload {
+    my ($self) = @_;
 
 }
 
-sub set {
+sub set_value {
+    my ($self, $value, @keys) = @_;
 }
 
-sub get {
-    
+sub get_value {
+    my ($self, @keys) = @_;
 }
 
+
+sub check {
+    my ($data, $default) = @_;
+
+
+}
 
 1;

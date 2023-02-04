@@ -9,25 +9,27 @@ package Kephra;
 
 our $VERSION = '0.405';
 our $NAME = 'Kephra';
-our $STAGE = 'sed';
+# our $STAGE = 'sed';
 
 use base qw(Wx::App);
 
 sub OnInit {
     my $app  = shift;
-    my $window = $app->{'win'} = Kephra::App::Window->new();
+    my $config = $app->{'config'} = Kephra::Config->new();
+    my $window = $app->{'window'} = Kephra::App::Window->new( $app );
     $window->Center();
     $window->Show(1);
     $app->SetTopWindow( $window );
     1;
 }
-    
-sub close  { $_[0]->{'win'}->Close() }
+
+sub close  { $_[0]->{'window'}->Close() }
 
 sub OnExit {
     my $app = shift;
    	Wx::wxTheClipboard->Flush;
-    # $app->{'win'}->Destroy;
+    $app->{'config'}->write;
+    # $app->{'window'}->Destroy;
     1;
 }
 
@@ -41,7 +43,7 @@ __END__
 
 Kephra - compact, effective and beautiful coding editor
 
-=head1 SYNOPSIS 
+=head1 SYNOPSIS
 
     kephra [file_name]
 
@@ -50,7 +52,7 @@ Small single file editor for perl with max editing comfort.
 =head1 DESCRIPTION
 
 Kephra is an editor from and for programmers, currently at start of rewrite.
-This page gives you a summary how to use it. 
+This page gives you a summary how to use it.
 
 =for HTML <p>
 <img src="https://raw.githubusercontent.com/lichtkind/Kephra/master/dev/img/sed.png"  alt="point chart"   width="300" height="225">
@@ -85,7 +87,7 @@ Core functions: C<cut> (Ctrl+X) removes the selected text or the current line
 (if nothing is selected) and copies it into the clipboard.
 Same is true for C<copy> (Ctrl+C), which only copies without removing anything.
 C<Paste> (Ctrl+V) inserts the copied text on the position of the caret (cursor).
-C<Swap> (Ctrl+Shift+V) streamlines the copy and paste process a bit by replacing 
+C<Swap> (Ctrl+Shift+V) streamlines the copy and paste process a bit by replacing
 the selection with the old clipboard content, while copying the selection or current line.
 C<Delete> (Del) only removes the selection or character on the caret position.
 C<Duplicate> (Ctrl+D) copies and paste's the selected text or current line,
@@ -100,7 +102,7 @@ Holding Alt moves the selected or current line up or down. Left and right
 indent and dedents char wise in this mode. Normal indent/dedent listens
 to Tab and Shift+Tab.
 
-Ctrl+K toggles comment status of current or selected lines (commented 
+Ctrl+K toggles comment status of current or selected lines (commented
 becomes uncommented and vice versa). Ctrl+Shift+K does the same, but with
 one difference. Ladder are the normal perl comments you might know
 (called line comments). The first option adds another letter after the
@@ -152,7 +154,7 @@ Further down are options to zoom text or break it on the right border of visibil
 Development is done is stages which are focused on different feature sets.
 Wer are in stage one called B<sed>, where its all about basic editing
 with comfort and effectiveness Next stage will be called B<med> and will
-be about having open several docs. Because I<Kephra> is mainly released 
+be about having open several docs. Because I<Kephra> is mainly released
 now on CPAN we will go on with versioning and choose 0.401 instead of 0.01.
 
 For more please check the TODO file.
