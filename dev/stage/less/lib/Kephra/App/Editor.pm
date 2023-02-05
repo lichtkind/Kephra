@@ -26,9 +26,11 @@ sub new {
     $self->SetAdditionalCaretsBlink( 1 );
     $self->SetAdditionalCaretsVisible( 1 );
     $self->SetAdditionalSelectionTyping( 1 );
-    $self->SetIndentationGuides( 2 );  # wxSTC_WS_VISIBLEAFTERINDENT   2   wxSTC_WS_VISIBLEALWAYS 1
+    $self->SetIndentationGuides( &Wx::wxSTC_WS_VISIBLEAFTERINDENT );  # wxSTC_WS_VISIBLEAFTERINDENT   2   wxSTC_WS_VISIBLEALWAYS 1
     # $self->SetAdditionalSelAlpha( 1 );
     $self->SetScrollWidth(300);
+    $self->SetYCaretPolicy( &Wx::wxSTC_CARET_SLOP, 5);
+    $self->SetVisiblePolicy( &Wx::wxSTC_VISIBLE_SLOP, 5);
     $self->set_margin;
     $self->load_font;  # before setting highlighting
     Kephra::App::Editor::SyntaxMode::apply( $self, 'perl' );
@@ -39,12 +41,25 @@ sub new {
     return $self;
 }
 
+sub window { $_[0]->GetParent }
+
 sub apply_config {
     my ($self, $config) = @_;
-    my $config_value = $config->get_value('editor');
+    my $config_value = $config->get_value('view');
+    $self->set_zoom_level( $config_value->{'zoom_level'} );
+    $self->toggle_view_whitespace     unless $config_value->{'whitespace'}    == $self->view_whitespace_mode;
+    $self->toggle_view_eol            unless $config_value->{'eol'}           == $self->view_eol_mode;
+    $self->toggle_view_indent_guide   unless $config_value->{'indent_guide'}  == $self->indent_guide_mode;
+    $self->toggle_view_right_margin   unless $config_value->{'right_margin'}  == $self->right_margin_mode;
+    $self->toggle_view_line_nr_margin unless $config_value->{'line_nr_margin'}== $self->line_nr_margin_mode;
+    $self->toggle_view_marker_margin  unless $config_value->{'marker_margin'} == $self->marker_margin_mode;
+    $self->toggle_view_caret_line     unless $config_value->{'caret_line'}    == $self->view_caret_line_mode;
+    $self->toggle_view_line_wrap      unless $config_value->{'line_wrap'}     == $self->line_wrap_mode;
+    $self->window->toggle_full_screen unless $config_value->{'full_screen'}   == $self->window->IsFullScreen;
+    $config_value = $config->get_value('editor');
     $self->{ $_ } = $config_value->{ $_ } for qw/change_pos change_prev/;
     $self->init_marker( @{$config_value->{'marker'}} );
-    $self->SetSelection( $config_value->{'cursor_pos'}, $config_value->{'cursor_pos'});
+    $self->SetSelection( $config_value->{'caret_pos'}, $config_value->{'caret_pos'});
     $self->EnsureCaretVisible;
 }
 
@@ -52,38 +67,20 @@ sub save_config {
     my ($self, $config) = @_;
     $config->set_value( { change_pos => $self->{'change_pos'},
                           change_prev => $self->{'change_prev'},
-                          cursor_pos => $self->GetCurrentPos,
+                          caret_pos => $self->GetCurrentPos,
                           marker => [ $self->marker_lines ],
                         } , 'editor');
-}
-
-sub set_margin {
-    my ($self, $style) = @_;
-
-    if (not defined $style or not $style or $style eq 'default') {
-        $self->SetMarginType( 0, &Wx::wxSTC_MARGIN_SYMBOL );
-        $self->SetMarginType( 1, &Wx::wxSTC_MARGIN_NUMBER );
-        $self->SetMarginType( 2, &Wx::wxSTC_MARGIN_SYMBOL );
-        $self->SetMarginType( 3, &Wx::wxSTC_MARGIN_SYMBOL );
-        $self->SetMarginMask( 0, 0x01FFFFFF );
-        $self->SetMarginMask( 1, 0 );
-        $self->SetMarginMask( 2, 0x01FFFFFF); #  | &Wx::wxSTC_MASK_FOLDERS
-        $self->SetMarginMask( 3, &Wx::wxSTC_MASK_FOLDERS );
-        $self->SetMarginSensitive( 0, 1 );
-        $self->SetMarginSensitive( 1, 1 );
-        $self->SetMarginSensitive( 2, 1 );
-        $self->SetMarginSensitive( 3, 0 );
-        $self->SetMarginWidth(0,  1);
-        $self->SetMarginWidth(1, 47);
-        $self->SetMarginWidth(2, 22);
-        $self->SetMarginWidth(3,  2);
-        # extra text margin
-    }
-    elsif ($style eq 'no') { $self->SetMarginWidth($_, 0) for 1..3 }
-
-    # extra margin left and right inside the white text area
-    $self->SetMargins(2, 2);
-    $self;
+    $config->set_value( { whitespace     => $self->view_whitespace_mode,
+                          eol            => $self->view_eol_mode,
+                          indent_guide   => $self->indent_guide_mode,
+                          right_margin   => $self->right_margin_mode,
+                          line_nr_margin => $self->line_nr_margin_mode,
+                          marker_margin  => $self->marker_margin_mode,
+                          caret_line     => $self->view_caret_line_mode,
+                          line_wrap      => $self->line_wrap_mode,
+                          zoom_level     => $self->get_zoom_level,
+                          full_screen    => int $self->window->IsFullScreen,
+                        } , 'view');
 }
 
 sub load_font {
@@ -91,8 +88,7 @@ sub load_font {
     my ( $fontweight, $fontstyle ) = ( &Wx::wxNORMAL, &Wx::wxNORMAL );
     $font = {
         family => $^O eq 'darwin' ? 'Andale Mono' : 'Courier New', # old default
-                # Courier New
-        #family => 'DejaVu Sans Mono', # new
+        # family => 'DejaVu Sans Mono', # new    # Courier New
         size => $^O eq 'darwin' ? 13 : 11,
         style => 'normal',
         weight => 'normal',

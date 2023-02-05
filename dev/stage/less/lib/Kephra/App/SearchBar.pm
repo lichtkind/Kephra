@@ -97,6 +97,7 @@ sub new {
 
 sub editor      { $_[0]->GetParent->{'editor'} }
 sub replace_bar { $_[0]->GetParent->{'replacebar'} }
+sub search_term { $_[0]->{'text'}->GetValue }
 
 sub show {
     my ($self, $visible) = @_;

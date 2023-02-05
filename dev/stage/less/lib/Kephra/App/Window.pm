@@ -13,7 +13,7 @@ use Kephra::IO::LocalFile;
 
 sub new {
     my ($class, $parent) = @_;
-    my $self = $class->SUPER::new( undef, -1, '', [-1,-1], [1000,800] );
+    my $self = $class->SUPER::new( undef, -1, '', [-1,-1], [1200,1000] );
     $self->CreateStatusBar(3);
     $self->SetStatusWidths(100, 50, -1);
     $self->SetStatusBarPane(2);
@@ -54,6 +54,7 @@ sub new {
 
     Kephra::App::Window::Menu::mount( $self );
     $self->set_title();
+    $self->{'searchbar'}->show(1);
     $self->{'replacebar'}->show(0);
 
     $self->read_file( $self->config->get_value('file') ); # open the last opened file

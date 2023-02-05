@@ -10,11 +10,20 @@ sub get {{
     editor => {
         change_pos => -1,
         change_prev => -1,
-        cursor_pos => -1,
+        caret_pos => -1,
         marker => [],
     },
     view => {
-        right_margin => 1,
+        whitespace    => 1,
+        caret_line    => 1,
+        eol           => 0,
+        line_wrap => 0,
+        line_nr_margin => 1,
+        marker_margin => 1,
+        right_margin  => 1,
+        indent_guide  => 1,
+        zoom_level => 0,
+        full_screen => 0,
     },
 
 
