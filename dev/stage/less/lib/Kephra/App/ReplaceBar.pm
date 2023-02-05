@@ -45,7 +45,7 @@ sub new {
     Wx::Event::EVT_BUTTON( $self, $self->{'rnext'},  sub { $self->revert_next  });
     Wx::Event::EVT_BUTTON( $self, $self->{'close'},  sub { $self->close        });
     # Wx::Event::EVT_TEXT_ENTER( $self, $self->{'text'}, sub {  });
-    
+
     Wx::Event::EVT_KEY_DOWN( $self->{'text'}, sub {
         my ($ed, $event) = @_;
         my $code = $event->GetKeyCode;  # my $mod = $event->GetModifiers();
@@ -64,7 +64,7 @@ sub new {
         elsif( $event->ControlDown and $code == ord('R'))           { $self->editor->SetFocus  }
         else { $event->Skip }
     });
-    
+
     my $attr = &Wx::wxGROW | &Wx::wxTOP|&Wx::wxDOWN;
     my $sizer = Wx::BoxSizer->new( &Wx::wxHORIZONTAL );
     $sizer->AddSpacer( 10);
@@ -100,8 +100,8 @@ sub new {
     $self;
 }
 
-sub editor     { $_[0]->GetParent->{'ed'} }
-sub search_bar { $_[0]->GetParent->{'sb'} }
+sub editor     { $_[0]->GetParent->{'editor'} }
+sub search_bar { $_[0]->GetParent->{'searchbar'} }
 
 sub show {
     my ($self, $visible) = @_;
@@ -111,7 +111,7 @@ sub show {
 
 sub enter {
     my ($self) = @_;
-    $self->search_bar->show(1); 
+    $self->search_bar->show(1);
     $self->show(1);
     my $sel = $self->editor->GetSelectedText;
     $self->{'text'}->SetValue( $sel ) if $sel;
@@ -186,7 +186,7 @@ sub replace_next {
 
 sub replace { $_[0]->editor->ReplaceSelection( $_[0]->{'text'}->GetValue ) }
 
-sub replace_once { 
+sub replace_once {
     my ($self) = @_;
     my $ed = $self->editor;
     my ($start, $end) = $ed->GetSelection;

@@ -8,6 +8,7 @@ use Wx::STC;
 use Wx::DND;
 #use Wx::Scintilla;
 use Kephra::App::Editor::Edit;
+use Kephra::App::Editor::Goto;
 use Kephra::App::Editor::Move;
 use Kephra::App::Editor::Position;
 use Kephra::App::Editor::Property;
@@ -36,6 +37,24 @@ sub new {
     $self->mount_events();
     $self->{'change_pos'} = $self->{'change_prev'} = -1;
     return $self;
+}
+
+sub apply_config {
+    my ($self, $config) = @_;
+    my $config_value = $config->get_value('editor');
+    $self->{ $_ } = $config_value->{ $_ } for qw/change_pos change_prev/;
+    $self->init_marker( @{$config_value->{'marker'}} );
+    $self->SetSelection( $config_value->{'cursor_pos'}, $config_value->{'cursor_pos'});
+    $self->EnsureCaretVisible;
+}
+
+sub save_config {
+    my ($self, $config) = @_;
+    $config->set_value( { change_pos => $self->{'change_pos'},
+                          change_prev => $self->{'change_prev'},
+                          cursor_pos => $self->GetCurrentPos,
+                          marker => [ $self->marker_lines ],
+                        } , 'editor');
 }
 
 sub set_margin {
@@ -302,132 +321,7 @@ sub sel {
     #say $self->GetStyleAt( $pos);
 }
 
-sub goto_last_edit {
-    my ($self) = @_;
-    return $self->GotoPos( $self->{'change_pos'} ) unless $self->GetCurrentPos == $self->{'change_pos'};
-    $self->GotoPos( $self->{'change_prev'} );
-}
-
-
-sub toggle_marker {
-    my ($self) = @_;
-    my $line = 	$self->GetCurrentLine ();
-    $self->MarkerGet( $line ) ? $self->MarkerDelete( $line, 1) : $self->MarkerAdd( $line, 1);
-}
-sub delete_all_marker { $_[0]->MarkerDeleteAll(1) }
-
-sub goto_prev_marker {
-    my ($self) = @_;
-    my $line = 	$self->GetCurrentLine ();
-    $line-- if $self->MarkerGet( $line );
-    my $target = $self->MarkerPrevious ( $line, 2);
-    $target = $self->MarkerPrevious ( $self->GetLineCount, 2 ) if $target == -1;
-    $self->GotoLine( $target ) if $target > -1;
-}
-
-sub goto_next_marker {
-    my ($self) = @_;
-    my $line = 	$self->GetCurrentLine ();
-    $line++ if $self->MarkerGet( $line );
-    my $target = $self->MarkerNext( $line, 2);
-    $target = $self->MarkerNext( 0, 2 ) if $target == -1;
-    $self->GotoLine( $target ) if $target > -1;
-}
-
-sub goto_prev_block {
-    my ($self) = @_;
-    $self->GotoPos( $self->smart_up_pos );
-    $self->EnsureCaretVisible;
-}
-
-sub goto_next_block {
-    my ($self) = @_;
-    $self->GotoPos( $self->smart_down_pos );
-    $self->EnsureCaretVisible;
-}
-
-sub smart_up_pos {
-    my ($self, $pos) = @_;
-    $pos = $self->GetCurrentPos unless defined $pos;
-    my $bpos = $self->prev_brace_pos( $pos );
-    return $bpos if $bpos != $pos;
-    my $line_nr = $self->get_prev_block_start( $pos );
-    defined $line_nr ? $self->PositionFromLine( $line_nr ) : $pos;
-}
-
-sub smart_down_pos {
-    my ($self, $pos) = @_;
-    $pos = $self->GetCurrentPos unless defined $pos;
-    my $bpos = $self->next_brace_pos( $pos );
-    return $bpos if $bpos != $pos;
-    my $line_nr = $self->get_next_block_start( $pos );
-    defined $line_nr ? $self->PositionFromLine( $line_nr ) : $pos;
-}
-
-sub prev_brace_pos {
-    my ($self, $pos) = @_;
-    $pos = $self->GetCurrentPos unless defined $pos;
-    my $char_before = $self->GetTextRange( $pos-1, $pos );
-    my $char_after = $self->GetTextRange( $pos, $pos + 1);
-    if ( $char_before eq ')' or $char_before eq '}' or $char_before eq ']' ) {
-        my $mpos = $self->BraceMatch( $pos - 1 );
-        return $mpos if $mpos != &Wx::wxSTC_INVALID_POSITION;
-    } elsif ($char_after eq ')' or $char_after eq '}' or $char_after eq ']'){
-        my $mpos = $self->BraceMatch( $pos );
-        return $mpos + 1 if $mpos != &Wx::wxSTC_INVALID_POSITION;
-    }
-    $pos;
-}
-
-sub next_brace_pos {
-    my ($self, $pos) = @_;
-    $pos = $self->GetCurrentPos unless defined $pos;
-    my $char_before = $self->GetTextRange( $pos-1, $pos );
-    my $char_after = $self->GetTextRange( $pos, $pos + 1);
-    if ( $char_before eq '(' or $char_before eq '{' or $char_before eq '[' ) {
-        my $mpos = $self->BraceMatch( $pos - 1 );
-        return $mpos if $mpos != &Wx::wxSTC_INVALID_POSITION;
-    } elsif ($char_after eq '(' or $char_after eq '{' or $char_after eq '['){
-        my $mpos = $self->BraceMatch( $pos );
-        return $mpos + 1 if $mpos != &Wx::wxSTC_INVALID_POSITION;
-    }
-    $pos;
-}
-
-sub goto_prev_sub {
-    my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
-    my $new_pos = $self->prev_sub;
-    if ($new_pos > -1) { $self->GotoPos( $self->GetCurrentPos ) }
-    else               { $self->GotoPos( $pos )  }
-
-}
-sub goto_next_sub {
-    my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
-    my $new_pos = $self->next_sub;
-    if ($new_pos > -1) { $self->GotoPos( $self->GetCurrentPos ) }
-    else               { $self->GotoPos( $pos )  }
-}
-
-
-sub marker_toggle {
-    my ($self) = @_;
-
-}
-
-sub marker_prev {
-    my ($self) = @_;
-
-}
-sub marker_next {
-    my ($self) = @_;
-
-}
-
 1;
-
-
 
 __END__
 

@@ -41,12 +41,12 @@ sub new {
     Wx::Event::EVT_BUTTON( $self, $self->{'close'},  sub { $self->close      });
 
     Wx::Event::EVT_TEXT( $self, $self->{'text'}, sub { $self->find_first( ); $_[1]->Skip; });
-    
+
     Wx::Event::EVT_CHECKBOX( $self, $self->{'case'},  sub { $self->update_flags } );
     Wx::Event::EVT_CHECKBOX( $self, $self->{'word'},  sub { $self->update_flags } );
     Wx::Event::EVT_CHECKBOX( $self, $self->{'start'}, sub { $self->update_flags } );
     Wx::Event::EVT_CHECKBOX( $self, $self->{'regex'}, sub { $self->update_flags } );
-    
+
     Wx::Event::EVT_KEY_DOWN( $self->{'text'}, sub {
         my ($ed, $event) = @_;
         my $code = $event->GetKeyCode; # my $mod = $event->GetModifiers();
@@ -60,7 +60,7 @@ sub new {
         elsif( $event->ControlDown and $code == ord('F'))         { $self->editor->SetFocus  }
         else { $event->Skip }
     });
-    
+
     my $attr = &Wx::wxGROW | &Wx::wxTOP|&Wx::wxDOWN;
     my $sizer = Wx::BoxSizer->new( &Wx::wxHORIZONTAL );
     $sizer->AddSpacer( 10);
@@ -95,8 +95,8 @@ sub new {
     $self;
 }
 
-sub editor      { $_[0]->GetParent->{'ed'} }
-sub replace_bar { $_[0]->GetParent->{'rb'} }
+sub editor      { $_[0]->GetParent->{'editor'} }
+sub replace_bar { $_[0]->GetParent->{'replacebar'} }
 
 sub show {
     my ($self, $visible) = @_;
@@ -134,13 +134,13 @@ sub find_first {
 sub find_prev {                                                       # key command
     my ($self) = @_;
     $self->_find_prev( $self->editor->GetSelectedText  );
-}    
+}
 sub _find_prev {                                                      # search bar command
     my ($self, $term) = @_;
     my $ed = $self->editor;
     my $wrap = $self->{'wrap'}->GetValue;
     my ($start_pos, $end_pos) = $ed->GetSelection;
-    
+
     if (defined $term and $term){ $self->{'text'}->SetValue( $term ) }
     else                        { $term = $self->{'text'}->GetValue  }
 
@@ -160,7 +160,7 @@ sub _find_prev {                                                      # search b
 sub find_next {                                                       # key command
     my ($self) = @_;
     $self->_find_next( $self->editor->GetSelectedText  );
-}    
+}
 sub _find_next {
     my ($self, $term) = @_;
     my $ed = $self->editor;

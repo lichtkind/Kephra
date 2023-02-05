@@ -65,7 +65,7 @@ sub brace_edges_expand {
     my $match = $self->BraceMatch( $npos );
     return if $match < 0;
     return if defined $line and $line != $self->LineFromPosition( $match );
-    ($npos, $match+1); 
+    ($npos, $match+1);
 }
 
 sub brace_edges_shrink {
@@ -78,7 +78,7 @@ sub brace_edges_shrink {
     return () if $npos < 0 or $npos >= $sel_end;
     my $match = $self->BraceMatch( $npos );
     return if $match < 0 or $match >= $sel_end;
-    ($npos, $match+1); 
+    ($npos, $match+1);
 }
 
 sub loop_edges_expand {
@@ -216,7 +216,7 @@ sub get_prev_block_start {
         last unless $self->GetLine( $line_nr - 1 ) =~ /\S/;
         $line_nr--;
     }
-    $line_nr;    
+    $line_nr;
 }
 sub get_next_block_start {
     my ($self, $pos) = @_;
@@ -276,5 +276,54 @@ sub next_sub {
     $self->SearchAnchor;
     $self->SearchNext( &Wx::wxSTC_FIND_REGEXP, '^\s*sub ');
 }
+
+sub smart_up_pos {
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    my $bpos = $self->prev_brace_pos( $pos );
+    return $bpos if $bpos != $pos;
+    my $line_nr = $self->get_prev_block_start( $pos );
+    defined $line_nr ? $self->PositionFromLine( $line_nr ) : $pos;
+}
+
+sub smart_down_pos {
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    my $bpos = $self->next_brace_pos( $pos );
+    return $bpos if $bpos != $pos;
+    my $line_nr = $self->get_next_block_start( $pos );
+    defined $line_nr ? $self->PositionFromLine( $line_nr ) : $pos;
+}
+
+sub prev_brace_pos {
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    my $char_before = $self->GetTextRange( $pos-1, $pos );
+    my $char_after = $self->GetTextRange( $pos, $pos + 1);
+    if ( $char_before eq ')' or $char_before eq '}' or $char_before eq ']' ) {
+        my $mpos = $self->BraceMatch( $pos - 1 );
+        return $mpos if $mpos != &Wx::wxSTC_INVALID_POSITION;
+    } elsif ($char_after eq ')' or $char_after eq '}' or $char_after eq ']'){
+        my $mpos = $self->BraceMatch( $pos );
+        return $mpos + 1 if $mpos != &Wx::wxSTC_INVALID_POSITION;
+    }
+    $pos;
+}
+
+sub next_brace_pos {
+    my ($self, $pos) = @_;
+    $pos = $self->GetCurrentPos unless defined $pos;
+    my $char_before = $self->GetTextRange( $pos-1, $pos );
+    my $char_after = $self->GetTextRange( $pos, $pos + 1);
+    if ( $char_before eq '(' or $char_before eq '{' or $char_before eq '[' ) {
+        my $mpos = $self->BraceMatch( $pos - 1 );
+        return $mpos if $mpos != &Wx::wxSTC_INVALID_POSITION;
+    } elsif ($char_after eq '(' or $char_after eq '{' or $char_after eq '['){
+        my $mpos = $self->BraceMatch( $pos );
+        return $mpos + 1 if $mpos != &Wx::wxSTC_INVALID_POSITION;
+    }
+    $pos;
+}
+
 
 1;

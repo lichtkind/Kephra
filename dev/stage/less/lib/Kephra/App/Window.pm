@@ -18,18 +18,19 @@ sub new {
     $self->SetStatusWidths(100, 50, -1);
     $self->SetStatusBarPane(2);
 
-    $self->{'ed'} = Kephra::App::Editor->new($self, -1);
-    $self->{'sb'} = Kephra::App::SearchBar->new($self, -1);
-    $self->{'rb'} = Kephra::App::ReplaceBar->new($self, -1);
+    $self->{'app'} = $parent;
+    $self->{'editor'} = Kephra::App::Editor->new($self, -1);
+    $self->{'searchbar'} = Kephra::App::SearchBar->new($self, -1);
+    $self->{'replacebar'} = Kephra::App::ReplaceBar->new($self, -1);
 
     my $sizer = Wx::BoxSizer->new( &Wx::wxVERTICAL );
-    $sizer->Add( $self->{'ed'}, 1, &Wx::wxEXPAND, 0);
-    $sizer->Add( $self->{'sb'}, 0, &Wx::wxGROW, 0);
-    $sizer->Add( $self->{'rb'}, 0, &Wx::wxGROW, 0);
+    $sizer->Add( $self->{'editor'}, 1, &Wx::wxEXPAND, 0);
+    $sizer->Add( $self->{'searchbar'}, 0, &Wx::wxGROW, 0);
+    $sizer->Add( $self->{'replacebar'}, 0, &Wx::wxGROW, 0);
 
     $self->SetSizer($sizer);
 
-    Wx::Window::SetFocus( $self->{'ed'} );
+    Wx::Window::SetFocus( $self->{'editor'} );
     Wx::Event::EVT_KEY_DOWN( $self, sub {
         my ($self, $event) = @_;
         my $code = $event->GetKeyCode ;
@@ -38,28 +39,35 @@ sub new {
     });
     Wx::Event::EVT_CLOSE( $self, sub {
         my ($self, $event) = @_;
-        if ($self->{'ed'}->GetModify() and not exists $self->{'dontask'}){
+        if ($self->{'editor'}->GetModify() and not exists $self->{'dontask'}){
             my $ret = Kephra::App::Dialog::yes_no_cancel( "\n".' save file ?  ');
             return                   if $ret ==  &Wx::wxCANCEL;
-            $self->{'ed'}->save_file if $ret ==  &Wx::wxYES;
+            $self->{'editor'}->save_file if $ret ==  &Wx::wxYES;
         }
         $event->Skip(1);
     });
-    Wx::Event::EVT_CLOSE( $self,       sub { $_[1]->Skip(1) });
+    Wx::Event::EVT_CLOSE( $self,       sub {
+        $self->config->set_value( $self->{'file'}, 'file');
+        $self->{'editor'}->save_config( $self->config );
+        $_[1]->Skip(1);
+    });
 
     Kephra::App::Window::Menu::mount( $self );
     $self->set_title();
-    $self->{'rb'}->show(0);
+    $self->{'replacebar'}->show(0);
 
-    $self->read_file( __FILE__);
+    $self->read_file( $self->config->get_value('file') ); # open the last opened file
+    $self->{'editor'}->apply_config( $self->config );
 
     return $self;
 }
 
+sub config {$_[0]{'app'}{'config'}}
+
 sub new_file {
     my $self = shift;
     $self->{'file'} = '';
-    $self->{'ed'}->new_text( '' );
+    $self->{'editor'}->new_text( '' );
     $self->{'encoding'} = 'utf-8';
     $self->set_title();
     $self->SetStatusText(  $self->{'encoding'}, 1);
@@ -74,7 +82,7 @@ sub read_file {
     return unless defined $file and -r $file;
     my ($content, $encoding) = Kephra::IO::LocalFile::read( $file );
     $self->{'encoding'} = $encoding;
-    $self->{'ed'}->new_text( $content, $soft );
+    $self->{'editor'}->new_text( $content, $soft );
     $self->{'file'} = $file;
     $self->set_title();
     $self->SetStatusText(  $self->{'encoding'}, 1);
@@ -83,8 +91,8 @@ sub read_file {
 sub save_file {
     my $self = shift;
     $self->{'file'} = Kephra::App::Dialog::get_file_save() unless $self->{'file'};
-    Kephra::IO::LocalFile::write( $self->{'file'},  $self->{'encoding'}, $self->{'ed'}->GetText() );
-    $self->{'ed'}->SetSavePoint;
+    Kephra::IO::LocalFile::write( $self->{'file'},  $self->{'encoding'}, $self->{'editor'}->GetText() );
+    $self->{'editor'}->SetSavePoint;
 }
 
 sub save_as_file {
@@ -96,14 +104,14 @@ sub save_as_file {
 sub save_under_file {
     my $self = shift;
     my $file = Kephra::App::Dialog::get_file_save();
-    Kephra::IO::LocalFile::write( $file,  $self->{'encoding'}, $self->{'ed'}->GetText() );
+    Kephra::IO::LocalFile::write( $file,  $self->{'encoding'}, $self->{'editor'}->GetText() );
 }
 
 sub set_title {
     my ($self) = @_;
     my $title .=  $self->{'file'} ? $self->{'file'} : '<unnamed>';
     $title .= " - Kephra";
-    $title = '* '.$title if $self->{'ed'}->GetModify();
+    $title = '* '.$title if $self->{'editor'}->GetModify();
     $self->SetTitle( $title );
 }
 

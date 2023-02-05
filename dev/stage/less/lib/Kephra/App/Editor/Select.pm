@@ -2,7 +2,6 @@ use v5.12;
 use warnings;
 
 package Kephra::App::Editor::Select;
-
 package Kephra::App::Editor;
 
 sub expand_selecton {
