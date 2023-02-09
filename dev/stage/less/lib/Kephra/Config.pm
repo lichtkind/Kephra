@@ -9,7 +9,7 @@ use YAML;
 
 use Kephra::Config::Default;
 
-my $file_name = File::Spec->catfile( File::HomeDir->my_home, '.config', 'kephra');
+my $file_name = File::Spec->catfile( File::HomeDir->my_home, '.config', 'kephra', 'main-recent.yaml');
 
 sub new {
     my $default = Kephra::Config::Default::get();

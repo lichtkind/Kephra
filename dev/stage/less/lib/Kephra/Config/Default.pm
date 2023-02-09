@@ -16,7 +16,7 @@ sub get {{
     view => {
         whitespace    => 1,
         caret_line    => 1,
-        eol           => 0,
+        line_ending   => 0,
         line_wrap => 0,
         line_nr_margin => 1,
         marker_margin => 1,
@@ -25,7 +25,21 @@ sub get {{
         zoom_level => 0,
         full_screen => 0,
     },
-
+    document => {
+        soft_tabs => 1,
+        indention_size => 4,
+        line_ending   => 'crlf',
+        encoding   => 'utf-8',
+    },
+    search => {
+        find_term => '',
+        replace_term => '',
+        case_sensitive => 0,
+        whole_word => 0,
+        word_start => 0,
+        regular_expression => 0,
+        wrap_abound_document => 0,
+    },
 
 }}
 

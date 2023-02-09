@@ -20,8 +20,6 @@ use Kephra::App::Editor::View;
 sub new {
     my( $class, $parent, $style) = @_;
     my $self = $class->SUPER::new( $parent, -1,[-1,-1],[-1,-1] );
-    $self->{'tab_size'} = 4;
-    $self->{'tab_space'} = ' ' x $self->{'tab_size'};
     $self->SetWordChars('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._$@%&*\\');
     $self->SetAdditionalCaretsBlink( 1 );
     $self->SetAdditionalCaretsVisible( 1 );
@@ -34,6 +32,8 @@ sub new {
     $self->set_margin;
     $self->load_font;  # before setting highlighting
     Kephra::App::Editor::SyntaxMode::apply( $self, 'perl' );
+    $self->{'tab_size'} = 4;
+    $self->{'tab_space'} = ' ' x $self->{'tab_size'};
     $self->set_tab_size( $self->{'tab_size'} );
     $self->set_tab_usage( 0 );
     $self->mount_events();
@@ -48,7 +48,7 @@ sub apply_config {
     my $config_value = $config->get_value('view');
     $self->set_zoom_level( $config_value->{'zoom_level'} );
     $self->toggle_view_whitespace     unless $config_value->{'whitespace'}    == $self->view_whitespace_mode;
-    $self->toggle_view_eol            unless $config_value->{'eol'}           == $self->view_eol_mode;
+    $self->toggle_view_eol            unless $config_value->{'line_ending'}   == $self->view_eol_mode;
     $self->toggle_view_indent_guide   unless $config_value->{'indent_guide'}  == $self->indent_guide_mode;
     $self->toggle_view_right_margin   unless $config_value->{'right_margin'}  == $self->right_margin_mode;
     $self->toggle_view_line_nr_margin unless $config_value->{'line_nr_margin'}== $self->line_nr_margin_mode;
@@ -71,7 +71,7 @@ sub save_config {
                           marker => [ $self->marker_lines ],
                         } , 'editor');
     $config->set_value( { whitespace     => $self->view_whitespace_mode,
-                          eol            => $self->view_eol_mode,
+                          line_ending    => $self->view_eol_mode,
                           indent_guide   => $self->indent_guide_mode,
                           right_margin   => $self->right_margin_mode,
                           line_nr_margin => $self->line_nr_margin_mode,

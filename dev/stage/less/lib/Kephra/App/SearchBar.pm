@@ -95,6 +95,31 @@ sub new {
     $self;
 }
 
+sub apply_config {
+    my ($self, $config) = @_;
+    my $config_value = $config->get_value('search');
+    $self->{'text'}->SetValue( $config_value->{'find_term'} );
+    $self->replace_bar->{'text'}->SetValue( $config_value->{'replace_term'} );
+    $self->{'case'}->SetValue( $config_value->{'case_sensitive'} );
+    $self->{'word'}->SetValue( $config_value->{'whole_word'} );
+    $self->{'start'}->SetValue( $config_value->{'word_start'} );
+    $self->{'regex'}->SetValue( $config_value->{'regular_expression'} );
+    $self->{'wrap'}->SetValue( $config_value->{'wrap_abound_document'} );
+}
+
+sub save_config {
+    my ($self, $config) = @_;
+    $config->set_value(
+        { find_term => $self->search_term,
+          replace_term => $self->replace_bar->replace_term,
+          case_sensitive => $self->{'case'}->GetValue,
+          whole_word => $self->{'word'}->GetValue,
+          word_start => $self->{'start'}->GetValue,
+          regular_expression => $self->{'regex'}->GetValue,
+          wrap_abound_document => $self->{'wrap'}->GetValue,
+        } , 'search');
+}
+
 sub editor      { $_[0]->GetParent->{'editor'} }
 sub replace_bar { $_[0]->GetParent->{'replacebar'} }
 sub search_term { $_[0]->{'text'}->GetValue }
@@ -126,7 +151,7 @@ sub find_first {
     my ($start, $end) = $ed->GetSelection;
     $ed->SetSelection( 0, 0 );
     $ed->SearchAnchor;
-    my $pos = $ed->SearchNext( $self->{'flags'}, $self->{'text'}->GetValue );
+    my $pos = $ed->SearchNext( $self->{'flags'}, $self->search_term );
     $ed->SetSelection( $start, $start ) if $pos == -1;
     $ed->EnsureCaretVisible;
     $pos > -1;
@@ -143,7 +168,7 @@ sub _find_prev {                                                      # search b
     my ($start_pos, $end_pos) = $ed->GetSelection;
 
     if (defined $term and $term){ $self->{'text'}->SetValue( $term ) }
-    else                        { $term = $self->{'text'}->GetValue  }
+    else                        { $term = $self->search_term  }
 
     $ed->SetSelection( $start_pos, $start_pos );
     $ed->SearchAnchor;
@@ -169,7 +194,7 @@ sub _find_next {
     my ($start_pos, $end_pos) = $ed->GetSelection;
 
     if (defined $term and $term){ $self->{'text'}->SetValue( $term ) }
-    else                        { $term = $self->{'text'}->GetValue  }
+    else                        { $term = $self->search_term  }
 
     $ed->SetSelection( $end_pos, $end_pos );
     $ed->SearchAnchor;

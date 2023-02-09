@@ -49,6 +49,7 @@ sub new {
     Wx::Event::EVT_CLOSE( $self,       sub {
         $self->config->set_value( $self->{'file'}, 'file');
         $self->{'editor'}->save_config( $self->config );
+        $self->{'searchbar'}->save_config( $self->config );
         $_[1]->Skip(1);
     });
 
@@ -59,6 +60,7 @@ sub new {
 
     $self->read_file( $self->config->get_value('file') ); # open the last opened file
     $self->{'editor'}->apply_config( $self->config );
+    $self->{'searchbar'}->apply_config( $self->config );
 
     return $self;
 }

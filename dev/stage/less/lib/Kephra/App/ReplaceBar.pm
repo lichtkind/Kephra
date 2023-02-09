@@ -133,11 +133,11 @@ sub find_prev {
     my $wrap = $self->search_bar->{'wrap'}->GetValue;
     $ed->SetSelection( $start, $start );
     $ed->SearchAnchor;
-    my $pos = $ed->SearchPrev( 0,  $self->{'text'}->GetValue );
+    my $pos = $ed->SearchPrev( 0,  $self->replace_term );
     if ($pos == -1){
         $ed->SetSelection( $ed->GetLength , $ed->GetLength  );
         $ed->SearchAnchor();
-        $pos = $ed->SearchPrev( 0,  $self->{'text'}->GetValue ) if $wrap;
+        $pos = $ed->SearchPrev( 0,  $self->replace_term ) if $wrap;
         $ed->SetSelection( $start, $end ) if $pos == -1;
     }
     $ed->EnsureCaretVisible;
@@ -149,11 +149,11 @@ sub find_next {
     my $wrap = $self->search_bar->{'wrap'}->GetValue;
     $ed->SetSelection( $end, $end );
     $ed->SearchAnchor;
-    my $pos = $ed->SearchNext( 0,  $self->{'text'}->GetValue );
+    my $pos = $ed->SearchNext( 0,  $self->replace_term );
     if ($pos == -1){
         $ed->SetSelection( 0, 0 );
         $ed->SearchAnchor;
-        $pos = $ed->SearchNext( 0,  $self->{'text'}->GetValue ) if $wrap;
+        $pos = $ed->SearchNext( 0,  $self->replace_term ) if $wrap;
         $ed->SetSelection( $start, $end ) if $pos == -1;
     }
     $ed->EnsureCaretVisible;
@@ -161,12 +161,12 @@ sub find_next {
 
 sub revert_prev {
     my ($self) = @_;
-    $self->editor->ReplaceSelection( $self->search_bar->{'text'}->GetValue );
+    $self->editor->ReplaceSelection( $self->search_bar->search_term );
     $self->find_prev;
 }
 sub revert_next {
     my ($self) = @_;
-    $self->editor->ReplaceSelection( $self->search_bar->{'text'}->GetValue );
+    $self->editor->ReplaceSelection( $self->search_bar->search_term );
     $self->find_next;
 }
 
@@ -185,14 +185,14 @@ sub replace_next {
     $ed->SetSelection( $start, $start ) unless $self->search_bar->_find_next;
 }
 
-sub replace { $_[0]->editor->ReplaceSelection( $_[0]->{'text'}->GetValue ) }
+sub replace { $_[0]->editor->ReplaceSelection( $_[0]->replace_term ) }
 
 sub replace_once {
     my ($self) = @_;
     my $ed = $self->editor;
     my ($start, $end) = $ed->GetSelection;
     $self->replace;
-    $ed->SetSelection( $start, $start + length $self->{'text'}->GetValue);
+    $ed->SetSelection( $start, $start + length $self->replace_term);
 }
 
 sub replace_all {
