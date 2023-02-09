@@ -20,6 +20,7 @@ use Kephra::App::Editor::View;
 sub new {
     my( $class, $parent, $style) = @_;
     my $self = $class->SUPER::new( $parent, -1,[-1,-1],[-1,-1] );
+    $self->mount_events();
     $self->SetWordChars('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._$@%&*\\');
     $self->SetAdditionalCaretsBlink( 1 );
     $self->SetAdditionalCaretsVisible( 1 );
@@ -32,11 +33,8 @@ sub new {
     $self->set_margin;
     $self->load_font;  # before setting highlighting
     Kephra::App::Editor::SyntaxMode::apply( $self, 'perl' );
-    $self->{'tab_size'} = 4;
-    $self->{'tab_space'} = ' ' x $self->{'tab_size'};
-    $self->set_tab_size( $self->{'tab_size'} );
+    $self->set_tab_size( 4 );
     $self->set_tab_usage( 0 );
-    $self->mount_events();
     $self->{'change_pos'} = $self->{'change_prev'} = -1;
     return $self;
 }
@@ -45,7 +43,11 @@ sub window { $_[0]->GetParent }
 
 sub apply_config {
     my ($self, $config) = @_;
-    my $config_value = $config->get_value('view');
+    my $config_value = $config->get_value('document');
+    $self->set_tab_size( $config_value->{'tab_size'} );
+    $self->set_tab_usage( !$config_value->{'soft_tabs'} );
+
+    $config_value = $config->get_value('view');
     $self->set_zoom_level( $config_value->{'zoom_level'} );
     $self->toggle_view_whitespace     unless $config_value->{'whitespace'}    == $self->view_whitespace_mode;
     $self->toggle_view_eol            unless $config_value->{'line_ending'}   == $self->view_eol_mode;
@@ -56,6 +58,7 @@ sub apply_config {
     $self->toggle_view_caret_line     unless $config_value->{'caret_line'}    == $self->view_caret_line_mode;
     $self->toggle_view_line_wrap      unless $config_value->{'line_wrap'}     == $self->line_wrap_mode;
     $self->window->toggle_full_screen unless $config_value->{'full_screen'}   == $self->window->IsFullScreen;
+
     $config_value = $config->get_value('editor');
     $self->{ $_ } = $config_value->{ $_ } for qw/change_pos change_prev/;
     $self->init_marker( @{$config_value->{'marker'}} );
@@ -65,6 +68,11 @@ sub apply_config {
 
 sub save_config {
     my ($self, $config) = @_;
+    $config->set_value( { soft_tabs => !$self->{'tab_usage'},
+                          indention_size => $self->{'tab_size'},
+                        # line_ending   => 'crlf',
+                        # encoding   => 'utf-8',
+                        } , 'document');
     $config->set_value( { change_pos => $self->{'change_pos'},
                           change_prev => $self->{'change_prev'},
                           caret_pos => $self->GetCurrentPos,

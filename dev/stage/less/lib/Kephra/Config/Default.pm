@@ -27,7 +27,7 @@ sub get {{
     },
     document => {
         soft_tabs => 1,
-        indention_size => 4,
+        tab_size => 4,
         line_ending   => 'crlf',
         encoding   => 'utf-8',
     },

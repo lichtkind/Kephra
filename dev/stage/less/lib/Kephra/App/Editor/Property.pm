@@ -14,6 +14,8 @@ sub set_tab_size {
     $self->SetTabWidth($size);
     $self->SetIndent($size);
     $self->SetHighlightGuide($size);
+    $self->{'tab_size'} = $size;
+    $self->{'tab_space'} = ' ' x $self->{'tab_size'};
     my $menu = $self->GetParent->GetMenuBar;
     $menu->Check( 15200 + $size, 1 ) if ref $menu;
 
