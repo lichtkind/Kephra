@@ -33,25 +33,51 @@ sub toggle_tab_usage {
     $self->GetParent->GetMenuBar->Check(15100, !$self->{'tab_usage'});
 }
 
+
+sub get_EOL {
+    my ($self) = @_;
+    my $mode = $self->GetEOLMode();
+    return 'lf' if $mode == &Wx::wxSTC_EOL_LF;
+    return 'cr' if $mode == &Wx::wxSTC_EOL_CR;
+    return 'crlf' if $mode == &Wx::wxSTC_EOL_CRLF;
+    return '';
+}
+
+sub set_EOL {
+    my ($self, $mode) = @_;
+    return unless defined $mode;
+    return $self->set_EOL_lf() if $mode eq 'lf';
+    return $self->set_EOL_cr() if $mode eq 'cr';
+    return $self->set_EOL_crlf() if $mode eq 'crlf';
+}
+
 sub set_EOL_lf   {
     my ($self) = @_;
     $self->SetEOLMode( &Wx::wxSTC_EOL_LF );
     $self->ConvertEOLs( &Wx::wxSTC_EOL_LF );
-    $self->GetParent->GetMenuBar->Check(15410, 1);
+    $self->GetParent->GetMenuBar->Check(15411, 1);
 }
 
 sub set_EOL_cr   {
     my ($self) = @_;
     $self->SetEOLMode( &Wx::wxSTC_EOL_CR );
     $self->ConvertEOLs( &Wx::wxSTC_EOL_CR );
-    $self->GetParent->GetMenuBar->Check(15420, 1);
+    $self->GetParent->GetMenuBar->Check(15412, 1);
 }
 
 sub set_EOL_crlf {
     my ($self) = @_;
     $self->SetEOLMode( &Wx::wxSTC_EOL_CRLF );
     $self->ConvertEOLs( &Wx::wxSTC_EOL_CRLF );
-    $self->GetParent->GetMenuBar->Check(15430, 1);
+    $self->GetParent->GetMenuBar->Check(15413, 1);
+}
+
+sub get_encoding {
+    my ($self) = @_;
+}
+
+sub set_encoding {
+    my ($self, $encoding) = @_;
 }
 
 

@@ -22,8 +22,8 @@ sub expand_selecton {
             my @brace_edges = $self->brace_edges_expand( $start_pos, $end_pos, $start_line );
             my ($begin_style, $end_style) = ( $self->GetStyleAt( $start_pos), $self->GetStyleAt( $end_pos - 1) );
             my @style_edges = ($begin_style == $end_style and (($begin_style >= 17 and $begin_style <= 30)
-                                                          or    $begin_style == 6  or  $begin_style == 7   )) 
-                            ? $self->style_edges($start_pos, $end_pos) 
+                                                          or    $begin_style == 6  or  $begin_style == 7   ))
+                            ? $self->style_edges($start_pos, $end_pos)
                             : ();
 
             if (@brace_edges and @style_edges){ # delete the wider
@@ -34,7 +34,7 @@ sub expand_selecton {
             @selection = @brace_edges if @brace_edges;
             @selection = ($line_start, $line_end) unless @selection;
         }
-    } 
+    }
     unless (@selection) { # select construct: sub for if
         @selection = (0, $self->GetTextLength - 1 ); #  select all
         my @block_edges = $self->block_edges_expand( $start_pos, $end_pos );
@@ -43,10 +43,10 @@ sub expand_selecton {
         @selection = @sub_edges   if @sub_edges   and ($sub_edges[0]   >= $selection[0] or $sub_edges[1]  <= $selection[1]);
         my @loop_edges = $self->loop_edges_expand( $start_pos, $end_pos );
         @selection = @loop_edges  if @loop_edges  and ($loop_edges[0]  >= $selection[0] or $loop_edges[1] <= $selection[1]);
-        # my @branch_edges = $self->branch_edges_expand( $start_pos, $end_pos );  select if () {}     # select unless () {} 
+        # my @branch_edges = $self->branch_edges_expand( $start_pos, $end_pos );  select if () {}     # select unless () {}
     }
     $self->SetSelection( @selection );
-    1;    
+    1;
 }
 
 sub shrink_selecton {
@@ -59,22 +59,22 @@ sub shrink_selecton {
     my $line_end = $self->GetLineEndPosition( $start_line );
     my @selection;
     #~ return if $start_pos == $end_pos;
-        
+
     #~ if ($start_line == $end_line) {
         #~ my @brace_edge = $self->brace_edges_shrink( $start_pos, $end_pos);
         #~ @selection = @brace_edge if @brace_edge;
-        
+
         #~ my @word_edge = $self->word_edges( $center );
         #~ @selection = ($start_pos > $word_edge[0] or $end_pos < $word_edge[1])
                    #~ ?  ($center, $center) : @word_edge;
 #~ say "word @word_edge sel @selection";
         #~ my $center_style = $self->GetStyleAt( $center );
-        
+
         #~ my @style_edge = (($center_style >= 17 and $center_style <= 30)
-                                                #~ or $center_style == 6  or  $center_style == 7   ) 
+                                                #~ or $center_style == 6  or  $center_style == 7   )
                        #~ ? $self->style_edges($start_pos, $end_pos) : ();
 
-        #~ @selection = @style_edge if @style_edge and $style_edge[0] <= $selection[0] and $style_edge[1] >= $selection[1] 
+        #~ @selection = @style_edge if @style_edge and $style_edge[0] <= $selection[0] and $style_edge[1] >= $selection[1]
                                                 #~ and $style_edge[0] >= $start_pos    and $style_edge[1] <= $end_pos;
 
         #~ my @brace_edge = $self->brace_edges_shrink( $start_pos, $end_pos);
@@ -84,13 +84,13 @@ sub shrink_selecton {
     #~ }
 #~ # say "shrink $start_pos, $end_pos ", $self->{'select_stack'};
     #~ $self->SetSelection( @selection );
-    1;    
+    1;
 }
 
 sub select_line {
     my ($self, $line) = @_;
     $line = $self->GetCurrentLine unless defined $line;
-    $self->SetSelection( $self->PositionFromLine( $line ), 
+    $self->SetSelection( $self->PositionFromLine( $line ),
                          $self->PositionFromLine( $line+1 ) );
     #$self->GetLineEndPosition( $line );     # $self->GetLineIndentPosition
 }
@@ -145,7 +145,7 @@ sub select_next_block {
     my $new_pos;
     if ($bpos != $pos) { $new_pos = $bpos }
     else {
-        if ($pos >= $anchor) { $new_pos = $self->GetLineEndPosition( $self->get_next_block_end( $pos ) )  } 
+        if ($pos >= $anchor) { $new_pos = $self->GetLineEndPosition( $self->get_next_block_end( $pos ) )  }
         else                 { $new_pos = $self->PositionFromLine( $self->get_next_block_start( $pos ) );
                                $new_pos = $self->GetLineEndPosition( $self->get_next_block_end( $pos ) ) if $new_pos > $anchor;
         }
@@ -157,7 +157,7 @@ sub select_next_block {
 #say $self->GetRect;
 # ->SelectionIsRectangle
 # ->HomeRectExtend ()
-# ->VCHomeRectExtend 
+# ->VCHomeRectExtend
 # ->SetInsertionPoint
 # ->GetMultipleSelection
 # ->GetRectangularSelectionAnchor()

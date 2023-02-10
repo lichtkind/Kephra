@@ -22,7 +22,7 @@ sub set_colors {
 
     $self->SetSelForeground( 1, create_color(243,243,243) );
     $self->SetSelBackground( 1, create_color(0, 17, 119) );
-    $self->SetWhitespaceForeground( 1, create_color(200, 200, 153) );
+    $self->SetWhitespaceForeground( 1, create_color(160, 160, 143) );
     $self->SetViewWhiteSpace(1);
 
     $self->StyleSetForeground(&Wx::wxSTC_STYLE_INDENTGUIDE, create_color(206,206,202)); # 37

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use v5.12;
 use lib 'lib';
-use Test::More tests => 30;
+use Test::More tests => 31;
 
 use_ok( 'Kephra::App::Editor::SyntaxMode::Bash' );
 use_ok( 'Kephra::App::Editor::SyntaxMode::CPP' );
@@ -32,4 +32,5 @@ use_ok( 'Kephra::App::Window' );
 use_ok( 'Kephra::IO::LocalFile' );
 use_ok( 'Kephra::Config' );
 use_ok( 'Kephra::Config::Default' );
+use_ok( 'Kephra::Document' );
 use_ok( 'Kephra' );

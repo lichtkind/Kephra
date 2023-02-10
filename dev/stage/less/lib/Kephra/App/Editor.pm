@@ -33,8 +33,6 @@ sub new {
     $self->set_margin;
     $self->load_font;  # before setting highlighting
     Kephra::App::Editor::SyntaxMode::apply( $self, 'perl' );
-    $self->set_tab_size( 4 );
-    $self->set_tab_usage( 0 );
     $self->{'change_pos'} = $self->{'change_prev'} = -1;
     return $self;
 }
@@ -46,6 +44,7 @@ sub apply_config {
     my $config_value = $config->get_value('document');
     $self->set_tab_size( $config_value->{'tab_size'} );
     $self->set_tab_usage( !$config_value->{'soft_tabs'} );
+    $self->set_EOL( $config_value->{'line_ending'} );
 
     $config_value = $config->get_value('view');
     $self->set_zoom_level( $config_value->{'zoom_level'} );
@@ -70,7 +69,7 @@ sub save_config {
     my ($self, $config) = @_;
     $config->set_value( { soft_tabs => !$self->{'tab_usage'},
                           indention_size => $self->{'tab_size'},
-                        # line_ending   => 'crlf',
+                          line_ending   => $self->get_EOL,
                         # encoding   => 'utf-8',
                         } , 'document');
     $config->set_value( { change_pos => $self->{'change_pos'},
@@ -322,7 +321,7 @@ sub escape {
 sub sel {
     my ($self) = @_;
     my $pos = $self->GetCurrentPos;
-    #say $self->GetStyleAt( $pos);
+    say $self->GetStyleAt( $pos);
 }
 
 1;

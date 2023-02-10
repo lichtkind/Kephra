@@ -42,6 +42,7 @@ values vec wait waitpid wantarray warn when while write x xor y');
 # Add new keyword.
 # $self->StyleSetSpec( &Wx::wxSTC_H_TAG, "fore:#000055" ); # Apply tag style for selected lexer (blue)
 
+    $self->StyleSetSpec(0,"fore:#aabbbb,back:#ffffff");                        # Whitespace
     $self->StyleSetSpec(1,"fore:#ff0000,back:#ffff00");                        # Error
     $self->StyleSetSpec(&Wx::wxSTC_PL_COMMENTLINE,"fore:#aaaaaa");                                     # Comment
     $self->StyleSetSpec(&Wx::wxSTC_PL_POD,        "fore:#004000,back:#E0FFE0,$(font.text),eolfilled"); # POD: = at beginning of line
@@ -71,8 +72,24 @@ values vec wait waitpid wantarray warn when while write x xor y');
     $self->StyleSetSpec(28,"fore:#ff7700,back:#f9f9d7");                       # qx = Back ticks
     $self->StyleSetSpec(29,"fore:#000000,back:#A0FFA0");                       # qr = Regex
     $self->StyleSetSpec(30,"fore:#f36600,back:#fff8f8");                       # qw = Array
+    $self->StyleSetSpec(31,"fore:#f36600,back:#fff8f8");                       # POD verb
     $self->StyleSetSpec(&Wx::wxSTC_STYLE_BRACELIGHT, "fore:#0000ff,back:#FFFFFF,bold");# 34
     $self->StyleSetSpec(&Wx::wxSTC_STYLE_BRACEBAD,   "fore:#ff0000,back:#FFFFFF,bold");# 35
 }
 
 1;
+
+__END__
+# wxSTC_PL_SUB_PROTOTYPE   40
+# wxSTC_PL_FORMAT_IDENT   41
+# wxSTC_PL_FORMAT   42
+# wxSTC_PL_STRING_VAR   43
+# wxSTC_PL_XLAT   44
+# wxSTC_PL_REGEX_VAR   54
+# wxSTC_PL_REGSUBST_VAR   55
+# wxSTC_PL_BACKTICKS_VAR   57
+# wxSTC_PL_HERE_QQ_VAR   61
+# wxSTC_PL_HERE_QX_VAR   62
+# wxSTC_PL_STRING_QQ_VAR   64
+# wxSTC_PL_STRING_QX_VAR   65
+# wxSTC_PL_STRING_QR_VAR   66

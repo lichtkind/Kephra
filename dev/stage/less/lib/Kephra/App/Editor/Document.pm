@@ -1,9 +1,7 @@
 use v5.12;
 use warnings;
 
-package Kephra::App::Editor::Document;
-package Kephra::App::Editor;
-
+package Kephra::Document;
 
 1;
 

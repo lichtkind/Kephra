@@ -42,7 +42,7 @@ sub new {
         if ($self->{'editor'}->GetModify() and not exists $self->{'dontask'}){
             my $ret = Kephra::App::Dialog::yes_no_cancel( "\n".' save file ?  ');
             return                   if $ret ==  &Wx::wxCANCEL;
-            $self->{'editor'}->save_file if $ret ==  &Wx::wxYES;
+            $self->save_file if $ret ==  &Wx::wxYES;
         }
         $event->Skip(1);
     });
@@ -76,7 +76,12 @@ sub new_file {
     $self->SetStatusText(  $self->{'encoding'}, 1);
 }
 
-sub open_file   { $_[0]->read_file( Kephra::App::Dialog::get_file_open() ) }
+sub open_file   {
+    my ($self) = @_;
+    my $dir = Kephra::IO::LocalFile::dir_from_path( $self->{'file'} );
+    my $file = Kephra::App::Dialog::get_file_open( $dir );
+    $self->read_file( $file ) if $file;
+}
 
 sub reopen_file { $_[0]->read_file( $_[0]->{'file'}, 1) }
 
@@ -93,21 +98,29 @@ sub read_file {
 
 sub save_file {
     my $self = shift;
-    $self->{'file'} = Kephra::App::Dialog::get_file_save() unless $self->{'file'};
+    unless (exists $self->{'file'} and -r $self->{'file'}){
+        my $file = Kephra::App::Dialog::get_file_save( );
+        return if $file eq &Wx::wxID_CANCEL;
+        $self->{'file'} = $file;
+    }
     Kephra::IO::LocalFile::write( $self->{'file'},  $self->{'encoding'}, $self->{'editor'}->GetText() );
     $self->{'editor'}->SetSavePoint;
 }
 
 sub save_as_file {
     my $self = shift;
-    $self->{'file'} = Kephra::App::Dialog::get_file_save();
+    my $dir = Kephra::IO::LocalFile::dir_from_path( $self->{'file'} );
+    my $file = Kephra::App::Dialog::get_file_save( $dir );
+    return unless $file;
+    $self->{'file'} = $file;
     $self->save_file;
 }
 
 sub save_under_file {
     my $self = shift;
-    my $file = Kephra::App::Dialog::get_file_save();
-    Kephra::IO::LocalFile::write( $file,  $self->{'encoding'}, $self->{'editor'}->GetText() );
+    my $dir = Kephra::IO::LocalFile::dir_from_path( $self->{'file'} );
+    my $file = Kephra::App::Dialog::get_file_save( $dir );
+    Kephra::IO::LocalFile::write( $file,  $self->{'encoding'}, $self->{'editor'}->GetText() ) if $file;
 }
 
 sub set_title {
