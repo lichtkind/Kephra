@@ -58,13 +58,14 @@ sub brace_edges_expand {
     my ($self, $sel_start, $sel_end, $line) = @_; # look only in $line if defined
     $sel_start = $self->GetCurrentPos unless defined $sel_start;
     $sel_end //= $sel_start;
-    $self->GotoPos( $sel_start - 1 );
+    $self->GotoPos( $sel_start);
     $self->SearchAnchor;
     my $npos = $self->SearchPrev( &Wx::wxSTC_FIND_REGEXP, '[([{]');
     return if defined $line and $line != $self->LineFromPosition( $npos );
     my $match = $self->BraceMatch( $npos );
     return if $match < 0;
     return if defined $line and $line != $self->LineFromPosition( $match );
+    return if $npos > $sel_end or $match <= $sel_start;
     ($npos, $match+1);
 }
 

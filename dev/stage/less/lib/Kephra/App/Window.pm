@@ -15,13 +15,14 @@ sub new {
     my ($class, $parent) = @_;
     my $self = $class->SUPER::new( undef, -1, '', [-1,-1], [1200,1000] );
     $self->CreateStatusBar(3);
-    $self->SetStatusWidths(100, 50, -1);
+    $self->SetStatusWidths(100, 150, -1);
     $self->SetStatusBarPane(2);
 
     $self->{'app'} = $parent;
     $self->{'editor'} = Kephra::App::Editor->new($self, -1);
     $self->{'searchbar'} = Kephra::App::SearchBar->new($self, -1);
     $self->{'replacebar'} = Kephra::App::ReplaceBar->new($self, -1);
+    Kephra::App::Window::Menu::mount( $self );
 
     my $sizer = Wx::BoxSizer->new( &Wx::wxVERTICAL );
     $sizer->Add( $self->{'editor'}, 1, &Wx::wxEXPAND, 0);
@@ -53,7 +54,7 @@ sub new {
         $_[1]->Skip(1);
     });
 
-    Kephra::App::Window::Menu::mount( $self );
+    # recreate starting state
     $self->set_title();
     $self->{'searchbar'}->show(1);
     $self->{'replacebar'}->show(0);

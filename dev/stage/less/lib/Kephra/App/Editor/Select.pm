@@ -6,27 +6,27 @@ package Kephra::App::Editor;
 
 sub expand_selecton {
     my ($self, $pos) = @_;
-    my ($start_pos, $end_pos) = $self->GetSelection;
-    return 0 if defined $pos and ($pos < $start_pos or $pos > $end_pos);
-    my $start_line = $self->LineFromPosition( $start_pos );
-    my $end_line = $self->LineFromPosition( $end_pos );
+    my ($sel_start, $sel_end) = $self->GetSelection;
+    return 0 if defined $pos and ($pos < $sel_start or $pos > $sel_start);
+    my $start_line = $self->LineFromPosition( $sel_start );
+    my $end_line = $self->LineFromPosition( $sel_end );
     my $line_start = $self->PositionFromLine( $start_line );
     my $line_end = $self->GetLineEndPosition( $start_line );
     my @selection;
-    if ($start_line == $end_line and not ($start_pos == $line_start and $end_pos == $line_end)) {
-        my @word_edge = $self->word_edges( $start_pos );
-        if    ( $start_pos == $word_edge[0] and $end_pos == $word_edge[1] ) {                         }
-        elsif ( $start_pos >= $word_edge[0] and $end_pos <= $word_edge[1] ) { @selection = @word_edge } # select word if got less
+    if ($start_line == $end_line and not ($sel_start == $line_start and $sel_end == $line_end)) {
+        my @word_edge = $self->word_edges( $sel_start );
+        if    ( $sel_start == $word_edge[0] and $sel_end == $word_edge[1] ) {                         }
+        elsif ( $sel_start >= $word_edge[0] and $sel_end <= $word_edge[1] ) { @selection = @word_edge } # select word if got less
 
         unless (@selection) {
-            my @brace_edges = $self->brace_edges_expand( $start_pos, $end_pos, $start_line );
-            my ($begin_style, $end_style) = ( $self->GetStyleAt( $start_pos), $self->GetStyleAt( $end_pos - 1) );
+            my @brace_edges = $self->brace_edges_expand( $sel_start, $sel_end, $start_line );
+            my ($begin_style, $end_style) = ( $self->GetStyleAt( $sel_start), $self->GetStyleAt( $sel_end - 1) );
             my @style_edges = ($begin_style == $end_style and (($begin_style >= 17 and $begin_style <= 30)
                                                           or    $begin_style == 6  or  $begin_style == 7   ))
-                            ? $self->style_edges($start_pos, $end_pos)
+                            ? $self->style_edges($sel_start, $sel_end)
                             : ();
 
-            if (@brace_edges and @style_edges){ # delete the wider
+            if (@brace_edges and @style_edges){ # delete the wider selection
                 if ($brace_edges[0] < $style_edges[0] or $brace_edges[1] > $style_edges[1]) { @brace_edges = () }
                 else                                                                        { @style_edges = () }
             }
@@ -37,13 +37,13 @@ sub expand_selecton {
     }
     unless (@selection) { # select construct: sub for if
         @selection = (0, $self->GetTextLength - 1 ); #  select all
-        my @block_edges = $self->block_edges_expand( $start_pos, $end_pos );
+        my @block_edges = $self->block_edges_expand( $sel_start, $sel_end );
         @selection = @block_edges if @block_edges and ($block_edges[0] >= $selection[0] or $block_edges[1] <= $selection[1]);
-        my @sub_edges = $self->sub_edges_expand( $start_pos, $end_pos );
+        my @sub_edges = $self->sub_edges_expand( $sel_start, $sel_end );
         @selection = @sub_edges   if @sub_edges   and ($sub_edges[0]   >= $selection[0] or $sub_edges[1]  <= $selection[1]);
-        my @loop_edges = $self->loop_edges_expand( $start_pos, $end_pos );
+        my @loop_edges = $self->loop_edges_expand( $sel_start, $sel_end );
         @selection = @loop_edges  if @loop_edges  and ($loop_edges[0]  >= $selection[0] or $loop_edges[1] <= $selection[1]);
-        # my @branch_edges = $self->branch_edges_expand( $start_pos, $end_pos );  select if () {}     # select unless () {}
+        # my @branch_edges = $self->branch_edges_expand( $sel_start, $sel_end );  select if () {}     # select unless () {}
     }
     $self->SetSelection( @selection );
     1;

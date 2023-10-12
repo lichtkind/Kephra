@@ -106,9 +106,12 @@ sub load_font {
     $fontstyle  = &Wx::wxSLANT  if $font->{style}  eq 'slant';
     $fontstyle  = &Wx::wxITALIC if $font->{style}  eq 'italic';
     my $wx_font = Wx::Font->new(
-        $font->{size}, &Wx::wxDEFAULT, $fontstyle, $fontweight, 0, $font->{family}
+        $font->{size}, &Wx::wxDEFAULT, $fontstyle, $fontweight, 0, $font->{family}, &Wx::wxFONTENCODING_DEFAULT
     );
     $self->StyleSetFont( &Wx::wxSTC_STYLE_DEFAULT, $wx_font ) if $wx_font->Ok > 0;
+    # wxFONTENCODING_ISO8859_1
+    # wxFONTENCODING_UTF8
+    # wxFONTENCODING_UTF16(L|BE)
 }
 
 
