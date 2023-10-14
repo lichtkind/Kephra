@@ -97,8 +97,8 @@ sub mount {
         $doc_encoding_menu->AppendRadioItem( 15606, 'Latin 3' );
         $doc_encoding_menu->AppendRadioItem( 15607, 'Latin 4' );
         $doc_encoding_menu->AppendRadioItem( 15608, 'Cyrillic' );
-        $doc_menu->Check(15601, 1);
-        $doc_menu->Append( 15600, '&Encoding', $doc_encoding_menu, '' );
+       # $doc_menu->Check(15601, 1);
+      #  $doc_menu->Append( 15600, '&Encoding', $doc_encoding_menu, '' );
     #my $doc_mode_menu  = Wx::Menu->new();
     #my @mode_label = (qw/no Bash C\/++ JSON Markdown Perl Python Ruby Rust YAML/);
     #my @modes      = (qw/no bash cpp json markdown perl python ruby rust yaml/);

@@ -9,7 +9,7 @@ package Kephra;
 
 our $VERSION = '0.405';
 our $NAME = 'Kephra';
-# our $STAGE = 'sed';
+our $STAGE = 'less';
 
 use base qw(Wx::App);
 
