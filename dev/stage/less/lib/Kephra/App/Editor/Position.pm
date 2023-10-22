@@ -2,14 +2,13 @@ use v5.12;
 use warnings;
 
 package Kephra::App::Editor::Position;
-
 package Kephra::App::Editor;
 
 
 sub line_start {
     my ($self, $pos) = @_;
     my $line = $self->LineFromPosition( $pos );
-    return $line if $line == -1;
+    return -1 if $line == -1;
     $self->GetLineIndentPosition( $line );
 }
 
@@ -96,6 +95,8 @@ sub loop_edges_expand {
     $self->SearchAnchor;
     $npos = $self->SearchPrev( 0, 'for');
     $loop_start = $npos if $npos > $loop_start and $self->GetStyleAt( $npos ) == 5;
+    $npos = $self->SearchPrev( 0, 'foreach');
+    $loop_start = $npos if $npos > $loop_start and $self->GetStyleAt( $npos ) == 5;
     $npos = $self->SearchPrev( 0, 'until');
     $loop_start = $npos if $npos > $loop_start and $self->GetStyleAt( $npos ) == 5;
     $npos = $self->SearchPrev( 0, 'while');
@@ -108,6 +109,8 @@ sub loop_edges_expand {
     $self->SearchAnchor;
     $loop_start = -1;
     $npos = $self->SearchPrev( 0, 'for');
+    $loop_start = $npos if $npos > $loop_start and $self->GetStyleAt( $npos ) == 5;
+    $npos = $self->SearchPrev( 0, 'foreach');
     $loop_start = $npos if $npos > $loop_start and $self->GetStyleAt( $npos ) == 5;
     $npos = $self->SearchPrev( 0, 'until');
     $loop_start = $npos if $npos > $loop_start and $self->GetStyleAt( $npos ) == 5;

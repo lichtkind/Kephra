@@ -4,6 +4,84 @@ use warnings;
 package Kephra::App::Editor::Goto;
 package Kephra::App::Editor;
 
+
+
+
+sub caret_left {
+    my ($self) = @_;
+    $self->del_caret_pos_cache();
+    $self->GotoPos( $self->GetCurrentPos - 1 );
+}
+sub caret_right {
+    my ($self) = @_;
+    $self->del_caret_pos_cache();
+    $self->GotoPos( $self->GetCurrentPos + 1 );
+}
+
+sub caret_up {
+    my ($self) = @_;
+    my $pos = $self->GetCurrentPos;
+    my $line_nr = $self->LineFromPosition( $pos );
+    return $self->GotoPos( 0 ) unless $line_nr;
+    my ($col) = ($self->get_caret_pos_cache('caret_col'));
+    unless (defined $col){
+        $col = $self->GetColumn( $pos );
+        $self->set_caret_pos_cache('caret_col', $col);
+    }
+    my $next_pos = $self->PositionFromLine( $line_nr - 1 ) + $col;
+    my $line_end = $self->GetLineEndPosition( $line_nr - 1 );
+    $self->GotoPos( $line_end < $next_pos ? $line_end : $next_pos );
+}
+sub caret_down {
+    my ($self) = @_;
+    my $pos = $self->GetCurrentPos;
+    my $line_nr = $self->LineFromPosition( $pos );
+    return $self->GotoPos( $self->GetLastPosition ) if $self->GetLineCount -1 == $line_nr;
+    my ($col) = ($self->get_caret_pos_cache('caret_col'));
+    unless (defined $col){
+        $col = $self->GetColumn( $pos );
+        $self->set_caret_pos_cache('caret_col', $col);
+    }
+    my $next_pos = $self->PositionFromLine( $line_nr + 1 ) + $col;
+    my $line_end = $self->GetLineEndPosition( $line_nr + 1 );
+    $self->GotoPos( $line_end < $next_pos ? $line_end : $next_pos );
+}
+
+my $page_size = 45;
+sub caret_page_up {
+    my ($self) = @_;
+    my $pos = $self->GetCurrentPos;
+    my $line_nr = $self->LineFromPosition( $pos );
+    return unless $line_nr;
+    my ($col) = ($self->get_caret_pos_cache('caret_col'));
+    unless (defined $col){
+        $col = $self->GetColumn( $pos );
+        $self->set_caret_pos_cache('caret_col', $col);
+    }
+    $line_nr -= $page_size;
+    $line_nr = 0 if $line_nr < 0;
+    my $next_pos = $self->PositionFromLine( $line_nr) + $col;
+    my $line_end = $self->GetLineEndPosition( $line_nr);
+    $self->GotoPos( $line_end < $next_pos ? $line_end : $next_pos );
+}
+sub caret_page_down {
+    my ($self) = @_;
+    my $pos = $self->GetCurrentPos;
+    my $line_nr = $self->LineFromPosition( $pos );
+    my $last_line = $self->GetLineCount - 1;
+    return if $line_nr == $last_line;
+    my ($col) = ($self->get_caret_pos_cache('caret_col'));
+    unless (defined $col){
+        $col = $self->GetColumn( $pos );
+        $self->set_caret_pos_cache('caret_col', $col);
+    }
+    $line_nr += $page_size;
+    $line_nr = $last_line if $line_nr > $last_line;
+    my $next_pos = $self->PositionFromLine( $line_nr ) + $col;
+    my $line_end = $self->GetLineEndPosition( $line_nr );
+    $self->GotoPos( $line_end < $next_pos ? $line_end : $next_pos );
+}
+
 sub goto_last_edit {
     my ($self) = @_;
     return $self->GotoPos( $self->{'change_pos'} ) unless $self->GetCurrentPos == $self->{'change_pos'} or $self->{'change_pos'} == -1;
@@ -82,3 +160,4 @@ sub goto_next_sub {
 }
 
 1;
+

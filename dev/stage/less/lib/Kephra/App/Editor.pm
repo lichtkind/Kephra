@@ -34,6 +34,7 @@ sub new {
     $self->load_font;  # before setting highlighting
     Kephra::App::Editor::SyntaxMode::apply( $self, 'perl' );
     $self->{'change_pos'} = $self->{'change_prev'} = -1;
+    $self->del_caret_pos_cache;
     return $self;
 }
 
@@ -191,6 +192,12 @@ sub mount_events {
                     else                                   { $event->Skip                }
                 } else {
                     if    ($code == &Wx::WXK_ESCAPE )      { $ed->escape                 }
+                    elsif ($code == &Wx::WXK_LEFT)         { $ed->caret_left             }
+                    elsif ($code == &Wx::WXK_RIGHT)        { $ed->caret_right            }
+                    elsif ($code == &Wx::WXK_UP)           { $ed->caret_up               }
+                    elsif ($code == &Wx::WXK_DOWN)         { $ed->caret_down             }
+                    elsif ($code == &Wx::WXK_PAGEUP )      { $ed->caret_page_up          }
+                    elsif ($code == &Wx::WXK_PAGEDOWN )    { $ed->caret_page_down        }
                     elsif ($code == &Wx::WXK_RETURN)       { $self->new_line             }
                     else                                   { $event->Skip                }
                 }
@@ -203,6 +210,7 @@ sub mount_events {
         #my $XY = $ev->GetLogicalPosition( Wx::MemoryDC->new( ) );
         #my $pos = $ed->XYToPosition( $XY->x, $XY->y);
         # $ed->expand_selecton( $pos ) or
+        $ed->del_caret_pos_cache();
         $ev->Skip;
     });
     # Wx::Event::EVT_RIGHT_DOWN( $self, sub {});
@@ -228,12 +236,15 @@ sub mount_events {
         $self->bracelight( $p );
         my $psrt = ($self->GetCurrentLine+1).':'.$self->GetColumn( $p );
         $psrt .= ' ('.($end_pos - $start_pos).')' if $start_pos != $end_pos;
-        $self->GetParent->SetStatusText( $psrt , 0); # say 'ui';
+        $self->GetParent->SetStatusText( $psrt , 0);
     });
     Wx::Event::EVT_STC_SAVEPOINTREACHED( $self, -1, sub { $self->GetParent->set_title(0) });
     Wx::Event::EVT_STC_SAVEPOINTLEFT(    $self, -1, sub { $self->GetParent->set_title(1) });
     Wx::Event::EVT_SET_FOCUS(            $self,     sub { my ($ed, $event ) = @_;        $event->Skip;   });
-    # Wx::Event::EVT_DROP_FILES       ($self, sub { say $_[0], $_[1];    $self->GetParent->open_file()  });
+    Wx::Event::EVT_DROP_FILES          ( $self,     sub {
+        say $_[0], $_[1];
+        #$self->GetParent->open_file()
+    });
 #    Wx::Event::EVT_STC_DO_DROP  ($self, -1, sub {
 #        my ($ed, $event ) = @_; # StyledTextEvent=SCALAR
 #        my $str = $event->GetDragText;
@@ -318,14 +329,29 @@ sub escape {
     #if ($start_pos != $end_pos) { return $self->GotoPos ( $self->GetCurrentPos ) }
     if ($win->IsFullScreen) { return $win->toggle_full_screen};
     # 3. focus  to edit field
-    #say 'esc';
 }
 
-sub sel {
-    my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
-    say $self->GetStyleAt( $pos);
+sub GetLastPosition { $_[0]->GetTextLength }
+
+sub set_caret_pos_cache {
+    my ($self, $name, $pos) = @_;
+    return unless defined $name;
+    $self->{'caret_cache'} = {name => $name, pos => [$self->GetSelection]};
+    $self->{'caret_cache'}{'pos'} = [$pos] if defined $pos;
+say "set $name, $pos";
 }
+sub get_caret_pos_cache {
+    my ($self, $name) = @_;
+    return unless defined $name and $self->{'caret_cache'}{'name'} eq $name;
+    return @{$self->{'caret_cache'}{'pos'}} if @{$self->{'caret_cache'}{'pos'}};
+}
+sub del_caret_pos_cache { $_[0]->{'caret_cache'} = {name => '', pos => []} }
+
+#~ sub sel {
+    #~ my ($self) = @_;
+    #~ my $pos = $self->GetCurrentPos;
+    #~ say $self->GetStyleAt( $pos);
+#~ }
 
 1;
 
@@ -365,7 +391,3 @@ Wx::Event::EVT_STC_UPDATEUI($self, -1, sub {
 $self->SetAcceleratorTable(
 Wx::AcceleratorTable->new(
 [&Wx::wxACCEL_CTRL, ord 'n', 1000],
-));
-
-
-
