@@ -338,7 +338,6 @@ sub set_caret_pos_cache {
     return unless defined $name;
     $self->{'caret_cache'} = {name => $name, pos => [$self->GetSelection]};
     $self->{'caret_cache'}{'pos'} = [$pos] if defined $pos;
-say "set $name, $pos";
 }
 sub get_caret_pos_cache {
     my ($self, $name) = @_;

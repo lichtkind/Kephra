@@ -8,15 +8,12 @@ sub expand_selecton {
     my ($self, $pos) = @_;
     my ($sel_start, $sel_end) = $self->GetSelection;
     return 0 if defined $pos and ($pos < $sel_start or $pos > $sel_start);
+    return 0 if $sel_start == 0 and $sel_end == $self->GetLastPosition;
     my $start_line = $self->LineFromPosition( $sel_start );
     my $end_line = $self->LineFromPosition( $sel_end );
     my $line_start = $self->PositionFromLine( $start_line );
     my $line_end = $self->GetLineEndPosition( $start_line );
     my @selection;
-
-    # remember from where selection was expanded to be able go back
-    my (@first_selection) = ($self->get_caret_pos_cache('expand_selecton'));
-    $self->set_caret_pos_cache('expand_selecton') unless int @first_selection;
 
     if ($start_line == $end_line and not ($sel_start == $line_start and $sel_end == $line_end)) {
         my @word_edge = $self->word_edges( $sel_start );
@@ -51,12 +48,29 @@ sub expand_selecton {
         # my @branch_edges = $self->branch_edges_expand( $sel_start, $sel_end );  select if () {}     # select unless () {} # for if and unless
     }
     $self->SetSelection( @selection );
+
+    # remember from where selection was expanded to be able go back
+    my ($selection_history) = ($self->get_caret_pos_cache('expand_selecton'));
+    $selection_history = [[$sel_start, $sel_end]] unless ref $selection_history eq 'ARRAY';
+    push @$selection_history, [@selection];
+    $self->set_caret_pos_cache('expand_selecton', $selection_history);
+
     1;
 }
 
 sub shrink_selecton {
     my ($self) = @_;
     my ($start_pos, $end_pos) = $self->GetSelection;
+    return 0 if $start_pos == $end_pos;
+
+    my ($selection_history) = ($self->get_caret_pos_cache('expand_selecton'));
+    if (ref $selection_history and @$selection_history){
+        my $selection = pop @$selection_history;
+        $selection = pop @$selection_history if @$selection_history
+                                            and $selection->[0] == $start_pos and $selection->[1] == $end_pos;
+        return $self->SetSelection( @$selection );
+    }
+
     my $center = $self->{'set_pos'};
     my $start_line = $self->LineFromPosition( $start_pos );
     my $end_line = $self->LineFromPosition( $end_pos );
@@ -64,7 +78,7 @@ sub shrink_selecton {
     my $line_end = $self->GetLineEndPosition( $start_line );
     my @selection;
     my (@first_selection) = ($self->get_caret_pos_cache('expand_selecton'));
-say 'shrink';
+# shrink toward tthe caret
     #~ return if $start_pos == $end_pos;
 
     #~ if ($start_line == $end_line) {
