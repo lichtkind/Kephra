@@ -175,6 +175,11 @@ sub select_next_block {
     $self->SetAnchor($anchor);
     $self->EnsureCaretVisible;
 }
+
+sub select_all {
+    my ($self) = @_;
+    $self->SetSelection( 0, $self->GetTextLength - 1 );
+}
 #say $self->GetRect;
 # ->SelectionIsRectangle
 # ->HomeRectExtend ()
@@ -188,8 +193,7 @@ sub select_next_block {
 sub select_rect_up {
     my ($self) = @_;
     $self->LineUpRectExtend;
-#say "$_ : ", $self->GetSelectionNCaret($_) for 1..6;
-#say '      '.$self->GetSelections();
+#say "$_ : ", $self->GetSelectionNCaret($_) for 1..6; #->GetSelections();
 }
 
 
@@ -197,7 +201,6 @@ sub select_rect_down {
     my ($self) = @_;
     $self->LineDownRectExtend;
 }
-
 
 sub select_rect_left {
     my ($self) = @_;
@@ -212,10 +215,7 @@ sub select_rect_right {
 }
 # &Wx::wxSTC_MULTIPASTE_EACH
 
-sub select_all {
-    my ($self) = @_;
-    $self->SetSelection( 0, $self->GetTextLength - 1 );
-}
+
 
 
 1;

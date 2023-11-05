@@ -329,5 +329,33 @@ sub next_brace_pos {
     $pos;
 }
 
+sub column_in_prev_lines { # get position at same column as $pos, but $lines up
+    my ($self, $pos, $lines) = @_;
+    $lines //= 1;
+    my $line_nr = $self->LineFromPosition( $pos ) - $lines;
+    return $pos if $line_nr < 0;
+    my ($col) = ($self->get_caret_pos_cache('caret_col'));
+    unless (defined $col){
+        $col = $self->GetColumn( $pos );
+        $self->set_caret_pos_cache('caret_col', $col);
+    }
+    my $next_pos = $self->PositionFromLine( $line_nr ) + $col;
+    my $line_end = $self->GetLineEndPosition( $line_nr );
+    return $line_end < $next_pos ? $line_end : $next_pos;
+}
+sub column_in_next_lines {
+    my ($self, $pos, $lines) = @_;
+    $lines //= 1;
+    my $line_nr = $self->LineFromPosition( $pos ) + $lines;
+    return $self->GetLastPosition if $self->GetLineCount <= $line_nr;
+    my ($col) = ($self->get_caret_pos_cache('caret_col'));
+    unless (defined $col){
+        $col = $self->GetColumn( $pos );
+        $self->set_caret_pos_cache('caret_col', $col);
+    }
+    my $next_pos = $self->PositionFromLine( $line_nr) + $col;
+    my $line_end = $self->GetLineEndPosition( $line_nr);
+    return $line_end < $next_pos ? $line_end : $next_pos;
+}
 
 1;

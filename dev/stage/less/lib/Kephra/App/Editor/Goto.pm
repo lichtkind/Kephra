@@ -20,67 +20,81 @@ sub caret_right {
 
 sub caret_up {
     my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
-    my $line_nr = $self->LineFromPosition( $pos );
-    return $self->GotoPos( 0 ) unless $line_nr;
-    my ($col) = ($self->get_caret_pos_cache('caret_col'));
-    unless (defined $col){
-        $col = $self->GetColumn( $pos );
-        $self->set_caret_pos_cache('caret_col', $col);
-    }
-    my $next_pos = $self->PositionFromLine( $line_nr - 1 ) + $col;
-    my $line_end = $self->GetLineEndPosition( $line_nr - 1 );
-    $self->GotoPos( $line_end < $next_pos ? $line_end : $next_pos );
+    $self->GotoPos( $self->column_in_prev_lines( $self->GetCurrentPos, 1) );
 }
 sub caret_down {
     my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
-    my $line_nr = $self->LineFromPosition( $pos );
-    return $self->GotoPos( $self->GetLastPosition ) if $self->GetLineCount -1 == $line_nr;
-    my ($col) = ($self->get_caret_pos_cache('caret_col'));
-    unless (defined $col){
-        $col = $self->GetColumn( $pos );
-        $self->set_caret_pos_cache('caret_col', $col);
-    }
-    my $next_pos = $self->PositionFromLine( $line_nr + 1 ) + $col;
-    my $line_end = $self->GetLineEndPosition( $line_nr + 1 );
-    $self->GotoPos( $line_end < $next_pos ? $line_end : $next_pos );
+    $self->GotoPos( $self->column_in_next_lines( $self->GetCurrentPos, 1) );
 }
 
 my $page_size = 45;
 sub caret_page_up {
     my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
-    my $line_nr = $self->LineFromPosition( $pos );
-    return unless $line_nr;
-    my ($col) = ($self->get_caret_pos_cache('caret_col'));
-    unless (defined $col){
-        $col = $self->GetColumn( $pos );
-        $self->set_caret_pos_cache('caret_col', $col);
-    }
-    $line_nr -= $page_size;
-    $line_nr = 0 if $line_nr < 0;
-    my $next_pos = $self->PositionFromLine( $line_nr) + $col;
-    my $line_end = $self->GetLineEndPosition( $line_nr);
-    $self->GotoPos( $line_end < $next_pos ? $line_end : $next_pos );
+    $self->GotoPos( $self->column_in_prev_lines( $self->GetCurrentPos, $page_size) );
 }
 sub caret_page_down {
     my ($self) = @_;
-    my $pos = $self->GetCurrentPos;
-    my $line_nr = $self->LineFromPosition( $pos );
-    my $last_line = $self->GetLineCount - 1;
-    return if $line_nr == $last_line;
-    my ($col) = ($self->get_caret_pos_cache('caret_col'));
-    unless (defined $col){
-        $col = $self->GetColumn( $pos );
-        $self->set_caret_pos_cache('caret_col', $col);
-    }
-    $line_nr += $page_size;
-    $line_nr = $last_line if $line_nr > $last_line;
-    my $next_pos = $self->PositionFromLine( $line_nr ) + $col;
-    my $line_end = $self->GetLineEndPosition( $line_nr );
-    $self->GotoPos( $line_end < $next_pos ? $line_end : $next_pos );
+    $self->GotoPos( $self->column_in_next_lines( $self->GetCurrentPos, $page_size) );
 }
+
+sub select_left {
+    my ($self) = @_;
+    my ($sel_start, $sel_end) = $self->GetSelection;
+    my $pos = $self->GetCurrentPos;
+    $self->del_caret_pos_cache();
+    $self->GotoPos( $pos - 1 );
+    if ($sel_start == $pos){ $self->SetAnchor($sel_end) }
+    else                   { $self->SetAnchor($sel_start) }
+}
+sub select_right {
+    my ($self) = @_;
+    my ($sel_start, $sel_end) = $self->GetSelection;
+    my $pos = $self->GetCurrentPos;
+    $self->del_caret_pos_cache();
+    $self->GotoPos( $pos + 1 );
+    if ($sel_start == $pos){ $self->SetAnchor($sel_end) }
+    else                   { $self->SetAnchor($sel_start) }
+}
+
+sub select_up {
+    my ($self) = @_;
+    my ($sel_start, $sel_end) = $self->GetSelection;
+    my $pos = $self->GetCurrentPos;
+    my $new_pos = $self->column_in_prev_lines( $pos, 1);
+    $self->GotoPos( $new_pos );
+    if ($sel_start == $pos){ $self->SetAnchor($sel_end) }
+    else                   { $self->SetAnchor($sel_start) }
+}
+sub select_down {
+    my ($self) = @_;
+    my ($sel_start, $sel_end) = $self->GetSelection;
+    my $pos = $self->GetCurrentPos;
+    my $new_pos = $self->column_in_next_lines( $pos, 1);
+    $self->GotoPos( $new_pos );
+    if ($sel_start == $pos){ $self->SetAnchor($sel_end) }
+    else                   { $self->SetAnchor($sel_start) }
+}
+
+sub select_page_up {
+    my ($self) = @_;
+    my ($sel_start, $sel_end) = $self->GetSelection;
+    my $pos = $self->GetCurrentPos;
+    my $new_pos = $self->column_in_prev_lines( $pos, $page_size);
+    $self->GotoPos( $new_pos );
+    if ($sel_start == $pos){ $self->SetAnchor($sel_end) }
+    else                   { $self->SetAnchor($sel_start) }
+}
+sub select_page_down {
+    my ($self) = @_;
+    my ($sel_start, $sel_end) = $self->GetSelection;
+    my $pos = $self->GetCurrentPos;
+    my $new_pos = $self->column_in_next_lines( $pos, $page_size);
+    $self->GotoPos( $new_pos );
+    if ($sel_start == $pos){ $self->SetAnchor($sel_end) }
+    else                   { $self->SetAnchor($sel_start) }
+}
+
+
 
 sub goto_last_edit {
     my ($self) = @_;

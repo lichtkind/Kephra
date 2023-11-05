@@ -189,6 +189,12 @@ sub mount_events {
                     if    ($code == 35 )                   { $ed->insert_brace("'", "'") }
                     elsif ($code == 40 )                   { $ed->insert_brace('(', ')') }
                     elsif ($code == 50 )                   { $ed->insert_brace('"', '"') }
+                    elsif ($code == &Wx::WXK_LEFT)         { $ed->select_left             }
+                    elsif ($code == &Wx::WXK_RIGHT)        { $ed->select_right            }
+                    elsif ($code == &Wx::WXK_UP)           { $ed->select_up              }
+                    elsif ($code == &Wx::WXK_DOWN)         { $ed->select_down            }
+                    elsif ($code == &Wx::WXK_PAGEUP )      { $ed->select_page_up         }
+                    elsif ($code == &Wx::WXK_PAGEDOWN )    { $ed->select_page_down       }
                     else                                   { $event->Skip                }
                 } else {
                     if    ($code == &Wx::WXK_ESCAPE )      { $ed->escape                 }
@@ -342,7 +348,7 @@ sub set_caret_pos_cache {
 sub get_caret_pos_cache {
     my ($self, $name) = @_;
     return unless defined $name and $self->{'caret_cache'}{'name'} eq $name;
-    return @{$self->{'caret_cache'}{'pos'}} if @{$self->{'caret_cache'}{'pos'}};
+    return @{$self->{'caret_cache'}{'pos'}} if int @{$self->{'caret_cache'}{'pos'}};
 }
 sub del_caret_pos_cache { $_[0]->{'caret_cache'} = {name => '', pos => []} }
 
