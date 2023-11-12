@@ -35,7 +35,7 @@ sub new {
     Wx::Event::EVT_KEY_DOWN( $self, sub {
         my ($self, $event) = @_;
         my $code = $event->GetKeyCode ;
-        if   ($code == &Wx::WXK_F11)        {  $self->ShowFullScreen( not $self->IsFullScreen ); say  "F11"  }
+        if   ($code == &Wx::WXK_F11)        {  $self->ShowFullScreen( not $self->IsFullScreen )  }
         else { $event->Skip }
     });
     Wx::Event::EVT_CLOSE( $self, sub {
@@ -48,7 +48,7 @@ sub new {
         $event->Skip(1);
     });
     Wx::Event::EVT_CLOSE( $self,       sub {
-        $self->config->set_value( $self->{'file'}, 'file');
+        $self->config->set_value( $self->{'file'}, 'file', 'open');
         $self->{'editor'}->save_config( $self->config );
         $self->{'searchbar'}->save_config( $self->config );
         $_[1]->Skip(1);
@@ -59,7 +59,7 @@ sub new {
     $self->{'searchbar'}->show(1);
     $self->{'replacebar'}->show(0);
 
-    $self->read_file( $self->config->get_value('file') ); # open the last opened file
+    $self->read_file( $self->config->get_value('file', 'open') ); # open the last opened file
     $self->{'editor'}->apply_config( $self->config );
     $self->{'searchbar'}->apply_config( $self->config );
 
@@ -81,7 +81,8 @@ sub open_file   {
     my ($self) = @_;
     my $dir = Kephra::IO::LocalFile::dir_from_path( $self->{'file'} );
     my $file = Kephra::App::Dialog::get_file_open( $dir );
-    $self->read_file( $file ) if $file;
+    return unless $file;
+    $self->read_file( $file );
 }
 
 sub reopen_file { $_[0]->read_file( $_[0]->{'file'}, 1) }
@@ -89,6 +90,7 @@ sub reopen_file { $_[0]->read_file( $_[0]->{'file'}, 1) }
 sub read_file {
     my ($self, $file, $soft) = @_;
     return unless defined $file and -r $file;
+    Kephra::App::Window::Menu::update_recent_files_menu( $self, $self->{'file'} );
     my ($content, $encoding) = Kephra::IO::LocalFile::read( $file );
     $self->{'encoding'} = $encoding;
     $self->{'editor'}->new_text( $content, $soft );
@@ -139,3 +141,4 @@ sub toggle_full_screen {
 }
 
 1;
+

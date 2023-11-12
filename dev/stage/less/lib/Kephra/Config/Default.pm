@@ -4,7 +4,10 @@ use warnings;
 package Kephra::Config::Default;
 
 sub get {{
-    file => '',
+    file => {
+        open => '',
+        closed => [],
+    },
     session => {loaded => '', last => [] },
     document_default => {},
     editor => {
