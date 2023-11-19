@@ -70,6 +70,7 @@ sub config {$_[0]{'app'}{'config'}}
 
 sub new_file {
     my $self = shift;
+    Kephra::App::Window::Menu::update_recent_files_menu( $self, $self->{'file'} );
     $self->{'file'} = '';
     $self->{'editor'}->new_text( '' );
     $self->{'encoding'} = 'utf-8';

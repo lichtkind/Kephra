@@ -1,20 +1,25 @@
 
-0.405
-
-  config for current file , mode , indention size, mode , coding 
 
 0.406
 
- shrink selection, auto get indention and tab mode
+    shrink selection
+    open recents menu
+    keep col pos
+
+0.407
+
+  mode , coding 
+
+0.408
+  
+  tab bar
+    move by mouse and keyboard
 
 
-tab bar, move by mouse and keyboard
 
+auto get indention
 session files
-
 split view
-
 file browser
-
 project prowser
 

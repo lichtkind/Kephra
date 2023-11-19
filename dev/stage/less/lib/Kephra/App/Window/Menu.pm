@@ -222,7 +222,7 @@ sub update_recent_files_menu {
     my ($win, $closed_file) = @_;
     my $recent_files = $win->config->get_value('file', 'closed');
     return unless ref $recent_files eq 'ARRAY';
-    if (defined $closed_file){
+    if (defined $closed_file and $closed_file){
         unshift @$recent_files, $closed_file;
         for my $i (reverse 1 .. $#$recent_files){
             splice( @$recent_files, $i, 1) if $recent_files->[$i] eq $closed_file;

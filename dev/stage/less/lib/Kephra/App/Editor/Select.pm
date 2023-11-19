@@ -16,7 +16,7 @@ sub expand_selecton {
     my @selection;
 
     if ($start_line == $end_line and not ($sel_start == $line_start and $sel_end == $line_end)) {
-        my @word_edge = $self->word_edges( $sel_start );
+        my @word_edge = $self->word_edges_expand( $sel_start );
         if    ( $sel_start == $word_edge[0] and $sel_end == $word_edge[1] ) {                         }
         elsif ( $sel_start >= $word_edge[0] and $sel_end <= $word_edge[1] ) { @selection = @word_edge } # select word if got less
 
@@ -71,14 +71,20 @@ sub shrink_selecton {
         return $self->SetSelection( @$selection );
     }
 
+    my $pos = $self->GetCurrentPos;
+    my $pos_anchor = $self->GetAnchor;
+ say "$pos $pos_anchor ";
     my $center = $self->{'set_pos'};
     my $start_line = $self->LineFromPosition( $start_pos );
     my $end_line = $self->LineFromPosition( $end_pos );
     my $line_start = $self->PositionFromLine( $start_line );
     my $line_end = $self->GetLineEndPosition( $start_line );
     my @selection;
-    my (@first_selection) = ($self->get_caret_pos_cache('expand_selecton'));
-# shrink toward tthe caret
+    # @selection = $self->word_edges_shrink($pos, $pos_anchor);
+    @selection = $self->block_edges_shrink($pos, $pos_anchor);
+    say "@selection";
+
+# shrink toward the caret
     #~ return if $start_pos == $end_pos;
 
     #~ if ($start_line == $end_line) {
@@ -104,7 +110,7 @@ sub shrink_selecton {
         #~ @selection = $start_pos, $end_pos;
     #~ }
 #~ # say "shrink $start_pos, $end_pos ", $self->{'select_stack'};
-    #~ $self->SetSelection( @selection );
+    $self->SetSelection( @selection );
     1;
 }
 
@@ -192,10 +198,8 @@ sub select_all {
 
 sub select_rect_up {
     my ($self) = @_;
-    $self->LineUpRectExtend;
-#say "$_ : ", $self->GetSelectionNCaret($_) for 1..6; #->GetSelections();
+    $self->LineUpRectExtend; #say "$_ : ", $self->GetSelectionNCaret($_) for 1..6; #->GetSelections();
 }
-
 
 sub select_rect_down {
     my ($self) = @_;
@@ -207,15 +211,9 @@ sub select_rect_left {
     $self->CharLeftRectExtend;
 }
 
-
 sub select_rect_right {
     my ($self) = @_;
-    $self->CharRightRectExtend;
-# $self->SetSelectionNCaret
+    $self->CharRightRectExtend; # $self->SetSelectionNCaret # &Wx::wxSTC_MULTIPASTE_EACH
 }
-# &Wx::wxSTC_MULTIPASTE_EACH
-
-
-
 
 1;
