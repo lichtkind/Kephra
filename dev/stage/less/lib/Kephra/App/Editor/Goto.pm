@@ -4,9 +4,6 @@ use warnings;
 package Kephra::App::Editor::Goto;
 package Kephra::App::Editor;
 
-
-
-
 sub caret_left {
     my ($self) = @_;
     $self->del_caret_pos_cache();

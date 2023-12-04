@@ -381,6 +381,11 @@ sub next_brace_pos {
     $pos;
 }
 
+sub same_column_in_other_line {
+    my ($self, $pos, $lines) = @_;
+    $lines //= 0;
+}
+
 sub column_in_prev_lines { # get position at same column as $pos, but $lines up
     my ($self, $pos, $lines) = @_;
     $lines //= 1;
