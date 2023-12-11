@@ -1,0 +1,26 @@
+
+undo/redo
+  none distructive
+  serializable
+  localized to paragraph/sub/
+
+git
+  commit selection/paragraph
+
+
+session
+- @file_name
+- @visible
+
+
+project
+ - default settings
+ - path
+ - commands
+ - notes
+
+code browser analyzer
+subs
+vars
+
+global notes

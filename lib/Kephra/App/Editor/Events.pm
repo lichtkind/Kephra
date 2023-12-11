@@ -80,6 +80,8 @@ sub mount {
                     elsif ($code == &Wx::WXK_RIGHT)        { $ed->select_right            }
                     elsif ($code == &Wx::WXK_UP)           { $ed->select_up              }
                     elsif ($code == &Wx::WXK_DOWN)         { $ed->select_down            }
+                    elsif ($code == &Wx::WXK_HOME)         { $ed->select_home            }
+                    elsif ($code == &Wx::WXK_END)          { $ed->select_end             }
                     elsif ($code == &Wx::WXK_PAGEUP )      { $ed->select_page_up         }
                     elsif ($code == &Wx::WXK_PAGEDOWN )    { $ed->select_page_down       }
                     else                                   { $event->Skip                }
@@ -87,6 +89,8 @@ sub mount {
                     if    ($code == &Wx::WXK_ESCAPE )      { $ed->escape                 }
                     elsif ($code == &Wx::WXK_LEFT)         { $ed->caret_left             }
                     elsif ($code == &Wx::WXK_RIGHT)        { $ed->caret_right            }
+                    elsif ($code == &Wx::WXK_HOME)         { $ed->caret_home             }
+                    elsif ($code == &Wx::WXK_END)          { $ed->caret_end              }
                     elsif ($code == &Wx::WXK_UP)           { $ed->caret_up               }
                     elsif ($code == &Wx::WXK_DOWN)         { $ed->caret_down             }
                     elsif ($code == &Wx::WXK_PAGEUP )      { $ed->caret_page_up          }
