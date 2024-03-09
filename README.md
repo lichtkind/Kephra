@@ -4,7 +4,7 @@
 
 ### VERSION
 
-    0.404
+    0.406
 
 [Home on CPAN](https://metacpan.org/pod/Kephra)
 
@@ -18,7 +18,7 @@
     If you check out sources here, you have to build the package yourself.
     In order to do that you need perl and the module Dist::Zilla.
 
-    cpan install Dist::Zilla   
+    cpan install Dist::Zilla
         or
     cpanm Dist::Zilla
 

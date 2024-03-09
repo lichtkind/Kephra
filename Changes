@@ -1,4 +1,9 @@
 
+0.407  2023-12-11    lichtkind
+-------
+    * = minor features
+    * + undo expand selection per algorithm (Ctrl+Shift+A)
+
 0.406  2023-12-11    lichtkind
 -------
     * = minor features
