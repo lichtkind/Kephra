@@ -1,0 +1,9 @@
+editing file
+
+reopen with all settings
+
+switch project fast (replace files in tabs)
+
+view several files parallel
+
+interact with git, squash revamp patches
