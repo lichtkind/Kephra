@@ -46,8 +46,8 @@ sub mount {
                     $event->Skip
                 } else {
                     if    ($code == 81)                { $ed->insert_text('@') } # Q
-                    elsif ($code == 55 )               { $ed->insert_brace('{', '}') }
-                    elsif ($code == 56 )               { $ed->insert_brace('[', ']') }
+                    elsif ($code == 55 )               { $ed->insert_brace('{', '}') or $event->Skip }
+                    elsif ($code == 56 )               { $ed->insert_brace('[', ']') or $event->Skip}
                     else                               { $event->Skip                }
                 }
             } elsif ( $event->AltDown ) { # $mod == 1
@@ -67,15 +67,15 @@ sub mount {
                     elsif ($code == &Wx::WXK_HOME)     { $ed->move_to_start     }
                     elsif ($code == &Wx::WXK_END )     { $ed->move_to_end       }
                     elsif ($code == &Wx::WXK_DELETE)   { $ed->delete_line       }
-                    elsif ($code == 55 )               { $ed->insert_brace('{', '}') }
-                    elsif ($code == 56 )               { $ed->insert_brace('[', ']') }
+                    elsif ($code == 55 )               { $ed->insert_brace('{', '}') or $event->Skip}
+                    elsif ($code == 56 )               { $ed->insert_brace('[', ']') or $event->Skip}
                     else                               { $event->Skip }
                 }
             } else {
                 if ($event->ShiftDown){
-                    if    ($code == 35 )                   { $ed->insert_brace("'", "'") }
-                    elsif ($code == 40 )                   { $ed->insert_brace('(', ')') }
-                    elsif ($code == 50 )                   { $ed->insert_brace('"', '"') }
+                    if    ($code == 35 )                   { $ed->insert_brace("'", "'") or $event->Skip}
+                    elsif ($code == 40 )                   { $ed->insert_brace('(', ')') or $event->Skip}
+                    elsif ($code == 50 )                   { $ed->insert_brace('"', '"') or $event->Skip}
                     elsif ($code == &Wx::WXK_LEFT)         { $ed->select_left             }
                     elsif ($code == &Wx::WXK_RIGHT)        { $ed->select_right            }
                     elsif ($code == &Wx::WXK_UP)           { $ed->select_up              }

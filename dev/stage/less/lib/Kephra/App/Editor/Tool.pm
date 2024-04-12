@@ -9,18 +9,20 @@ package Kephra::App::Editor;
 sub insert_brace {
     my ($self, $left, $right) = @_;
     my ($start_pos, $end_pos) = $self->GetSelection;
+    return 0 if $self->SelectionIsRectangle();
 
-    if ($start_pos == $end_pos) { 
-        $self->InsertText( $start_pos, $left.$right ); 
+    if ($start_pos == $end_pos) {
+        $self->InsertText( $start_pos, $left.$right );
         $self->SetSelection( $start_pos+1, $end_pos+1 );
     }
     else {
         $self->BeginUndoAction();
         $self->InsertText( $end_pos, $right );
-        $self->InsertText( $start_pos, $left ); 
+        $self->InsertText( $start_pos, $left );
         $self->SetSelection( $start_pos, $end_pos+2 );
         $self->EndUndoAction();
     }
+    1;
 }
 
 sub toggle_comment_line {
@@ -30,7 +32,7 @@ sub toggle_comment_line {
                          $self->GetLineEndPosition( $line_nr )  );
     $self->GetSelectedText( ) =~ /^(\s*)((?:#\s)|(?:#~\s))?(.*)$/;
     return unless $3;
-    $2 ? $self->ReplaceSelection( $1. $3 ) 
+    $2 ? $self->ReplaceSelection( $1. $3 )
        : $self->ReplaceSelection( $1.'# '.$3 );
 }
 
@@ -41,7 +43,7 @@ sub toggle_block_comment_line {
                          $self->GetLineEndPosition( $line_nr )  );
     $self->GetSelectedText( ) =~ /^(\s*)(#?)(~\s)?(.*)$/;
     return if (not $4) or ($2 and not $3);
-    $2 ? $self->ReplaceSelection( $1. $4     ) 
+    $2 ? $self->ReplaceSelection( $1. $4     )
        : $self->ReplaceSelection( $1.'#~ '.$4 );
 }
 
