@@ -80,6 +80,11 @@ sub new_file {
 
 sub open_file   {
     my ($self) = @_;
+    if ($self->{'editor'}->GetModify()){
+        my $ret = Kephra::App::Dialog::yes_no_cancel( "\n".' save file ?  ');
+        return           if $ret ==  &Wx::wxCANCEL;
+        $self->save_file if $ret ==  &Wx::wxYES;
+    }
     my $dir = Kephra::IO::LocalFile::dir_from_path( $self->{'file'} );
     my $file = Kephra::App::Dialog::get_file_open( $dir );
     return unless $file;
