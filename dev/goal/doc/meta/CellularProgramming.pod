@@ -10,27 +10,39 @@ Please stick to these guidelines if, you want to join the Kephra dev team.
 In any other case - take from it and adapt what seems to be useful.
 
 
-=head2 Main Ideas
+=head2 Core Idea
 
-Cells are the core concept, because they modularize (portion)
-the process, which keeps complexity manageable.
+The name is derived from the behaviour of a biological cell,
+that encapsulates the complexity of one task and communicates with
+other cells over a simplified protocol (API).
+Objects as in object orientation implement the same concept in
+software engineering. But here its about organisational subunits,
+parts of a software project, with some independence.
 
-The word cell refers to an organisational subunit, which is
-semi-independent. No change in one cell can break something in another.
-But they build upon each others work and their relation is documented.
-A cell sits in a directory that reflects its role within the overall
-project.
+
+Cells have a narrow goal and a reduced set of moving parts. That makes it
+easier to reflected upon, plan and complete them - and a completed task
+just feels good. The freed up attention can alse be used for creativity
+and care for details.
+
+Cells also may depend on the completion of some other cells. This way
+it becomes obvious which tasks need to be done next. Progress can be
+tracked and specified.
+The projects directory tree reflects the cell structure.
+
+Cells demand to put informations into certain files at certain places.
+This makes informations easier to find and basic project automation
+low effort and done with simple in house (perl) tools.
+
+Cells isolate mistakes. This allows risk free experiments, because
+no change in one cell can break something in another.
+cells decouple parts of the software development that can be decouped
+and allow safe(r) parallelism.
 
 In general CP aims at the golden mean between the big three conflicting
 forces in software development: 1. planning, 2.iteration and 3.spontaneity.
 
-Because every type of cell has a narrow goal, it becomes clear how much
-planning is needed for now, to get robust guardrails for the next steps.
-Instead of iterating over and over one code base, in CP we mostly hop
-from cell to cell. This way we get the the satisfaction of a completed
-milestone (cell), that has to be only good enough for a specific task.
-Limited tasks can be better reflected upon which also frees up attention,
-that can be used for creativity and care for details.
+
 
 Even if code does get copied over from one completed to another,
 just started cell - it also gets adapted for the current task and thus
@@ -96,7 +108,7 @@ Priorities are (in that order):
 
 There are 6 kinds of cells. Dependent on the project size and structure,
 you can leave out some. Essential are only function, module and goal,
-but in Kephra we use them all. 
+but in Kephra we use them all.
 This chapter explains their purpose and layout, sorted by the level of
 abstraction of its content - from the lowest, most concrete upwards.
 
@@ -106,7 +118,7 @@ abstraction of its content - from the lowest, most concrete upwards.
 The purpose of a functional prototype cell is pracical research. If your
 planned programm has to fetch data from a file format, that you're not
 familiar with, you have to find out how to do it. Reading documentation
-is a good first step, but you're not proficient in that task, 
+is a good first step, but you're not proficient in that task,
 until you've programmed it. Beside - documentation might lie.
 
 You want to know the pro's and con's, the pitfalls and the benefits,
@@ -135,7 +147,7 @@ complexities of dealing with the main program.
 Module cells are the location where libraries, which are the backbone
 of the project, get developed. This task becomes easier, when important
 decisions are made elsewhere - be it of design (goal), management (stage)
-or technical (function) nature. In other words: we implemented 
+or technical (function) nature. In other words: we implemented
 (put flesh on) already designed interfaces without solving hard
 technical problems, which is done during previous, functional cells.
 
@@ -149,7 +161,7 @@ or to produce failing experiments, which don't affect the rest of the project.
 
 It is advised to have a planned order in which to write the modules.
 This furthermore pushes for a clean architecture with a clear hierarchy
-of reliance, since a module is only allowed to use/import already 
+of reliance, since a module is only allowed to use/import already
 completed modules.
 
 If you have to extend a module to support the next major release -
@@ -168,7 +180,7 @@ just a specialized case of module cell and much of the above applies.
 They are different because there is more communication and work that goes
 into artwork as well as GUI and CLI development and testing.
 
-One advantage to do these task in an prototype environment is that 
+One advantage to do these task in an prototype environment is that
 (if time allows) one can pursue an ideal and cut back later. This is less
 effort than one might expect if the tools and partial solutions in palace
 anyway and good tools (editors) support such tasks.
@@ -195,7 +207,7 @@ what is created here.
 Because a sane software project has only one goal, there also should be
 only one goal cell. This breaks the previously established rule of getting
 things done and move on with the next cell - but there has to be one place
-for a general plan. In order to get stability and to minize changes, 
+for a general plan. In order to get stability and to minize changes,
 we plan as far into the future as possible and reach for an ideal,
 which gets cut back in some places anyway. Cutting back is always easier
 and less troublesome, than attaching what does not really fit.
@@ -215,7 +227,7 @@ but without any actual implementation (empty methods, but lots of comments).
 
 =head3 Sketch
 
-Sketch cells are a landing pads for sets of related ideas - 
+Sketch cells are a landing pads for sets of related ideas -
 where the author can reflect, order, filter and rewrite them,
 until they might become something useful or not. For that are process are
 simple markup languages like  markdown, POD or org mode highly recommended.
@@ -224,16 +236,16 @@ Sketch cells lend themself for prototyping goal documentation, but are the
 one place in this highly structured environment with no rules (within one cell),
 because you need a valve for creativity.
 
-=head2 Directory ans File Structure
+=head2 Directory and File Structure
 
 You keep the usual project subdirectories like /lib, /bin, /t, /doc and
 so forth. CP adds just /dev to it, where all the action will take place.
 The above mentioned directories will only contain the current release.
 
-/dev itself will have 6 subfolder, for each cell type one. 
+/dev itself will have 6 subfolder, for each cell type one.
 /dev/stage/ will of course have subfolder for every stage (/dev/stage/stage_name).
 module and feature cells will be located in (/dev/module/cell_name/stage_name).
-functional protos like: /dev/function/topic/cell_name. 
+functional protos like: /dev/function/topic/cell_name.
 
 Every root directory of a cell has a status.cp.txt which reorts the
 progress and inner dependencies of cell.
@@ -261,7 +273,7 @@ For every next release the cycle (partially) repeats.
 
     2) derive dev documentation from collected ideas, describing features
        and rough architecture under /dev/goal/doc
-       
+
     3) write the dummy code under /dev/goal/lib. Start with initializing
        the big components and refine them one by one is several waves.
 
@@ -272,13 +284,13 @@ For every next release the cycle (partially) repeats.
        feature cell will be needed
 
     6) implement the function cells
-    
+
     7) implement the module cells
-    
+
     8) implement the feature cells
 
     9) assemple all at /dev/stage/name
-    
+
     10) package, test and ship the release
 
 
@@ -293,9 +305,9 @@ For every next release the cycle (partially) repeats.
 
     1. they have to sorted by topic and maturity.
 
-    2. abandoned sketches are moved in a special sektion and 
+    2. abandoned sketches are moved in a special sektion and
 
-    3. when a sketch page or its content becomes part of another cell, 
+    3. when a sketch page or its content becomes part of another cell,
        it has to be deleted here.
 
 
@@ -304,7 +316,7 @@ For every next release the cycle (partially) repeats.
        This process helps to get feel for the code structure and what belongs where.
        It assist greatly in finding fitting abstractions and self explanatory
        class and method names - which improves initial code quality greatly and
-       reduces the need for refactoring. 
+       reduces the need for refactoring.
 
        Unlike boring fantasy UML diagrams, this dummy code can be checked
        automatically, if in sync with the published code base.
@@ -313,18 +325,18 @@ For every next release the cycle (partially) repeats.
 
 Dummy code has numerous advantages over UML and other abstract specs:
 
-    1. It forces you to think about the implementation from early on, 
+    1. It forces you to think about the implementation from early on,
        not to construct sky castles.
-   
+
     2. It uses the same format as the actual implementation, no translation needed.
 
-    3. Our compiler or interpreter will ensure consistancy. 
+    3. Our compiler or interpreter will ensure consistancy.
 
     4. Comments are easy to attach. They explain what supposed to happen where
        and often grow later into better, more detailled ideas.
 
     5. Instead of describing what a class will do, write some dummy methods.
-       That is more productive and at least as descriptive, if the class, 
+       That is more productive and at least as descriptive, if the class,
        method and attribute names are well chosen.
     6. Fitting and precisely speaking names are the soul of clean code.
        They go hand in glove with the abstractions they represent and should
@@ -361,9 +373,9 @@ Dummy code has numerous advantages over UML and other abstract specs:
 
     2) One ingredient to achieve that is to obey and not and not sabotage
        the natural order and and logic behind the progression of a flittering idea
-       to a solid well rounded product. 
+       to a solid well rounded product.
        Important part of the planning is to know who needs when which information.
-     
+
     3) There are 5 views we have to care about simultaneously:
        a) the libs/API we use/ program against
        b) the API our libs provide
@@ -373,7 +385,7 @@ Dummy code has numerous advantages over UML and other abstract specs:
        This list has an inherent bottom up order, can be also found in our planning/roadmap.
        To have this full 360 view is one reason why its clled complete programming.
 
-    4) Once the issues are sorted into these 5 boxes, they can be than even 
+    4) Once the issues are sorted into these 5 boxes, they can be than even
        easier decoupled into smaller pieces, that are easier to prioritize,
        rearrange and to solve. Work becomes more fun, less of a burden,
        because you only have to care about one of these 5 levels at once.
@@ -393,9 +405,9 @@ Dummy code has numerous advantages over UML and other abstract specs:
        to close a parcel so to speak.
 
     8) All aspects of a feature (docs, code, comments, tests, artwork) are
-       developed together and by same (group of) people. 
+       developed together and by same (group of) people.
        This is another meaning of "complete".
-    
+
     9) The repository (codebase) is the primary means of communication.
        Decentral VCS like hg or git play a vital role in CP.
 
@@ -597,7 +609,7 @@ flaws or misleading names becomes easier - plus the compiler tells, if the plan
 is even doable. Don't underestimate the power of names. They are equally important
 as the logic, helping to communicate the inner workings and the intentions of the
 architect. In CP we spend some time just writing dummy code and contemplate about
-it, to find the right hierarchies and names. 
+it, to find the right hierarchies and names.
 Maybe other people don't call that programming, but we certainly do.
 
 Secondly: having this dummy code in place (just do it for the current roadmap stage),
@@ -641,7 +653,7 @@ the algorithm, its use cases and its role in the larger scheme fully. And having
 to rewrite the code and the tests several times is frustrating. Besides - TDD
 is not even doable for GUI and other areas where the supporting structure has to
 be built first to even run a test. A startling read about even more prescribed
-madness in software testing is Elisabeth Hendricksons paper: "better testing - 
+madness in software testing is Elisabeth Hendricksons paper: "better testing -
 worse quality?" at L<http://testobsessed.com/wp-content/uploads/2011/04/btwq.pdf>
 But the other benefits of testing are still as worthwhile as describes by TDD people.
 
