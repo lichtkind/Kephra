@@ -1,9 +1,12 @@
+#+title:  Kephra Sketches
+#+author: LK
+#+date:   2024-08-30
 
 
+Files:
 
+ - dreamlist -- features we ideally want
+ - task      -- most important usage scenarios
 
-overview
-
-feature
-
-dreamlist -- features we ideally want
+ - overview
+ - feature -- components spec

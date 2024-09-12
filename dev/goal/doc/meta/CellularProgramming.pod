@@ -199,7 +199,7 @@ the how and the why.
 
 Sketch cells are a landing pads for sets of related ideas -
 where the author can reflect, order, filter and rewrite them,
-until they might become something useful or not. For that are process are
+until they might become something useful or not. For that process are
 simple markup languages like  markdown, POD or org mode highly recommended,
 but plain text will do also.
 

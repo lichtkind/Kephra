@@ -4,6 +4,8 @@ reopen with all settings
 
 switch project fast (replace files in tabs)
 
+run code/pieces, search the output
+
 view several files parallel
 
 interact with git, squash revamp patches
