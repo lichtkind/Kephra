@@ -47,16 +47,16 @@ forces in software development: 1. planning, 2.iteration and 3.spontaneity.
 
 There are 6 kinds (types) of cells. Depending on the project size and
 structure, you can leave out some. Essential are only stage and goal,
-but in Kephra we use all 6: function, module, feature, stage, goal and sketch.
+but in Kephra we use all 6: proof, module, feature, stage, goal and sketch.
 The next chapter will describe their layout, but here are written
 their purpose and usage - sorted by the level of abstraction of its content:
 from the lowest, most concrete upwards.
 
 
 
-=head3 Function
+=head3 Proof
 
-The purpose of a functional prototype cell is practical research.
+The purpose of a proof prototype cell is practical research.
 If your planned software has to fetch data from a file format that you're
 not familiar with - you have to find out how to do it.
 Reading documentation is a good first step, but you're not proficient in
@@ -72,15 +72,15 @@ of the main program or a bigger library. Also the actual dependencies
 will be then clear. This is invaluable information for proper planning
 and can be reused for (copied or referenced into) other projects.
 
-A functional proto is a little sub-project with its own documentation,
+A proof proto is a little sub-project with its own documentation,
 main program, libraries and tests. And once its running and feature complete,
 it has to be cleaned up, formatted, commented and well structered
 like it is the main program. That way you can always come back and use the
 code as documentation on how to use this API, low level syntax or other
 feature - demo'ed by this prototype. You could also clone (copy and rename)
-this function cell to work on a related issue.
+this proof cell to work on a related issue.
 
-Since functional prototypes aim for the simplest and fastest good solution,
+Since proof prototypes aim for the simplest and fastest good solution,
 their easier to rewrite until all details are worked out and a good form
 is achieved. This gets done faster because the programmer has no other goal
 in parallel. When later implementing a module/library you can focus more
@@ -94,7 +94,7 @@ consistency throughout the project. Once a good solution is found,
 it can be almost copied to several places with same or similar variable
 and function names. Less nasty think work and easier to understand code!
 
-Functional protos are generally a good, searchable store of documentation
+Proof protos are generally a good, searchable store of documentation
 of accumulated low level knowledge, which can be shared without explicitly
 writing many extra pages. You just format your work in a way thats sharable
 and you can avoid some annoying meetings and talks withs other people.
@@ -106,9 +106,9 @@ and you can avoid some annoying meetings and talks withs other people.
 Module cells are the location where libraries, which are the backbone
 of the project, get developed. This task becomes easier, when important
 decisions are made elsewhere - be it of design (goal), management (stage)
-or technical (function) nature. In other words: we implemented
+or technical (proof) nature. In other words: we implemented
 (put flesh on) already designed interfaces without solving hard
-technical problems, which is done during previous, functional cells.
+technical problems, which is done during previous, proof cells.
 
 All the documentation and the tests of a module cell serve only its content:
 a group of libraries, which together solve one larger task or are of the same topic.
@@ -153,7 +153,7 @@ assembled. Their name refers to "stages of development" or toward the goal.
 At first you note what subset of the general plan becomes the next release.
 Usually we try to balance an advantageous effort/features delivered ratio
 with an practical assessment which features are best developed together.
-After that analysis a plan gets written down which function, modul and
+After that analysis a plan gets written down which proof, module and
 feature cells do the bulk of the work in that stage.
 
 Inside a stage cell is hardly any coding done, only rudimental smoke tests,
@@ -234,7 +234,7 @@ The above mentioned subdirectories will only contain the current release,
 which is a copy from /dev/stage/current_stage_name.
 
 /dev itself will have 4 subfolder, for the cell types:
-    - /function
+    - /proof
     - /goal
     - /sketch
     - /stage
@@ -243,14 +243,21 @@ module and feature cells belong to a certain stage where they sit under
     - /dev/stage/name/module/name
     - /dev/stage/name/feature/name.
 
-Since function cells are plenty are should be sorted by topic since over 20
-subdirectories is too much for orientation
+If there are are more than 20 proof cells, they should be sorted by topic,
+like /dev/proof/topic/proof_name. A topic could be UI or network.
+A proof cell has it's own /doc, /t and /bin directories and /lib if needed.
+Every cell also needs a status.cp.txt, which describes if the work in
+this cell has started, is in progress or completed. It also points out
+what are the dependencies. Nice summaries can be automatically compiled
+from these reports.
 
-They will have their own /doc, /lib, /bin ...
-directories if needed. But the stages, which are storted under
-/dev/stage/stagename have their modular and feature cells in subfolder,
-because they got developed only for that stage.
-Functional protos are under: /dev/function/topic/cell_name.
+Same aplies for module and feature cells, bun only thy will surely
+need a /lib subfolder since there are the main fils of the cell.
+Other libs not developed here, should go in another subdirectory.
+
+The root directories of each cell type like /dev/proof, but also
+/dev/stage/name/module need to contain an index.cp.txt.
+They list all contained cells and their status.
 
 Every root directory of a cell has a status.cp.txt which reports the
 progress and inner dependencies of cell.
@@ -264,6 +271,8 @@ Under /dev/tool lies software to monitor state (which stages are there, which
 are completed and so forth) and integrity of the project (do the module cells of
 the current stage match the module structure in /dev/goal/lib) as well as a
 global test runner.
+
+
 
 =head2 Basic Workflow
 
