@@ -19,15 +19,15 @@ Objects as in object orientation implement the same concept in
 software engineering. But here its about organisational subunits,
 parts of a software project, with some independence.
 
-
 Cells have a narrow goal and a reduced set of moving parts. That makes it
-easier to reflected upon, plan and complete them - and a completed task
-just feels good. The freed up attention can alse be used for creativity
+easier to reflected upon, plan and complete them. A completed task
+just feels good. And the freed up attention can alse be used for creativity
 and care for details.
 
 Cells also may depend on the completion of some other cells. This way
 it becomes obvious which tasks need to be done next. Progress can be
 tracked and specified.
+
 The projects directory tree reflects the cell structure.
 
 Cells demand to put informations into certain files at certain places.
@@ -36,7 +36,7 @@ low effort and done with simple in house (perl) tools.
 
 Cells isolate mistakes. This allows risk free experiments, because
 no change in one cell can break something in another.
-cells decouple parts of the software development that can be decouped
+cells decouple parts of the software development that can be decoupled
 and allow safe(r) parallelism.
 
 In general CP aims at the golden mean between the big three conflicting
@@ -80,15 +80,24 @@ code as documentation on how to use this API, low level syntax or other
 feature - demo'ed by this prototype. You could also clone (copy and rename)
 this function cell to work on a related issue.
 
-Functional prototypes free the developers mind since
-ease up the development in
+Since functional prototypes aim for the simplest and fastest good solution,
+their easier to rewrite until all details are worked out and a good form
+is achieved. This gets done faster because the programmer has no other goal
+in parallel. When later implementing a module/library you can focus more
+on the logic and API, because all technologies and techiques are known.
 
-In short it's an ensurance, that the API you build on top can do what it
-promises. And it also secures that you know how to implement base level
-tasks your project relies upon. That alone avoids one source of unforeseen
-project delays, since you
+The only perceived downside: you have to write the same code twice -
+which can feel bothersome. But this forced refactoring demands reflection
+upon the once written code and leads generally to higher code quality
+and less refactoring and bug hunting later. And it leads to higher
+consistency throughout the project. Once a good solution is found,
+it can be almost copied to several places with same or similar variable
+and function names. Less nasty think work and easier to understand code!
 
-as intended and the functionality is encapsuled as you intend it to use it later
+Functional protos are generally a good, searchable store of documentation
+of accumulated low level knowledge, which can be shared without explicitly
+writing many extra pages. You just format your work in a way thats sharable
+and you can avoid some annoying meetings and talks withs other people.
 
 
 
