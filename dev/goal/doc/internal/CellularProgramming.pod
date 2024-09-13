@@ -45,43 +45,51 @@ forces in software development: 1. planning, 2.iteration and 3.spontaneity.
 
 =head2 Cell Types
 
-There are 6 kinds (types) of cells. Dependending on the project size and
-structure, you can leave out some. Essential are only function, module
-and goal, but in Kephra we use all 6: function, module, feature, stage,
-goal and sketch.
-This chapter explains their purpose and layout, sorted by the level of
-abstraction of its content - from the lowest, most concrete upwards.
+There are 6 kinds (types) of cells. Depending on the project size and
+structure, you can leave out some. Essential are only stage and goal,
+but in Kephra we use all 6: function, module, feature, stage, goal and sketch.
+The next chapter will describe their layout, but here are written
+their purpose and usage - sorted by the level of abstraction of its content:
+from the lowest, most concrete upwards.
+
 
 
 =head3 Function
 
-The purpose of a functional prototype cell is pracical research. If your
-planned programm has to fetch data from a file format, that you're not
-familiar with, you have to find out how to do it. Reading documentation
-is a good first step, but you're not proficient in that task,
-until you've programmed it. Beside - documentation might lie.
+The purpose of a functional prototype cell is practical research.
+If your planned software has to fetch data from a file format that you're
+not familiar with - you have to find out how to do it.
+Reading documentation is a good first step, but you're not proficient in
+that task, until you've programmed it. Beside - documentation might lie.
 You want to know the pro's and con's, the pitfalls and the benefits of a
 technology or programming technique for sure.
 
 That is best found out in a minimal sized program that serves as a show case.
-This prototype can then analyzed for memory and CPU usage and you get
-clean numbers that are not muddied by other code that would be part of the
-main program or a library. Also the real dependencies will be then clear.
-This is invaluable information for proper planning and can be reused
-for other projects.
+This prototype answers the question if a library does work on your computer
+or environment and it can be analyzed for memory and CPU usage. You will
+get clean numbers that are not muddied by other code that would be part
+of the main program or a bigger library. Also the actual dependencies
+will be then clear. This is invaluable information for proper planning
+and can be reused for (copied or referenced into) other projects.
 
 A functional proto is a little sub-project with its own documentation,
-tests and guidlines how to clean up the code, once its running.
-The prototype is complete, when the cell has reached CP quality standards
-and the enquired functionality is encapsuled as you intend it to use it later.
+main program, libraries and tests. And once its running and feature complete,
+it has to be cleaned up, formatted, commented and well structered
+like it is the main program. That way you can always come back and use the
+code as documentation on how to use this API, low level syntax or other
+feature - demo'ed by this prototype. You could also clone (copy and rename)
+this function cell to work on a related issue.
+
+Functional prototypes free the developers mind since
+ease up the development in
+
 In short it's an ensurance, that the API you build on top can do what it
 promises. And it also secures that you know how to implement base level
 tasks your project relies upon. That alone avoids one source of unforeseen
-project delays.
+project delays, since you
 
-In case questions about the demo-ed technology show up later, you can
-always fork and experiment with a functional prototype in a way that
-avoids the complexeties of the main program.
+as intended and the functionality is encapsuled as you intend it to use it later
+
 
 
 =head3 Module
@@ -197,26 +205,39 @@ the how and the why.
 
 =head3 Sketch
 
-Sketch cells are a landing pads for sets of related ideas -
-where the author can reflect, order, filter and rewrite them,
+Sketch cells are a landing pads for sets of related ideas,
+where the author can put them down, reflect, order, filter and rewrite them,
 until they might become something useful or not. For that process are
 simple markup languages like  markdown, POD or org mode highly recommended,
 but plain text will do also.
 
 Sketch cells lend themself for prototyping goal documentation
 and are the only place in CP without any strict rules,
-because you need a valve for creativity.
+because you need a valve for raw creativity.
 
 
 =head2 Directory and File Structure
 
-You keep the usual project subdirectories like /lib, /bin, /t, /doc and
-so forth. CP adds just /dev to it, where all the action will take place.
-The above mentioned directories will only contain the current release,
-which is a transfer from the current stage.
+Every perl project is in a directory that contains subdirectories like
+like /lib, /bin, /t and maybe /doc, /xt and so forth.
+CP adds just /dev to it, where all the development will take place.
+The above mentioned subdirectories will only contain the current release,
+which is a copy from /dev/stage/current_stage_name.
 
-/dev itself will have 4 subfolder, for the cell types: /goal, /sketch,
-/stage and function. They will have their own /doc, /lib, /bin ...
+/dev itself will have 4 subfolder, for the cell types:
+    - /function
+    - /goal
+    - /sketch
+    - /stage
+
+module and feature cells belong to a certain stage where they sit under
+    - /dev/stage/name/module/name
+    - /dev/stage/name/feature/name.
+
+Since function cells are plenty are should be sorted by topic since over 20
+subdirectories is too much for orientation
+
+They will have their own /doc, /lib, /bin ...
 directories if needed. But the stages, which are storted under
 /dev/stage/stagename have their modular and feature cells in subfolder,
 because they got developed only for that stage.
