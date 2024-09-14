@@ -2,12 +2,14 @@
 =head1 Cellular Programming (CP)
 
 
+
 =head2 Preamble
 
 This document describes a set of workflows, which evolved from and
 for the development of the Kephra editor.
 Please stick to these guidelines if, you want to join the Kephra dev team.
 In any other case - take from it and adapt what seems to be useful.
+
 
 
 =head2 Core Idea
@@ -43,15 +45,15 @@ In general CP aims at the golden mean between the big three conflicting
 forces in software development: 1. planning, 2.iteration and 3.spontaneity.
 
 
+
 =head2 Cell Types
 
 There are 6 kinds (types) of cells. Depending on the project size and
-structure, you can leave out some. Essential are only stage and goal,
-but in Kephra we use all 6: proof, module, feature, stage, goal and sketch.
+structure, you can leave out some. Essential are only goal and release,
+but in Kephra we use all 6: proof, module, feature, release, goal and sketch.
 The next chapter will describe their layout, but here are written
 their purpose and usage - sorted by the level of abstraction of its content:
 from the lowest, most concrete upwards.
-
 
 
 =head3 Proof
@@ -105,7 +107,7 @@ and you can avoid some annoying meetings and talks withs other people.
 
 Module cells are the location where libraries, which are the backbone
 of the project, get developed. This task becomes easier, when important
-decisions are made elsewhere - be it of design (goal), management (stage)
+decisions are made elsewhere - be it of design (goal), management (release)
 or technical (proof) nature. In other words: we implemented
 (put flesh on) already designed interfaces without solving hard
 technical problems, which is done during previous, proof cells.
@@ -145,18 +147,20 @@ One advantage to do these task in an prototype environment is that
 effort than one might expect if the tools and partial solutions are in
 place anyway and good tools (editors) support such tasks.
 
-=head3 Stage
+=head3 Release
 
-Stage cells are the dockyards where major releases get to be planned and
-assembled. Their name refers to "stages of development" or toward the goal.
+Release cells are the dockyards where major releases get to be planned
+and assembled. Most of the coding is of course done in the previously
+presented cell types - although features and modules can have their
+own version/instances per release.
 
 At first you note what subset of the general plan becomes the next release.
 Usually we try to balance an advantageous effort/features delivered ratio
 with an practical assessment which features are best developed together.
 After that analysis a plan gets written down which proof, module and
-feature cells do the bulk of the work in that stage.
+feature cells do the bulk of the work in that release.
 
-Inside a stage cell is hardly any coding done, only rudimental smoke tests,
+Inside a release cell is hardly any coding done, only rudimental smoke tests,
 since even most of the integration testing is done in previous cells.
 It is rather user level documentation and the rest of the packaging,
 what is created here.
@@ -200,9 +204,9 @@ into the future as possible and reach for an ideal, which gets cut back
 in some places anyway. Cutting back is always easier and less troublesome,
 than attaching what does not really fit.
 
-The current stage will pick only a subset of the goal, but is obliged
+The current release will pick only a subset of the goal, but is obliged
 to be consistent with the goal (checkable by software tests).
-Because the goal is of course subject to changes - older stages might
+Because the goal is of course subject to changes - older releases might
 become out of sync, but there are either in maintenance mode anyway or
 just a source of knowledge.
 
@@ -225,44 +229,54 @@ and are the only place in CP without any strict rules,
 because you need a valve for raw creativity.
 
 
+
 =head2 Directory and File Structure
 
 Every perl project is in a directory that contains subdirectories like
 like /lib, /bin, /t and maybe /doc, /xt and so forth.
 CP adds just /dev to it, where all the development will take place.
 The above mentioned subdirectories will only contain the current release,
-which is a copy from /dev/stage/current_stage_name.
+which is a copy from /dev/release/name.
 
 /dev itself will have 4 subfolder, for the cell types:
-    - /proof
     - /goal
+    - /proof
+    - /release
     - /sketch
-    - /stage
 
 module and feature cells belong to a certain stage where they sit under
-    - /dev/stage/name/module/name
-    - /dev/stage/name/feature/name.
+    - /dev/release/name/module/name
+    - /dev/release/name/feature/name.
 
 If there are are more than 20 proof cells, they should be sorted by topic,
 like /dev/proof/topic/proof_name. A topic could be UI or network.
 A proof cell has it's own /doc, /t and /bin directories and /lib if needed.
-Every cell also needs a status.cp.txt, which describes if the work in
-this cell has started, is in progress or completed. It also points out
-what are the dependencies. Nice summaries can be automatically compiled
-from these reports.
+In lib are only libraries you have written for that prototype. Any other
+library goes into /xlib. The Most important file is the the /doc/summary.* .
+It will define name, description and comments about this prototype.
 
-Same aplies for module and feature cells, bun only thy will surely
-need a /lib subfolder since there are the main fils of the cell.
-Other libs not developed here, should go in another subdirectory.
+Almost the same applies for module and feature cells. Only they will
+for sure need a /lib subfolder, since there is the main work done.
+Module protos do not need a /bin most of the time since tests will check
+all the functionality anyway.
 
-The root directories of each cell type like /dev/proof, but also
-/dev/stage/name/module need to contain an index.cp.txt.
-They list all contained cells and their status.
+A release is naturally structured like a release. They only will have
+the additional subdirectories /module and /feature where almost all the
+development work is done.
 
-Every root directory of a cell has a status.cp.txt which reports the
-progress and inner dependencies of cell.
-The root of every cell type except goal contains a index.cp.txt listing
-the viable cells and their status.
+The goal proto is also structured like a release, but it contains only
+dummy code and documentation and some smoke tests. An additional tool
+will check that the current release has only classes or methods that are
+also found in the goal. This is has only /doc, /lib and /t subdirs.
+
+The sketch dir has the least amount of regulation - only 3 rules:
+    1. Start a a new sketch in a file that is located under /sketch/new
+    2. Once it gains content and a direction move it into a subdir that
+       reflects a cell type it is aimed for. If there are are mor than 10-20
+       sketches in a dir, create categories.
+    3. Try to garbage collect sketches that are implemented in a cell turned
+       out futile be deleting them or copy them into /sketch/scrap.
+       You should also combine very similar sketches into one.
 
 A lot of what is usually hidden in branches, will in CP have its place
 in the dir structure. This way it is search- and findable.
@@ -271,6 +285,16 @@ Under /dev/tool lies software to monitor state (which stages are there, which
 are completed and so forth) and integrity of the project (do the module cells of
 the current stage match the module structure in /dev/goal/lib) as well as a
 global test runner.
+
+The tools generate in the root directory of each cell (except goal and sketch)
+a file named status.cp.txt which contains important information about this
+cell. It is compiled from the summary.pod, file counts and sizes, test results
+but also certain comments inside the code.
+
+In the root dir of each cell type like /dev/goal or /dev/release/name/module
+will be generated an index.cp.txt that list all containing cells with
+a short summary of its status. There will be also a general summary under
+/dev/index.cp.txt.
 
 
 
@@ -292,18 +316,18 @@ For every next release the cycle (partially) repeats.
        the big components and refine them one by one is several waves.
 
     4) partition the envisioned features into several releases and not that
-       in the dev/stage/index.cp.txt
+       in the dev/release/index.cp.txt
 
-    5) plan inside dev/stage/name/status.cp.txt which function, module and
+    5) plan inside dev/release/name/status.cp.txt which proof, module and
        feature cell will be needed
 
-    6) implement the function cells
+    6) implement the proof cells
 
     7) implement the module cells
 
     8) implement the feature cells
 
-    9) assemple all at /dev/stage/name
+    9) assemple all at /dev/release/name
 
     10) package, test and ship the release
 
@@ -362,7 +386,7 @@ Dummy code has numerous advantages over UML and other abstract specs:
 
 =head3 5: Plan Stage
 
-=head3 6: Function Cell
+=head3 6: Proof Cell
 
 =head3 7: Module Cell
 
@@ -439,13 +463,13 @@ Dummy code has numerous advantages over UML and other abstract specs:
 
 =head3 Completeness
 
- Lets start with a small meditation, because Complete Programming (CP) relies on
+Lets start with a small meditation, because Complete Programming (CP) relies on
 embodying a mindset that is still a bit alien to some. In one word it is holistic -
 meaning seeing the full (complete) picture. That includes the views of the user,
 the programmer, the designer, tester and project manager.
 That sounds demanding, but you do it already when you really care about something.
 
- As a consequence we count an ugly icon, missing documentation or an badly
+As a consequence we count an ugly icon, missing documentation or an badly
 designed internal API equally as a bug as a crashing function. CP is designed
 to deliver that high standard, without packing too much burden on the programmer.
  Firstly: all aspects of a feature are planned at once - so they're in tune with
@@ -604,7 +628,7 @@ where you can do heart transplant to the production stream without greater troub
 CP knows two types of prototypes that are living in two seperate branches.
 That's because the main program has to bridge two endpoints which are too different
 to think about and optimize for at once. Theset are the hardware or the near
-hardware software layer and the user. For the one side we have functional
+hardware software layer and the user. For the one side we have proof
 prototypes and for the second use case prototypes.
 
 
