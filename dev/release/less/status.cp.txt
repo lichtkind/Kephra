@@ -1,0 +1,25 @@
+
+
+0.406
+
+    shrink selection
+    open recents menu
+    keep col pos
+
+0.407
+
+  mode , coding 
+
+0.408
+  
+  tab bar
+    move by mouse and keyboard
+
+
+
+auto get indention
+session files
+split view
+file browser
+project prowser
+

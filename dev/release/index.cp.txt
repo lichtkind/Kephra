@@ -1,0 +1,42 @@
+
+stage cells are evolutionary steps of app development.
+
+Each is a complete usable, polished (as good as it gets) program.
+Between stages we add features set which belongs together from the technical and
+usage point of view. When a proto is completed it becomes the new stable branch.
+Next proto gets started by copy previous, completed one.
+
+complete development model: /dev/goal/doc/meta/CompleteProgramming.pod 
+ ## sate of the project with relation between protos types: dev/roadmap.txt
+--------------------------------------------------------------------------------
+       C = complete
+        I = mInor Feature mIssing
+         U = usable
+          B = Buggy
+           M = Major feature missing
+            P = In Progress (currently worked on)
+             N = not yet (planned)
+
+--------------------------------------------------------------------------------
+sed     I        single file editor: simplest possible useful editor
+                 read, writes files, utf safe, perl highlighting, searchbar
+                 comfort editing: nav, move, select, autoindent
+                 
+ded              single doc editor: simplest possible useful editor
+                 read, writes files, utf safe, perl highlighting, searchbar
+                 comfort editing: nav, move, select, autoindent
+                 
+                                     
+med    C         multi file ed: max productivity on projects with lowes amount of code
+                 partial sessions file, docbar, file browser, config dialog
+                                     
+bed         P    base ed: establish Krphra Base core structure object and type system
+                 feat: doc objects, loging, event system, search bar, shell interface
+--------------------------------------------------------------------------------
+
+ged        MP    gui edit: getting all principle graphical components in order
+                 feat:  UI command list, keymaps, toolbar, menus, statusbar defined by regist. commands
+ved      UBMP    view: several tab bars, filebrowser, notes, direct io, EventTable.pm, LogBook.pm
+ked          N   keylog: every key calls a call, own edit history
+ned          N   nav edit: own find&replace, searchbar, marker, bookmarks, last edit
+ced          N   comfort editing: brace&block navigation, selection, goto last edit ^

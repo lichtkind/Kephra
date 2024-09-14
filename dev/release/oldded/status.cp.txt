@@ -1,0 +1,13 @@
+
+          ==[[ stage 1 : Multi document EDitor]]==
+          
+ = partial sessions file, docbar, file browser, config dialog 
+
+
+Doc: coding, lang, tab, eol
+
+Docbar: move docs by mouse and cursor
+
+Session: files, open close partial sessions, 
+
+Find: replace in session / dir / project
