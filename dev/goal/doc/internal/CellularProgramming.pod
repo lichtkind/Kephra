@@ -245,8 +245,8 @@ which is a copy from /dev/release/name.
     - /sketch
 
 module and feature cells belong to a certain stage where they sit under
-    - /dev/release/name/module/name
-    - /dev/release/name/feature/name.
+    - /dev/release/name/has/module/name
+    - /dev/release/name/has/feature/name.
 
 If there are are more than 20 proof cells, they should be sorted by topic,
 like /dev/proof/topic/proof_name. A topic could be UI or network.
