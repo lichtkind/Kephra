@@ -301,7 +301,8 @@ a short summary of its status. There will be also a general summary under
 =head2 Basic Workflow
 
 This describes the way from project start to the first major release.
-For every next release the cycle (partially) repeats.
+For every next release the cycle (partially) repeats. Steps 6-8 can be
+mixed of curse if depencies of cells are observed.
 
 
     1) collect ideas: features, user stories, architectural parts, GUI
