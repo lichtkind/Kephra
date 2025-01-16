@@ -1,11 +1,41 @@
-editing file
+#+title:  Kephra main tasks
+#+author: HB
+#+date:   2024-12-25
 
-reopen with all settings
 
-switch project fast (replace files in tabs)
+# Text
 
-run code/pieces, search the output
+ - rectangular edit
+ - goto last edit
+ - replace in document
+ - fast navigation on braces blocks
+ - complex text ops
 
-view several files parallel
+# Code
 
-interact with git, squash revamp patches
+ - semantic aware replacements/changes
+   - refactorings
+ - run code files
+ - run code onto file content
+ - searchable output
+
+
+# Files
+
+ - split view
+ - reopen with all settings
+ - replace in file|type of (sub)dir
+
+
+# Version control/git
+
+ - commit/push but command (button or key stroke)
+ - graphical chunk selection for commit
+ - squash revamp patches
+
+
+# Projects
+
+ - quick change between project and parts of it
+ - replace in project
+ - project wide settings
